@@ -1,10 +1,21 @@
-Description
+# USA Travel Guide
 
-A single-page, animation-rich travel guide to the United States, covering five regions, twelve destination cities, three road-trip routes, seasonal travel advice, cultural highlights, and practical planning essentials. The site supports six visual themes, three languages (English, Chinese, Japanese), and switchable measurement units (°F/°C, miles/km) — all configurable from a dedicated Settings section and persisted across visits.
-Built as a single self-contained HTML file with no external dependencies beyond Google Fonts.
+A single-page, animation-rich travel guide to the United States — covering 5 regions, 12 destination cities, 3 road-trip routes, seasonal travel advice, cultural highlights, and practical planning essentials.
 
-(Will add more features in the future, as well as other destinations and countries)
+**Live site:** https://tgthms.github.io/usa-travel-guide/
 
-Try it out: https://tgthms.github.io/usa-travel-guide/
+## Features
+- 6 visual themes
+- 3 languages (English, Chinese, Japanese)
+- Switchable units (°F/°C, miles/km) — persisted across visits
+- Built as a single self-contained HTML file, no external dependencies beyond Google Fonts
 
-For bugs report/improments/etc. feel free to contact me at contact.timg@icloud.com  As an individual pursuing an interest-driven project, I would appreciate hearing your feedback!
+*More destinations, countries, and features coming soon.*
+
+## Feedback
+This is an interest-driven personal project — bug reports and suggestions are welcome!
+📧 contact.timg@icloud.com
+
+## License
+Code is MIT licensed — see [LICENSE] 
+Photos in /images are © 2026 TGthms and licensed under CC BY 4.0 — free to use with credit.
