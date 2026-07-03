@@ -6,3 +6,5 @@ Built as a single self-contained HTML file with no external dependencies beyond 
 (Will add more features in the future, as well as other destinations and countries)
 
 Try it out: https://tgthms.github.io/usa-travel-guide/
+
+For bugs report/improments/etc. feel free to contact me at contact.timg@icloud.com  As an individual pursuing an interest-driven project, I would appreciate hearing your feedback!
