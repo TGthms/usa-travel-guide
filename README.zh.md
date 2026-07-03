@@ -22,4 +22,5 @@
 
 ## 许可
 代码采用 MIT 许可协议 —— 详见 [LICENSE](LICENSE)。
-`/images` 中的照片版权归 © 2026 TGthms 所有，采用 CC BY 4.0 协议授权 —— 注明作者后可使用。
+
+/images 中的照片版权归 © 2026 TGthms 所有，采用 CC BY 4.0 协议授权 —— 注明作者后可使用。
