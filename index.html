@@ -195,6 +195,152 @@ body {
   transition: background 0.5s ease, color 0.5s ease;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   GALLERY SECTION
+   Filter pills + a responsive photo grid + a fullscreen lightbox.
+   Matches the site's existing visual language:
+     - "reveal on scroll" fade/rise (same feel as .reveal elsewhere)
+     - hover image zoom (same trick as .dest-card / .region-card)
+     - lightbox open/close styled like #modal-overlay (blur + scale)
+   ═══════════════════════════════════════════════════════════════ */
+
+.gallery-filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 32px auto 40px; max-width: 1200px; }
+.gallery-filter {
+  padding: 10px 22px; border-radius: 999px; border: 1px solid var(--bg-surface-2);
+  background: var(--bg-card); color: var(--text-dim); font-family: var(--ff-body);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all .25s cubic-bezier(0.2,0.8,0.2,1);
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.gallery-filter:hover { background: var(--bg-card-hov); color: var(--text-main); transform: translateY(-2px); }
+.gallery-filter.active {
+  background: var(--accent-1); color: var(--text-inv); border-color: var(--accent-1);
+  animation: filterPop .35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes filterPop { 0% { transform: scale(1); } 45% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
+.gallery-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;
+  max-width: 1200px; margin: 0 auto;
+}
+
+.gallery-empty-state { display: none; text-align: center; max-width: 1200px; margin: 32px auto 0; color: var(--text-mute); font-size: 14px; }
+.gallery-empty-state.show { display: block; }
+
+/* Each photo tile: starts invisible/lowered, rises into place the first time
+   it scrolls into view (see the "galleryObs" IntersectionObserver in the JS),
+   then behaves like a normal hoverable card afterwards. */
+.gallery-item {
+  position: relative; border-radius: 8px; overflow: hidden; cursor: pointer;
+  aspect-ratio: 4/3; background: var(--bg-surface-2); /* shows while image is still loading */
+  opacity: 0; transform: translateY(28px) scale(.96);
+  transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1), box-shadow .35s;
+}
+.gallery-item.in-view { opacity: 1; transform: translateY(0) scale(1); }
+.gallery-item:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 20px 40px rgba(0,0,0,.28); }
+
+/* Filtering a category out: quick shrink/fade, then removed from layout.
+   Filtering one in: fades/rises back, same as the initial reveal. */
+.gallery-item.fade-out { opacity: 0; transform: scale(.85); transition-duration: .3s; }
+.gallery-item.hidden { display: none; }
+
+.gallery-item img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  opacity: 0; transition: opacity .5s ease, transform .7s cubic-bezier(.22,1,.36,1);
+}
+.gallery-item img.loaded { opacity: 1; }
+.gallery-item:hover img { transform: scale(1.08); } /* same zoom trick as .dest-card/.region-card */
+
+/* If a photo's file is missing/broken (e.g. you referenced a filename you
+   haven't uploaded to images/gallery/ yet), show a deliberate "no photo yet"
+   placeholder instead of an empty box - so an unfinished gallery still reads
+   as intentional, styled work rather than looking broken. */
+.gallery-item.load-error { border: 1px dashed var(--border-med); cursor: default; }
+.gallery-item.load-error img { display: none; }
+.gallery-item-placeholder {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 20px;
+  color: var(--text-mute); font-family: var(--ff-body);
+}
+.gallery-item-placeholder .ph-icon { font-size: 1.8rem; opacity: .5; }
+.gallery-item-placeholder .ph-text { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; }
+
+.gallery-caption {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 16px;
+  background: linear-gradient(to top, rgba(0,0,0,.75), transparent);
+  color: #fff; font-family: var(--ff-body); font-size: 13px; font-weight: 600;
+  transform: translateY(4px); opacity: 0; transition: all .4s cubic-bezier(.22,1,.36,1);
+}
+.gallery-item.in-view .gallery-caption { transform: translateY(0); opacity: 1; }
+
+/* ── LIGHTBOX ──
+   Same open/close mechanics as #modal-overlay: opacity + visibility +
+   pointer-events (not display:none) so the fade/scale can actually animate. */
+.lightbox {
+  position: fixed; inset: 0; z-index: 1001;
+  background: rgba(0,0,0,.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .4s, visibility .4s; padding: 24px;
+}
+.lightbox.open { opacity: 1; visibility: visible; pointer-events: auto; }
+
+.lightbox-counter {
+  position: absolute; top: 20px; left: 20px; font-size: 10px; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase; color: #fff;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 4px;
+}
+
+.lightbox-stage {
+  transform: scale(.92) translateY(24px); transition: transform .5s cubic-bezier(.22,1,.36,1);
+  display: flex; flex-direction: column; align-items: center; max-width: 100%;
+}
+.lightbox.open .lightbox-stage { transform: scale(1) translateY(0); }
+
+.lightbox-img {
+  max-width: 85vw; max-height: 75vh; border-radius: 6px; touch-action: pan-y;
+  box-shadow: 0 40px 80px rgba(0,0,0,.5);
+  transition: opacity .18s ease; /* crossfade when switching photos, see JS */
+}
+.lightbox-img.switching { opacity: 0; }
+
+.lightbox-info { text-align: center; margin-top: 18px; }
+.lightbox-caption { color: #fff; font-family: var(--ff-body); font-size: 15px; font-weight: 600; }
+.lightbox-meta { color: rgba(255,255,255,.6); font-family: var(--ff-body); font-size: 12.5px; margin-top: 4px; }
+
+.lightbox-close, .lightbox-prev, .lightbox-next {
+  position: absolute; background: none; border: none; color: #fff; font-size: 28px;
+  cursor: pointer; padding: 12px; opacity: .7; transition: all .25s cubic-bezier(0.2,0.8,0.2,1);
+  min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover { opacity: 1; }
+.lightbox-close:hover { transform: rotate(90deg); } /* same touch as .modal-close:hover */
+.lightbox-prev:hover { transform: translateY(-50%) translateX(-3px); }
+.lightbox-next:hover { transform: translateY(-50%) translateX(3px); }
+.lightbox-close { top: 16px; right: 16px; }
+.lightbox-prev { left: 8px; top: 50%; transform: translateY(-50%); }
+.lightbox-next { right: 8px; top: 50%; transform: translateY(-50%); }
+
+/* ── Responsiveness across breakpoints ── */
+@media (max-width: 1024px) {
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+}
+@media (max-width: 640px) {
+  .gallery-filters { gap: 8px; }
+  .gallery-filter { padding: 8px 16px; font-size: 12px; }
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .lightbox-prev, .lightbox-next { font-size: 22px; }
+  .lightbox-close { font-size: 22px; }
+  .lightbox-counter { top: 12px; left: 12px; }
+}
+/* Phones in landscape have very little vertical space - shrink the image
+   so the caption/controls never get squeezed off-screen. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .lightbox-img { max-height: 58vh; }
+  .lightbox-info { margin-top: 8px; }
+}
+
 /* Accessibility: Focus outlines */
 :focus-visible {
   outline: 2px solid var(--accent-1);
@@ -207,6 +353,9 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border-med); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-1); }
 ::selection { background: var(--accent-1); color: var(--text-inv); }
+
+/* ═══ GALLERY SECTION (base layout — sits between .tips and #settings) ═══ */
+#gallery { padding: 120px 60px; position: relative; }
 
 /* ═══ PROGRESS BAR ═══ */
 #progress-bar {
@@ -261,6 +410,12 @@ body {
 .units-row { display: flex; gap: 8px; }
 .units-row .pill-btn { text-align: center; justify-content: center; }
 
+/* Accessibility group spans the full grid width and lays its two toggles
+   side by side on wide screens, stacking on narrow ones. */
+.settings-group-wide { grid-column: 1 / -1; }
+.settings-subgroup-row { display: flex; gap: 24px 32px; flex-wrap: wrap; }
+.settings-subgroup-row .settings-subgroup { flex: 1 1 220px; margin-top: 0; }
+
 /* ═══ LOADER ═══ */
 #loader {
   position: fixed; inset: 0; background: var(--bg-base); z-index: 9997;
@@ -268,8 +423,7 @@ body {
   transition: opacity .8s ease, visibility .8s ease;
 }
 #loader.gone { opacity: 0; visibility: hidden; pointer-events: none; }
-.loader-flag { font-size: 3.5rem; animation: loaderFlag 1s ease-in-out infinite alternate; }
-@keyframes loaderFlag { from{transform:rotate(-5deg) scale(.95)} to{transform:rotate(5deg) scale(1.05)} }
+.loader-flag { font-size: 3.5rem; }
 .loader-text {
   font-family: var(--ff-display); font-size: clamp(2rem, 5vw, 3.5rem); font-style: italic; 
   color: var(--accent-1); letter-spacing: .05em; animation: loaderPulse 1.8s ease-in-out infinite;
@@ -783,7 +937,7 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   nav.scrolled { padding: 14px 24px; }
   .nav-links { display: none; }
   .nav-hamburger { display: flex; }
-  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #settings, footer { padding-left: 24px; padding-right: 24px; }
+  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, #settings, footer { padding-left: 24px; padding-right: 24px; }
   .hero-content { padding: 0 24px 80px; }
   .intro-grid { grid-template-columns: 1fr; }
   .intro-right { display: none; }
@@ -823,8 +977,22 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .hero-cta .btn-primary, .hero-cta .btn-ghost { flex: 1 1 auto; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  html { scroll-behavior: auto; }
+  .dest-track, .regions-track { scroll-behavior: auto; }
 }
+
+/* Manual "Reduce Motion" toggle in Settings — mirrors the OS-level query
+   above so people get the same calmer experience whether their system
+   preference is set or they just flip the in-page switch. */
+html[data-reduce-motion="true"] *,
+html[data-reduce-motion="true"] *::before,
+html[data-reduce-motion="true"] *::after {
+  animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important;
+}
+html[data-reduce-motion="true"] { scroll-behavior: auto; }
+html[data-reduce-motion="true"] .dest-track,
+html[data-reduce-motion="true"] .regions-track { scroll-behavior: auto; }
 </style>
 </head>
 <body>
@@ -863,6 +1031,7 @@ section[id], footer[id] { scroll-margin-top: 90px; }
     <li><a href="#destinations" data-section="destinations" data-i18n="nav.destinations">Destinations</a></li>
     <li><a href="#routes"       data-section="routes" data-i18n="nav.routes">Road Trips</a></li>
     <li><a href="#tips"         data-section="tips" data-i18n="nav.tips">Essentials</a></li>
+    <li><a href="#gallery" data-section="gallery" data-i18n="nav.gallery">Gallery</a></li>
     <li><a href="#settings"     data-section="settings" data-i18n="nav.settings">Settings</a></li>
   </ul>
   <button class="nav-hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
@@ -875,6 +1044,7 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   <a href="#destinations" class="nav-mobile-link" data-i18n="nav.destinations">Destinations</a>
   <a href="#routes"       class="nav-mobile-link" data-i18n="nav.routes">Road Trips</a>
   <a href="#tips"         class="nav-mobile-link" data-i18n="nav.tips">Essentials</a>
+  <a href="#gallery" class="nav-mobile-link" data-i18n="nav.gallery">Gallery</a>
   <a href="#settings"     class="nav-mobile-link" data-i18n="nav.settings">Settings</a>
 </nav>
 
@@ -900,12 +1070,12 @@ section[id], footer[id] { scroll-margin-top: 90px; }
 
   <div class="hero-stats">
     <div class="stat-item">
-      <div class="stat-num" data-target="50">50</div>
+      <div class="stat-num">50</div>
       <div class="stat-label" data-i18n="hero.statStates">Unique States</div>
       <div class="stat-bar"><div class="stat-bar-fill"></div></div>
     </div>
     <div class="stat-item">
-      <div class="stat-num" data-target="63">63</div>
+      <div class="stat-num">63</div>
       <div class="stat-label" data-i18n="hero.statParks">National Parks</div>
       <div class="stat-bar"><div class="stat-bar-fill"></div></div>
     </div>
@@ -1525,7 +1695,101 @@ section[id], footer[id] { scroll-margin-top: 90px; }
     <div class="tip-row reveal reveal-delay-3" data-modal="tip" data-tip="driving" tabindex="0"><div class="tip-icon">🚦</div><div class="tip-content"><div class="tip-title" data-i18n="tips.driving.title">Right Turn on Red</div><div class="tip-body" data-i18n-html="tips.driving.body">Unless posted otherwise, you may <strong>turn right at a red traffic light</strong> after stopping, in all 50 states.</div></div></div>
   </div>
 </section>
+<section id="gallery">
+  <div class="section-header reveal">
+    <div>
+      <span class="section-eyebrow" data-i18n="gallery.eyebrow">Photo Gallery</span>
+      <h2 data-i18n-html="gallery.heading">Moments From<br><em>The Road</em></h2>
+    </div>
+    <p data-i18n="gallery.intro">A running collection of shots from the road — sorted by category, more added as the trip continues.</p>
+  </div>
 
+  <div class="gallery-filters">
+    <button class="gallery-filter active" data-filter="all" data-i18n="gallery.filterAll">All</button>
+    <button class="gallery-filter" data-filter="cityscapes" data-i18n="gallery.filterCityscapes">Cityscapes</button>
+    <button class="gallery-filter" data-filter="landmarks" data-i18n="gallery.filterLandmarks">Landmarks</button>
+    <button class="gallery-filter" data-filter="nature" data-i18n="gallery.filterNature">Nature</button>
+    <button class="gallery-filter" data-filter="coast" data-i18n="gallery.filterCoast">Coast</button>
+    <button class="gallery-filter" data-filter="food-culture" data-i18n="gallery.filterFoodCulture">Food &amp; Culture</button>
+    <button class="gallery-filter" data-filter="roads" data-i18n="gallery.filterRoads">Roads</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       PHOTO MANAGEMENT GUIDE
+       ═══════════════════════════════════════════════════════════════════
+       Add a photo:
+         1. Save the image file into  images/gallery/
+         2. Copy one whole <div class="gallery-item">...</div> block below
+         3. Edit these 5 things in your copy:
+              data-category = cityscapes | landmarks | nature | coast | food-culture | roads
+              src           = images/gallery/your-file-name.jpg
+              alt           = plain description (screen readers + broken-image fallback)
+              data-location = shown under the photo when clicked, e.g. "Austin, TX"
+              data-date     = shown under the photo when clicked, e.g. "May 2026"
+         4. Change the <div class="gallery-caption"> text to a short label
+            (this is the only part visible on the grid itself, e.g. a city name)
+         No JS or CSS edits needed — animations, filtering, and the lightbox
+         all pick up new items automatically.
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="gallery-grid" id="galleryGrid">
+    <div class="gallery-item" data-category="landmarks" data-location="San Francisco, California" data-date="June 2026" tabindex="0" role="button">
+      <img src="images/gallery/SFgolden_gate_bridge.jpeg" alt="San Francisco Golden Gate Bridge" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.sfgoldengate.caption">Golden Gate Bridge</div>
+    </div>
+    <div class="gallery-item" data-category="landmarks" data-location="CA-1, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/bixby_bridge.jpeg" alt="Bixby Creek Bridge" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.bixby.caption">Bixby Bridge</div>
+    </div>
+    <div class="gallery-item" data-category="coast" data-location="Carmel by the Sea, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/Carmel_by_the_Sea.jpeg" alt="Carmel by the Sea" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.carmel.caption">Carmel by the Sea</div>
+    </div>
+    <div class="gallery-item" data-category="nature" data-location="Garrapata Beach, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/Garrapata_State_Beach_View.jpeg" alt="Garrapata State Beach" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.garrapataview.caption">Garrapata Beach</div>
+    </div>
+    <div class="gallery-item" data-category="coast" data-location="Garrapata Beach, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/Garrapata_State_Beach.jpeg" alt="Garrapata State Beach" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.garrapata.caption">Garrapata Beach</div>
+    </div>
+    <div class="gallery-item" data-category="roads" data-location="CA-1, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/Granite_Canyon_Bridge.jpeg" alt="Granite Canyon Bridge" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.granitecanyon.caption">Granite Canyon Bridge</div>
+    </div>
+    <div class="gallery-item" data-category="nature" data-location="Monterey County, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/Hurricane_Point_Landscape.jpeg" alt="Hurricane Point Landscape" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.hurricanepoint.caption">Hurricane Point</div>
+    </div>
+    <div class="gallery-item" data-category="coast" data-location="Richmond, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/Richmond_facing_bay_back.jpeg" alt="Calm waterfront with a graffiti-covered abandoned concrete building on a rocky shoreline, viewed from a pier with a metal railing, under a wide blue sky with wispy clouds." loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.richmond.caption">SF Bay from Richmond</div>
+    </div>
+    <div class="gallery-item" data-category="nature" data-location="Richmond, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/Richmond_Regional_Park_facing_mountain.jpeg" alt="Beautiful view of the river and themountains from Richmond Regional Park" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.richmond.caption">Richmond Regional Park</div>
+    </div>
+    <div class="gallery-item" data-category="coast" data-location="Richmond, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/Richmond_SFbay_view.jpeg" alt="Sunset view with sea gull in San Francisco Bay from Richmond" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.richmond.caption">SF Bay view from Richmond</div>
+    </div>
+  </div>
+  <p class="gallery-empty-state" id="galleryEmptyState" data-i18n="gallery.emptyState">No photos in this category yet — check back soon.</p>
+</section>
+
+<!-- Lightbox overlay - only ONE of these needed for the whole page, sits outside the section -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="lightbox-counter" id="lightboxCounter"></div>
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
+  <button class="lightbox-prev" id="lightboxPrev" aria-label="Previous photo">←</button>
+  <div class="lightbox-stage">
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    <div class="lightbox-info">
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+      <div class="lightbox-meta" id="lightboxMeta"></div>
+    </div>
+  </div>
+  <button class="lightbox-next" id="lightboxNext" aria-label="Next photo">→</button>
+</div>
 <section id="settings">
   <div class="settings-header reveal">
     <span class="section-eyebrow" data-i18n="settings.eyebrow">Personalize</span>
@@ -1590,6 +1854,27 @@ section[id], footer[id] { scroll-margin-top: 90px; }
         <div class="units-row" id="unitDistGroup">
           <button class="pill-btn active" data-unit-val="mi"><span data-i18n="settings.miles">Miles</span><span class="pill-check">✓</span></button>
           <button class="pill-btn" data-unit-val="km"><span data-i18n="settings.km">Kilometers</span><span class="pill-check">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group settings-group-wide reveal reveal-delay-3">
+      <div class="settings-group-label">♿ <span data-i18n="settings.accessibilityLabel">Accessibility</span></div>
+      <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Tone down animation or turn off the cursor trail — handy for motion sensitivity, older devices, or just a calmer feel.</div>
+      <div class="settings-subgroup-row">
+        <div class="settings-subgroup">
+          <div class="settings-subgroup-label" data-i18n="settings.reduceMotion">Motion</div>
+          <div class="units-row" id="motionPillGroup">
+            <button class="pill-btn active" data-motion-val="off"><span data-i18n="settings.motionStandard">Standard</span><span class="pill-check">✓</span></button>
+            <button class="pill-btn" data-motion-val="on"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
+          </div>
+        </div>
+        <div class="settings-subgroup">
+          <div class="settings-subgroup-label" data-i18n="settings.cursorEffect">Cursor Trail</div>
+          <div class="units-row" id="cursorPillGroup">
+            <button class="pill-btn active" data-cursor-val="on"><span data-i18n="settings.cursorOn">On</span><span class="pill-check">✓</span></button>
+            <button class="pill-btn" data-cursor-val="off"><span data-i18n="settings.cursorOff">Off</span><span class="pill-check">✓</span></button>
+          </div>
         </div>
       </div>
     </div>
@@ -1661,6 +1946,7 @@ const I18N = {
     "nav.destinations": "目的地",
     "nav.routes": "自驾路线",
     "nav.tips": "旅行须知",
+    "nav.gallery": "相册",
     "nav.settings": "设置",
 
     "hero.eyebrow": "终极旅行指南",
@@ -1884,6 +2170,20 @@ const I18N = {
     "tips.driving.title": "红灯亦可右转",
     "tips.driving.body": "除非另有明确标示，在全美50个州，车辆完全停稳后，均可<strong>在红灯时右转</strong>。",
 
+    "gallery.eyebrow": "旅途影像",
+    "gallery.heading": "来自旅途的<br><em>瞬间</em>",
+    "gallery.intro": "一份持续更新的旅途影像集——按类别整理，旅程继续，照片也会不断增加",
+    "gallery.filterAll": "全部",
+    "gallery.filterCityscapes": "城市风光",
+    "gallery.filterLandmarks": "地标建筑",
+    "gallery.filterNature": "自然风光",
+    "gallery.filterCoast": "海岸线",
+    "gallery.filterFoodCulture": "美食与文化",
+    "gallery.filterRoads": "公路旅途",
+    "gallery.emptyState": "该分类暂无照片——敬请期待",
+    "gallery.item.nyc1.caption": "纽约市",
+    "gallery.item.sf1.caption": "金门大桥",
+
     "settings.eyebrow": "个性化设置",
     "settings.heading": "打造<em>专属于你的体验</em>",
     "settings.intro": "选择喜欢的视觉主题，切换语言，或设定你熟悉的计量单位——所有偏好都会保存在这台设备上。",
@@ -1903,6 +2203,14 @@ const I18N = {
     "settings.distance": "距离",
     "settings.miles": "英里",
     "settings.km": "公里",
+    "settings.accessibilityLabel": "无障碍",
+    "settings.accessibilitySub": "减弱动效，或关闭鼠标光标特效——适合对动态效果敏感的用户、性能较弱的设备，或单纯偏好更沉静的体验。",
+    "settings.reduceMotion": "动效",
+    "settings.motionStandard": "标准",
+    "settings.motionReduced": "减弱",
+    "settings.cursorEffect": "光标特效",
+    "settings.cursorOn": "开启",
+    "settings.cursorOff": "关闭",
 
     "footer.tagline": "一份关于美国的完整旅行指南——广袤之中，故事缓缓展开，成为一段值得铭记的旅程",
     "footer.regionsTitle": "五大地区",
@@ -1921,6 +2229,7 @@ const I18N = {
     "nav.destinations": "目的地",
     "nav.routes": "ロードトリップ",
     "nav.tips": "旅の基本情報",
+    "nav.gallery": "ギャラリー",
     "nav.settings": "設定",
 
     "hero.eyebrow": "究極の旅行ガイド",
@@ -2144,6 +2453,20 @@ const I18N = {
     "tips.driving.title": "赤信号でも右折可能",
     "tips.driving.body": "標識で特に禁止されていない限り、全50州において、一時停止のうえで<strong>赤信号での右折</strong>が認められています。",
 
+    "gallery.eyebrow": "フォトギャラリー",
+    "gallery.heading": "旅の途中の<br><em>ワンシーン</em>",
+    "gallery.intro": "旅の記録を集めたコレクション——カテゴリー別に整理され、旅が続く限り随時追加されます。",
+    "gallery.filterAll": "すべて",
+    "gallery.filterCityscapes": "都市風景",
+    "gallery.filterLandmarks": "ランドマーク",
+    "gallery.filterNature": "自然",
+    "gallery.filterCoast": "海岸",
+    "gallery.filterFoodCulture": "食と文化",
+    "gallery.filterRoads": "ロード",
+    "gallery.emptyState": "このカテゴリーの写真はまだありません。お楽しみに。",
+    "gallery.item.nyc1.caption": "ニューヨーク市",
+    "gallery.item.sf1.caption": "ゴールデンゲートブリッジ",
+
     "settings.eyebrow": "パーソナライズ",
     "settings.heading": "自分だけの<em>旅のかたちに</em>",
     "settings.intro": "お好みのビジュアルテーマを選び、表示言語を切り替え、使い慣れた単位を設定できます。設定内容は、この端末に保存されます。",
@@ -2163,6 +2486,14 @@ const I18N = {
     "settings.distance": "距離",
     "settings.miles": "マイル",
     "settings.km": "キロメートル",
+    "settings.accessibilityLabel": "アクセシビリティ",
+    "settings.accessibilitySub": "アニメーションを控えめにしたり、カーソルエフェクトをオフにできます。動きに敏感な方、非力なデバイス、落ち着いた体験がお好みの方に。",
+    "settings.reduceMotion": "モーション",
+    "settings.motionStandard": "標準",
+    "settings.motionReduced": "控えめ",
+    "settings.cursorEffect": "カーソルエフェクト",
+    "settings.cursorOn": "オン",
+    "settings.cursorOff": "オフ",
 
     "footer.tagline": "アメリカ合衆国を巡る完全ガイド——50の州、数えきれない物語、そして一生忘れられない旅の記憶。",
     "footer.regionsTitle": "地域",
@@ -2263,8 +2594,18 @@ let currentTheme    = safeStorage.get('usa-travel-theme', 'default');
 let currentLang     = safeStorage.get('usa-travel-lang', 'en');
 let currentTempUnit = safeStorage.get('usa-travel-temp-unit', 'f');
 let currentDistUnit = safeStorage.get('usa-travel-dist-unit', 'mi');
+let reduceMotion         = safeStorage.get('usa-travel-reduce-motion', 'off') === 'on';
+let cursorEffectEnabled  = safeStorage.get('usa-travel-cursor-fx', 'on') !== 'off';
 
 document.documentElement.setAttribute('data-theme', currentTheme);
+document.documentElement.setAttribute('data-reduce-motion', reduceMotion ? 'true' : 'false');
+
+/* Respects the manual Settings toggle AND the OS-level preference — either
+   one being "on" is enough to calm things down. Checked live (not cached)
+   so it also reacts if the OS setting changes mid-session. */
+const prefersReducedMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+function motionActive() { return reduceMotion || prefersReducedMotionMQ.matches; }
+function scrollBehaviorPref() { return motionActive() ? 'auto' : 'smooth'; }
 
 /* ── THEME SWATCHES ── */
 const themeSwatches = document.querySelectorAll('.theme-swatch');
@@ -2317,6 +2658,30 @@ distPills.forEach(p => p.addEventListener('click', () => {
 }));
 updateUnitUI();
 
+/* ── ACCESSIBILITY PILLS (Reduce Motion / Cursor Effect) ── */
+const motionPills = document.querySelectorAll('#motionPillGroup .pill-btn');
+function updateMotionUI() {
+  motionPills.forEach(p => p.classList.toggle('active', p.dataset.motionVal === (reduceMotion ? 'on' : 'off')));
+}
+motionPills.forEach(p => p.addEventListener('click', () => {
+  reduceMotion = p.dataset.motionVal === 'on';
+  safeStorage.set('usa-travel-reduce-motion', reduceMotion ? 'on' : 'off');
+  document.documentElement.setAttribute('data-reduce-motion', reduceMotion ? 'true' : 'false');
+  updateMotionUI();
+}));
+updateMotionUI();
+
+const cursorPills = document.querySelectorAll('#cursorPillGroup .pill-btn');
+function updateCursorUI() {
+  cursorPills.forEach(p => p.classList.toggle('active', p.dataset.cursorVal === (cursorEffectEnabled ? 'on' : 'off')));
+}
+cursorPills.forEach(p => p.addEventListener('click', () => {
+  cursorEffectEnabled = p.dataset.cursorVal === 'on';
+  safeStorage.set('usa-travel-cursor-fx', cursorEffectEnabled ? 'on' : 'off');
+  updateCursorUI();
+}));
+updateCursorUI();
+
 /* ── UTILITY: GET CSS VARIABLE ── */
 function getCssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#e8a435';
@@ -2358,7 +2723,15 @@ window.addEventListener('scroll', () => {
     requestAnimationFrame(tick);
     frame++;
     ctx.clearRect(0, 0, c.width, c.height);
-    
+
+    // Respect the "Cursor Trail" Settings toggle and reduced-motion preference.
+    // Bail out early (after clearing) so a disable takes effect on the very
+    // next frame instead of waiting for existing particles to fade out.
+    if (!cursorEffectEnabled || motionActive()) {
+      if (particles.length) particles.length = 0;
+      return;
+    }
+
     // Dynamically fetch theme accent color
     const themeAccent = getCssVar('--accent-1');
 
@@ -2454,7 +2827,7 @@ window.addEventListener('scroll', () => {
     dots.forEach(d => {
       if (elapsed < d.delay) return;
       d.alpha = Math.min(d.target, d.alpha + .008);
-      const pulse = Math.sin(elapsed * .55 + d.pulse) * .15 + .85;
+      const pulse = motionActive() ? 1 : (Math.sin(elapsed * .55 + d.pulse) * .15 + .85);
       ctx.globalAlpha = d.alpha * pulse;
       ctx.beginPath();
       ctx.arc(mx2 + d.nx * mw, my2 + d.ny * mh, d.size * .5, 0, Math.PI * 2);
@@ -2483,6 +2856,7 @@ window.addEventListener('scroll', () => {
 /* ── PARALLAX ── */
 const heroBg  = document.getElementById('heroBg');
 window.addEventListener('scroll', () => {
+  if (motionActive()) { heroBg.style.transform = 'none'; return; }
   const y = window.scrollY;
   if (y < window.innerHeight * 1.2) {
     heroBg.style.transform  = `translateY(${y * 0.38}px)`;
@@ -2491,7 +2865,7 @@ window.addEventListener('scroll', () => {
 
 /* ── HERO SCROLL CLICK ── */
 document.getElementById('heroScroll').addEventListener('click', () => {
-  document.getElementById('intro').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('intro').scrollIntoView({ behavior: scrollBehaviorPref() });
 });
 
 /* ── REGIONS CAROUSEL (mirrors destinations pattern; grid on desktop, carousel below 1100px) ── */
@@ -2507,10 +2881,10 @@ function regionScrollStep() {
   return card.getBoundingClientRect().width + gap;
 }
 regionBtnLeft.addEventListener('click', () => {
-  regionsTrack.scrollBy({ left: -regionScrollStep(), behavior: 'smooth' });
+  regionsTrack.scrollBy({ left: -regionScrollStep(), behavior: scrollBehaviorPref() });
 });
 regionBtnRight.addEventListener('click', () => {
-  regionsTrack.scrollBy({ left: regionScrollStep(), behavior: 'smooth' });
+  regionsTrack.scrollBy({ left: regionScrollStep(), behavior: scrollBehaviorPref() });
 });
 
 /* ── DESTINATION FAVORITES ──
@@ -2581,7 +2955,7 @@ if (destFilterBar) {
     destFilterBar.querySelectorAll('.dest-filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     applyDestFilter(btn.dataset.filter);
-    destTrack.scrollTo({ left: 0, behavior: 'smooth' });
+    destTrack.scrollTo({ left: 0, behavior: scrollBehaviorPref() });
   });
 }
 
@@ -2605,10 +2979,10 @@ function destScrollStep() {
 }
 
 btnLeft.addEventListener('click', () => {
-  destTrack.scrollBy({ left: -destScrollStep(), behavior: 'smooth' });
+  destTrack.scrollBy({ left: -destScrollStep(), behavior: scrollBehaviorPref() });
 });
 btnRight.addEventListener('click', () => {
-  destTrack.scrollBy({ left: destScrollStep(), behavior: 'smooth' });
+  destTrack.scrollBy({ left: destScrollStep(), behavior: scrollBehaviorPref() });
 });
 destTrack.addEventListener('scroll', updateCarouselBtns, {passive: true});
 // Initial check
@@ -2635,7 +3009,7 @@ if (tb) tempObs.observe(tb);
 
 /* ── BACK TO TOP ── */
 document.getElementById('back-top').addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: scrollBehaviorPref() });
 });
 
 /* ── SMOOTH ANCHORS ── */
@@ -2647,7 +3021,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     const target = document.querySelector(hash);
     if (!target) return; // let the browser handle anything we don't recognize
     e.preventDefault();
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    target.scrollIntoView({ behavior: scrollBehaviorPref(), block: 'start' });
     document.getElementById('navMobile').classList.remove('open');
     const btn = document.getElementById('hamburger');
     btn.classList.remove('open');
@@ -2939,7 +3313,7 @@ overlay.addEventListener('click', e => { if (e.target === overlay) closeModal();
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 // Keyboard accessibility for interactive elements
-document.querySelectorAll('.prac-card, .season-card, .culture-tile, .dest-card, .region-card, .route-card, .tip-row, .fact-card').forEach(card => {
+document.querySelectorAll('.prac-card, .season-card, .culture-tile, .dest-card, .region-card, .route-card, .tip-row, .fact-card, .gallery-item').forEach(card => {
   card.addEventListener('keydown', e => {
     if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
   });
@@ -2972,6 +3346,194 @@ document.querySelectorAll('[data-modal]').forEach(el => {
 applyLanguage(currentLang);
 applyUnits();
 
+// ═══════════════════════════════════════════════════════════════════════
+// GALLERY — filtering, scroll-in animation, image loading state, lightbox
+// ═══════════════════════════════════════════════════════════════════════
+
+const galleryGrid = document.getElementById('galleryGrid');
+const filterBtns = document.querySelectorAll('.gallery-filter');
+const galleryEmptyState = document.getElementById('galleryEmptyState');
+let visibleItems = [...document.querySelectorAll('.gallery-item')];
+let currentIndex = 0;
+let lastFocusedThumb = null; // so closing the lightbox returns focus sensibly
+
+// Mirrors the EMPTY_STATE_SAVED_TEXT pattern used by the destinations filter:
+// the "photo not added yet" placeholder is generated dynamically in JS, so it
+// can't pick up a data-i18n attribute — it's translated by hand instead.
+const GALLERY_PLACEHOLDER_TEXT = {
+  en: 'Photo not added yet',
+  zh: '照片尚未上传',
+  ja: '写真はまだ追加されていません'
+};
+
+// --- Entrance animation: each tile fades/rises into place the first time
+// it scrolls into view, then is left alone (mirrors the site's .reveal system,
+// but kept separate so hiding/showing tiles via filters never fights with it).
+const galleryObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+      galleryObs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+// --- Image loading state: tile shows a plain background until its photo has
+// actually finished loading, then the photo fades in. Handles both slow
+// connections and images the browser already had cached (which fire "load"
+// before we can even attach the listener, hence the `.complete` check) - and
+// handles a missing/broken file (the "error" case) with a visible placeholder
+// rather than silently leaving the tile blank forever.
+function watchImageLoad(img) {
+  const item = img.closest('.gallery-item');
+  if (img.complete && img.naturalWidth > 0) {
+    img.classList.add('loaded');
+  } else if (img.complete) {
+    // .complete is true even for failed loads once the browser gives up, so
+    // naturalWidth === 0 here means "tried and failed", not "still loading".
+    showLoadError(item);
+  } else {
+    img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+    img.addEventListener('error', () => showLoadError(item), { once: true });
+  }
+}
+function showLoadError(item) {
+  item.classList.add('load-error');
+  item.setAttribute('tabindex', '-1');
+  item.removeAttribute('role');
+  if (!item.querySelector('.gallery-item-placeholder')) {
+    const ph = document.createElement('div');
+    ph.className = 'gallery-item-placeholder';
+    const text = GALLERY_PLACEHOLDER_TEXT[currentLang] || GALLERY_PLACEHOLDER_TEXT.en;
+    ph.innerHTML = `<span class="ph-icon">🖼️</span><span class="ph-text">${text}</span>`;
+    item.appendChild(ph);
+  }
+}
+
+function initGalleryItem(item, index) {
+  item.style.transitionDelay = `${(index % 6) * 60}ms`; // gentle stagger, resets every 6 tiles
+  galleryObs.observe(item);
+  watchImageLoad(item.querySelector('img'));
+}
+document.querySelectorAll('.gallery-item').forEach(initGalleryItem);
+
+// --- Filtering: items leaving shrink/fade out, THEN get display:none once
+// that transition finishes (so it actually animates instead of vanishing
+// instantly); items entering just drop their hidden state and re-run the
+// same rise-in animation.
+const FADE_MS = 300;
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    let matchCount = 0;
+
+    document.querySelectorAll('.gallery-item').forEach((item, index) => {
+      const match = filter === 'all' || item.dataset.category === filter;
+      if (match) matchCount++;
+      if (match) {
+        item.classList.remove('fade-out', 'hidden');
+        item.style.transitionDelay = `${(index % 6) * 40}ms`;
+        requestAnimationFrame(() => item.classList.add('in-view'));
+      } else if (!item.classList.contains('hidden')) {
+        item.classList.add('fade-out');
+        setTimeout(() => item.classList.add('hidden'), FADE_MS);
+      }
+    });
+
+    if (galleryEmptyState) galleryEmptyState.classList.toggle('show', matchCount === 0);
+
+    setTimeout(() => {
+      visibleItems = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.load-error)')];
+    }, FADE_MS + 20);
+  });
+});
+
+// --- Lightbox ---
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxCaption = document.getElementById('lightboxCaption');
+const lightboxMeta = document.getElementById('lightboxMeta');
+const lightboxCounter = document.getElementById('lightboxCounter');
+const lightboxCloseBtn = document.getElementById('lightboxClose');
+
+function preload(src) { const i = new Image(); i.src = src; } // warms the browser cache for instant next/prev
+
+function renderLightboxContent(index) {
+  const item = visibleItems[index];
+  const img = item.querySelector('img');
+  lightboxImg.src = img.src;
+  lightboxImg.alt = img.alt;
+  lightboxCaption.textContent = item.querySelector('.gallery-caption').textContent;
+  const location = item.dataset.location || '';
+  const date = item.dataset.date || '';
+  lightboxMeta.textContent = [location, date].filter(Boolean).join(' · ');
+  lightboxCounter.textContent = `${index + 1} / ${visibleItems.length}`;
+  // Warm the neighbors so arrow/swipe navigation feels instant.
+  const next = visibleItems[(index + 1) % visibleItems.length];
+  const prev = visibleItems[(index - 1 + visibleItems.length) % visibleItems.length];
+  if (next) preload(next.querySelector('img').src);
+  if (prev) preload(prev.querySelector('img').src);
+}
+
+function openLightbox(index) {
+  currentIndex = index;
+  renderLightboxContent(index);
+  lightbox.classList.add('open');
+  lightbox.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  lightboxCloseBtn.focus();
+}
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  lightbox.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  if (lastFocusedThumb) lastFocusedThumb.focus();
+}
+// Crossfade between photos: fade the current image out, swap its content
+// once it's actually invisible, then fade the new one in.
+function navigate(step) {
+  lightboxImg.classList.add('switching');
+  setTimeout(() => {
+    currentIndex = (currentIndex + step + visibleItems.length) % visibleItems.length;
+    renderLightboxContent(currentIndex);
+    lightboxImg.classList.remove('switching');
+  }, 180);
+}
+function showNext() { navigate(1); }
+function showPrev() { navigate(-1); }
+
+document.querySelectorAll('.gallery-item').forEach((item) => {
+  item.addEventListener('click', () => {
+    if (item.classList.contains('load-error')) return; // nothing valid to show yet
+    lastFocusedThumb = item;
+    visibleItems = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.load-error)')];
+    openLightbox(visibleItems.indexOf(item));
+  });
+});
+lightboxCloseBtn.addEventListener('click', closeLightbox);
+document.getElementById('lightboxNext').addEventListener('click', showNext);
+document.getElementById('lightboxPrev').addEventListener('click', showPrev);
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', e => {
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') showNext();
+  if (e.key === 'ArrowLeft') showPrev();
+});
+
+// Mobile: swipe left/right anywhere on the lightbox to go next/prev
+let touchStartX = 0;
+lightbox.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].clientX;
+}, { passive: true });
+lightbox.addEventListener('touchend', e => {
+  const diff = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(diff) > 40) { // ignore tiny accidental swipes
+    diff < 0 ? showNext() : showPrev();
+  }
+}, { passive: true });
 
 </script>
 </body>
