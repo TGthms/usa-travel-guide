@@ -20,7 +20,7 @@ A beautifully designed travel guide to the United States — covering 5 regions,
 This is an interest-driven personal project — bug reports and suggestions are welcome!
 📧 contact.timg@icloud.com
 
-## License
-Code is MIT licensed — see [LICENSE](LICENSE)
+## License and Legal
+The project is MIT licensed — see [LICENSE](LICENSE)
 
 All photos in /images are © 2026 TGthms and licensed under CC BY 4.0 — free to use with credit.
