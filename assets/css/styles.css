@@ -365,13 +365,13 @@ body {
   transition: opacity .3s ease, visibility .3s ease;
 }
 .settings-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; }
-#settings.settings-panel {
+.settings-panel {
   width: min(1120px, 100%); max-height: min(86vh, 900px); overflow: auto;
   padding: 42px; background: var(--bg-surface); border: 1px solid var(--border-light);
   border-radius: 8px; box-shadow: 0 40px 90px rgba(0,0,0,.45); position: relative;
   transform: translateY(18px) scale(.98); transition: transform .3s cubic-bezier(.22,1,.36,1);
 }
-.settings-overlay.open #settings.settings-panel { transform: translateY(0) scale(1); }
+.settings-overlay.open .settings-panel { transform: translateY(0) scale(1); }
 .settings-header { max-width: 1200px; margin: 0 auto 34px; }
 .settings-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
 .settings-header h2 { font-family: var(--ff-display); font-size: clamp(2.2rem, 3vw, 2.8rem); font-weight: 700; line-height: 1.1; margin-bottom: 16px; }
@@ -387,6 +387,31 @@ body {
 .settings-group { padding: 32px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-card); display: flex; flex-direction: column; }
 .settings-group-label { font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--accent-1); margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
 .settings-group-sub { font-size: 12.5px; color: var(--text-mute); margin-bottom: 22px; line-height: 1.6; }
+
+
+/* Travel tools */
+.tools-panel { width: min(1180px, 100%); }
+.tools-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; align-items: stretch; }
+.tool-card { padding: 28px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-card); min-width: 0; }
+.tool-card-wide { grid-row: span 2; }
+.tool-form { display: grid; gap: 12px; }
+.currency-tool { grid-template-columns: minmax(120px, 1fr) minmax(110px, .75fr) 44px minmax(110px, .75fr); align-items: end; }
+.tool-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.tool-field span { color: var(--text-mute); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.tool-field input, .tool-field select { width: 100%; min-height: 44px; padding: 11px 12px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-surface-2); color: var(--text-main); font: 500 14px var(--ff-body); outline: none; }
+.tool-field input:focus, .tool-field select:focus { border-color: var(--accent-1); box-shadow: 0 0 0 1px var(--accent-1); }
+.tool-swap { width: 44px; height: 44px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-card); color: var(--text-main); cursor: pointer; font-size: 18px; transition: all .25s; }
+.tool-swap:hover { border-color: var(--accent-1); color: var(--accent-1); transform: translateY(-2px); }
+.tool-result { margin-top: 20px; color: var(--text-main); font-family: var(--ff-display); font-size: clamp(1.7rem, 3vw, 2.6rem); font-weight: 700; line-height: 1.1; overflow-wrap: anywhere; }
+.tool-meta { margin-top: 8px; color: var(--text-mute); font-size: 12px; line-height: 1.6; }
+.clock-list { display: flex; flex-direction: column; gap: 10px; }
+.clock-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border-light); }
+.clock-row:last-child { border-bottom: 0; }
+.clock-city { color: var(--text-main); font-weight: 600; font-size: 13px; }
+.clock-zone { color: var(--text-mute); font-size: 11px; margin-top: 3px; }
+.clock-time { color: var(--accent-1); font-weight: 700; font-size: 18px; white-space: nowrap; }
+.stacked { gap: 14px; }
+.tool-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 /* Theme swatches */
 .theme-swatch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -474,12 +499,13 @@ nav.scrolled {
 }
 .nav-links a:hover, .nav-links a.active-link { color: var(--text-main); }
 .nav-links a:hover::after, .nav-links a.active-link::after { transform: scaleX(1); transform-origin: left; }
-.nav-settings-btn {
-  width: 40px; height: 40px; margin-left: 20px; display: inline-flex; align-items: center; justify-content: center;
+.nav-actions { display: flex; align-items: center; gap: 10px; margin-left: 20px; }
+.nav-settings-btn, .nav-tool-btn {
+  width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid var(--border-light); border-radius: 999px; background: var(--bg-card);
   color: var(--text-main); cursor: pointer; font-size: 17px; line-height: 1; transition: all .25s;
 }
-.nav-settings-btn:hover { border-color: var(--accent-1); color: var(--accent-1); background: var(--bg-card-hov); transform: translateY(-2px); }
+.nav-settings-btn:hover, .nav-tool-btn:hover { border-color: var(--accent-1); color: var(--accent-1); background: var(--bg-card-hov); transform: translateY(-2px); }
 
 /* Hamburger */
 .nav-hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; padding: 4px; background: none; border: none; z-index: 201; }
@@ -936,7 +962,7 @@ footer::before { content:''; position:absolute; top:0; left:60px; right:60px; he
 .season-card, .culture-intro > *, .section-header > *, .dest-header-wrapper > *,
 .footer-top > *, .footer-col, .routes-grid > *, .tips-grid > *,
 .culture-tiles > *, .practical-grid > *, .regions-track > *,
-.settings-grid > *, .theme-swatch-grid > *, .theme-swatch, .pill-group > * {
+.settings-grid > *, .tools-grid > *, .theme-swatch-grid > *, .theme-swatch, .pill-group > * {
   min-width: 0;
 }
 h1, h2, h3, .hero-desc, .intro-body, .intro-pull, p { overflow-wrap: break-word; }
@@ -964,6 +990,7 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   nav { padding: 20px 24px; }
   nav.scrolled { padding: 14px 24px; }
   .nav-links { display: none; }
+  .nav-actions { margin-left: auto; gap: 8px; }
   .nav-hamburger { display: flex; }
   #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, footer { padding-left: 24px; padding-right: 24px; }
   .hero-content { padding: 0 24px 80px; }
@@ -980,10 +1007,13 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .tips-grid { grid-template-columns: 1fr; }
   .footer-top { grid-template-columns: 1fr; gap: 40px; }
   .settings-overlay { padding: 12px; align-items: stretch; }
-  #settings.settings-panel { max-height: calc(100vh - 24px); padding: 26px 18px; }
+  .settings-panel { max-height: calc(100vh - 24px); padding: 26px 18px; }
   .settings-title-row { align-items: center; }
   .settings-close { flex-basis: 40px; width: 40px; height: 40px; }
-  .settings-grid { grid-template-columns: 1fr; }
+  .settings-grid, .tools-grid { grid-template-columns: 1fr; }
+  .tool-card-wide { grid-row: auto; }
+  .currency-tool { grid-template-columns: 1fr; }
+  .tool-swap { width: 100%; }
   .theme-swatch-grid { grid-template-columns: repeat(3, 1fr); }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
   .hero-stats { display: none; }
@@ -999,6 +1029,8 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   #back-top { bottom: 20px; right: 20px; }
 }
 @media (max-width: 540px) {
+  .tool-two-col { grid-template-columns: 1fr; }
+  .tool-card { padding: 22px 18px; }
   .culture-tiles { grid-template-columns: repeat(2,1fr); }
   .seasons-right { grid-template-columns: 1fr; }
   .modal-facts { grid-template-columns: 1fr; }

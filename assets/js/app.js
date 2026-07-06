@@ -17,6 +17,7 @@ const I18N = {
     "nav.routes": "自驾路线",
     "nav.tips": "旅行贴士",
     "nav.settings": "设置",
+    "nav.tools": "工具",
 
     "hero.eyebrow": "终极旅行指南",
     "hero.headline": "无尽奇境<br><em>近在咫尺</em>",
@@ -267,7 +268,7 @@ const I18N = {
     "settings.themeGlass": "玻璃拟态",
     "settings.themeNature": "自然生态",
     "settings.languageLabel": "多语言",
-    "settings.languageSub": "翻译全站内容，包括各地区与城市的详细介绍。",
+    "settings.languageSub": "中文版内容，包括各地区与城市的详细介绍。",
     "settings.unitsLabel": "偏好设置",
     "settings.unitsSub": "应用于气温显示与自驾路线的距离计量",
     "settings.temperature": "温度",
@@ -275,13 +276,29 @@ const I18N = {
     "settings.miles": "英里",
     "settings.km": "公里",
     "settings.accessibilityLabel": "无障碍",
-    "settings.accessibilitySub": "减弱动效，或关闭鼠标光标特效——适合对动态效果敏感的用户、性能较弱的设备，或单纯偏好更沉静的体验。",
+    "settings.accessibilitySub": "减弱动态效果，或关闭光标特效——适合对动态效果敏感的用户、性能较弱的设备，或偏好更沉静的体验。",
     "settings.reduceMotion": "动效",
     "settings.motionStandard": "标准",
     "settings.motionReduced": "减弱",
     "settings.cursorEffect": "光标特效",
     "settings.cursorOn": "开启",
     "settings.cursorOff": "关闭",
+
+    "tools.eyebrow": "工具箱",
+    "tools.heading": "更从容地<em>规划旅程</em>",
+    "tools.intro": "旅行快捷工具：实时汇率、世界时钟和小费+税率计算器",
+    "tools.currencyLabel": "实时汇率换算",
+    "tools.currencySub": "使用 Frankfurter 每日汇率",
+    "tools.amount": "金额",
+    "tools.from": "从",
+    "tools.to": "到",
+    "tools.clockLabel": "世界时钟",
+    "tools.clockSub": "用于规划国内联络与行程安排",
+    "tools.tipLabel": "小费与税费估算",
+    "tools.tipSub": "快速估算账单总额。",
+    "tools.bill": "账单",
+    "tools.tax": "税率 %",
+    "tools.tip": "小费 %",
 
     "footer.tagline": "一份关于美国的完整旅行指南——广袤之中，故事缓缓展开，成为一段值得铭记的旅程",
     "footer.regionsTitle": "五大地区",
@@ -305,6 +322,7 @@ const I18N = {
     "nav.routes": "ロードトリップ",
     "nav.tips": "旅のヒント",
     "nav.settings": "設定",
+    "nav.tools": "ツール",
 
     "hero.eyebrow": "究極の旅行ガイド",
     "hero.headline": "終わりなき<br><em>驚異の大地へ</em>",
@@ -570,6 +588,22 @@ const I18N = {
     "settings.cursorEffect": "カーソルエフェクト",
     "settings.cursorOn": "オン",
     "settings.cursorOff": "オフ",
+
+    "tools.eyebrow": "旅行ツール",
+    "tools.heading": "安心して<em>旅を計画</em>",
+    "tools.intro": "為替、世界時計、レストラン合計をすばやく確認できます。",
+    "tools.currencyLabel": "ライブ通貨換算",
+    "tools.currencySub": "Frankfurter の日次為替レートを使用",
+    "tools.amount": "金額",
+    "tools.from": "換算元",
+    "tools.to": "換算先",
+    "tools.clockLabel": "世界時計",
+    "tools.clockSub": "通話、到着、チェックインの計画に便利な主要タイムゾーン。",
+    "tools.tipLabel": "チップ・税金計算",
+    "tools.tipSub": "米国レストランの合計額をすばやく見積もります。",
+    "tools.bill": "会計",
+    "tools.tax": "税率 %",
+    "tools.tip": "チップ %",
 
     "footer.tagline": "アメリカ合衆国を巡る完全ガイド——50の州、数えきれない物語、そして一生忘れられない旅の記憶。",
     "footer.regionsTitle": "地域",
@@ -1184,6 +1218,124 @@ settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverla
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && settingsOverlay.classList.contains('open')) closeSettings();
 });
+
+
+/* ── TRAVEL TOOLS DIALOG ── */
+const toolsOverlay = document.getElementById('toolsOverlay');
+const toolsOpenBtn = document.getElementById('toolsOpen');
+const mobileToolsBtn = document.getElementById('mobileToolsBtn');
+const toolsCloseBtn = document.getElementById('toolsClose');
+let lastToolsTrigger = null;
+
+function openTools(trigger) {
+  if (toolsOverlay.classList.contains('open')) return;
+  if (settingsOverlay.classList.contains('open')) closeSettings();
+  lastToolsTrigger = trigger || document.activeElement;
+  closeMobileNav();
+  lockSettingsBackground();
+  toolsOverlay.classList.add('open');
+  toolsOverlay.setAttribute('aria-hidden', 'false');
+  toolsOverlay.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+  updateWorldClock();
+  updateTipEstimator();
+  updateCurrency();
+  setTimeout(() => toolsCloseBtn.focus(), 100);
+}
+
+function closeTools() {
+  if (!toolsOverlay.classList.contains('open')) return;
+  toolsOverlay.classList.remove('open');
+  toolsOverlay.setAttribute('aria-hidden', 'true');
+  unlockSettingsBackground();
+  if (lastToolsTrigger && typeof lastToolsTrigger.focus === 'function') lastToolsTrigger.focus();
+}
+
+toolsOpenBtn.addEventListener('click', () => openTools(toolsOpenBtn));
+mobileToolsBtn.addEventListener('click', () => openTools(mobileToolsBtn));
+toolsCloseBtn.addEventListener('click', closeTools);
+toolsOverlay.addEventListener('click', e => { if (e.target === toolsOverlay) closeTools(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && toolsOverlay.classList.contains('open')) closeTools();
+});
+
+const currencyAmount = document.getElementById('currencyAmount');
+const currencyFrom = document.getElementById('currencyFrom');
+const currencyTo = document.getElementById('currencyTo');
+const currencyResult = document.getElementById('currencyResult');
+const currencyMeta = document.getElementById('currencyMeta');
+const currencySwap = document.getElementById('currencySwap');
+let currencyAbort = null;
+
+function moneyFmt(value, currency) {
+  try { return new Intl.NumberFormat(currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value); }
+  catch (e) { return `${value.toFixed(2)} ${currency}`; }
+}
+
+async function updateCurrency() {
+  const amount = Math.max(0, Number(currencyAmount.value) || 0);
+  const base = currencyFrom.value;
+  const quote = currencyTo.value;
+  if (base === quote) {
+    currencyResult.textContent = `${moneyFmt(amount, base)} = ${moneyFmt(amount, quote)}`;
+    currencyMeta.textContent = 'Same currency selected.';
+    return;
+  }
+  if (currencyAbort) currencyAbort.abort();
+  currencyAbort = new AbortController();
+  currencyResult.textContent = 'Updating...';
+  currencyMeta.textContent = 'Fetching latest available daily rate.';
+  try {
+    const res = await fetch(`https://api.frankfurter.dev/v2/rate/${base}/${quote}`, { signal: currencyAbort.signal });
+    if (!res.ok) throw new Error('Rate unavailable');
+    const data = await res.json();
+    const converted = amount * Number(data.rate);
+    currencyResult.textContent = `${moneyFmt(amount, base)} = ${moneyFmt(converted, quote)}`;
+    currencyMeta.textContent = `1 ${base} = ${Number(data.rate).toFixed(4)} ${quote}${data.date ? ` · ${data.date}` : ''}`;
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    currencyResult.textContent = 'Rate unavailable';
+    currencyMeta.textContent = 'Check your connection and try again.';
+  }
+}
+
+[currencyAmount, currencyFrom, currencyTo].forEach(el => el.addEventListener('input', updateCurrency));
+[currencyFrom, currencyTo].forEach(el => el.addEventListener('change', updateCurrency));
+currencySwap.addEventListener('click', () => {
+  const from = currencyFrom.value;
+  currencyFrom.value = currencyTo.value;
+  currencyTo.value = from;
+  updateCurrency();
+});
+
+const worldClockList = document.getElementById('worldClockList');
+const CLOCK_ZONES = [
+  ['Los Angeles', 'America/Los_Angeles'], ['New York', 'America/New_York'], ['London', 'Europe/London'], ['Paris', 'Europe/Paris'], ['Tokyo', 'Asia/Tokyo'], ['Shanghai', 'Asia/Shanghai']
+];
+function updateWorldClock() {
+  const locale = currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : 'en-US';
+  worldClockList.innerHTML = CLOCK_ZONES.map(([city, zone]) => {
+    const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: currentLang === 'en', timeZone: zone }).format(new Date());
+    return `<div class="clock-row"><div><div class="clock-city">${city}</div><div class="clock-zone">${zone.replace('_', ' ')}</div></div><div class="clock-time">${time}</div></div>`;
+  }).join('');
+}
+updateWorldClock();
+setInterval(updateWorldClock, 30000);
+
+const billAmount = document.getElementById('billAmount');
+const taxRate = document.getElementById('taxRate');
+const tipRate = document.getElementById('tipRate');
+const tipResult = document.getElementById('tipResult');
+const tipMeta = document.getElementById('tipMeta');
+function updateTipEstimator() {
+  const bill = Math.max(0, Number(billAmount.value) || 0);
+  const tax = bill * Math.max(0, Number(taxRate.value) || 0) / 100;
+  const tip = bill * Math.max(0, Number(tipRate.value) || 0) / 100;
+  const total = bill + tax + tip;
+  tipResult.textContent = moneyFmt(total, 'USD');
+  tipMeta.textContent = `Tax ${moneyFmt(tax, 'USD')} · Tip ${moneyFmt(tip, 'USD')}`;
+}
+[billAmount, taxRate, tipRate].forEach(el => el.addEventListener('input', updateTipEstimator));
+updateTipEstimator();
 
 /* ── MODAL SYSTEM ── */
 const overlay   = document.getElementById('modal-overlay');
