@@ -20,7 +20,7 @@
 这是一个出于个人兴趣的项目 —— 欢迎提交错误报告和建议！
 📧 contact.timg@icloud.com
 
-## 许可
+## 版权
 代码采用 MIT 许可协议 —— 详见 [LICENSE](LICENSE)。
 
 /images 中的照片版权归 © 2026 TGthms 所有，采用 CC BY 4.0 协议授权 —— 注明作者后可使用。
