@@ -9,12 +9,15 @@ A beautifully designed travel guide to the United States — covering 5 regions,
 **Try it out:** https://tgthms.github.io/usa-travel-guide/
 
 ## Features
-- 6 visual themes
-- 3 languages (English, Chinese, Japanese)
-- Switchable units (°F/°C, miles/km) — persisted across visits
-- Built as a single self-contained HTML file, no external dependencies beyond Google Fonts & images
+- 🌍 **Comprehensive Travel Coverage** Covers all 50 U.S. states with categorized regional information.
+- 🧭 **Region-Based Organization** Content is structured into major regions such as Northeast, South, Midwest, West, and Southwest.
+- 📸 **Curated Destination Content** Includes notable landmarks, cities, and scenic locations across the country.
+- 🌦️ **Seasonal Travel Insights** Highlights the best times to visit different regions and destinations.
+- 🌐 **Multi-Language Support** Designed to support English, Chinese and Japanese for broader accessibility.
+- ⚙️ **Customizable User Preferences** Allows adjustment of settings such as language and measurement units.
+- 🗂️ **Structured Content Layout** Organized information for easy browsing and exploration.
 
-*More destinations, countries, and features coming soon.*
+> *More destinations, countries, and features coming soon.*
 
 ## Feedback
 This is an interest-driven personal project — bug reports and suggestions are welcome!
