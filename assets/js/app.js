@@ -1100,11 +1100,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     const target = document.querySelector(hash);
     if (!target) return; // let the browser handle anything we don't recognize
     e.preventDefault();
+    closeMobileNav();
     target.scrollIntoView({ behavior: scrollBehaviorPref(), block: 'start' });
-    document.getElementById('navMobile').classList.remove('open');
-    const btn = document.getElementById('hamburger');
-    btn.classList.remove('open');
-    btn.setAttribute('aria-expanded', 'false');
   });
 });
 
@@ -1112,15 +1109,25 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 const hamburger = document.getElementById('hamburger');
 const navMobile = document.getElementById('navMobile');
 hamburger.addEventListener('click', () => {
-  const isOpen = hamburger.classList.toggle('open');
-  navMobile.classList.toggle('open');
-  hamburger.setAttribute('aria-expanded', isOpen);
+  const willOpen = !hamburger.classList.contains('open');
+  if (willOpen) {
+    lockSettingsBackground();
+    hamburger.classList.add('open');
+    navMobile.classList.add('open');
+  } else {
+    hamburger.classList.remove('open');
+    navMobile.classList.remove('open');
+    unlockSettingsBackground();
+  }
+  hamburger.setAttribute('aria-expanded', String(willOpen));
 });
 
 function closeMobileNav() {
+  const wasOpen = navMobile.classList.contains('open');
   navMobile.classList.remove('open');
   hamburger.classList.remove('open');
   hamburger.setAttribute('aria-expanded', 'false');
+  if (wasOpen) unlockSettingsBackground();
 }
 
 /* ── SETTINGS DIALOG ── */
