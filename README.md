@@ -12,7 +12,7 @@ A beautifully designed travel guide to the United States — covering 5 regions,
 - 6 visual themes
 - 3 languages (English, Chinese, Japanese)
 - Switchable units (°F/°C, miles/km) — persisted across visits
-- Built as a single self-contained HTML file, no external dependencies beyond Google Fonts
+- Built as a single self-contained HTML file, no external dependencies beyond Google Fonts & images
 
 *More destinations, countries, and features coming soon.*
 
@@ -23,4 +23,4 @@ This is an interest-driven personal project — bug reports and suggestions are 
 ## License
 Code is MIT licensed — see [LICENSE](LICENSE)
 
-Photos in /images are © 2026 TGthms and licensed under CC BY 4.0 — free to use with credit.
+All photos in /images are © 2026 TGthms and licensed under CC BY 4.0 — free to use with credit.
