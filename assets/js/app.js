@@ -6,6 +6,311 @@ window.addEventListener('load', () => {
 });
 
 const I18N = {
+  es: {
+    "nav.about": "Acerca de",
+    "nav.regions": "Regiones",
+    "nav.destinations": "Destinos",
+    "nav.gallery": "Galería",
+    "nav.practical": "Lo esencial",
+    "nav.seasons": "Estaciones",
+    "nav.culture": "Cultura",
+    "nav.routes": "Rutas por carretera",
+    "nav.tips": "Consejos",
+    "nav.settings": "Ajustes",
+    "nav.tools": "Herramientas",
+
+    "hero.eyebrow": "La guía de viaje definitiva",
+    "hero.headline": "Tierra de<br><em>Maravillas Infinitas</em>",
+    "hero.desc": "Desde las costas embravecidas del Atlántico hasta los atardeceres del Pacífico, desde la tundra ártica hasta los cayos subtropicales: Estados Unidos alberga más paisajes, culturas e historias de las que un solo viaje podría abarcar.",
+    "hero.ctaPrimary": "Comenzar a explorar",
+    "hero.ctaGhost": "Destinos principales ↓",
+    "hero.statStates": "Estados únicos",
+    "hero.statParks": "Parques nacionales",
+    "hero.statMiles": "Millas cuadradas",
+    "hero.scroll": "Desplázate",
+
+    "intro.eyebrow": "Sobre Estados Unidos",
+    "intro.heading": "Una Nación que<br><em>Desafía Toda Descripción</em>",
+    "intro.quote": "\"Estados Unidos no es solo un país. Es un mosaico de mundos: cada estado, una nación en sí misma; cada ciudad, su propio universo.\"",
+    "intro.body1": "Con una extensión de <strong>3.8 millones de millas cuadradas</strong> en Norteamérica, Estados Unidos es el tercer país más grande del mundo por superficie y el cuarto por población. Limita con Canadá al norte y México al sur, con el océano Atlántico al este y el Pacífico al oeste.",
+    "intro.body2": "Desde las <strong>antiguas secuoyas milenarias</strong> de la costa del Pacífico hasta las doradas praderas del interior; desde los Apalaches hasta las Montañas Rocosas, pasando por el poderoso río Misisipi: cada rincón tiene su propio ritmo y su propio idioma.",
+    "intro.factPopulation": "Población",
+    "intro.factStates": "Estados",
+    "intro.factParks": "Parques nacionales",
+    "intro.factFounded": "Año de fundación",
+    "intro.factGdp": "PIB",
+    "intro.factTimezones": "Husos horarios",
+    "intro.sceneCanyon": "San Francisco, California",
+    "intro.sceneNyc": "Ciudad de Nueva York",
+    "intro.sceneYellow": "Yellowstone",
+
+    "regions.eyebrow": "Explora por región",
+    "regions.heading": "Un país,<br><em>cinco caras distintas</em>",
+    "regions.intro": "Cada región tiene su propio acento y su propio ritmo, desde el espíritu libre del Noreste hasta la inmensidad indómita del Oeste.",
+    "regions.tag": "✦ Cinco regiones",
+    "regions.ne.name": "El Noreste",
+    "regions.ne.desc": "Donde comenzó la historia de Estados Unidos: calles empedradas, universidades cubiertas de hiedra, un otoño ardiente en color, y la propia ciudad de Nueva York.",
+    "regions.ne.spot1": "Nueva York",
+    "regions.ne.spot2": "Boston",
+    "regions.so.name": "El Sur",
+    "regions.so.desc": "Hospitalidad cálida, gastronomía inolvidable, los acordes del blues y el jazz, y noches perfumadas de magnolia.",
+    "regions.so.spot1": "Nueva Orleans",
+    "regions.so.spot2": "Nashville",
+    "regions.mw.name": "El Medio Oeste",
+    "regions.mw.desc": "El corazón de Estados Unidos: praderas que se extienden hasta el horizonte, los Grandes Lagos resplandecientes y la célebre arquitectura de Chicago.",
+    "regions.mw.spot1": "Chicago",
+    "regions.mw.spot2": "Detroit",
+    "regions.we.name": "El Oeste",
+    "regions.we.desc": "De la vanguardia tecnológica a los bosques milenarios, de la costa del Pacífico a las cumbres volcánicas: esto es California.",
+    "regions.we.spot1": "Los Ángeles",
+    "regions.we.spot2": "Seattle",
+    "regions.sw.name": "El Suroeste",
+    "regions.sw.desc": "Entre cañones rojizos e imponentes, vestigios de civilizaciones ancestrales y desiertos poblados de cactus saguaro, hasta llegar a las noches irreales y deslumbrantes de Las Vegas.",
+    "regions.sw.spot1": "Las Vegas",
+    "regions.sw.spot2": "Phoenix",
+
+    "dest.eyebrow": "Destinos imprescindibles",
+    "dest.heading": "Ciudades que<br><em>cambiaron el mundo</em>",
+    "dest.filterAll": "Todas las ciudades",
+    "dest.bestTime": "Mejor época",
+    "dest.budget": "Presupuesto",
+    "dest.emptyState": "No hay ciudades que coincidan con esta región. Prueba con otro filtro.",
+    "dest.filterSaved": "Guardadas",
+    "dest.emptyStateSaved": "Aún no has guardado ninguna ciudad. Toca el icono del corazón en una tarjeta de ciudad para guardarla.",
+    "dest.nyc.tag": "✦ La capital del mundo",
+    "dest.nyc.name": "Ciudad de Nueva York",
+    "dest.nyc.desc": "La ciudad que nunca duerme: ocho millones de historias entre cinco distritos, desde los rascacielos de Manhattan hasta las calles de Brooklyn.",
+    "dest.nyc.time": "Abr–jun · sep–nov",
+    "dest.la.tag": "✦ La fábrica de sueños",
+    "dest.la.name": "Los Ángeles",
+    "dest.la.desc": "Cine, surf y un sol que nunca se apaga, entretejidos en una ciudad vastísima que se extiende desde las colinas de Hollywood hasta el malecón de Venice Beach.",
+    "dest.la.time": "Mar–may · sep–nov",
+    "dest.chicago.tag": "✦ La Ciudad de los Vientos",
+    "dest.chicago.name": "Chicago",
+    "dest.chicago.desc": "Cuna del rascacielos, a orillas del lago Míchigan: una arquitectura incomparable, un blues profundo y una pizza de masa gruesa inigualable.",
+    "dest.chicago.time": "Mayo a septiembre",
+    "dest.miami.tag": "✦ Costa de sol",
+    "dest.miami.name": "Miami",
+    "dest.miami.desc": "El art déco de South Beach, los murales vibrantes de Wynwood, el aroma del café cubano en La Pequeña Habana y una vida nocturna que nunca se detiene.",
+    "dest.miami.time": "Nov a abr",
+    "dest.nola.tag": "✦ La Gran Fácil",
+    "dest.nola.name": "Nueva Orleans",
+    "dest.nola.desc": "Una ciudad impregnada de jazz, historia del vudú y sabores criollos: el Barrio Francés no tiene igual en ningún otro lugar del mundo.",
+    "dest.nola.time": "Feb a may",
+    "dest.vegas.tag": "✦ La ciudad que nunca duerme",
+    "dest.vegas.name": "Las Vegas",
+    "dest.vegas.desc": "Un espejismo de neón que surge del desierto de Mojave: gastronomía de talla mundial, casinos de lujo y un espectáculo visual sin fin.",
+    "dest.vegas.time": "Mar–may · sep–nov",
+    "dest.sf.tag": "✦ La ciudad del Golden Gate",
+    "dest.sf.name": "San Francisco",
+    "dest.sf.desc": "Calles empinadas, tranvías que resuenan y un puente icónico envuelto en niebla: el cruce global de la tecnología y la contracultura.",
+    "dest.sf.time": "Sep a nov",
+    "dest.seattle.tag": "✦ La Ciudad Esmeralda",
+    "dest.seattle.name": "Seattle",
+    "dest.seattle.desc": "Rodeada de agua, montañas y bosques siempre verdes: célebre por su cultura del café, el bullicio del Pike Place Market y sus grandes empresas tecnológicas.",
+    "dest.seattle.time": "Jul a sep",
+    "dest.austin.tag": "✦ Capital de la música en vivo",
+    "dest.austin.name": "Austin",
+    "dest.austin.desc": "La tradición vaquera de Texas se funde con una creatividad desbordante: barbacoa auténtica, un estilo de vida al aire libre y una escena musical en vivo imparable.",
+    "dest.austin.time": "Sep–nov · mar–may",
+    "dest.dc.tag": "✦ Capital nacional",
+    "dest.dc.name": "Washington D. C.",
+    "dest.dc.desc": "El corazón de la historia y la política de Estados Unidos: majestuosos monumentos neoclásicos y algunos de los mejores museos gratuitos del mundo.",
+    "dest.dc.time": "Mar–may (temporada de cerezos)",
+    "dest.honolulu.tag": "✦ Paraíso tropical",
+    "dest.honolulu.name": "Honolulu",
+    "dest.honolulu.desc": "Las aguas turquesas de Waikiki, cráteres volcánicos imponentes y una arraigada tradición polinesia: la puerta de entrada a las cautivadoras islas de Hawái.",
+    "dest.honolulu.time": "Mediados de dic a mar",
+    "dest.boston.tag": "✦ El corazón de la historia",
+    "dest.boston.name": "Boston",
+    "dest.boston.desc": "Recorre sus calles empedradas siguiendo el camino de la Revolución estadounidense, prueba su legendario marisco y siente la pasión deportiva de la ciudad.",
+    "dest.boston.time": "Jun–oct (temporada de follaje)",
+
+    "prac.eyebrow": "Información práctica",
+    "prac.heading": "Lo esencial<em> del viaje</em>",
+    "prac.learnMore": "Saber más →",
+    "prac.transport.title": "Cómo llegar",
+    "prac.transport.body": "Los principales aeropuertos de entrada son <strong>JFK en Nueva York, LAX en Los Ángeles, SFO en San Francisco, ORD en Chicago, MIA en Miami</strong> y Atlanta. La mayoría de los viajeros de países exentos de visado deben solicitar el <strong>ESTA</strong> en línea antes de partir.",
+    "prac.driving.title": "Moverse por el país",
+    "prac.driving.body": "Fuera de las grandes ciudades, <strong>alquilar un coche</strong> es casi indispensable. Los vuelos nacionales son asequibles, y Uber y Lyft están disponibles en prácticamente todas las áreas metropolitanas.",
+    "prac.money.title": "Moneda y presupuesto",
+    "prac.money.body": "La moneda es el <strong>dólar estadounidense (USD)</strong>, y la propina suele ser del 18–22% del total. Viaje económico: 80–120 USD al día; viaje de gama media: 180–280 USD. Nueva York y San Francisco están entre las ciudades más caras.",
+    "prac.health.title": "Salud y seguridad",
+    "prac.health.body": "<strong>Se recomienda encarecidamente contratar un seguro de viaje</strong>: la atención médica en Estados Unidos es de primer nivel, pero también muy costosa. Para emergencias, llama al <strong>911</strong>.",
+
+    "seasons.eyebrow": "Cuándo viajar",
+    "seasons.heading": "Cada estación, <br><em>un país diferente</em>",
+    "seasons.intro": "El clima de Estados Unidos es extremadamente diverso, así que la mejor época para viajar depende de a dónde vayas y qué quieras vivir.",
+    "seasons.tempLabel": "Confort promedio",
+    "seasons.goTo": "Destinos recomendados:",
+    "seasons.spring.badge": "Mejor relación calidad-precio",
+    "seasons.spring.name": "Primavera",
+    "seasons.spring.months": "Marzo–mayo",
+    "seasons.spring.desc": "Los cerezos florecen en Washington D. C., las flores silvestres cubren los campos de Texas, y las temperaturas templadas junto con multitudes moderadas hacen de esta la temporada perfecta.",
+    "seasons.spring.go": "Washington D. C., Nueva York, Nashville",
+    "seasons.summer.badge": "Temporada alta",
+    "seasons.summer.name": "Verano",
+    "seasons.summer.months": "Junio–agosto",
+    "seasons.summer.desc": "Los parques nacionales están espectaculares, pero también abarrotados; las localidades costeras están en pleno apogeo. Reserva el alojamiento con antelación.",
+    "seasons.summer.go": "Parques nacionales, Nueva Inglaterra",
+    "seasons.fall.badge": "Recomendado por la redacción",
+    "seasons.fall.name": "Otoño",
+    "seasons.fall.months": "Septiembre–noviembre",
+    "seasons.fall.desc": "La estación más hermosa del año. El follaje otoñal de Nueva Inglaterra es sobrecogedor, el clima es fresco y agradable, y las ciudades cobran una energía especial.",
+    "seasons.fall.go": "Nueva Inglaterra, Great Smoky Mountains",
+    "seasons.winter.badge": "Temporada de esquí",
+    "seasons.winter.name": "Invierno",
+    "seasons.winter.months": "Diciembre–febrero",
+    "seasons.winter.desc": "Las estaciones de esquí de Colorado alcanzan su punto álgido, mientras que Florida, Hawái y el sur de California se convierten en refugios cálidos para escapar del frío.",
+    "seasons.winter.go": "Florida, Hawái, Montañas Rocosas",
+
+    "culture.eyebrow": "Gastronomía, música y cultura",
+    "culture.heading": "Un lugar<br><em>de infinita diversidad</em>",
+    "culture.intro": "Lo más valioso de Estados Unidos no es una sola cultura, sino su propia diversidad: sin normas fijas, sin fronteras, solo un mundo nuevo por descubrir en cada esquina.",
+    "culture.rock.name": "Rock y música country",
+    "culture.rock.desc": "Los bares country de Nashville, cuna del rock en Memphis",
+    "culture.jazz.name": "Jazz y blues",
+    "culture.jazz.desc": "El Barrio Francés de Nueva Orleans, donde la música nunca se detiene",
+    "culture.texmex.name": "Comida Tex-Mex",
+    "culture.texmex.desc": "La maravillosa fusión del espíritu texano y mexicano",
+    "culture.seafood.name": "Marisco de Nueva Inglaterra",
+    "culture.seafood.desc": "Suculentos rollos de langosta y ostras frescas de Cape Cod",
+    "culture.broadway.name": "Broadway",
+    "culture.broadway.desc": "Manhattan: el escenario más célebre del mundo",
+    "culture.bbq.name": "Barbacoa americana",
+    "culture.bbq.desc": "Texas, Kansas City, Carolina, Memphis: cada estilo tiene sus propias reglas sagradas",
+    "culture.streetart.name": "Arte urbano",
+    "culture.streetart.desc": "Los murales de Wynwood, el arte callejero de Detroit, el barrio de la Misión en San Francisco",
+    "culture.sports.name": "Cultura deportiva",
+    "culture.sports.desc": "Los domingos de la NFL, las largas tardes de béisbol y la pasión desbordante del fútbol americano universitario",
+    "culture.hollywood.name": "Hollywood",
+    "culture.hollywood.desc": "El corazón mundial del cine, las estrellas y las historias",
+    "culture.pizza.name": "Pizza neoyorquina",
+    "culture.pizza.desc": "Una porción fina que se dobla al comer: el emblema culinario de la ciudad",
+    "culture.smithsonian.name": "Museos gratuitos",
+    "culture.smithsonian.desc": "Los 19 museos del Smithsonian en Washington D. C., todos de entrada libre",
+    "culture.farmtable.name": "De la granja a la mesa",
+    "culture.farmtable.desc": "La revolución culinaria de ingredientes frescos liderada por California",
+
+    "routes.eyebrow": "Rutas por carretera",
+    "routes.heading": "La carretera abierta<br><em>te está esperando</em>",
+    "routes.intro": "Estados Unidos nació para el viaje por carretera. Estas rutas legendarias trascienden el simple transporte: son un rito de iniciación, un capítulo esencial de la gran historia estadounidense.",
+    "routes.route66.name": "Ruta 66",
+    "routes.route66.dist": "Chicago → Los Ángeles",
+    "routes.route66.duration": "2–3 semanas",
+    "routes.route66.desc": "Conocida como la \"Madre de los Caminos\", se extiende desde Chicago hasta Santa Mónica, entre carteles de neón desgastados, restaurantes de carretera y el colorido Desierto Pintado.",
+    "routes.route66.stop1": "Chicago, Illinois",
+    "routes.route66.stop2": "San Luis, Misuri",
+    "routes.route66.stop3": "Gran Cañón, Arizona",
+    "routes.route66.stop4": "Santa Mónica, California",
+    "routes.pch.name": "Autopista de la Costa del Pacífico",
+    "routes.pch.dist": "Seattle → San Diego",
+    "routes.pch.duration": "10–14 días",
+    "routes.pch.desc": "La ruta 1 serpentea a lo largo de los acantilados del Pacífico, considerada una de las carreteras costeras más espectaculares del mundo.",
+    "routes.pch.stop1": "Seattle, Washington",
+    "routes.pch.stop2": "Parque Nacional de las Secuoyas",
+    "routes.pch.stop3": "Acantilados de Big Sur",
+    "routes.pch.stop4": "San Diego, California",
+    "routes.parksloop.name": "Circuito de los Parques",
+    "routes.parksloop.dist": "Utah · Arizona · Nevada",
+    "routes.parksloop.duration": "10–12 días",
+    "routes.parksloop.desc": "Los \"Cinco Grandes\" parques nacionales de Utah, junto con el Gran Cañón, forman la región con mayor concentración de maravillas naturales del planeta.",
+    "routes.parksloop.stop1": "Las Vegas (base)",
+    "routes.parksloop.stop2": "Zion y Bryce Canyon",
+    "routes.parksloop.stop3": "Monument Valley",
+    "routes.parksloop.stop4": "Gran Cañón, borde sur",
+
+    "tips.eyebrow": "Consejos de expertos",
+    "tips.heading": "Viaja por Estados Unidos<br><em>con total tranquilidad</em>",
+    "tips.intro": "Estados Unidos recompensa a los viajeros preparados: estos consejos te ayudarán a ahorrar tiempo, dinero y contratiempos.",
+    "tips.parks.title": "Reserva los parques nacionales con antelación",
+    "tips.parks.body": "Muchos parques exigen <strong>reservas con horario de entrada</strong>, que suelen abrirse hasta 6 meses antes. Los cupos en Yosemite y Zion se agotan en cuestión de minutos.",
+    "tips.tax.title": "El impuesto sobre ventas se añade al pagar",
+    "tips.tax.body": "A diferencia de Europa, <strong>los precios exhibidos no incluyen impuestos</strong>. El impuesto sobre ventas varía según el estado (entre el 0% y más del 10%), así que el total siempre será mayor que el precio marcado.",
+    "tips.sim.title": "Consigue una SIM local con antelación",
+    "tips.sim.body": "Una <strong>eSIM de prepago</strong> cuesta desde unos 30 USD al mes. Si planeas visitar parques nacionales remotos, la cobertura de Verizon suele ser la más fiable.",
+    "tips.distance.title": "Las distancias son mayores de lo que imaginas",
+    "tips.distance.body": "Los estadounidenses miden las distancias en horas, no en millas. <strong>De Nueva York a Los Ángeles hay 41 horas en coche, unas <span class=\"unit-dist\" data-mi=\"2789\">2,789 millas</span></strong>. Es mejor planear pocos lugares y disfrutarlos bien que intentar abarcarlo todo.",
+    "tips.tipping.title": "La cultura de la propina",
+    "tips.tipping.body": "La propina en restaurantes suele ser del <strong>18–22%</strong> de la cuenta, y en los bares, entre 1 y 2 USD por bebida. Para muchos trabajadores del sector, la propina es su sustento: es una costumbre establecida, no un gesto opcional.",
+    "tips.pass.title": "Pase anual \"America the Beautiful\"",
+    "tips.pass.body": "Por <strong>80 USD al año</strong>, obtienes acceso ilimitado a los 63 parques nacionales del país. Con visitar solo 2 o 3 parques ya amortizas el costo.",
+    "tips.food.title": "Come donde comen los locales",
+    "tips.food.body": "La comida verdaderamente deliciosa rara vez se encuentra en zonas turísticas. Usa aplicaciones de reseñas para descubrir restaurantes familiares y locales étnicos con excelentes calificaciones.",
+    "tips.driving.title": "Se puede girar a la derecha en luz roja",
+    "tips.driving.body": "Salvo que se indique expresamente lo contrario, en los 50 estados se permite <strong>girar a la derecha con el semáforo en rojo</strong> tras detenerse por completo.",
+
+    "gallery.eyebrow": "Imágenes del viaje",
+    "gallery.heading": "Momentos<br><em>capturados en el camino</em>",
+    "gallery.intro": "Una colección en constante crecimiento de imágenes de viaje. \"Fotografías con derechos de autor de GitHub @TGthms, (Tim G), protegidas bajo la licencia CC BY 4.0; su uso requiere atribución.\"",
+    "gallery.filterAll": "Todas",
+    "gallery.filterCityscapes": "Paisajes urbanos",
+    "gallery.filterLandmarks": "Monumentos",
+    "gallery.filterNature": "Naturaleza",
+    "gallery.filterCoast": "Costa",
+    "gallery.filterFoodCulture": "Gastronomía y cultura",
+    "gallery.filterRoads": "Carreteras",
+    "gallery.emptyState": "Aún no hay fotos en esta categoría. Vuelve pronto.",
+    "gallery.viewAll": "Ver galería completa",
+    "gallery.viewLess": "Mostrar menos fotos",
+    "gallery.item.nyc1.caption": "Ciudad de Nueva York",
+    "gallery.item.sf1.caption": "Puente Golden Gate",
+
+    "settings.eyebrow": "Preferencias",
+    "settings.heading": "Crea <em>tu propia experiencia</em>",
+    "settings.intro": "Las preferencias se guardan en este dispositivo",
+    "settings.themeLabel": "Tema",
+    "settings.themeSub": "Cada sección se adapta a la paleta que elijas.",
+    "settings.themeDefault": "Azul marino y dorado",
+    "settings.themeMinimal": "Minimalista moderno",
+    "settings.themeElegant": "Elegante clásico",
+    "settings.themeLuxury": "Viaje de lujo",
+    "settings.themeGlass": "Glassmorfismo",
+    "settings.themeNature": "Naturaleza / Eco",
+    "settings.languageLabel": "Idioma",
+    "settings.languageSub": "Traduce todo el contenido de la guía, incluidos los detalles de regiones y ciudades.",
+    "settings.unitsLabel": "Unidades",
+    "settings.unitsSub": "Se aplica a las temperaturas y a las distancias de las rutas por carretera.",
+    "settings.temperature": "Temperatura",
+    "settings.distance": "Distancia",
+    "settings.miles": "Millas",
+    "settings.km": "Kilómetros",
+    "settings.accessibilityLabel": "Accesibilidad",
+    "settings.accessibilitySub": "Reduce la animación o desactiva el efecto del cursor: ideal para la sensibilidad al movimiento, dispositivos más antiguos o simplemente una experiencia más tranquila.",
+    "settings.reduceMotion": "Movimiento",
+    "settings.motionStandard": "Estándar",
+    "settings.motionReduced": "Reducido",
+    "settings.cursorEffect": "Efecto de cursor",
+    "settings.cursorOn": "Activado",
+    "settings.cursorOff": "Desactivado",
+
+    "tools.eyebrow": "Caja de herramientas",
+    "tools.heading": "Planifica tu viaje <em>con más tranquilidad</em>",
+    "tools.intro": "Herramientas rápidas de viaje: tipo de cambio en tiempo real, reloj mundial y calculadora de propinas e impuestos",
+    "tools.currencyLabel": "Conversor de divisas en vivo",
+    "tools.currencySub": "Usa los tipos de cambio diarios de Frankfurter",
+    "tools.amount": "Cantidad",
+    "tools.from": "De",
+    "tools.to": "A",
+    "tools.clockLabel": "Reloj mundial",
+    "tools.clockSub": "Útil para coordinar llamadas y planificar tu itinerario",
+    "tools.tipLabel": "Calculadora de propinas e impuestos",
+    "tools.tipSub": "Estima rápidamente el total de tu cuenta.",
+    "tools.bill": "Cuenta",
+    "tools.tax": "Impuesto %",
+    "tools.tip": "Propina %",
+
+    "footer.tagline": "Una guía de viaje completa por Estados Unidos: 50 estados, incontables historias, un viaje inolvidable.",
+    "footer.regionsTitle": "Regiones",
+    "footer.destTitle": "Destinos",
+    "footer.planTitle": "Planifica tu viaje",
+    "footer.parks": "Parques nacionales",
+    "footer.whenToVisit": "Cuándo viajar",
+    "footer.visa": "Visado y entrada",
+    "footer.copyright": "© 2026 Guía de viaje de EE. UU. &nbsp;·&nbsp; Hecho con pasión por la carretera abierta | Creado por Tim G · En colaboración con IA",
+    "footer.motto": "Tierra de libres, hogar de valientes 🇺🇸"
+  },
+
   zh: {
     "nav.about": "关于",
     "nav.regions": "地区",
@@ -646,9 +951,9 @@ function applyLanguage(lang) {
       if (isAria) el.setAttribute('aria-label', translated); else if (isHtml) el.innerHTML = translated; else el.textContent = translated;
     }
   });
-  document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : 'en');
+  document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : lang === 'es' ? 'es' : 'en');
   document.documentElement.setAttribute('data-lang', lang);
-  const titles = { en: 'America — A Travel Guide', zh: '美国 — 旅行指南', ja: 'アメリカ — 旅行ガイド' };
+  const titles = { en: 'America — A Travel Guide', es: 'América — Una Guía de Viaje', zh: '美国 — 旅行指南', ja: 'アメリカ — 旅行ガイド' };
   document.title = titles[lang] || titles.en;
   applyUnits(); // re-stamp unit spans that may have been inside translated HTML
   if (currentModalKey) {
@@ -677,10 +982,10 @@ function applyUnits() {
     const suffix = el.dataset.suffix || '';
     if (currentDistUnit === 'km') {
       const km = Math.round(mi * 1.60934).toLocaleString('en-US');
-      el.textContent = km + (currentLang === 'zh' ? ' 公里' : currentLang === 'ja' ? ' km' : ' km') + suffix;
+      el.textContent = km + (currentLang === 'zh' ? ' 公里' : currentLang === 'ja' ? ' km' : currentLang === 'es' ? ' km' : ' km') + suffix;
     } else {
       const miFmt = Math.round(mi).toLocaleString('en-US');
-      el.textContent = miFmt + (currentLang === 'zh' ? ' 英里' : currentLang === 'ja' ? ' マイル' : ' mi') + suffix;
+      el.textContent = miFmt + (currentLang === 'zh' ? ' 英里' : currentLang === 'ja' ? ' マイル' : currentLang === 'es' ? ' mi' : ' mi') + suffix;
     }
   });
 }
@@ -1040,7 +1345,7 @@ persistFavorites(); // paints the initial count without re-writing storage unnec
 const destFilterBar = document.getElementById('destFilterBar');
 const destEmptyState = document.getElementById('destEmptyState');
 const destEmptyStateDefaultKey = destEmptyState ? destEmptyState.getAttribute('data-i18n') : null;
-const EMPTY_STATE_SAVED_TEXT = { en: "You haven't saved any cities yet. Tap the heart icon on a city card to save it.", zh: "你还没有收藏任何城市。点击城市卡片上的心形图标即可收藏。", ja: "まだお気に入りの都市がありません。都市カードのハートアイコンをタップして保存しましょう。" };
+const EMPTY_STATE_SAVED_TEXT = { en: "You haven't saved any cities yet. Tap the heart icon on a city card to save it.", es: "Aún no has guardado ninguna ciudad. Toca el icono del corazón en una tarjeta de ciudad para guardarla.", zh: "你还没有收藏任何城市。点击城市卡片上的心形图标即可收藏。", ja: "まだお気に入りの都市がありません。都市カードのハートアイコンをタップして保存しましょう。" };
 
 function applyDestFilter(filter) {
   let visibleCount = 0;
@@ -1267,7 +1572,7 @@ const currencySwap = document.getElementById('currencySwap');
 let currencyAbort = null;
 
 function moneyFmt(value, currency) {
-  try { return new Intl.NumberFormat(currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value); }
+  try { return new Intl.NumberFormat(currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value); }
   catch (e) { return `${value.toFixed(2)} ${currency}`; }
 }
 
@@ -1312,7 +1617,7 @@ const CLOCK_ZONES = [
   ['Los Angeles', 'America/Los_Angeles'], ['New York', 'America/New_York'], ['London', 'Europe/London'], ['Paris', 'Europe/Paris'], ['Tokyo', 'Asia/Tokyo'], ['Shanghai', 'Asia/Shanghai']
 ];
 function updateWorldClock() {
-  const locale = currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : 'en-US';
+  const locale = currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : 'en-US';
   worldClockList.innerHTML = CLOCK_ZONES.map(([city, zone]) => {
     const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: currentLang === 'en', timeZone: zone }).format(new Date());
     return `<div class="clock-row"><div><div class="clock-city">${city}</div><div class="clock-zone">${zone.replace('_', ' ')}</div></div><div class="clock-time">${time}</div></div>`;
@@ -1431,6 +1736,84 @@ const MODAL_DATA = {
 /* Translated modal content, keyed identically to MODAL_DATA above.
    getModalData() falls back to English MODAL_DATA for any key missing here. */
 const MODAL_DATA_I18N = {
+es: {
+  region_northeast: {
+    tag: '✦ Región — El Noreste', title: 'El Noreste',
+    body: `<p>El rincón más densamente poblado e históricamente rico de Estados Unidos, el Noreste se extiende desde la escarpada costa de Maine hasta el bullicioso área metropolitana de Washington D. C. Aquí nació la nación.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">9</div><div class="modal-fact-label">Estados</div></div><div class="modal-fact"><div class="modal-fact-num">55M+</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">Sep–nov</div><div class="modal-fact-label">Mejor época</div></div></div><div class="modal-highlights"><div class="modal-highlight">Nueva York: Times Square, Central Park, el puente de Brooklyn, el Met</div><div class="modal-highlight">Boston: el Freedom Trail, la Universidad de Harvard, Fenway Park</div></div>`
+  },
+  region_south: {
+    tag: '✦ Región — El Sur', title: 'El Sur de Estados Unidos',
+    body: `<p>Ninguna otra región de Estados Unidos iguala al Sur en riqueza narrativa, musical y gastronómica. Desde las plazas cubiertas de musgo español de Savannah hasta los bares country iluminados con neón de Nashville.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">16</div><div class="modal-fact-label">Estados</div></div><div class="modal-fact"><div class="modal-fact-num">125M+</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">Mar–may</div><div class="modal-fact-label">Mejor época</div></div></div>`
+  },
+  region_midwest: {
+    tag: '✦ Región — El Medio Oeste', title: 'El Medio Oeste',
+    body: `<p>A menudo pasado por alto por los viajeros internacionales, el Medio Oeste recompensa a los curiosos con museos de talla mundial, una escena gastronómica extraordinaria y una calidez genuina y sin pretensiones.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">12</div><div class="modal-fact-label">Estados</div></div><div class="modal-fact"><div class="modal-fact-num">68M+</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">Jun–sep</div><div class="modal-fact-label">Mejor época</div></div></div>`
+  },
+  region_west: {
+    tag: '✦ Región — El Oeste', title: 'El Oeste de Estados Unidos',
+    body: `<p>El Oeste es donde nace la mitología estadounidense: la fiebre del oro, el espíritu de frontera, la contracultura y la revolución tecnológica. Aquí se encuentran las montañas más altas del país y sus desiertos más áridos.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">11</div><div class="modal-fact-label">Estados</div></div><div class="modal-fact"><div class="modal-fact-num">80M+</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">Todo el año</div><div class="modal-fact-label">Mejor época</div></div></div>`
+  },
+  region_southwest: {
+    tag: '✦ Región — El Suroeste', title: 'El Suroeste',
+    body: `<p>Ningún otro lugar de la Tierra combina la geología y la luz con tanta belleza como el Suroeste estadounidense. La meseta de Colorado alberga el paisaje erosionado más espectacular del planeta.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">4</div><div class="modal-fact-label">Estados clave</div></div><div class="modal-fact"><div class="modal-fact-num">5</div><div class="modal-fact-label">Parques "Mighty Five" de Utah</div></div><div class="modal-fact"><div class="modal-fact-num">Mar–may</div><div class="modal-fact-label">Mejor época</div></div></div>`
+  },
+
+  dest_nyc: { tag: '✦ Destino', title: 'Ciudad de Nueva York', body: `<p>La Ciudad de Nueva York es, sin duda, la capital del mundo. Ocho millones de personas conviven en un puñado de islas, hablando 800 idiomas.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">8M+</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">5</div><div class="modal-fact-label">Distritos</div></div><div class="modal-fact"><div class="modal-fact-num">$$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_la: { tag: '✦ Destino', title: 'Los Ángeles', body: `<p>El núcleo de la industria del entretenimiento mundial, extendiéndose sin límites. Desde el Observatorio Griffith hasta la playa de Santa Mónica, Los Ángeles es menos una ciudad y más un vasto conjunto de comunidades unidas por el automóvil.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">4M</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num unit-temp" data-f="75">75°F</div><div class="modal-fact-label">Temp. media</div></div><div class="modal-fact"><div class="modal-fact-num">$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_chicago: { tag: '✦ Destino', title: 'Chicago', body: `<p>La capital de la arquitectura estadounidense. Chicago se alza majestuosa junto al lago Míchigan, con un horizonte impresionante, museos de renombre mundial y una escena gastronómica excepcional.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">2.7M</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">1871</div><div class="modal-fact-label">Año del gran incendio</div></div><div class="modal-fact"><div class="modal-fact-num">$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_miami: { tag: '✦ Destino', title: 'Miami', body: `<p>Miami es la ciudad más internacional de Estados Unidos, donde América Latina, el Caribe y Norteamérica se cruzan, creando una atmósfera tropical y llena de neón.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">470K</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">Art Déco</div><div class="modal-fact-label">Estilo arquitectónico</div></div><div class="modal-fact"><div class="modal-fact-num">$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_nola: { tag: '✦ Destino', title: 'Nueva Orleans', body: `<p>No hay otro lugar en Estados Unidos como Nueva Orleans. Esta ciudad portuaria hermosa y compleja dio origen al jazz, perfeccionó la cocina criolla y celebra cada momento con desfiles de segunda línea.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">380K</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">1718</div><div class="modal-fact-label">Año de fundación</div></div><div class="modal-fact"><div class="modal-fact-num">$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_vegas: { tag: '✦ Destino', title: 'Las Vegas', body: `<p>Un parque de diversiones para adultos surgido del desierto. Célebre por sus enormes resorts-casino, restaurantes con estrellas Michelin, residencias de estrellas mundiales y su cercanía a maravillas naturales como el Gran Cañón.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">650K</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">24/7</div><div class="modal-fact-label">Vida nocturna</div></div><div class="modal-fact"><div class="modal-fact-num">$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_sf: { tag: '✦ Destino', title: 'San Francisco', body: `<p>Famosa por el puente Golden Gate, sus calles empinadas y Alcatraz. Una ciudad compacta y magnífica que funciona como el centro cultural y financiero del norte de California.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">800K</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">Colinas</div><div class="modal-fact-label">Terreno</div></div><div class="modal-fact"><div class="modal-fact-num">$$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_seattle: { tag: '✦ Destino', title: 'Seattle', body: `<p>Rodeada de agua y montañas majestuosas. Conocida por su cultura del café, el Pike Place Market y su papel como puerta de entrada al exuberante Pacífico Noroeste.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">730K</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">Lluvioso</div><div class="modal-fact-label">Clima invernal</div></div><div class="modal-fact"><div class="modal-fact-num">$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_austin: { tag: '✦ Destino', title: 'Austin', body: `<p>La capital mundial de la música en vivo. Austin combina la tradición vaquera de Texas con una industria tecnológica en auge, una barbacoa excepcional y una escena artística excéntrica y diversa.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">960K</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">Barbacoa</div><div class="modal-fact-label">Plato estrella</div></div><div class="modal-fact"><div class="modal-fact-num">$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_dc: { tag: '✦ Destino', title: 'Washington D. C.', body: `<p>El corazón político de Estados Unidos. Diseñada en torno a grandes avenidas, alberga el Capitolio, la Casa Blanca y una impresionante red de museos Smithsonian gratuitos.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">690K</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">19</div><div class="modal-fact-label">Museos gratuitos</div></div><div class="modal-fact"><div class="modal-fact-num">$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_honolulu: { tag: '✦ Destino', title: 'Honolulu', body: `<p>La capital del estado de Hawái, en la isla de Oahu. La cultura polinesia, las influencias del este asiático y el estilo de vida estadounidense se fusionan aquí, con la icónica playa de Waikiki como telón de fondo.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">340K</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">Aloha</div><div class="modal-fact-label">Espíritu</div></div><div class="modal-fact"><div class="modal-fact-num">$$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+  dest_boston: { tag: '✦ Destino', title: 'Boston', body: `<p>Una de las ciudades más antiguas de Estados Unidos, impregnada de historia revolucionaria. Recorre el Freedom Trail, visita la histórica Universidad de Harvard o disfruta de un partido en Fenway Park.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num">650K</div><div class="modal-fact-label">Población</div></div><div class="modal-fact"><div class="modal-fact-num">1630</div><div class="modal-fact-label">Año de fundación</div></div><div class="modal-fact"><div class="modal-fact-num">$$$</div><div class="modal-fact-label">Presupuesto</div></div></div>` },
+
+  fact_population: { tag: '✦ Dato curioso', title: 'Diversidad poblacional', body: '<p>La población de Estados Unidos ronda los <strong>333 millones</strong>. Su rasgo más distintivo es una diversidad sin precedentes: una nación formada enteramente por pueblos indígenas e inmigrantes de todos los rincones del mundo.</p>' },
+  fact_states: { tag: '✦ Dato curioso', title: '50 estados únicos', body: '<p>Estados Unidos es una república federal compuesta por 50 estados. Cada uno tiene su propia constitución, sus propias leyes y una identidad cultural distintiva. Viajar de Texas a Vermont puede sentirse tan diferente como viajar de España a Suecia.</p>' },
+  fact_parks: { tag: '✦ Dato curioso', title: 'Parques nacionales', body: '<p>La creación del sistema de parques nacionales ha sido llamada "la mejor idea" de Estados Unidos. Hoy existen <strong>63 parques nacionales</strong> designados oficialmente, que protegen millones de acres de naturaleza virgen, maravillas geotérmicas y ecosistemas antiguos.</p>' },
+  fact_founded: { tag: '✦ Dato curioso', title: '1776', body: '<p>El 4 de julio de 1776, Estados Unidos declaró oficialmente su independencia del Imperio Británico. Este audaz experimento democrático ha moldeado profundamente el curso de la historia mundial desde entonces.</p>' },
+  fact_gdp: { tag: '✦ Dato curioso', title: 'Potencia económica', body: '<p>El PIB de Estados Unidos supera los <strong>30 billones de dólares</strong>, lo que lo convierte en la mayor economía del mundo. Solo California, por sí sola, se ubicaría entre las cinco economías más grandes del planeta.</p>' },
+  fact_timezones: { tag: '✦ Dato curioso', title: '6 husos horarios', body: '<p>Estados Unidos abarca seis husos horarios (Este, Central, de Montaña, Pacífico, Alaska y Hawái). Un vuelo de Nueva York a Los Ángeles dura aproximadamente 6 horas.</p>' },
+
+  season_spring: { tag: '✦ Estación', title: 'La primavera en Estados Unidos', body: `<p>La primavera se considera, en general, la temporada con mejor relación calidad-precio: temperaturas agradables en todo el país, paisajes en plena floración y multitudes que aún no alcanzan su punto máximo.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num unit-temp" data-f="72">72°F</div><div class="modal-fact-label">Máxima media</div></div><div class="modal-fact"><div class="modal-fact-num">Mar–may</div><div class="modal-fact-label">Meses</div></div><div class="modal-fact"><div class="modal-fact-num">Moderada</div><div class="modal-fact-label">Afluencia</div></div></div><div class="modal-highlights"><div class="modal-highlight">Los cerezos de Washington D. C. florecen a finales de marzo y principios de abril</div><div class="modal-highlight">Las flores silvestres del Texas Hill Country florecen hasta abril</div></div>` },
+  season_summer: { tag: '✦ Estación', title: 'El verano en Estados Unidos', body: `<p>La temporada alta por excelencia. Los parques nacionales, las costas y las rutas icónicas están en su mejor momento, pero también las multitudes y los precios. Reserva alojamiento y entradas a los parques con antelación.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num unit-temp" data-f="88">88°F</div><div class="modal-fact-label">Máxima media</div></div><div class="modal-fact"><div class="modal-fact-num">Jun–ago</div><div class="modal-fact-label">Meses</div></div><div class="modal-fact"><div class="modal-fact-num">Máxima</div><div class="modal-fact-label">Afluencia</div></div></div><div class="modal-highlights"><div class="modal-highlight">Los días largos son ideales para senderismo en los parques nacionales</div><div class="modal-highlight">Los pueblos costeros de Nueva Inglaterra están en pleno apogeo</div></div>` },
+  season_fall: { tag: '✦ Estación', title: 'El otoño en Estados Unidos', body: `<p>Muchos locales consideran el otoño la mejor época para viajar: aire fresco, menos multitudes y, sobre todo, el legendario follaje otoñal de Nueva Inglaterra que tiñe las montañas de colores ardientes.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num unit-temp" data-f="62">62°F</div><div class="modal-fact-label">Máxima media</div></div><div class="modal-fact"><div class="modal-fact-num">Sep–nov</div><div class="modal-fact-label">Meses</div></div><div class="modal-fact"><div class="modal-fact-num">Baja</div><div class="modal-fact-label">Afluencia</div></div></div><div class="modal-highlights"><div class="modal-highlight">El follaje de Vermont y New Hampshire alcanza su punto máximo a principios y mediados de octubre</div><div class="modal-highlight">El follaje de Great Smoky Mountains dura hasta principios de noviembre</div></div>` },
+  season_winter: { tag: '✦ Estación', title: 'El invierno en Estados Unidos', body: `<p>Un país de dos caras: las Montañas Rocosas y el Noreste sufren un frío intenso con estaciones de esquí de primer nivel, mientras que Florida, el sur de California y Hawái ofrecen un refugio cálido y soleado. Elige tu clima.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num unit-temp" data-f="38">38°F</div><div class="modal-fact-label">Máxima media</div></div><div class="modal-fact"><div class="modal-fact-num">Dic–feb</div><div class="modal-fact-label">Meses</div></div><div class="modal-fact"><div class="modal-fact-num">Variable</div><div class="modal-fact-label">Afluencia</div></div></div><div class="modal-highlights"><div class="modal-highlight">Las estaciones de esquí de Colorado alcanzan su apogeo entre finales de diciembre y marzo</div><div class="modal-highlight">Hawái y el sur de Florida son cálidos y secos todo el año</div></div>` },
+
+  route_route66: { tag: '✦ Ruta por carretera', title: 'Ruta 66 — La Madre de los Caminos', body: `<p>La ruta por carretera más legendaria de Estados Unidos. La Ruta 66 recorre desde el centro de Chicago hasta el muelle de Santa Mónica, atravesando ocho estados entre desvaídos carteles de neón de moteles y la vasta belleza del Desierto Pintado.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num unit-dist" data-mi="2448">2,448 mi</div><div class="modal-fact-label">Distancia total</div></div><div class="modal-fact"><div class="modal-fact-num">8</div><div class="modal-fact-label">Estados atravesados</div></div><div class="modal-fact"><div class="modal-fact-num">2–3 semanas</div><div class="modal-fact-label">Duración sugerida</div></div></div><div class="modal-highlights"><div class="modal-highlight">Cadillac Ranch: diez Cadillacs cubiertos de grafiti, enterrados de cabeza en un campo de Texas</div><div class="modal-highlight">Fácil desvío al Gran Cañón cerca de Williams, Arizona</div></div>` },
+  route_pch: { tag: '✦ Ruta por carretera', title: 'Autopista de la Costa del Pacífico', body: `<p>La ruta 1 serpentea casi por completo a lo largo de los acantilados que dominan el Pacífico en toda la costa oeste. Reconocida como una de las carreteras más espectaculares del mundo, alterna secuoyas imponentes, playas vírgenes y una costa dramática y sobrecogedora.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num unit-dist" data-mi="1650">1,650 mi</div><div class="modal-fact-label">Distancia total</div></div><div class="modal-fact"><div class="modal-fact-num">3</div><div class="modal-fact-label">Estados atravesados</div></div><div class="modal-fact"><div class="modal-fact-num">10–14 días</div><div class="modal-fact-label">Duración sugerida</div></div></div><div class="modal-highlights"><div class="modal-highlight">El puente Bixby en Big Sur es uno de los lugares más fotografiados de California</div><div class="modal-highlight">Los árboles del Parque Nacional de las Secuoyas son más antiguos que el Imperio romano</div></div>` },
+  route_parksloop: { tag: '✦ Ruta por carretera', title: 'Circuito del Gran Círculo de Parques', body: `<p>Los "Cinco Grandes" parques nacionales de Utah, sumados al Gran Cañón, forman la zona con mayor concentración de maravillas naturales del planeta. Con Las Vegas como base, recorre cañones rojizos, formaciones rocosas caprichosas y antiguas mesetas.</p><div class="modal-facts"><div class="modal-fact"><div class="modal-fact-num unit-dist" data-mi="980">980 mi</div><div class="modal-fact-label">Distancia total</div></div><div class="modal-fact"><div class="modal-fact-num">3</div><div class="modal-fact-label">Estados atravesados</div></div><div class="modal-fact"><div class="modal-fact-num">10–12 días</div><div class="modal-fact-label">Duración sugerida</div></div></div><div class="modal-highlights"><div class="modal-highlight">Angels Landing, en Zion, es una de las caminatas de un día más emocionantes de Estados Unidos</div><div class="modal-highlight">Las mesetas de Monument Valley han aparecido en incontables clásicos del western</div></div>` },
+
+  culture_rock: { tag: '✦ Pilar cultural', title: 'El nacimiento del rock y la música country', body: '<p>La música estadounidense cambió el mundo. <strong>Memphis</strong> fusionó el blues y el country para dar origen al rock and roll. <strong>Nashville</strong> sigue siendo, sin discusión, la capital de la música country.</p>' },
+  culture_jazz: { tag: '✦ Pilar cultural', title: 'Jazz y blues', body: '<p>Nacido en las calles de <strong>Nueva Orleans</strong>, el jazz es una forma de arte genuinamente estadounidense. Desde los clubes envueltos en humo del Barrio Francés hasta los legendarios bares de blues del Delta del Misisipi.</p>' },
+  culture_texmex: { tag: '✦ Pilar cultural', title: 'Cocina Tex-Mex', body: '<p>Esta cocina de fusión, nacida en la frontera entre Texas y México, dio al mundo las fajitas, los nachos y el chili con carne, con abundante queso fundido, carne de res y especias.</p>' },
+  culture_seafood: { tag: '✦ Pilar cultural', title: 'Marisco de Nueva Inglaterra', body: '<p>Las frías aguas de la costa atlántica producen mariscos excepcionales. Ningún viaje a Maine está completo sin un rollo de langosta recién capturada, mientras que Boston es célebre por su clam chowder.</p>' },
+  culture_broadway: { tag: '✦ Pilar cultural', title: 'Broadway y el teatro', body: '<p>Los 41 teatros profesionales del distrito teatral de Manhattan representan lo más alto del teatro comercial en el mundo de habla inglesa.</p>' },
+  culture_bbq: { tag: '✦ Pilar cultural', title: 'La fe de la barbacoa', body: '<p>La barbacoa estadounidense tiene una identidad regional muy marcada. <strong>Texas</strong> se centra en el brisket ahumado. <strong>Kansas City</strong> prefiere las salsas espesas. <strong>Carolina</strong> apuesta por el cerdo, mientras que <strong>Memphis</strong> destaca por sus costillas con adobo seco.</p>' },
+  culture_streetart: { tag: '✦ Pilar cultural', title: 'Arte urbano', body: '<p>Las ciudades de Estados Unidos son como museos al aire libre. Wynwood Walls, en Miami, revolucionó la revitalización urbana a través del grafiti. Ciudades como Los Ángeles y Detroit cuentan con miles de murales.</p>' },
+  culture_sports: { tag: '✦ Pilar cultural', title: 'El deporte como fe', body: '<p>Los estadounidenses viven el deporte con una pasión casi religiosa: los tailgates antes de los partidos de la NFL, las tardes de verano en el béisbol, o el fervor desenfrenado del fútbol americano universitario.</p>' },
+  culture_hollywood: { tag: '✦ Pilar cultural', title: 'Hollywood', body: '<p>Los Ángeles es la fábrica de sueños del mundo. El letrero de Hollywood, el Paseo de la Fama y sus extensos estudios de cine siguen marcando el rumbo de la cultura pop global.</p>' },
+  culture_pizza: { tag: '✦ Pilar cultural', title: 'La cultura de la pizza neoyorquina', body: '<p>Traída por inmigrantes italianos, la porción neoyorquina se caracteriza por su masa ancha, fina y fácil de doblar. En casi cualquier esquina de Manhattan puedes conseguir una porción perfecta por pocos dólares.</p>' },
+  culture_smithsonian: { tag: '✦ Pilar cultural', title: 'El Instituto Smithsonian', body: '<p>Ubicado en Washington D. C., el Smithsonian es el complejo de museos más grande del mundo. Los 19 museos que lo componen son <strong>completamente gratuitos</strong>.</p>' },
+  culture_farmtable: { tag: '✦ Pilar cultural', title: 'La revolución de la granja a la mesa', body: '<p>Este movimiento, pionero en lugares como Berkeley, prioriza ingredientes locales, de temporada y orgánicos. El Pacífico Noroeste y California lideran esta tendencia a nivel mundial.</p>' },
+
+  prac_transport: { tag: '✦ Lo esencial', title: 'Cómo llegar a Estados Unidos', body: '<p>Los principales puntos de entrada internacional incluyen <strong>el aeropuerto JFK de Nueva York</strong>, <strong>el LAX de Los Ángeles</strong> y <strong>el O\'Hare de Chicago</strong>. La mayoría de los viajeros de países con exención de visado necesitan solicitar el <strong>ESTA</strong> antes de viajar.</p>' },
+  prac_driving: { tag: '✦ Lo esencial', title: 'Moverse dentro de Estados Unidos', body: '<p>Estados Unidos es un país profundamente dependiente del automóvil. Fuera de grandes ciudades como Nueva York, Boston o Chicago, alquilar un coche es casi imprescindible. Dentro de las ciudades, Uber y Lyft están disponibles en todas partes.</p>' },
+  prac_money: { tag: '✦ Lo esencial', title: 'Moneda y presupuesto', body: '<p>Las tarjetas de crédito y débito se aceptan prácticamente en todas partes. <strong>La propina es obligatoria:</strong> en restaurantes es del 18–22%. Además, el precio exhibido nunca incluye el impuesto sobre ventas.</p>' },
+  prac_health: { tag: '✦ Lo esencial', title: 'Salud y seguridad', body: '<p>Estados Unidos cuenta con un excelente sistema de salud, pero sin seguro los costos pueden ser extremadamente elevados. <strong>Contratar un seguro de viaje integral es absolutamente indispensable.</strong> El número de emergencias es el <strong>911</strong>.</p>' },
+
+  tip_parks: { tag: '✦ Consejo', title: 'Reserva los parques nacionales', body: '<p>No vayas a un parque nacional popular en verano sin preparación. Parques como Yosemite y Arches exigen <strong>reservas con horario de entrada</strong> incluso solo para conducir por ellos. Reserva con meses de antelación.</p>' },
+  tip_tax: { tag: '✦ Consejo', title: 'El impuesto sobre ventas se suma al pagar', body: '<p>Los precios en Estados Unidos no incluyen el impuesto sobre ventas. La tasa varía según la localidad, normalmente entre <strong>el 4% y el 10%</strong>, dependiendo del estado y la ciudad.</p>' },
+  tip_sim: { tag: '✦ Consejo', title: 'Mantente conectado', body: '<p>Compra una eSIM de prepago (como Airalo) antes de llegar, o adquiere una SIM física de T-Mobile o AT&T al llegar. Si planeas visitar parques nacionales remotos, <strong>Verizon</strong> ofrece la mejor cobertura en zonas rurales.</p>' },
+  tip_distance: { tag: '✦ Consejo', title: 'Las distancias son mayores de lo que parece', body: '<p>"En Europa, 100 millas es una gran distancia; en Estados Unidos, 100 años es una gran historia." Conducir de Florida a Nueva York toma 20 horas. No intentes ver la costa este y el Gran Cañón en un viaje de 7 días.</p>' },
+  tip_tipping: { tag: '✦ Consejo', title: 'La propina no es opcional', body: '<p>Meseros y bartenders dependen en gran medida de las propinas para vivir. El estándar es del <strong>18% al 22%</strong> de la cuenta antes de impuestos. No dejar propina se considera extremadamente descortés.</p>' },
+  tip_pass: { tag: '✦ Consejo', title: 'Pase anual "America the Beautiful"', body: '<p>Si planeas visitar 3 o más parques nacionales, considera el <strong>pase anual de 80 USD</strong>. Da acceso gratuito durante un año a los 63 parques nacionales para todo un vehículo.</p>' },
+  tip_food: { tag: '✦ Consejo', title: 'Come como un local', body: '<p>Evita las cadenas cerca de las zonas turísticas. Camina 15 minutos en cualquier dirección y encontrarás los lugares que frecuentan los locales. Usa Yelp o Google Maps para encontrar restaurantes familiares con buenas reseñas.</p>' },
+  tip_driving: { tag: '✦ Consejo', title: 'Girar a la derecha en rojo', body: '<p>A menos que un letrero indique expresamente lo contrario, girar a la derecha con el semáforo en rojo, tras detenerse por completo, es legal en los 50 estados.</p>' }
+},
 zh: {
   region_northeast: {
     tag: '✦ 地区 — 东北部', title: '东北部',
@@ -1660,6 +2043,7 @@ let galleryExpanded = false;
 const GALLERY_PREVIEW_LIMIT = 6;
 const GALLERY_TOGGLE_TEXT = {
   en: { more: 'View Full Gallery', less: 'Show Fewer Photos' },
+  es: { more: 'Ver galería completa', less: 'Mostrar menos fotos' },
   zh: { more: '展开完整相册', less: '收起相册' },
   ja: { more: 'ギャラリーをすべて表示', less: 'ギャラリーを閉じる' }
 };
@@ -1669,6 +2053,7 @@ const GALLERY_TOGGLE_TEXT = {
 // can't pick up a data-i18n attribute — it's translated by hand instead.
 const GALLERY_PLACEHOLDER_TEXT = {
   en: 'Photo not added yet',
+  es: 'Foto aún no añadida',
   zh: '照片尚未上传',
   ja: '写真はまだ追加されていません'
 };
