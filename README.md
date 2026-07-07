@@ -26,7 +26,7 @@
 | 🌍 **Comprehensive Travel Coverage** | Covers all 50 U.S. states with categorized regional information. |
 | 🧭 **Region-Based Organization** | Content is structured into major regions such as Northeast, South, Midwest, West, and Southwest. |
 | 📸 **Curated Destination Content** | Includes notable landmarks, cities, and scenic locations across the country. |
-| 🖼️ **Photo Gallery** | A filterable gallery of travel photography — browse by cityscapes, landmarks, nature, coastlines, food & culture, or road trips. |
+| 🖼️ **Photo Gallery** | A filterable gallery of travel photography — browse by cityscapes, landmarks, nature, coastlines, food & culture, or road trips. *HDR Supported*|
 | 🌦️ **Seasonal Travel Insights** | Highlights the best times to visit different regions and destinations. |
 | 🧰 **Travel Toolbox** | Fast utilities for common travel decisions: live currency conversion (Frankfurter API), time zones, and restaurant bill totals. |
 | 🌐 **Multi-Language Support** | Available in English, Spanish, Chinese, and Japanese for broader accessibility. |
