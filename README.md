@@ -13,7 +13,7 @@ A beautifully designed travel guide to the United States — covering 5 regions,
 - 🧭 **Region-Based Organization** Content is structured into major regions such as Northeast, South, Midwest, West, and Southwest.
 - 📸 **Curated Destination Content** Includes notable landmarks, cities, and scenic locations across the country.
 - 🌦️ **Seasonal Travel Insights** Highlights the best times to visit different regions and destinations.
-- 🧰 **Travel Toolbox** Fast utilities for common travel decisions: live currency, time zones, and restaurant totals.
+- 🧰 **Travel Toolbox** Fast utilities for common travel decisions: live currency (Frankfurter API), time zones, and restaurant totals.
 - 🌐 **Multi-Language Support** Designed to support English, Chinese and Japanese for broader accessibility.
 - ⚙️ **Customizable User Preferences** Allows adjustment of settings such as language and measurement units.
 - ♿️ **Accessibility Features** Tone down animation or turn off the cursor trail — handy for motion sensitivity, older devices, or just a calmer feel.
