@@ -123,10 +123,10 @@ const I18N = {
     "dest.honolulu.time": "12月中旬至3月",
     "dest.boston.tag": "✦ 历史之心",
     "dest.boston.name": "波士顿",
-    "dest.boston.desc": "循着鹅卵石街道，重走美国独立革命之路；再尝一口传奇海鲜，感受这座城市近乎虔诚的体育热忱",
+    "dest.boston.desc": "循着鹅卵石街道，重走美国独立革命之路；再尝一口传奇海鲜，感受这座城市的体育热忱",
     "dest.boston.time": "6–10月（秋叶季）",
 
-    "prac.eyebrow": "行前须知",
+    "prac.eyebrow": "旅行须知",
     "prac.heading": "旅行<em>要点</em>",
     "prac.learnMore": "了解更多 →",
     "prac.transport.title": "如何抵达",
@@ -256,9 +256,9 @@ const I18N = {
     "gallery.item.nyc1.caption": "纽约市",
     "gallery.item.sf1.caption": "金门大桥",
 
-    "settings.eyebrow": "个性化设置",
+    "settings.eyebrow": "偏好设置",
     "settings.heading": "打造<em>专属于你的体验</em>",
-    "settings.intro": "选择喜欢的视觉主题，切换语言，或设定你熟悉的计量单位——所有偏好都会保存在这台设备上。",
+    "settings.intro": "偏好设置会保存在这台设备上",
     "settings.themeLabel": "主题",
     "settings.themeSub": "每个板块的配色，都会随你的选择而焕然一新。",
     "settings.themeDefault": "海军蓝",
@@ -268,7 +268,7 @@ const I18N = {
     "settings.themeGlass": "玻璃拟态",
     "settings.themeNature": "自然生态",
     "settings.languageLabel": "多语言",
-    "settings.languageSub": "中文版内容，包括各地区与城市的详细介绍。",
+    "settings.languageSub": "选择你熟悉的语言",
     "settings.unitsLabel": "偏好设置",
     "settings.unitsSub": "应用于气温显示与自驾路线的距离计量",
     "settings.temperature": "温度",
@@ -307,7 +307,7 @@ const I18N = {
     "footer.parks": "国家公园",
     "footer.whenToVisit": "最佳季节",
     "footer.visa": "签证与入境",
-    "footer.copyright": "© 2026 美国旅行指南 &nbsp;·&nbsp; 心怀热爱，畅游在自由的公路上 | 由 Tim G 创作 · 与 AI 协作完成",
+    "footer.copyright": "© 2026 美国旅行指南 &nbsp;·&nbsp; 心怀热爱，畅游在自由的公路上 | 由 Tim G 创作 · 含有部分与 AI 协作的内容",
     "footer.motto": "自由的土地，勇者的家园 🇺🇸"
   },
 
