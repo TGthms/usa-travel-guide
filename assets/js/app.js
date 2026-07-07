@@ -1259,13 +1259,13 @@ window.addEventListener('scroll', () => {
 
 /* ── NAVBAR + ACTIVE LINK ── */
 const navbar = document.getElementById('navbar');
-const sections = document.querySelectorAll('section[id]:not(#settings)');
+const sections = document.querySelectorAll('section[id]:not(#settings):not(#tools)');
 const navLinks = document.querySelectorAll('.nav-links a[data-section]');
 
 window.addEventListener('scroll', () => {
   const y = window.scrollY;
   navbar.classList.toggle('scrolled', y > 60);
-  document.getElementById('back-top').classList.toggle('visible', y > 400);
+
   let current = '';
   sections.forEach(s => { if (y >= s.offsetTop - 200) current = s.id; });
   navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === current));
@@ -1274,10 +1274,10 @@ window.addEventListener('scroll', () => {
 /* ── PARALLAX ── */
 const heroBg  = document.getElementById('heroBg');
 window.addEventListener('scroll', () => {
-  if (motionActive()) { heroBg.style.transform = 'none'; return; }
+  if (motionActive()) { heroBg.style.translate = '0px 0px'; return; }
   const y = window.scrollY;
   if (y < window.innerHeight * 1.2) {
-    heroBg.style.transform  = `translateY(${y * 0.38}px)`;
+    heroBg.style.translate = `0px ${y * 0.38}px`;
   }
 }, { passive: true });
 
@@ -1304,6 +1304,14 @@ regionBtnLeft.addEventListener('click', () => {
 regionBtnRight.addEventListener('click', () => {
   regionsTrack.scrollBy({ left: regionScrollStep(), behavior: scrollBehaviorPref() });
 });
+
+function updateRegionBtns() {
+  const maxScroll = regionsTrack.scrollWidth - regionsTrack.clientWidth;
+  regionBtnLeft.disabled = regionsTrack.scrollLeft <= 5;
+  regionBtnRight.disabled = regionsTrack.scrollLeft >= maxScroll - 5;
+}
+regionsTrack.addEventListener('scroll', updateRegionBtns, {passive: true});
+setTimeout(updateRegionBtns, 500);
 
 /* ── DESTINATION FAVORITES ──
    A lightweight "save for later" system. Persists the same way as other
@@ -1357,8 +1365,9 @@ function applyDestFilter(filter) {
   if (destEmptyState) {
     destEmptyState.classList.toggle('show', visibleCount === 0);
     if (filter === 'saved') {
-      destEmptyState.removeAttribute('data-i18n');
-      destEmptyState.textContent = EMPTY_STATE_SAVED_TEXT[currentLang] || EMPTY_STATE_SAVED_TEXT.en;
+      destEmptyState.setAttribute('data-i18n', 'dest.emptyStateSaved');
+      const dict = I18N[currentLang];
+      destEmptyState.textContent = (dict && dict['dest.emptyStateSaved']) || EMPTY_STATE_SAVED_TEXT.en;
     } else if (destEmptyStateDefaultKey) {
       destEmptyState.setAttribute('data-i18n', destEmptyStateDefaultKey);
       const dict = I18N[currentLang];
@@ -1424,11 +1433,6 @@ const tempObs = new IntersectionObserver(entries => {
 }, { threshold: 0.3 });
 const tb = document.getElementById('tempBars');
 if (tb) tempObs.observe(tb);
-
-/* ── BACK TO TOP ── */
-document.getElementById('back-top').addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: scrollBehaviorPref() });
-});
 
 /* ── SMOOTH ANCHORS ── */
 document.querySelectorAll('a[href^="#"]').forEach(a => {

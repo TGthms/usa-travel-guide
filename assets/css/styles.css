@@ -515,8 +515,9 @@ nav.scrolled {
 .nav-hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); background: var(--accent-1); }
 .nav-mobile {
   position: fixed; inset: 0; top: 0; background: var(--modal-bg); backdrop-filter: blur(24px); z-index: 190;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(18px, 4vh, 34px);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: clamp(18px, 4vh, 34px);
   opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .4s, visibility .4s;
+  overflow-y: auto; padding: 100px 24px 60px;
 }
 .nav-mobile.open { opacity: 1; visibility: visible; pointer-events: auto; }
 .nav-mobile a { font-family: var(--ff-display); font-size: clamp(1.6rem, 7vw, 2.5rem); font-style: italic; color: var(--text-dim); text-decoration: none; transition: color .25s, transform .25s; }
@@ -879,16 +880,6 @@ nav.scrolled {
 .tip-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
 .tip-body { font-size: 13.5px; color: var(--text-dim); line-height: 1.7; }
 .tip-body strong { color: var(--text-main); font-weight: 500; }
-
-/* ═══ BACK TO TOP ═══ */
-#back-top {
-  position: fixed; bottom: 90px; right: 30px; z-index: 500; width: 48px; height: 48px;
-  border: 1px solid var(--border-med); background: var(--bg-surface); backdrop-filter: blur(12px);
-  border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--accent-1); font-size: 20px;
-  transition: all .4s ease; opacity: 0; transform: translateY(20px); pointer-events: none;
-}
-#back-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-#back-top:hover { border-color: var(--accent-1); background: var(--accent-1); color: var(--text-inv); transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
 
 /* ═══ MODAL OVERLAY ═══ */
 #modal-overlay {
