@@ -2,6 +2,7 @@
   <img src="https://capsule-render.vercel.app/api?type=waving&height=300&color=gradient&text=USA%20Travel%20Guide&animation=fadeIn"/>
 </p>
 Language
+
 [English](README.md) | [中文](README.zh.md) | [日本語](README.ja.md)
 
 A beautifully designed travel guide to the United States — covering 5 regions, 12 destination cities, 3 road-trip routes, seasonal travel advice, cultural highlights, and practical planning essentials.
