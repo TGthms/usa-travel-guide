@@ -2,7 +2,11 @@
 
 /* ── LOADER ── */
 window.addEventListener('load', () => {
-  setTimeout(() => document.getElementById('loader').classList.add('gone'), 1500);
+  const loader = document.getElementById('loader');
+  if (!loader) return;
+  // Gallery mini-app can dismiss sooner — less “full site boot” feel.
+  const delay = document.body.classList.contains('page-gallery') ? 700 : 1400;
+  setTimeout(() => loader.classList.add('gone'), delay);
 });
 
 const I18N = {
@@ -243,6 +247,8 @@ const I18N = {
     "gallery.eyebrow": "Imágenes del viaje",
     "gallery.heading": "Momentos<br><em>capturados en el camino</em>",
     "gallery.intro": "Una colección en constante crecimiento de imágenes de viaje. \"Fotografías con derechos de autor de GitHub @TGthms, (Tim G), protegidas bajo la licencia CC BY 4.0; su uso requiere atribución.\"",
+    "gallery.teaserBody": "Costas, puentes, miradores y carretera abierta: un diario fotográfico del viaje por Estados Unidos.",
+    "gallery.teaserAria": "Abrir la galería de fotos completa",
     "gallery.filterAll": "Todas",
     "gallery.filterCityscapes": "Paisajes urbanos",
     "gallery.filterLandmarks": "Monumentos",
@@ -252,21 +258,30 @@ const I18N = {
     "gallery.filterRoads": "Carreteras",
     "gallery.emptyState": "Aún no hay fotos en esta categoría. Vuelve pronto.",
     "gallery.viewAll": "Ver galería completa",
-    "gallery.viewLess": "Mostrar menos fotos",
-    "gallery.item.nyc1.caption": "Ciudad de Nueva York",
-    "gallery.item.sf1.caption": "Puente Golden Gate",
+    "gallery.backToGuide": "Volver a la guía",
+    "gallery.pageIntro": "Cada parada del viaje hasta ahora, organizada por categoría — se añaden nuevas fotos a medida que continúa el viaje.",
+    "gallery.item.sfgoldengate.caption": "Puente Golden Gate",
+    "gallery.item.bixby.caption": "Puente Bixby",
+    "gallery.item.carmel.caption": "Carmel-by-the-Sea",
+    "gallery.item.garrapataview.caption": "Mirador de Playa Garrapata",
+    "gallery.item.garrapata.caption": "Playa Garrapata",
+    "gallery.item.granitecanyon.caption": "Puente Granite Canyon",
+    "gallery.item.hurricanepoint.caption": "Hurricane Point",
+    "gallery.item.richmondbay.caption": "Bahía de SF desde Richmond",
+    "gallery.item.richmondpark.caption": "Parque Regional de Richmond",
+    "gallery.item.richmondview.caption": "Vista de la Bahía de SF desde Richmond",    "gallery.item.tmpdk2t3a5.caption": "Japantown",
 
     "settings.eyebrow": "Preferencias",
     "settings.heading": "Crea <em>tu propia experiencia</em>",
     "settings.intro": "Las preferencias se guardan en este dispositivo",
     "settings.themeLabel": "Tema",
     "settings.themeSub": "Cada sección se adapta a la paleta que elijas.",
-    "settings.themeDefault": "Azul marino y dorado",
-    "settings.themeMinimal": "Minimalista moderno",
-    "settings.themeElegant": "Elegante clásico",
-    "settings.themeLuxury": "Viaje de lujo",
-    "settings.themeGlass": "Glassmorfismo",
-    "settings.themeNature": "Naturaleza / Eco",
+    "settings.themeDefault": "Atlas de medianoche",
+    "settings.themeMinimal": "Galería diurna",
+    "settings.themeElegant": "Papel patrimonio",
+    "settings.themeLuxury": "Gran tour",
+    "settings.themeGlass": "Cristal crepuscular",
+    "settings.themeNature": "Notas de campo",
     "settings.languageLabel": "Idioma",
     "settings.languageSub": "Traduce todo el contenido de la guía, incluidos los detalles de regiones y ciudades.",
     "settings.unitsLabel": "Unidades",
@@ -286,7 +301,7 @@ const I18N = {
 
     "tools.eyebrow": "Caja de herramientas",
     "tools.heading": "Planifica tu viaje <em>con más tranquilidad</em>",
-    "tools.intro": "Herramientas rápidas de viaje: tipo de cambio en tiempo real, reloj mundial y calculadora de propinas e impuestos",
+    "tools.intro": "Divisas, relojes, propinas, coste de carretera, impuestos y teléfonos útiles — todo listo.",
     "tools.currencyLabel": "Conversor de divisas en vivo",
     "tools.currencySub": "Usa los tipos de cambio diarios de Frankfurter",
     "tools.amount": "Cantidad",
@@ -294,11 +309,31 @@ const I18N = {
     "tools.to": "A",
     "tools.clockLabel": "Reloj mundial",
     "tools.clockSub": "Útil para coordinar llamadas y planificar tu itinerario",
-    "tools.tipLabel": "Calculadora de propinas e impuestos",
-    "tools.tipSub": "Estima rápidamente el total de tu cuenta.",
-    "tools.bill": "Cuenta",
+    "tools.tipLabel": "Propina e impuesto de ventas",
+    "tools.tipSub": "Total de restaurante o compra: elige cualquier estado de EE. UU. para el impuesto y añade propina.",
+    "tools.bill": "Importe / cuenta",
     "tools.tax": "Impuesto %",
     "tools.tip": "Propina %",
+    "tools.taxHint": "El impuesto se rellena según el estado (tasa combinada aprox.). Puedes ajustarlo.",
+    "tools.driveLabel": "Coste del viaje por carretera",
+    "tools.driveSub": "Tiempo y coste de energía para coches de gasolina o eléctricos.",
+    "tools.driveDist": "Distancia",
+    "tools.driveSpeed": "Velocidad media",
+    "tools.driveMpg": "MPG / L/100 km",
+    "tools.driveFuel": "Combustible $/gal o $/L",
+    "tools.driveGas": "Gasolina",
+    "tools.driveEv": "Eléctrico",
+    "tools.driveEvEcon": "mi/kWh o kWh/100 km",
+    "tools.driveEvPrice": "Electricidad $/kWh",
+    "tools.salesTaxState": "Estado",
+    "tools.emergencyLabel": "Números útiles",
+    "tools.emergencySub": "Tenlos a mano mientras viajas por Estados Unidos.",
+    "tools.em911": "Emergencias (policía, bomberos, ambulancia)",
+    "tools.em511": "Tráfico y estado de carreteras (muchos estados)",
+    "tools.em988": "Línea de crisis y prevención del suicidio",
+    "tools.emPoison": "Control de intoxicaciones",
+    "tools.em311": "Servicios municipales no urgentes (donde exista)",
+    "tools.emNote": "Llama al 911 solo en emergencias reales. Guarda también el teléfono de tu embajada.",
 
     "footer.tagline": "Una guía de viaje completa por Estados Unidos: 50 estados, incontables historias, un viaje inolvidable.",
     "footer.regionsTitle": "Regiones",
@@ -548,6 +583,8 @@ const I18N = {
     "gallery.eyebrow": "旅途影像",
     "gallery.heading": "来自旅途的<br><em>瞬间</em>",
     "gallery.intro": "一份持续更新的旅途影像集「照片版权归GitHub @TGthms, (Tim G)所有，受 CC BY 4.0 协议保护 —— 注明作者后方可使用」",
+    "gallery.teaserBody": "海岸、桥梁、观景台与开阔公路——一部横跨美国旅途的影像手记。",
+    "gallery.teaserAria": "打开完整照片相册",
     "gallery.filterAll": "全部",
     "gallery.filterCityscapes": "城市风光",
     "gallery.filterLandmarks": "地标建筑",
@@ -556,22 +593,31 @@ const I18N = {
     "gallery.filterFoodCulture": "美食与文化",
     "gallery.filterRoads": "公路旅途",
     "gallery.emptyState": "该分类暂无照片——敬请期待",
-    "gallery.viewAll": "展开完整相册",
-    "gallery.viewLess": "收起相册",
-    "gallery.item.nyc1.caption": "纽约市",
-    "gallery.item.sf1.caption": "金门大桥",
+    "gallery.viewAll": "查看完整相册",
+    "gallery.backToGuide": "返回指南",
+    "gallery.pageIntro": "目前旅途中的每一站，按类别整理——旅程仍在继续，新照片会持续更新。",
+    "gallery.item.sfgoldengate.caption": "金门大桥",
+    "gallery.item.bixby.caption": "比克斯比大桥",
+    "gallery.item.carmel.caption": "海边卡梅尔小镇",
+    "gallery.item.garrapataview.caption": "加拉帕塔海滩观景台",
+    "gallery.item.garrapata.caption": "加拉帕塔海滩",
+    "gallery.item.granitecanyon.caption": "花岗岩峡谷大桥",
+    "gallery.item.hurricanepoint.caption": "飓风角",
+    "gallery.item.richmondbay.caption": "从里士满眺望旧金山湾",
+    "gallery.item.richmondpark.caption": "里士满区域公园",
+    "gallery.item.richmondview.caption": "里士满旧金山湾景",    "gallery.item.tmpdk2t3a5.caption": "Japantown",
 
     "settings.eyebrow": "偏好设置",
     "settings.heading": "打造<em>专属于你的体验</em>",
     "settings.intro": "偏好设置会保存在这台设备上",
     "settings.themeLabel": "主题",
     "settings.themeSub": "每个板块的配色，都会随你的选择而焕然一新。",
-    "settings.themeDefault": "海军蓝",
-    "settings.themeMinimal": "现代简约",
-    "settings.themeElegant": "经典优雅",
-    "settings.themeLuxury": "奢华旅行",
-    "settings.themeGlass": "玻璃拟态",
-    "settings.themeNature": "自然生态",
+    "settings.themeDefault": "午夜图集",
+    "settings.themeMinimal": "白日画廊",
+    "settings.themeElegant": "典藏纸页",
+    "settings.themeLuxury": "壮游金典",
+    "settings.themeGlass": "暮色玻璃",
+    "settings.themeNature": "野外手记",
     "settings.languageLabel": "多语言",
     "settings.languageSub": "选择你熟悉的语言",
     "settings.unitsLabel": "偏好设置",
@@ -591,7 +637,7 @@ const I18N = {
 
     "tools.eyebrow": "工具箱",
     "tools.heading": "更从容地<em>规划旅程</em>",
-    "tools.intro": "旅行快捷工具：实时汇率、世界时钟和小费+税率计算器",
+    "tools.intro": "汇率、时钟、小费、公路费用、销售税与紧急电话——一应俱全。",
     "tools.currencyLabel": "实时汇率换算",
     "tools.currencySub": "使用 Frankfurter 每日汇率",
     "tools.amount": "金额",
@@ -599,11 +645,31 @@ const I18N = {
     "tools.to": "到",
     "tools.clockLabel": "世界时钟",
     "tools.clockSub": "用于规划国内联络与行程安排",
-    "tools.tipLabel": "小费与税费估算",
-    "tools.tipSub": "快速估算账单总额。",
-    "tools.bill": "账单",
+    "tools.tipLabel": "小费与销售税",
+    "tools.tipSub": "餐厅或购物合计：选择任意美国州预填销售税，再加小费。",
+    "tools.bill": "金额 / 账单",
     "tools.tax": "税率 %",
     "tools.tip": "小费 %",
+    "tools.taxHint": "税率会按所选州自动填入（综合税率约数），可手动调整。",
+    "tools.driveLabel": "公路旅行费用",
+    "tools.driveSub": "汽油车或电动车的行驶时间与能源费用。",
+    "tools.driveDist": "距离",
+    "tools.driveSpeed": "平均速度",
+    "tools.driveMpg": "MPG / 升/百公里",
+    "tools.driveFuel": "油价 $/加仑 或 $/升",
+    "tools.driveGas": "汽油",
+    "tools.driveEv": "电动",
+    "tools.driveEvEcon": "英里/度 或 度/百公里",
+    "tools.driveEvPrice": "电价 $/度",
+    "tools.salesTaxState": "州",
+    "tools.emergencyLabel": "常用电话",
+    "tools.emergencySub": "在美国旅行时建议备好这些号码。",
+    "tools.em911": "紧急求助（警察、消防、救护）",
+    "tools.em511": "路况与交通信息（多数州）",
+    "tools.em988": "心理危机与自杀干预热线",
+    "tools.emPoison": "中毒控制中心",
+    "tools.em311": "非紧急市政服务（视城市而定）",
+    "tools.emNote": "仅在真正紧急时拨打 911。也请保存本国使领馆电话。",
 
     "footer.tagline": "一份关于美国的完整旅行指南——广袤之中，故事缓缓展开，成为一段值得铭记的旅程",
     "footer.regionsTitle": "五大地区",
@@ -853,6 +919,8 @@ const I18N = {
     "gallery.eyebrow": "フォトギャラリー",
     "gallery.heading": "旅の途中の<br><em>ワンシーン</em>",
     "gallery.intro": "旅の記録を集めたコレクション——カテゴリー別に整理され、旅が続く限り随時追加されます。",
+    "gallery.teaserBody": "海岸線、橋、展望台、そして開かれたハイウェイ——アメリカ横断の旅のフォトジャーナル。",
+    "gallery.teaserAria": "フォトギャラリーをすべて表示",
     "gallery.filterAll": "すべて",
     "gallery.filterCityscapes": "都市風景",
     "gallery.filterLandmarks": "ランドマーク",
@@ -862,21 +930,30 @@ const I18N = {
     "gallery.filterRoads": "ロード",
     "gallery.emptyState": "このカテゴリーの写真はまだありません。お楽しみに。",
     "gallery.viewAll": "ギャラリーをすべて表示",
-    "gallery.viewLess": "ギャラリーを閉じる",
-    "gallery.item.nyc1.caption": "ニューヨーク市",
-    "gallery.item.sf1.caption": "ゴールデンゲートブリッジ",
+    "gallery.backToGuide": "ガイドに戻る",
+    "gallery.pageIntro": "これまでの道中のすべての立ち寄り先をカテゴリー別に整理。旅の続きとともに新しい写真も追加されます。",
+    "gallery.item.sfgoldengate.caption": "ゴールデンゲートブリッジ",
+    "gallery.item.bixby.caption": "ビクスビー橋",
+    "gallery.item.carmel.caption": "カーメル・バイ・ザ・シー",
+    "gallery.item.garrapataview.caption": "ガラパタ・ビーチ展望台",
+    "gallery.item.garrapata.caption": "ガラパタ・ビーチ",
+    "gallery.item.granitecanyon.caption": "グラナイト・キャニオン橋",
+    "gallery.item.hurricanepoint.caption": "ハリケーン・ポイント",
+    "gallery.item.richmondbay.caption": "リッチモンドから見るSF湾",
+    "gallery.item.richmondpark.caption": "リッチモンド・リージョナル・パーク",
+    "gallery.item.richmondview.caption": "リッチモンドのSF湾の眺め",    "gallery.item.tmpdk2t3a5.caption": "Japantown",
 
     "settings.eyebrow": "パーソナライズ",
     "settings.heading": "自分だけの<em>旅のかたちに</em>",
     "settings.intro": "お好みのビジュアルテーマを選び、表示言語を切り替え、使い慣れた単位を設定できます。設定内容は、この端末に保存されます。",
     "settings.themeLabel": "テーマ",
     "settings.themeSub": "選んだ配色に合わせて、すべてのセクションの表情が変わります。",
-    "settings.themeDefault": "ネイビー＆ゴールド",
-    "settings.themeMinimal": "モダンミニマル",
-    "settings.themeElegant": "クラシックエレガント",
-    "settings.themeLuxury": "ラグジュアリートラベル",
-    "settings.themeGlass": "グラスモーフィズム",
-    "settings.themeNature": "ネイチャー／エコ",
+    "settings.themeDefault": "ミッドナイト・アトラス",
+    "settings.themeMinimal": "ギャラリー・デイライト",
+    "settings.themeElegant": "ヘリテージ・ペーパー",
+    "settings.themeLuxury": "グランドツアー",
+    "settings.themeGlass": "トワイライト・グラス",
+    "settings.themeNature": "フィールドノート",
     "settings.languageLabel": "言語",
     "settings.languageSub": "地域や都市の詳細情報を含め、ガイド全体を翻訳します。",
     "settings.unitsLabel": "単位設定",
@@ -896,7 +973,7 @@ const I18N = {
 
     "tools.eyebrow": "旅行ツール",
     "tools.heading": "安心して<em>旅を計画</em>",
-    "tools.intro": "為替、世界時計、レストラン合計をすばやく確認できます。",
+    "tools.intro": "為替、時計、チップ、ロードトリップ費用、売上税、緊急連絡先をまとめて。",
     "tools.currencyLabel": "ライブ通貨換算",
     "tools.currencySub": "Frankfurter の日次為替レートを使用",
     "tools.amount": "金額",
@@ -904,11 +981,31 @@ const I18N = {
     "tools.to": "換算先",
     "tools.clockLabel": "世界時計",
     "tools.clockSub": "通話、到着、チェックインの計画に便利な主要タイムゾーン。",
-    "tools.tipLabel": "チップ・税金計算",
-    "tools.tipSub": "米国レストランの合計額をすばやく見積もります。",
-    "tools.bill": "会計",
+    "tools.tipLabel": "チップと売上税",
+    "tools.tipSub": "レストランや買い物の合計。州を選んで売上税を自動入力し、チップを加算。",
+    "tools.bill": "金額 / 会計",
     "tools.tax": "税率 %",
     "tools.tip": "チップ %",
+    "tools.taxHint": "州を選ぶと税率が自動入力されます（概算）。必要なら調整できます。",
+    "tools.driveLabel": "ロードトリップ費用",
+    "tools.driveSub": "ガソリン車またはEVの走行時間とエネルギー費用。",
+    "tools.driveDist": "距離",
+    "tools.driveSpeed": "平均速度",
+    "tools.driveMpg": "MPG / L/100km",
+    "tools.driveFuel": "燃料 $/gal または $/L",
+    "tools.driveGas": "ガソリン",
+    "tools.driveEv": "EV",
+    "tools.driveEvEcon": "mi/kWh または kWh/100km",
+    "tools.driveEvPrice": "電気料金 $/kWh",
+    "tools.salesTaxState": "州",
+    "tools.emergencyLabel": "役立つ電話番号",
+    "tools.emergencySub": "米国旅行中に控えておくと安心です。",
+    "tools.em911": "緊急通報（警察・消防・救急）",
+    "tools.em511": "交通・道路状況（多くの州）",
+    "tools.em988": "自殺・危機ライフライン",
+    "tools.emPoison": "毒物管理センター",
+    "tools.em311": "非緊急の市サービス（地域による）",
+    "tools.emNote": "本当の緊急時のみ 911 へ。大使館の番号も保存しておきましょう。",
 
     "footer.tagline": "アメリカ合衆国を巡る完全ガイド——50の州、数えきれない物語、そして一生忘れられない旅の記憶。",
     "footer.regionsTitle": "地域",
@@ -953,12 +1050,36 @@ function applyLanguage(lang) {
   });
   document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : lang === 'es' ? 'es' : 'en');
   document.documentElement.setAttribute('data-lang', lang);
-  const titles = { en: 'America — A Travel Guide', es: 'América — Una Guía de Viaje', zh: '美国 — 旅行指南', ja: 'アメリカ — 旅行ガイド' };
+  // Keep page-specific titles (gallery mini-app vs main guide).
+  const onGallery = document.body.classList.contains('page-gallery');
+  const titles = onGallery
+    ? {
+        en: 'Photo Gallery — America, A Travel Guide',
+        es: 'Galería — América, Una Guía de Viaje',
+        zh: '相册 — 美国旅行指南',
+        ja: 'ギャラリー — アメリカ旅行ガイド'
+      }
+    : {
+        en: 'America — A Travel Guide',
+        es: 'América — Una Guía de Viaje',
+        zh: '美国 — 旅行指南',
+        ja: 'アメリカ — 旅行ガイド'
+      };
   document.title = titles[lang] || titles.en;
   applyUnits(); // re-stamp unit spans that may have been inside translated HTML
   if (currentModalKey) {
     const d = getModalData(currentModalKey);
     if (d) openModal(d.tag, d.title, d.body);
+  }
+  // Keep the Tools panel's live-generated text (clock, currency, tip) in the
+  // new language immediately, instead of waiting for the next input/tick.
+  const toolsEl = document.getElementById('toolsOverlay');
+  if (toolsEl && toolsEl.classList.contains('open')) {
+    if (typeof updateWorldClock === 'function') updateWorldClock();
+    if (typeof updateTipEstimator === 'function') updateTipEstimator();
+    if (typeof updateCurrency === 'function') updateCurrency();
+    if (typeof updateDriveCost === 'function') updateDriveCost();
+    if (typeof updateSalesTax === 'function') updateSalesTax();
   }
 }
 
@@ -988,6 +1109,8 @@ function applyUnits() {
       el.textContent = miFmt + (currentLang === 'zh' ? ' 英里' : currentLang === 'ja' ? ' マイル' : currentLang === 'es' ? ' mi' : ' mi') + suffix;
     }
   });
+  // Road-trip tool math depends on mi vs km economy units.
+  if (typeof updateDriveCost === 'function') updateDriveCost();
 }
 
 /* ── SAFE STORAGE ──
@@ -1001,18 +1124,107 @@ const safeStorage = {
     try { const v = localStorage.getItem(key); return v === null ? fallback : v; }
     catch (e) { return fallback; }
   },
+  /** True only when the user (or a prior session) has explicitly saved a value. */
+  has(key) {
+    try { return localStorage.getItem(key) !== null; }
+    catch (e) { return false; }
+  },
   set(key, value) {
     try { localStorage.setItem(key, value); } catch (e) { /* in-memory state still works */ }
   }
 };
 
-/* ── SETTINGS STATE ── */
-let currentTheme    = safeStorage.get('usa-travel-theme', 'default');
-let currentLang     = safeStorage.get('usa-travel-lang', 'en');
-let currentTempUnit = safeStorage.get('usa-travel-temp-unit', 'f');
-let currentDistUnit = safeStorage.get('usa-travel-dist-unit', 'mi');
-let reduceMotion         = safeStorage.get('usa-travel-reduce-motion', 'off') === 'on';
-let cursorEffectEnabled  = safeStorage.get('usa-travel-cursor-fx', 'on') !== 'off';
+/* ── FIRST-VISIT PREFERENCE DETECTION ──
+   Only used when a key has never been saved — once the visitor picks something
+   in Settings, that choice always wins. Safe, progressive, no network calls. */
+const SUPPORTED_LANGS = ['en', 'es', 'zh', 'ja'];
+
+function detectLanguage() {
+  const candidates = [];
+  if (Array.isArray(navigator.languages)) candidates.push(...navigator.languages);
+  if (navigator.language) candidates.push(navigator.language);
+  for (const raw of candidates) {
+    const tag = String(raw || '').toLowerCase().replace('_', '-');
+    if (!tag) continue;
+    // Chinese: zh, zh-CN, zh-TW, zh-Hans, etc.
+    if (tag === 'zh' || tag.startsWith('zh-')) return 'zh';
+    if (tag === 'ja' || tag.startsWith('ja-')) return 'ja';
+    if (tag === 'es' || tag.startsWith('es-')) return 'es';
+    if (tag === 'en' || tag.startsWith('en-')) return 'en';
+    // Primary subtag only (e.g. "pt-BR" → no match → keep scanning)
+    const primary = tag.split('-')[0];
+    if (SUPPORTED_LANGS.includes(primary)) return primary;
+  }
+  return 'en';
+}
+
+function detectTheme() {
+  try {
+    if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'minimal';
+  } catch (e) { /* ignore */ }
+  return 'default';
+}
+
+function detectUnits() {
+  // Prefer full locale region when available (en-GB → metric, en-US → imperial).
+  const locales = [];
+  if (Array.isArray(navigator.languages)) locales.push(...navigator.languages);
+  if (navigator.language) locales.push(navigator.language);
+  let region = '';
+  for (const loc of locales) {
+    const parts = String(loc || '').replace('_', '-').split('-');
+    if (parts.length >= 2 && parts[1].length === 2) {
+      region = parts[1].toUpperCase();
+      break;
+    }
+  }
+  // Countries that primarily use US customary units for everyday distance/temp.
+  const imperialRegions = new Set(['US', 'LR', 'MM']);
+  const imperial = imperialRegions.has(region);
+  return { temp: imperial ? 'f' : 'c', dist: imperial ? 'mi' : 'km' };
+}
+
+function detectReduceMotionDefault() {
+  try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  catch (e) { return false; }
+}
+
+function detectCursorDefault() {
+  // No trail on touch-first / no-hover devices (phones, most tablets, watch).
+  try {
+    if (window.matchMedia('(hover: none)').matches) return false;
+    if (window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(pointer: fine)').matches) return false;
+  } catch (e) { /* ignore */ }
+  return true;
+}
+
+/* ── SETTINGS STATE ──
+   Saved preference → use it. Never saved → detect from the environment. */
+const detectedUnits = detectUnits();
+let currentTheme    = safeStorage.has('usa-travel-theme')
+  ? safeStorage.get('usa-travel-theme', 'default')
+  : detectTheme();
+let currentLang     = safeStorage.has('usa-travel-lang')
+  ? safeStorage.get('usa-travel-lang', 'en')
+  : detectLanguage();
+let currentTempUnit = safeStorage.has('usa-travel-temp-unit')
+  ? safeStorage.get('usa-travel-temp-unit', 'f')
+  : detectedUnits.temp;
+let currentDistUnit = safeStorage.has('usa-travel-dist-unit')
+  ? safeStorage.get('usa-travel-dist-unit', 'mi')
+  : detectedUnits.dist;
+let reduceMotion = safeStorage.has('usa-travel-reduce-motion')
+  ? safeStorage.get('usa-travel-reduce-motion', 'off') === 'on'
+  : detectReduceMotionDefault();
+let cursorEffectEnabled = safeStorage.has('usa-travel-cursor-fx')
+  ? safeStorage.get('usa-travel-cursor-fx', 'on') !== 'off'
+  : detectCursorDefault();
+
+// Guard against corrupt storage values
+if (!['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'].includes(currentTheme)) currentTheme = 'default';
+if (!SUPPORTED_LANGS.includes(currentLang)) currentLang = 'en';
+if (currentTempUnit !== 'f' && currentTempUnit !== 'c') currentTempUnit = 'f';
+if (currentDistUnit !== 'mi' && currentDistUnit !== 'km') currentDistUnit = 'mi';
 
 document.documentElement.setAttribute('data-theme', currentTheme);
 document.documentElement.setAttribute('data-reduce-motion', reduceMotion ? 'true' : 'false');
@@ -1029,15 +1241,31 @@ const themeSwatches = document.querySelectorAll('.theme-swatch');
 function updateThemeUI(theme) {
   themeSwatches.forEach(sw => sw.classList.toggle('active', sw.dataset.themeVal === theme));
 }
+const THEME_META_COLORS = {
+  default: '#07101c',
+  minimal: '#f7f6f3',
+  elegant: '#f6f1e8',
+  luxury: '#0c0c0c',
+  glass: '#0b1424',
+  nature: '#141c18'
+};
+function applyThemeChrome(theme) {
+  const light = theme === 'minimal' || theme === 'elegant';
+  document.documentElement.style.colorScheme = light ? 'light' : 'dark';
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', THEME_META_COLORS[theme] || THEME_META_COLORS.default);
+}
 themeSwatches.forEach(sw => {
   sw.addEventListener('click', () => {
     currentTheme = sw.dataset.themeVal;
     document.documentElement.setAttribute('data-theme', currentTheme);
     safeStorage.set('usa-travel-theme', currentTheme);
     updateThemeUI(currentTheme);
+    applyThemeChrome(currentTheme);
   });
 });
 updateThemeUI(currentTheme);
+applyThemeChrome(currentTheme);
 
 /* ── LANGUAGE PILLS ── */
 const langPills = document.querySelectorAll('#langPillGroup .pill-btn');
@@ -1050,7 +1278,6 @@ langPills.forEach(p => {
     safeStorage.set('usa-travel-lang', currentLang);
     updateLangUI(currentLang);
     applyLanguage(currentLang);
-    updateGalleryToggle();
   });
 });
 updateLangUI(currentLang);
@@ -1086,12 +1313,22 @@ motionPills.forEach(p => p.addEventListener('click', () => {
   safeStorage.set('usa-travel-reduce-motion', reduceMotion ? 'on' : 'off');
   document.documentElement.setAttribute('data-reduce-motion', reduceMotion ? 'true' : 'false');
   updateMotionUI();
+  // Cursor trail also respects reduced motion — keep its canvas state in sync.
+  if (typeof updateCursorUI === 'function') updateCursorUI();
 }));
 updateMotionUI();
 
 const cursorPills = document.querySelectorAll('#cursorPillGroup .pill-btn');
 function updateCursorUI() {
   cursorPills.forEach(p => p.classList.toggle('active', p.dataset.cursorVal === (cursorEffectEnabled ? 'on' : 'off')));
+  // Keep the overlay canvas in sync so disabling the trail takes effect
+  // immediately (including when reduced-motion is on).
+  const cursorCanvasEl = document.getElementById('cursorCanvas');
+  if (cursorCanvasEl) {
+    const off = !cursorEffectEnabled || motionActive();
+    cursorCanvasEl.classList.toggle('is-disabled', off);
+    cursorCanvasEl.setAttribute('aria-hidden', off ? 'true' : 'false');
+  }
 }
 cursorPills.forEach(p => p.addEventListener('click', () => {
   cursorEffectEnabled = p.dataset.cursorVal === 'on';
@@ -1099,90 +1336,211 @@ cursorPills.forEach(p => p.addEventListener('click', () => {
   updateCursorUI();
 }));
 updateCursorUI();
+// If the OS reduced-motion preference flips mid-session, restyle the canvas.
+if (typeof prefersReducedMotionMQ.addEventListener === 'function') {
+  prefersReducedMotionMQ.addEventListener('change', updateCursorUI);
+} else if (typeof prefersReducedMotionMQ.addListener === 'function') {
+  prefersReducedMotionMQ.addListener(updateCursorUI);
+}
 
 /* ── UTILITY: GET CSS VARIABLE ── */
 function getCssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#e8a435';
 }
 
+// Sizes a canvas's backing store to the device pixel ratio so drawing stays
+// crisp on Retina / HiDPI / 4K+ screens instead of looking soft/blurry, while
+// letting the rest of the drawing code keep working in plain CSS-pixel units.
+// Capped at 3x so very-high-DPR mobile panels don't allocate huge buffers.
+// Explicit CSS width/height keep clientX/clientY coordinates aligned with the
+// drawing buffer after the bitmap is scaled up for DPR.
+function fitCanvasToDPR(canvas, ctx) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const cssW = window.innerWidth;
+  const cssH = window.innerHeight;
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { width: cssW, height: cssH };
+}
+
+// Throttles a resize handler to at most once per animation frame so live
+// window drag-resizing doesn't repeatedly reallocate canvas buffers.
+function onResizeRAF(fn) {
+  let pending = false;
+  window.addEventListener('resize', () => {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => { fn(); pending = false; });
+  }, { passive: true });
+}
+
 /* ── PROGRESS BAR ── */
 const progressBar = document.getElementById('progress-bar');
 window.addEventListener('scroll', () => {
+  if (!progressBar) return;
   const h = document.documentElement;
-  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  const scrollable = h.scrollHeight - h.clientHeight;
+  // Guard against div-by-zero: on very large / short-content viewports (e.g. TVs,
+  // zoomed-out desktops) the page may not scroll at all, so scrollable can be 0.
+  const pct = scrollable > 0 ? (h.scrollTop / scrollable) * 100 : 0;
   progressBar.style.width = pct + '%';
 }, { passive: true });
 
-/* ── CURSOR TRAIL (Performance/Touch Fixed) ── */
+/* ── CURSOR TRAIL ──
+   Fine-pointer desktops only. Spawns particles only while the cursor is
+   actually moving (not a stationary fountain), keeps CSS/bitmap size in
+   lockstep for correct coordinates, and hard-caps particle count. */
 (function() {
-  // Disable on touch devices
-  if (window.matchMedia("(pointer: coarse)").matches) return;
-
   const c = document.getElementById('cursorCanvas');
-  const ctx = c.getContext('2d');
+  if (!c) return;
+
+  // Prefer devices that can hover with a fine pointer (mice / trackpads).
+  // pointer:coarse alone is wrong on hybrid convertibles that report both.
+  const canHoverFine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (!canHoverFine) {
+    c.classList.add('is-disabled');
+    c.setAttribute('aria-hidden', 'true');
+    return;
+  }
+
+  const ctx = c.getContext('2d', { alpha: true });
+  if (!ctx) return;
+
   const particles = [];
+  const MAX_PARTICLES = 48;
   let mx = -999, my = -999;
+  let prevX = -999, prevY = -999;
   let isMouseIn = false;
+  let movedThisFrame = false;
+  let cssW = 0, cssH = 0;
+  let rafId = 0;
+  let running = false;
 
-  function resize() { c.width = window.innerWidth; c.height = window.innerHeight; }
+  function resize() { ({ width: cssW, height: cssH } = fitCanvasToDPR(c, ctx)); }
   resize();
-  window.addEventListener('resize', resize);
-  
-  window.addEventListener('mousemove', e => { 
-    mx = e.clientX; my = e.clientY; 
-    isMouseIn = true;
-  }, { passive: true });
-  
-  window.addEventListener('mouseleave', () => { isMouseIn = false; });
-  window.addEventListener('blur', () => { isMouseIn = false; }); // tab switch fix
+  onResizeRAF(resize);
 
-  let frame = 0;
+  document.addEventListener('pointermove', e => {
+    // Ignore touch/pen so hybrid tablets don't paint trails from finger pans.
+    if (e.pointerType && e.pointerType !== 'mouse') return;
+    mx = e.clientX;
+    my = e.clientY;
+    isMouseIn = true;
+    // Only treat as "moving" when the cursor actually traveled a pixel.
+    if (Math.abs(mx - prevX) > 0.5 || Math.abs(my - prevY) > 0.5) {
+      movedThisFrame = true;
+      prevX = mx;
+      prevY = my;
+    }
+    if (!running && cursorEffectEnabled && !motionActive()) startLoop();
+  }, { passive: true });
+
+  // window/document "mouseleave" is unreliable; relatedTarget null means the
+  // pointer left the document (to chrome / another app).
+  document.addEventListener('mouseout', e => {
+    if (!e.relatedTarget && !e.toElement) {
+      isMouseIn = false;
+      movedThisFrame = false;
+    }
+  });
+  document.documentElement.addEventListener('mouseleave', () => {
+    isMouseIn = false;
+    movedThisFrame = false;
+  });
+  window.addEventListener('blur', () => {
+    isMouseIn = false;
+    movedThisFrame = false;
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      isMouseIn = false;
+      movedThisFrame = false;
+      particles.length = 0;
+      ctx.clearRect(0, 0, cssW, cssH);
+    }
+  });
+
+  function startLoop() {
+    if (running) return;
+    running = true;
+    rafId = requestAnimationFrame(tick);
+  }
+  function stopLoop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+    ctx.clearRect(0, 0, cssW, cssH);
+  }
+
   function tick() {
-    requestAnimationFrame(tick);
-    frame++;
-    ctx.clearRect(0, 0, c.width, c.height);
+    if (!running) return;
+    rafId = requestAnimationFrame(tick);
+    ctx.clearRect(0, 0, cssW, cssH);
 
     // Respect the "Cursor Trail" Settings toggle and reduced-motion preference.
-    // Bail out early (after clearing) so a disable takes effect on the very
-    // next frame instead of waiting for existing particles to fade out.
     if (!cursorEffectEnabled || motionActive()) {
       if (particles.length) particles.length = 0;
+      stopLoop();
       return;
     }
 
-    // Dynamically fetch theme accent color
     const themeAccent = getCssVar('--accent-1');
 
-    if (frame % 2 === 0 && isMouseIn) {
-      particles.push({
-        x: mx + (Math.random() - .5) * 6,
-        y: my + (Math.random() - .5) * 6,
-        vx: (Math.random() - .5) * 0.6,
-        vy: -Math.random() * 1.2 - 0.3,
-        life: 1,
-        size: Math.random() * 3 + 1,
-        color: themeAccent // Storing current theme color
-      });
+    // Emit only while the pointer is moving — a trail, not a stationary blob.
+    if (isMouseIn && movedThisFrame) {
+      const burst = particles.length < MAX_PARTICLES / 2 ? 2 : 1;
+      for (let n = 0; n < burst; n++) {
+        if (particles.length >= MAX_PARTICLES) break;
+        particles.push({
+          x: mx + (Math.random() - 0.5) * 8,
+          y: my + (Math.random() - 0.5) * 8,
+          vx: (Math.random() - 0.5) * 0.7,
+          vy: -Math.random() * 1.1 - 0.25,
+          life: 1,
+          size: Math.random() * 2.8 + 1.2,
+          color: themeAccent
+        });
+      }
+      movedThisFrame = false;
     }
+
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
-      p.x += p.vx; p.y += p.vy;
-      p.life -= 0.035;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.01; // tiny drift so the trail feels airy
+      p.life -= 0.038;
       if (p.life <= 0) { particles.splice(i, 1); continue; }
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-      ctx.globalAlpha = p.life * 0.6;
-      ctx.fillStyle = p.color; 
+      ctx.globalAlpha = p.life * 0.55;
+      ctx.fillStyle = p.color;
       ctx.fill();
     }
     ctx.globalAlpha = 1;
+
+    // Idle with nothing left to draw — pause the RAF loop until next move.
+    if (!particles.length && !movedThisFrame) {
+      stopLoop();
+    }
   }
-  tick();
+
+  // Kick once if the trail is enabled so resize state is warm.
+  if (cursorEffectEnabled && !motionActive()) {
+    // Loop starts on first pointermove; keep canvas ready and visible.
+    c.classList.remove('is-disabled');
+  }
 })();
 
 /* ── DOT MAP (Theme Aware) ── */
 (function() {
+  // Only present in the homepage hero — other pages (e.g. gallery.html) that
+  // share this script simply don't have this canvas, so bail out quietly.
   const canvas = document.getElementById('dotMap');
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const dots = [];
   let W, H, needRebuild = true;
@@ -1224,19 +1582,17 @@ window.addEventListener('scroll', () => {
   }
 
   function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
+    ({ width: W, height: H } = fitCanvasToDPR(canvas, ctx));
     needRebuild = true;
   }
   resize();
-  window.addEventListener('resize', () => { resize(); }, { passive: true });
+  onResizeRAF(resize);
 
   let t0 = null;
   function draw(ts) {
     if (needRebuild) buildDots();
     if (!t0) t0 = ts;
     const elapsed = (ts - t0) / 1000;
-    W = canvas.width; H = canvas.height;
     ctx.clearRect(0, 0, W, H);
     const mw = W * .65, mh = H * .58, mx2 = W * .16, my2 = H * .16;
     
@@ -1261,15 +1617,37 @@ window.addEventListener('scroll', () => {
 const navbar = document.getElementById('navbar');
 const sections = document.querySelectorAll('section[id]:not(#settings):not(#tools)');
 const navLinks = document.querySelectorAll('.nav-links a[data-section]');
+const isGalleryPage = document.body.classList.contains('page-gallery');
 
 window.addEventListener('scroll', () => {
   const y = window.scrollY;
-  navbar.classList.toggle('scrolled', y > 60);
+  if (navbar) navbar.classList.toggle('scrolled', y > 60);
+
+  // Full photo page: keep Gallery highlighted (only real content section).
+  if (isGalleryPage) {
+    navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === 'gallery'));
+    return;
+  }
 
   let current = '';
   sections.forEach(s => { if (y >= s.offsetTop - 200) current = s.id; });
+  // Homepage teaser uses id="gallery" — highlight Gallery while it's in view.
   navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === current));
 }, { passive: true });
+
+// Initial paint (e.g. gallery page load, deep-linked homepage section)
+if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 60);
+if (isGalleryPage) {
+  navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === 'gallery'));
+}
+
+/* ── HOMEPAGE-ONLY FEATURES ──
+   Everything below (hero parallax, regions carousel, destinations carousel
+   + favorites + filtering) only exists on the homepage. This script is
+   shared with other pages (e.g. gallery.html) that reuse the same header,
+   settings/tools dialogs, and gallery/lightbox further down — so this whole
+   block is skipped there instead of throwing on missing elements. */
+if (document.getElementById('hero')) {
 
 /* ── PARALLAX ── */
 const heroBg  = document.getElementById('heroBg');
@@ -1346,6 +1724,10 @@ function toggleFavorite(btn) {
     applyDestFilter('saved');
   }
 }
+// Called from an inline onclick="" attribute in the HTML, which resolves
+// names against the global scope — 'use strict' means a function declared
+// inside this if-block would otherwise NOT be reachable from there.
+window.toggleFavorite = toggleFavorite;
 syncFavoriteButtons();
 persistFavorites(); // paints the initial count without re-writing storage unnecessarily
 
@@ -1413,7 +1795,9 @@ btnRight.addEventListener('click', () => {
 });
 destTrack.addEventListener('scroll', updateCarouselBtns, {passive: true});
 // Initial check
-setTimeout(updateCarouselBtns, 500); 
+setTimeout(updateCarouselBtns, 500);
+
+} // end homepage-only guard (if #hero present)
 
 /* ── SCROLL REVEAL ── */
 const allReveal = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
@@ -1448,124 +1832,211 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
-/* ── HAMBURGER ── */
+/* ── HAMBURGER (main guide only — gallery mini-app has no mobile drawer) ── */
 const hamburger = document.getElementById('hamburger');
 const navMobile = document.getElementById('navMobile');
-hamburger.addEventListener('click', () => {
-  const willOpen = !hamburger.classList.contains('open');
-  if (willOpen) {
-    lockSettingsBackground();
-    hamburger.classList.add('open');
-    navMobile.classList.add('open');
-  } else {
-    hamburger.classList.remove('open');
-    navMobile.classList.remove('open');
-    unlockSettingsBackground();
-  }
-  hamburger.setAttribute('aria-expanded', String(willOpen));
-});
+if (hamburger && navMobile) {
+  hamburger.addEventListener('click', () => {
+    const willOpen = !hamburger.classList.contains('open');
+    if (willOpen) {
+      lockBodyScroll();
+      hamburger.classList.add('open');
+      navMobile.classList.add('open');
+    } else {
+      hamburger.classList.remove('open');
+      navMobile.classList.remove('open');
+      unlockBodyScroll();
+    }
+    hamburger.setAttribute('aria-expanded', String(willOpen));
+  });
+}
 
 function closeMobileNav() {
+  if (!hamburger || !navMobile) return;
   const wasOpen = navMobile.classList.contains('open');
   navMobile.classList.remove('open');
   hamburger.classList.remove('open');
   hamburger.setAttribute('aria-expanded', 'false');
-  if (wasOpen) unlockSettingsBackground();
+  if (wasOpen) unlockBodyScroll();
 }
 
 /* ── SETTINGS DIALOG ── */
 const settingsOverlay = document.getElementById('settingsOverlay');
 const settingsOpenBtn = document.getElementById('settingsOpen');
-const mobileSettingsBtn = document.getElementById('mobileSettingsBtn');
+const mobileSettingsBtn = document.getElementById('mobileSettingsBtn'); // may be null on gallery mini-app
 const settingsCloseBtn = document.getElementById('settingsClose');
 let lastSettingsTrigger = null;
-let settingsScrollY = 0;
+// Nested-safe scroll lock: mobile nav, settings, tools, modals, and the
+// lightbox all share this so opening one over another never resets scroll to 0
+// or leaves body permanently fixed.
+let scrollLockCount = 0;
+let lockedScrollY = 0;
 
-function lockSettingsBackground() {
-  settingsScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-  document.body.style.position = 'fixed';
-  document.body.style.top = `-${settingsScrollY}px`;
-  document.body.style.left = '0';
-  document.body.style.right = '0';
-  document.body.style.width = '100%';
-  document.body.style.overflow = 'hidden';
+function lockBodyScroll() {
+  if (scrollLockCount === 0) {
+    lockedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+    // Prevent iOS rubber-band from fighting the lock.
+    document.documentElement.style.overflow = 'hidden';
+  }
+  scrollLockCount++;
 }
 
-function unlockSettingsBackground() {
+function unlockBodyScroll() {
+  scrollLockCount = Math.max(0, scrollLockCount - 1);
+  if (scrollLockCount > 0) return;
+  const y = lockedScrollY;
+  const html = document.documentElement;
+  // Force instant scroll BEFORE releasing body lock — otherwise CSS
+  // `scroll-behavior: smooth` animates from the top to the saved offset.
+  const prevInline = html.style.scrollBehavior;
+  html.style.scrollBehavior = 'auto';
+  html.classList.add('scroll-instant');
+
   document.body.style.position = '';
   document.body.style.top = '';
   document.body.style.left = '';
   document.body.style.right = '';
   document.body.style.width = '';
   document.body.style.overflow = '';
-  window.scrollTo(0, settingsScrollY);
+  html.style.overflow = '';
+
+  if (typeof window.scrollTo === 'function') {
+    try {
+      window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+    } catch (e) {
+      window.scrollTo(0, y);
+    }
+  } else {
+    html.scrollTop = y;
+    document.body.scrollTop = y;
+  }
+
+  // Restore smooth anchors on the next frame (after paint settles).
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      html.style.scrollBehavior = prevInline;
+      html.classList.remove('scroll-instant');
+    });
+  });
 }
 
 function openSettings(trigger) {
-  if (settingsOverlay.classList.contains('open')) return;
+  if (!settingsOverlay || settingsOverlay.classList.contains('open')) return;
+  if (toolsOverlay && toolsOverlay.classList.contains('open')) closeTools();
+  // Don't open settings over an open lightbox — close it first so scroll lock stays sane.
+  if (typeof closeLightbox === 'function' && document.getElementById('lightbox')?.classList.contains('open')) {
+    closeLightbox();
+  }
   lastSettingsTrigger = trigger || document.activeElement;
   closeMobileNav();
-  lockSettingsBackground();
+  lockBodyScroll();
   settingsOverlay.classList.add('open');
   settingsOverlay.setAttribute('aria-hidden', 'false');
   settingsOverlay.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
-  setTimeout(() => settingsCloseBtn.focus(), 100);
+  if (settingsCloseBtn) setTimeout(() => settingsCloseBtn.focus(), 100);
 }
 
 function closeSettings() {
-  if (!settingsOverlay.classList.contains('open')) return;
+  if (!settingsOverlay || !settingsOverlay.classList.contains('open')) return;
+  const restoreY = lockedScrollY;
   settingsOverlay.classList.remove('open');
   settingsOverlay.setAttribute('aria-hidden', 'true');
-  unlockSettingsBackground();
-  if (lastSettingsTrigger && typeof lastSettingsTrigger.focus === 'function') lastSettingsTrigger.focus();
+  unlockBodyScroll();
+  if (lastSettingsTrigger && typeof lastSettingsTrigger.focus === 'function') {
+    try { lastSettingsTrigger.focus({ preventScroll: true }); }
+    catch (e) { lastSettingsTrigger.focus(); }
+  }
+  try { window.scrollTo({ top: restoreY, left: 0, behavior: 'instant' }); }
+  catch (e) { window.scrollTo(0, restoreY); }
 }
 
-settingsOpenBtn.addEventListener('click', () => openSettings(settingsOpenBtn));
-mobileSettingsBtn.addEventListener('click', () => openSettings(mobileSettingsBtn));
-settingsCloseBtn.addEventListener('click', closeSettings);
-settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverlay) closeSettings(); });
+if (settingsOpenBtn) settingsOpenBtn.addEventListener('click', () => openSettings(settingsOpenBtn));
+if (mobileSettingsBtn) mobileSettingsBtn.addEventListener('click', () => openSettings(mobileSettingsBtn));
+if (settingsCloseBtn) settingsCloseBtn.addEventListener('click', closeSettings);
+if (settingsOverlay) settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverlay) closeSettings(); });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && settingsOverlay.classList.contains('open')) closeSettings();
+  if (e.key === 'Escape' && settingsOverlay && settingsOverlay.classList.contains('open')) closeSettings();
 });
 
 
 /* ── TRAVEL TOOLS DIALOG ── */
 const toolsOverlay = document.getElementById('toolsOverlay');
 const toolsOpenBtn = document.getElementById('toolsOpen');
-const mobileToolsBtn = document.getElementById('mobileToolsBtn');
+const mobileToolsBtn = document.getElementById('mobileToolsBtn'); // may be null on gallery mini-app
 const toolsCloseBtn = document.getElementById('toolsClose');
 let lastToolsTrigger = null;
 
 function openTools(trigger) {
-  if (toolsOverlay.classList.contains('open')) return;
-  if (settingsOverlay.classList.contains('open')) closeSettings();
+  if (!toolsOverlay || toolsOverlay.classList.contains('open')) return;
+  if (settingsOverlay && settingsOverlay.classList.contains('open')) closeSettings();
+  if (typeof closeLightbox === 'function' && document.getElementById('lightbox')?.classList.contains('open')) {
+    closeLightbox();
+  }
   lastToolsTrigger = trigger || document.activeElement;
   closeMobileNav();
-  lockSettingsBackground();
+  lockBodyScroll();
   toolsOverlay.classList.add('open');
   toolsOverlay.setAttribute('aria-hidden', 'false');
   toolsOverlay.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
   updateWorldClock();
   updateTipEstimator();
   updateCurrency();
-  setTimeout(() => toolsCloseBtn.focus(), 100);
+  if (typeof updateDriveCost === 'function') updateDriveCost();
+  if (typeof updateSalesTax === 'function') updateSalesTax();
+  if (worldClockInterval) clearInterval(worldClockInterval);
+  worldClockInterval = setInterval(updateWorldClock, 30000);
+  if (toolsCloseBtn) setTimeout(() => toolsCloseBtn.focus(), 100);
 }
 
 function closeTools() {
-  if (!toolsOverlay.classList.contains('open')) return;
+  if (!toolsOverlay || !toolsOverlay.classList.contains('open')) return;
+  const restoreY = lockedScrollY;
   toolsOverlay.classList.remove('open');
   toolsOverlay.setAttribute('aria-hidden', 'true');
-  unlockSettingsBackground();
-  if (lastToolsTrigger && typeof lastToolsTrigger.focus === 'function') lastToolsTrigger.focus();
+  unlockBodyScroll();
+  if (worldClockInterval) { clearInterval(worldClockInterval); worldClockInterval = null; }
+  if (lastToolsTrigger && typeof lastToolsTrigger.focus === 'function') {
+    try { lastToolsTrigger.focus({ preventScroll: true }); }
+    catch (e) { lastToolsTrigger.focus(); }
+  }
+  try { window.scrollTo({ top: restoreY, left: 0, behavior: 'instant' }); }
+  catch (e) { window.scrollTo(0, restoreY); }
 }
 
-toolsOpenBtn.addEventListener('click', () => openTools(toolsOpenBtn));
-mobileToolsBtn.addEventListener('click', () => openTools(mobileToolsBtn));
-toolsCloseBtn.addEventListener('click', closeTools);
-toolsOverlay.addEventListener('click', e => { if (e.target === toolsOverlay) closeTools(); });
+if (toolsOpenBtn) toolsOpenBtn.addEventListener('click', () => openTools(toolsOpenBtn));
+if (mobileToolsBtn) mobileToolsBtn.addEventListener('click', () => openTools(mobileToolsBtn));
+if (toolsCloseBtn) toolsCloseBtn.addEventListener('click', closeTools);
+if (toolsOverlay) toolsOverlay.addEventListener('click', e => { if (e.target === toolsOverlay) closeTools(); });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && toolsOverlay.classList.contains('open')) closeTools();
+  if (e.key === 'Escape' && toolsOverlay && toolsOverlay.classList.contains('open')) closeTools();
 });
+
+// Dynamic UI strings for the Tools panel (currency converter, tip estimator,
+// world clock). These are generated at runtime rather than sitting in static
+// HTML, so they need their own small translation table alongside the main
+// I18N dictionary — this keeps the Tools panel fully localized instead of
+// silently staying in English when another language is selected.
+const TOOLS_TEXT = {
+  en: { sameCurrency: 'Same currency selected.', updating: 'Updating...', fetching: 'Fetching latest available daily rate.', rateUnavailable: 'Rate unavailable', checkConnection: 'Check your connection and try again.', tax: 'Tax', tip: 'Tip',
+    driveGal: 'gal', driveL: 'L', salesTaxZero: 'No statewide sales tax (local may apply).',
+    cities: { 'Los Angeles': 'Los Angeles', 'New York': 'New York', 'London': 'London', 'Paris': 'Paris', 'Tokyo': 'Tokyo', 'Shanghai': 'Shanghai' } },
+  es: { sameCurrency: 'Misma divisa seleccionada.', updating: 'Actualizando…', fetching: 'Obteniendo el último tipo de cambio diario disponible.', rateUnavailable: 'Tipo de cambio no disponible', checkConnection: 'Comprueba tu conexión e inténtalo de nuevo.', tax: 'Impuesto', tip: 'Propina',
+    driveGal: 'gal', driveL: 'L', salesTaxZero: 'Sin impuesto estatal de ventas (puede haber impuestos locales).',
+    cities: { 'Los Angeles': 'Los Ángeles', 'New York': 'Nueva York', 'London': 'Londres', 'Paris': 'París', 'Tokyo': 'Tokio', 'Shanghai': 'Shanghái' } },
+  zh: { sameCurrency: '已选择相同货币。', updating: '更新中…', fetching: '正在获取最新每日汇率。', rateUnavailable: '汇率不可用', checkConnection: '请检查网络连接后重试。', tax: '税费', tip: '小费',
+    driveGal: '加仑', driveL: '升', salesTaxZero: '该州无州销售税（可能仍有地方税）。',
+    cities: { 'Los Angeles': '洛杉矶', 'New York': '纽约', 'London': '伦敦', 'Paris': '巴黎', 'Tokyo': '东京', 'Shanghai': '上海' } },
+  ja: { sameCurrency: '同じ通貨が選択されています。', updating: '更新中…', fetching: '最新の為替レートを取得しています。', rateUnavailable: 'レートを取得できません', checkConnection: '接続を確認して再度お試しください。', tax: '税金', tip: 'チップ',
+    driveGal: 'ガロン', driveL: 'L', salesTaxZero: '州の売上税はありません（地方税がかかる場合あり）。',
+    cities: { 'Los Angeles': 'ロサンゼルス', 'New York': 'ニューヨーク', 'London': 'ロンドン', 'Paris': 'パリ', 'Tokyo': '東京', 'Shanghai': '上海' } },
+};
+function toolsText() { return TOOLS_TEXT[currentLang] || TOOLS_TEXT.en; }
 
 const currencyAmount = document.getElementById('currencyAmount');
 const currencyFrom = document.getElementById('currencyFrom');
@@ -1581,18 +2052,20 @@ function moneyFmt(value, currency) {
 }
 
 async function updateCurrency() {
+  if (!currencyAmount || !currencyFrom || !currencyTo || !currencyResult) return;
   const amount = Math.max(0, Number(currencyAmount.value) || 0);
   const base = currencyFrom.value;
   const quote = currencyTo.value;
+  const t = toolsText();
   if (base === quote) {
     currencyResult.textContent = `${moneyFmt(amount, base)} = ${moneyFmt(amount, quote)}`;
-    currencyMeta.textContent = 'Same currency selected.';
+    currencyMeta.textContent = t.sameCurrency;
     return;
   }
   if (currencyAbort) currencyAbort.abort();
   currencyAbort = new AbortController();
-  currencyResult.textContent = 'Updating...';
-  currencyMeta.textContent = 'Fetching latest available daily rate.';
+  currencyResult.textContent = t.updating;
+  currencyMeta.textContent = t.fetching;
   try {
     const res = await fetch(`https://api.frankfurter.dev/v2/rate/${base}/${quote}`, { signal: currencyAbort.signal });
     if (!res.ok) throw new Error('Rate unavailable');
@@ -1602,49 +2075,198 @@ async function updateCurrency() {
     currencyMeta.textContent = `1 ${base} = ${Number(data.rate).toFixed(4)} ${quote}${data.date ? ` · ${data.date}` : ''}`;
   } catch (err) {
     if (err.name === 'AbortError') return;
-    currencyResult.textContent = 'Rate unavailable';
-    currencyMeta.textContent = 'Check your connection and try again.';
+    currencyResult.textContent = t.rateUnavailable;
+    currencyMeta.textContent = t.checkConnection;
   }
 }
 
-[currencyAmount, currencyFrom, currencyTo].forEach(el => el.addEventListener('input', updateCurrency));
-[currencyFrom, currencyTo].forEach(el => el.addEventListener('change', updateCurrency));
-currencySwap.addEventListener('click', () => {
-  const from = currencyFrom.value;
-  currencyFrom.value = currencyTo.value;
-  currencyTo.value = from;
-  updateCurrency();
+[currencyAmount, currencyFrom, currencyTo].forEach(el => {
+  if (el) el.addEventListener('input', updateCurrency);
 });
+[currencyFrom, currencyTo].forEach(el => {
+  if (el) el.addEventListener('change', updateCurrency);
+});
+if (currencySwap) {
+  currencySwap.addEventListener('click', () => {
+    const from = currencyFrom.value;
+    currencyFrom.value = currencyTo.value;
+    currencyTo.value = from;
+    updateCurrency();
+  });
+}
 
 const worldClockList = document.getElementById('worldClockList');
 const CLOCK_ZONES = [
   ['Los Angeles', 'America/Los_Angeles'], ['New York', 'America/New_York'], ['London', 'Europe/London'], ['Paris', 'Europe/Paris'], ['Tokyo', 'Asia/Tokyo'], ['Shanghai', 'Asia/Shanghai']
 ];
 function updateWorldClock() {
+  if (!worldClockList) return;
   const locale = currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : 'en-US';
+  const cities = toolsText().cities;
   worldClockList.innerHTML = CLOCK_ZONES.map(([city, zone]) => {
     const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: currentLang === 'en', timeZone: zone }).format(new Date());
-    return `<div class="clock-row"><div><div class="clock-city">${city}</div><div class="clock-zone">${zone.replace('_', ' ')}</div></div><div class="clock-time">${time}</div></div>`;
+    return `<div class="clock-row"><div><div class="clock-city">${cities[city] || city}</div><div class="clock-zone">${zone.replace('_', ' ')}</div></div><div class="clock-time">${time}</div></div>`;
   }).join('');
 }
-updateWorldClock();
-setInterval(updateWorldClock, 30000);
+// The clock only needs to tick while the Tools panel is actually visible —
+// starting/stopping the interval with the dialog avoids a timer running for
+// the entire session (and doing DOM work) when nobody can see it.
+let worldClockInterval = null;
+
+/* Approximate average combined state + local sales tax (%).
+   Source-style public averages — local rates vary; user can override Tax %. */
+const SALES_TAX_RATES = {
+  AL: 9.29, AK: 1.76, AZ: 8.40, AR: 9.51, CA: 8.85, CO: 7.77, CT: 6.35, DE: 0,
+  DC: 6.00, FL: 7.01, GA: 7.38, HI: 4.44, ID: 6.03, IL: 8.86, IN: 7.00, IA: 6.94,
+  KS: 8.70, KY: 6.00, LA: 9.56, ME: 5.50, MD: 6.00, MA: 6.25, MI: 6.00, MN: 7.49,
+  MS: 7.07, MO: 8.29, MT: 0, NE: 6.94, NV: 8.23, NH: 0, NJ: 6.63, NM: 7.84,
+  NY: 8.52, NC: 6.98, ND: 6.96, OH: 7.24, OK: 8.98, OR: 0, PA: 6.34, RI: 7.00,
+  SC: 7.46, SD: 6.11, TN: 9.55, TX: 8.20, UT: 7.19, VT: 6.36, VA: 5.75, WA: 9.38,
+  WV: 6.55, WI: 5.43, WY: 5.36
+};
+const US_STATE_NAMES = {
+  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+  CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', DC: 'Washington, D.C.',
+  FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois',
+  IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana',
+  ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota',
+  MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada',
+  NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York',
+  NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon',
+  PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota',
+  TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia',
+  WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming'
+};
 
 const billAmount = document.getElementById('billAmount');
 const taxRate = document.getElementById('taxRate');
 const tipRate = document.getElementById('tipRate');
 const tipResult = document.getElementById('tipResult');
 const tipMeta = document.getElementById('tipMeta');
-function updateTipEstimator() {
-  const bill = Math.max(0, Number(billAmount.value) || 0);
-  const tax = bill * Math.max(0, Number(taxRate.value) || 0) / 100;
-  const tip = bill * Math.max(0, Number(tipRate.value) || 0) / 100;
-  const total = bill + tax + tip;
-  tipResult.textContent = moneyFmt(total, 'USD');
-  tipMeta.textContent = `Tax ${moneyFmt(tax, 'USD')} · Tip ${moneyFmt(tip, 'USD')}`;
+const salesTaxState = document.getElementById('salesTaxState');
+
+function populateStateSelect() {
+  if (!salesTaxState || salesTaxState.options.length > 0) return;
+  const codes = Object.keys(US_STATE_NAMES).sort((a, b) => US_STATE_NAMES[a].localeCompare(US_STATE_NAMES[b]));
+  salesTaxState.innerHTML = codes.map(code => {
+    const rate = SALES_TAX_RATES[code] ?? 0;
+    return `<option value="${code}"${code === 'CA' ? ' selected' : ''}>${US_STATE_NAMES[code]} (~${rate.toFixed(2)}%)</option>`;
+  }).join('');
 }
-[billAmount, taxRate, tipRate].forEach(el => el.addEventListener('input', updateTipEstimator));
+
+function applyStateTaxRate() {
+  if (!salesTaxState || !taxRate) return;
+  const rate = SALES_TAX_RATES[salesTaxState.value];
+  if (rate == null) return;
+  taxRate.value = String(rate);
+}
+
+function updateTipEstimator() {
+  if (!billAmount || !tipResult) return;
+  const bill = Math.max(0, Number(billAmount.value) || 0);
+  const taxPct = Math.max(0, Number(taxRate?.value) || 0);
+  const tipPct = Math.max(0, Number(tipRate?.value) || 0);
+  const tax = bill * taxPct / 100;
+  const tip = bill * tipPct / 100;
+  const total = bill + tax + tip;
+  const t = toolsText();
+  tipResult.textContent = moneyFmt(total, 'USD');
+  if (tipMeta) {
+    const state = salesTaxState ? (US_STATE_NAMES[salesTaxState.value] || salesTaxState.value) : '';
+    const taxNote = taxPct === 0
+      ? (t.salesTaxZero || 'No statewide sales tax (local may apply).')
+      : `${t.tax || 'Tax'} ${moneyFmt(tax, 'USD')} (${taxPct.toFixed(2)}%)`;
+    tipMeta.textContent = [state, taxNote, `${t.tip || 'Tip'} ${moneyFmt(tip, 'USD')}`].filter(Boolean).join(' · ');
+  }
+}
+
+// Combined tip + sales tax (one card)
+populateStateSelect();
+applyStateTaxRate();
+if (salesTaxState) {
+  salesTaxState.addEventListener('change', () => {
+    applyStateTaxRate();
+    updateTipEstimator();
+  });
+}
+[billAmount, taxRate, tipRate].forEach(el => { if (el) el.addEventListener('input', updateTipEstimator); });
 updateTipEstimator();
+// Keep a no-op alias so older openTools hooks don't throw if still referenced.
+function updateSalesTax() { updateTipEstimator(); }
+
+/* Road-trip cost: Gas (MPG / L/100km) or EV (mi/kWh / kWh/100km). */
+const driveToolCard = document.getElementById('driveToolCard');
+const driveDist = document.getElementById('driveDist');
+const driveSpeed = document.getElementById('driveSpeed');
+const driveMpg = document.getElementById('driveMpg');
+const driveFuel = document.getElementById('driveFuel');
+const driveEvEcon = document.getElementById('driveEvEcon');
+const driveEvPrice = document.getElementById('driveEvPrice');
+const driveResult = document.getElementById('driveResult');
+const driveMeta = document.getElementById('driveMeta');
+let driveMode = 'gas'; // 'gas' | 'ev'
+
+function setDriveMode(mode) {
+  driveMode = mode === 'ev' ? 'ev' : 'gas';
+  if (driveToolCard) driveToolCard.setAttribute('data-drive-mode', driveMode);
+  document.querySelectorAll('#driveToolCard .tool-seg-btn, .tool-seg [data-drive-type]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-drive-type') === driveMode);
+  });
+  updateDriveCost();
+}
+
+function updateDriveCost() {
+  if (!driveDist || !driveResult) return;
+  const dist = Math.max(0, Number(driveDist.value) || 0);
+  const speed = Math.max(1, Number(driveSpeed.value) || 1);
+  const imperial = currentDistUnit !== 'km';
+  const hours = dist / speed;
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  const t = toolsText();
+  const timeStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
+  const distUnit = imperial ? 'mi' : 'km';
+  let cost = 0;
+  let energyLine = '';
+
+  if (driveMode === 'ev') {
+    const econ = Math.max(0.1, Number(driveEvEcon?.value) || 0.1);
+    const price = Math.max(0, Number(driveEvPrice?.value) || 0);
+    let kwh;
+    if (imperial) {
+      // econ = mi/kWh
+      kwh = dist / econ;
+    } else {
+      // econ = kWh/100km
+      kwh = (econ / 100) * dist;
+    }
+    cost = kwh * price;
+    energyLine = `${kwh.toFixed(1)} kWh · $${price.toFixed(2)}/kWh`;
+  } else {
+    const economy = Math.max(0.1, Number(driveMpg?.value) || 0.1);
+    const price = Math.max(0, Number(driveFuel?.value) || 0);
+    let fuelAmt;
+    if (imperial) {
+      fuelAmt = dist / economy; // gallons
+    } else {
+      fuelAmt = (economy / 100) * dist; // liters
+    }
+    cost = fuelAmt * price;
+    const fuelUnit = imperial ? (t.driveGal || 'gal') : (t.driveL || 'L');
+    energyLine = `${fuelAmt.toFixed(1)} ${fuelUnit}`;
+  }
+
+  driveResult.textContent = `${timeStr} · ${moneyFmt(cost, 'USD')}`;
+  driveMeta.textContent = `${dist.toLocaleString()} ${distUnit} · ${energyLine} · ~${speed} ${distUnit}/h`;
+}
+
+document.querySelectorAll('[data-drive-type]').forEach(btn => {
+  btn.addEventListener('click', () => setDriveMode(btn.getAttribute('data-drive-type')));
+});
+[driveDist, driveSpeed, driveMpg, driveFuel, driveEvEcon, driveEvPrice].forEach(el => {
+  if (el) el.addEventListener('input', updateDriveCost);
+});
+setDriveMode('gas');
 
 /* ── MODAL SYSTEM ── */
 const overlay   = document.getElementById('modal-overlay');
@@ -1979,24 +2601,31 @@ ja: {
 let currentModalKey = null;
 
 function openModal(tag, title, body) {
-  modalTag.textContent = tag;
-  modalTitle.textContent = title;
-  modalBody.innerHTML = body;
+  if (!overlay) return;
+  if (modalTag) modalTag.textContent = tag;
+  if (modalTitle) modalTitle.textContent = title;
+  if (modalBody) modalBody.innerHTML = body;
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
   applyUnits();
 }
 function closeModal() {
+  if (!overlay || !overlay.classList.contains('open')) return;
   overlay.classList.remove('open');
   overlay.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
+  unlockBodyScroll();
   currentModalKey = null;
 }
 
-document.getElementById('modal-close').addEventListener('click', closeModal);
-overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+const modalCloseBtn = document.getElementById('modal-close');
+if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+if (overlay) {
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
 
 // Keyboard accessibility for interactive elements
 document.querySelectorAll('.prac-card, .season-card, .culture-tile, .dest-card, .region-card, .route-card, .tip-row, .fact-card, .gallery-item').forEach(card => {
@@ -2039,18 +2668,10 @@ applyUnits();
 const galleryGrid = document.getElementById('galleryGrid');
 const filterBtns = document.querySelectorAll('.gallery-filter');
 const galleryEmptyState = document.getElementById('galleryEmptyState');
-const galleryToggle = document.getElementById('galleryToggle');
-let visibleItems = [...document.querySelectorAll('.gallery-item')];
+let visibleItems = [...document.querySelectorAll('.gallery-item:not(.load-error)')];
 let currentIndex = 0;
 let lastFocusedThumb = null; // so closing the lightbox returns focus sensibly
-let galleryExpanded = false;
-const GALLERY_PREVIEW_LIMIT = 6;
-const GALLERY_TOGGLE_TEXT = {
-  en: { more: 'View Full Gallery', less: 'Show Fewer Photos' },
-  es: { more: 'Ver galería completa', less: 'Mostrar menos fotos' },
-  zh: { more: '展开完整相册', less: '收起相册' },
-  ja: { more: 'ギャラリーをすべて表示', less: 'ギャラリーを閉じる' }
-};
+let filterFadeTimers = new WeakMap();
 
 // Mirrors the EMPTY_STATE_SAVED_TEXT pattern used by the destinations filter:
 // the "photo not added yet" placeholder is generated dynamically in JS, so it
@@ -2072,89 +2693,107 @@ const galleryObs = new IntersectionObserver(entries => {
       galleryObs.unobserve(entry.target);
     }
   });
-}, { threshold: 0.15 });
+}, { threshold: 0.12, rootMargin: '0px 0px -4% 0px' });
 
-// --- Image loading state: tile shows a plain background until its photo has
-// actually finished loading, then the photo fades in. Handles both slow
-// connections and images the browser already had cached (which fire "load"
-// before we can even attach the listener, hence the `.complete` check) - and
-// handles a missing/broken file (the "error" case) with a visible placeholder
-// rather than silently leaving the tile blank forever.
+// --- Image loading state: tile keeps a skeleton min-height until the photo
+// loads, then sizes to the image's natural aspect ratio (masonry columns pack
+// without holes). Cached images may already be .complete before we attach
+// listeners; failed loads get a deliberate placeholder.
 function watchImageLoad(img) {
+  if (!img) return;
   const item = img.closest('.gallery-item');
-  if (img.complete && img.naturalWidth > 0) {
+  const onOk = () => {
     img.classList.add('loaded');
+    if (item) item.classList.add('img-ready');
+  };
+  if (img.complete && img.naturalWidth > 0) {
+    onOk();
   } else if (img.complete) {
     // .complete is true even for failed loads once the browser gives up, so
     // naturalWidth === 0 here means "tried and failed", not "still loading".
     showLoadError(item);
   } else {
-    img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+    img.addEventListener('load', onOk, { once: true });
     img.addEventListener('error', () => showLoadError(item), { once: true });
   }
 }
 function showLoadError(item) {
-  item.classList.add('load-error');
+  if (!item) return;
+  item.classList.add('load-error', 'img-ready');
   item.setAttribute('tabindex', '-1');
+  item.setAttribute('aria-disabled', 'true');
   item.removeAttribute('role');
+  // Keep a stable tile size for error states so the column doesn't collapse.
+  item.style.minHeight = '180px';
   if (!item.querySelector('.gallery-item-placeholder')) {
     const ph = document.createElement('div');
     ph.className = 'gallery-item-placeholder';
     const text = GALLERY_PLACEHOLDER_TEXT[currentLang] || GALLERY_PLACEHOLDER_TEXT.en;
-    ph.innerHTML = `<span class="ph-icon">🖼️</span><span class="ph-text">${text}</span>`;
+    ph.innerHTML = `<span class="ph-icon" aria-hidden="true">🖼️</span><span class="ph-text">${text}</span>`;
     item.appendChild(ph);
   }
+  refreshVisibleGalleryItems();
+  updateFilterCounts();
+}
+
+function ensureZoomHint(item) {
+  if (item.querySelector('.gallery-zoom-hint') || item.classList.contains('load-error')) return;
+  const hint = document.createElement('span');
+  hint.className = 'gallery-zoom-hint';
+  hint.setAttribute('aria-hidden', 'true');
+  hint.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M11 8v6M8 11h6"/></svg>';
+  item.appendChild(hint);
 }
 
 function initGalleryItem(item, index) {
   item.style.transitionDelay = `${(index % 6) * 60}ms`; // gentle stagger, resets every 6 tiles
+  if (!item.hasAttribute('aria-label')) {
+    const cap = item.querySelector('.gallery-caption');
+    if (cap) item.setAttribute('aria-label', cap.textContent.trim());
+  }
+  ensureZoomHint(item);
   galleryObs.observe(item);
-  watchImageLoad(item.querySelector('img'));
+  const img = item.querySelector('img');
+  if (img) {
+    img.setAttribute('decoding', 'async');
+    // Eager-load the first few above-the-fold tiles on the dedicated gallery page.
+    if (document.body.classList.contains('page-gallery') && index < 4) {
+      img.loading = 'eager';
+      img.fetchPriority = 'high';
+    }
+  }
+  watchImageLoad(img);
 }
 document.querySelectorAll('.gallery-item').forEach(initGalleryItem);
 
-function getGalleryFilter() {
-  return document.querySelector('.gallery-filter.active')?.dataset.filter || 'all';
-}
-
-function galleryFilterMatches(item, filter = getGalleryFilter()) {
-  return filter === 'all' || item.dataset.category === filter;
-}
-
 function refreshVisibleGalleryItems() {
-  visibleItems = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.gallery-overflow-hidden):not(.load-error)')];
+  visibleItems = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.load-error)')];
 }
 
-function updateGalleryToggle() {
-  if (!galleryToggle) return;
-  const matches = [...document.querySelectorAll('.gallery-item')].filter(item => galleryFilterMatches(item));
-  const shouldShow = matches.length > GALLERY_PREVIEW_LIMIT;
-  galleryToggle.closest('.gallery-actions').style.display = shouldShow ? 'flex' : 'none';
-  galleryToggle.setAttribute('aria-expanded', String(galleryExpanded));
-  galleryToggle.textContent = galleryExpanded
-    ? (GALLERY_TOGGLE_TEXT[currentLang]?.less || GALLERY_TOGGLE_TEXT.en.less)
-    : (GALLERY_TOGGLE_TEXT[currentLang]?.more || GALLERY_TOGGLE_TEXT.en.more);
-}
-
-function applyGalleryLimit() {
-  const filter = getGalleryFilter();
-  let visibleMatchIndex = 0;
-  document.querySelectorAll('.gallery-item').forEach(item => {
-    const match = galleryFilterMatches(item, filter);
-    const overflow = match && !galleryExpanded && visibleMatchIndex >= GALLERY_PREVIEW_LIMIT;
-    item.classList.toggle('gallery-overflow-hidden', overflow);
-    if (match) visibleMatchIndex++;
-  });
-  updateGalleryToggle();
-  refreshVisibleGalleryItems();
-}
-
-applyGalleryLimit();
-
-if (galleryToggle) {
-  galleryToggle.addEventListener('click', () => {
-    galleryExpanded = !galleryExpanded;
-    applyGalleryLimit();
+function updateFilterCounts() {
+  if (!filterBtns.length) return;
+  const items = [...document.querySelectorAll('.gallery-item:not(.load-error)')];
+  filterBtns.forEach(btn => {
+    const filter = btn.dataset.filter;
+    const count = filter === 'all'
+      ? items.length
+      : items.filter(i => i.dataset.category === filter).length;
+    let badge = btn.querySelector('.gallery-filter-count');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'gallery-filter-count';
+      badge.setAttribute('aria-hidden', 'true');
+      btn.appendChild(badge);
+    }
+    badge.textContent = String(count);
+    // Hide empty categories except "All" so the filter bar stays honest.
+    if (filter !== 'all' && count === 0) {
+      btn.hidden = true;
+      btn.setAttribute('aria-hidden', 'true');
+    } else {
+      btn.hidden = false;
+      btn.removeAttribute('aria-hidden');
+    }
   });
 }
 
@@ -2164,33 +2803,52 @@ if (galleryToggle) {
 // same rise-in animation.
 const FADE_MS = 300;
 filterBtns.forEach(btn => {
+  btn.setAttribute('type', 'button');
+  btn.setAttribute('aria-pressed', btn.classList.contains('active') ? 'true' : 'false');
   btn.addEventListener('click', () => {
-    filterBtns.forEach(b => b.classList.remove('active'));
+    filterBtns.forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
+    });
     btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
     const filter = btn.dataset.filter;
-    galleryExpanded = false;
     let matchCount = 0;
 
     document.querySelectorAll('.gallery-item').forEach((item, index) => {
       const match = filter === 'all' || item.dataset.category === filter;
-      if (match) matchCount++;
+      // Cancel any pending hide timer so rapid filter clicks don't leave
+      // matching tiles stuck with .hidden from a previous selection.
+      const pending = filterFadeTimers.get(item);
+      if (pending) { clearTimeout(pending); filterFadeTimers.delete(item); }
+
       if (match) {
-        item.classList.remove('fade-out', 'hidden', 'gallery-overflow-hidden');
+        matchCount++;
+        item.classList.remove('fade-out', 'hidden');
         item.style.transitionDelay = `${(index % 6) * 40}ms`;
-        requestAnimationFrame(() => item.classList.add('in-view'));
+        // Re-trigger entrance if the tile was previously hidden.
+        item.classList.remove('in-view');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => item.classList.add('in-view'));
+        });
       } else if (!item.classList.contains('hidden')) {
         item.classList.add('fade-out');
-        setTimeout(() => item.classList.add('hidden'), FADE_MS);
+        const t = setTimeout(() => {
+          item.classList.add('hidden');
+          filterFadeTimers.delete(item);
+        }, FADE_MS);
+        filterFadeTimers.set(item, t);
       }
     });
 
     if (galleryEmptyState) galleryEmptyState.classList.toggle('show', matchCount === 0);
 
     setTimeout(() => {
-      applyGalleryLimit();
+      refreshVisibleGalleryItems();
     }, FADE_MS + 20);
   });
 });
+updateFilterCounts();
 
 // --- Lightbox ---
 const lightbox = document.getElementById('lightbox');
@@ -2199,83 +2857,166 @@ const lightboxCaption = document.getElementById('lightboxCaption');
 const lightboxMeta = document.getElementById('lightboxMeta');
 const lightboxCounter = document.getElementById('lightboxCounter');
 const lightboxCloseBtn = document.getElementById('lightboxClose');
+const lightboxNextBtn = document.getElementById('lightboxNext');
+const lightboxPrevBtn = document.getElementById('lightboxPrev');
 
-function preload(src) { const i = new Image(); i.src = src; } // warms the browser cache for instant next/prev
+function preload(src) {
+  if (!src) return;
+  const i = new Image();
+  i.decoding = 'async';
+  i.src = src;
+}
+
+function galleryFullSrc(img) {
+  if (!img) return '';
+  return img.getAttribute('data-full') || img.currentSrc || img.src || '';
+}
 
 function renderLightboxContent(index) {
+  if (!lightbox) return;
   const item = visibleItems[index];
   if (!item) return;
   const img = item.querySelector('img');
-  lightboxImg.src = img.src;
-  lightboxImg.alt = img.alt;
-  lightboxCaption.textContent = item.querySelector('.gallery-caption').textContent;
+  if (!img) return;
+  // Grid shows lightweight thumbs; lightbox loads the full-resolution asset.
+  lightboxImg.src = galleryFullSrc(img);
+  lightboxImg.alt = img.alt || '';
+  const cap = item.querySelector('.gallery-caption');
+  lightboxCaption.textContent = cap ? cap.textContent.trim() : '';
   const location = item.dataset.location || '';
   const date = item.dataset.date || '';
   lightboxMeta.textContent = [location, date].filter(Boolean).join(' · ');
   lightboxCounter.textContent = `${index + 1} / ${visibleItems.length}`;
-  // Warm the neighbors so arrow/swipe navigation feels instant.
-  const next = visibleItems[(index + 1) % visibleItems.length];
-  const prev = visibleItems[(index - 1 + visibleItems.length) % visibleItems.length];
-  if (next) preload(next.querySelector('img').src);
-  if (prev) preload(prev.querySelector('img').src);
+  // Hide nav arrows when there's only one photo to show.
+  const multi = visibleItems.length > 1;
+  if (lightboxNextBtn) lightboxNextBtn.hidden = !multi;
+  if (lightboxPrevBtn) lightboxPrevBtn.hidden = !multi;
+  // Warm neighbor full-size images so next/prev feels instant.
+  if (multi) {
+    const next = visibleItems[(index + 1) % visibleItems.length];
+    const prev = visibleItems[(index - 1 + visibleItems.length) % visibleItems.length];
+    if (next) preload(galleryFullSrc(next.querySelector('img')));
+    if (prev) preload(galleryFullSrc(prev.querySelector('img')));
+  }
 }
 
 function openLightbox(index) {
-  if (index < 0 || visibleItems.length === 0) return;
+  if (!lightbox || index < 0 || visibleItems.length === 0) return;
   currentIndex = index;
   renderLightboxContent(index);
   lightbox.classList.add('open');
   lightbox.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-  lightboxCloseBtn.focus();
+  lightbox.setAttribute('aria-label', lightboxCaption.textContent || 'Photo');
+  lockBodyScroll();
+  if (lightboxCloseBtn) lightboxCloseBtn.focus();
 }
 function closeLightbox() {
+  if (!lightbox || !lightbox.classList.contains('open')) return;
+  // Capture before unlock — focus restore can otherwise scroll masonry items
+  // into view and jump the page (seen on lower-column photos like Richmond).
+  const restoreY = lockedScrollY;
   lightbox.classList.remove('open');
   lightbox.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
-  if (lastFocusedThumb) lastFocusedThumb.focus();
+  // Drop the heavy full-res decode when the viewer closes.
+  if (lightboxImg) {
+    lightboxImg.removeAttribute('src');
+    lightboxImg.alt = '';
+  }
+  unlockBodyScroll();
+  if (lastFocusedThumb && typeof lastFocusedThumb.focus === 'function') {
+    try { lastFocusedThumb.focus({ preventScroll: true }); }
+    catch (e) { lastFocusedThumb.focus(); }
+  }
+  // Pin scroll after unlock + focus (some browsers still adjust for focus).
+  const pin = () => {
+    try { window.scrollTo({ top: restoreY, left: 0, behavior: 'instant' }); }
+    catch (e) { window.scrollTo(0, restoreY); }
+  };
+  pin();
+  requestAnimationFrame(() => {
+    pin();
+    requestAnimationFrame(pin);
+  });
 }
 // Crossfade between photos: fade the current image out, swap its content
 // once it's actually invisible, then fade the new one in.
+let navTimer = null;
 function navigate(step) {
-  if (visibleItems.length < 2) return;
+  if (!lightboxImg || visibleItems.length < 2) return;
   lightboxImg.classList.add('switching');
-  setTimeout(() => {
+  if (navTimer) clearTimeout(navTimer);
+  navTimer = setTimeout(() => {
     currentIndex = (currentIndex + step + visibleItems.length) % visibleItems.length;
     renderLightboxContent(currentIndex);
     lightboxImg.classList.remove('switching');
-  }, 180);
+    navTimer = null;
+  }, motionActive() ? 0 : 180);
 }
 function showNext() { navigate(1); }
 function showPrev() { navigate(-1); }
 
 document.querySelectorAll('.gallery-item').forEach((item) => {
   item.addEventListener('click', () => {
-    if (item.classList.contains('load-error')) return; // nothing valid to show yet
+    if (item.classList.contains('load-error') || item.classList.contains('hidden')) return;
     lastFocusedThumb = item;
     refreshVisibleGalleryItems();
-    openLightbox(visibleItems.indexOf(item));
+    const idx = visibleItems.indexOf(item);
+    if (idx >= 0) openLightbox(idx);
   });
 });
-lightboxCloseBtn.addEventListener('click', closeLightbox);
-document.getElementById('lightboxNext').addEventListener('click', showNext);
-document.getElementById('lightboxPrev').addEventListener('click', showPrev);
-lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-document.addEventListener('keydown', e => {
-  if (!lightbox.classList.contains('open')) return;
-  if (e.key === 'Escape') closeLightbox();
-  if (e.key === 'ArrowRight') showNext();
-  if (e.key === 'ArrowLeft') showPrev();
-});
 
-// Mobile: swipe left/right anywhere on the lightbox to go next/prev
-let touchStartX = 0;
-lightbox.addEventListener('touchstart', e => {
-  touchStartX = e.changedTouches[0].clientX;
-}, { passive: true });
-lightbox.addEventListener('touchend', e => {
-  const diff = e.changedTouches[0].clientX - touchStartX;
-  if (Math.abs(diff) > 40) { // ignore tiny accidental swipes
-    diff < 0 ? showNext() : showPrev();
-  }
-}, { passive: true });
+if (lightbox) {
+  if (lightboxCloseBtn) lightboxCloseBtn.addEventListener('click', closeLightbox);
+  if (lightboxNextBtn) lightboxNextBtn.addEventListener('click', e => { e.stopPropagation(); showNext(); });
+  if (lightboxPrevBtn) lightboxPrevBtn.addEventListener('click', e => { e.stopPropagation(); showPrev(); });
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); showNext(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); showPrev(); }
+    // Simple focus trap between close / prev / next.
+    if (e.key === 'Tab') {
+      const focusables = [lightboxCloseBtn, lightboxPrevBtn, lightboxNextBtn].filter(el => el && !el.hidden);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // Mobile: swipe left/right anywhere on the lightbox to go next/prev
+  let touchStartX = 0;
+  let touchStartY = 0;
+  lightbox.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+  }, { passive: true });
+  lightbox.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    // Prefer horizontal swipes; ignore mostly-vertical gestures (scroll-ish).
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+      dx < 0 ? showNext() : showPrev();
+    }
+  }, { passive: true });
+}
+
+// After language switch, refresh dynamic gallery chrome (placeholders + aria).
+document.querySelectorAll('#langPillGroup .pill-btn').forEach(p => {
+  p.addEventListener('click', () => {
+    // Defer until the primary language handler's applyLanguage has run.
+    queueMicrotask(() => {
+      document.querySelectorAll('.gallery-item-placeholder .ph-text').forEach(el => {
+        el.textContent = GALLERY_PLACEHOLDER_TEXT[currentLang] || GALLERY_PLACEHOLDER_TEXT.en;
+      });
+      document.querySelectorAll('.gallery-item').forEach(item => {
+        const cap = item.querySelector('.gallery-caption');
+        if (cap && !item.classList.contains('load-error')) {
+          item.setAttribute('aria-label', cap.textContent.trim());
+        }
+      });
+    });
+  });
+});

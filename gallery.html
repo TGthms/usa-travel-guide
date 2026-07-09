@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Browse the complete photo gallery from the road — landmarks, coastline, nature, and roads across the United States, sorted by category.">
+<meta name="theme-color" content="#07101c">
+<meta name="color-scheme" content="dark light">
+<title>Photo Gallery — America, A Travel Guide</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23060b18'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='%23e8a435'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23060b18'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='%23e8a435'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="America — A Travel Guide">
+<meta property="og:title" content="Photo Gallery — America, A Travel Guide">
+<meta property="og:description" content="Browse the complete photo gallery from the road — landmarks, coastline, nature, and roads across the United States, sorted by category.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Photo Gallery — America, A Travel Guide">
+<meta name="twitter:description" content="Browse the complete photo gallery from the road — landmarks, coastline, nature, and roads across the United States, sorted by category.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Special+Elite&family=Noto+Serif+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="page-gallery">
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div id="progress-bar"></div>
+
+<div id="loader">
+  <div class="loader-flag">🇺🇸</div>
+  <div class="loader-text">America</div>
+  <div class="loader-sub">Preparing your journey</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<canvas id="cursorCanvas" aria-hidden="true"></canvas>
+
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-tag" id="modal-tag"></div>
+        <div class="modal-title" id="modal-title"></div>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Gallery mini-app chrome — not a clone of the guide nav -->
+<header id="navbar" class="gallery-app-bar" role="banner">
+  <a href="index.html" class="gallery-app-back" data-i18n-aria="gallery.backToGuide" aria-label="Back to the Guide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+    <span class="gallery-app-back-label" data-i18n="gallery.backToGuide">Back to the Guide</span>
+  </a>
+  <div class="gallery-app-title" aria-current="page">
+    <span class="gallery-app-mark" aria-hidden="true">✦</span>
+    <span data-i18n="nav.gallery">Gallery</span>
+  </div>
+  <div class="nav-actions gallery-app-actions">
+    <button class="nav-tool-btn" id="toolsOpen" type="button" aria-haspopup="dialog" aria-controls="toolsOverlay" data-i18n-aria="nav.tools" aria-label="Travel tools">🧰</button>
+    <button class="nav-settings-btn" id="settingsOpen" type="button" aria-haspopup="dialog" aria-controls="settingsOverlay" data-i18n-aria="nav.settings" aria-label="Settings">⚙️</button>
+  </div>
+</header>
+
+<main id="main">
+<section id="gallery" aria-labelledby="galleryHeading">
+  <div class="section-header gallery-app-header reveal">
+    <div>
+      <span class="section-eyebrow" data-i18n="gallery.eyebrow">Photo Gallery</span>
+      <h2 id="galleryHeading" data-i18n-html="gallery.heading">Moments From<br><em>The Road</em></h2>
+    </div>
+    <p data-i18n="gallery.pageIntro">Every stop from the road so far, sorted by category — new photos added as the trip continues.</p>
+  </div>
+
+  <div class="gallery-filters reveal reveal-delay-2" role="toolbar" aria-label="Filter photos by category">
+    <button type="button" class="gallery-filter active" data-filter="all" aria-pressed="true" data-i18n="gallery.filterAll">All</button>
+    <button type="button" class="gallery-filter" data-filter="cityscapes" aria-pressed="false" data-i18n="gallery.filterCityscapes">Cityscapes</button>
+    <button type="button" class="gallery-filter" data-filter="landmarks" aria-pressed="false" data-i18n="gallery.filterLandmarks">Landmarks</button>
+    <button type="button" class="gallery-filter" data-filter="nature" aria-pressed="false" data-i18n="gallery.filterNature">Nature</button>
+    <button type="button" class="gallery-filter" data-filter="coast" aria-pressed="false" data-i18n="gallery.filterCoast">Coast</button>
+    <button type="button" class="gallery-filter" data-filter="food-culture" aria-pressed="false" data-i18n="gallery.filterFoodCulture">Food &amp; Culture</button>
+    <button type="button" class="gallery-filter" data-filter="roads" aria-pressed="false" data-i18n="gallery.filterRoads">Roads</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       PHOTO MANAGEMENT GUIDE — master gallery (gallery.html). Homepage only
+       links here via the teaser card; every photo block lives below.
+       ═══════════════════════════════════════════════════════════════════
+       To add a photo:
+         1. Save the image file into  images/gallery/
+         2. Copy one whole <div class="gallery-item">...</div> block below
+         3. Edit these 5 things in your copy:
+              data-category = cityscapes | landmarks | nature | coast | food-culture | roads
+              src           = images/gallery/your-file-name.jpg
+              alt           = plain description (screen readers + broken-image fallback)
+              data-location = shown under the photo when clicked, e.g. "Austin, TX"
+              data-date     = shown under the photo when clicked, e.g. "May 2026"
+         4. Change the <div class="gallery-caption"> text to a short label
+            (this is the only part visible on the grid itself, e.g. a city name)
+            — give it its own unique data-i18n key (e.g. gallery.item.yourkey.caption)
+            and add matching translations for it in the I18N dictionary in
+            assets/js/app.js (search for "gallery.item." to find the other
+            entries — es/zh/ja each need the same key).
+         5. Optional: feature the same photo on the homepage teaser by
+            copying the block into the smaller preview grid in index.html
+            too (search for "PHOTO MANAGEMENT GUIDE" there).
+         No other JS or CSS edits needed — animations, filtering, and the
+         lightbox all pick up new items automatically. Photos not yet
+         uploaded show a "Photo not added yet" placeholder instead of a
+         broken-image icon, so it's safe to add the caption/metadata for a
+         photo before the file itself is ready.
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="gallery-grid" id="galleryGrid">
+    <div class="gallery-item" data-category="landmarks" data-location="San Francisco, California" data-date="June 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/SFgolden_gate_bridge.jpeg" data-full="images/gallery/SFgolden_gate_bridge.jpeg" width="900" height="506" alt="San Francisco Golden Gate Bridge" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.sfgoldengate.caption">Golden Gate Bridge</div>
+    </div>
+    <div class="gallery-item" data-category="landmarks" data-location="CA-1, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/bixby_bridge.jpeg" data-full="images/gallery/bixby_bridge.jpeg" width="900" height="675" alt="Bixby Creek Bridge" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.bixby.caption">Bixby Bridge</div>
+    </div>
+    <div class="gallery-item" data-category="coast" data-location="Carmel by the Sea, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Carmel_by_the_Sea.jpeg" data-full="images/gallery/Carmel_by_the_Sea.jpeg" width="675" height="900" alt="Carmel by the Sea" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.carmel.caption">Carmel by the Sea</div>
+    </div>
+    <div class="gallery-item" data-category="nature" data-location="Garrapata Beach, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Garrapata_State_Beach_View.jpeg" data-full="images/gallery/Garrapata_State_Beach_View.jpeg" width="675" height="900" alt="Garrapata State Beach" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.garrapataview.caption">Garrapata Beach Overlook</div>
+    </div>
+    <div class="gallery-item" data-category="coast" data-location="Garrapata Beach, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Garrapata_State_Beach.jpeg" data-full="images/gallery/Garrapata_State_Beach.jpeg" width="675" height="900" alt="Garrapata State Beach" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.garrapata.caption">Garrapata Beach</div>
+    </div>
+    <div class="gallery-item" data-category="roads" data-location="CA-1, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Granite_Canyon_Bridge.jpeg" data-full="images/gallery/Granite_Canyon_Bridge.jpeg" width="900" height="675" alt="Granite Canyon Bridge" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.granitecanyon.caption">Granite Canyon Bridge</div>
+    </div>
+    <div class="gallery-item" data-category="nature" data-location="Monterey County, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Hurricane_Point_Landscape.jpeg" data-full="images/gallery/Hurricane_Point_Landscape.jpeg" width="900" height="382" alt="Hurricane Point Landscape" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.hurricanepoint.caption">Hurricane Point</div>
+    </div>
+    <div class="gallery-item" data-category="coast" data-location="Richmond, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Richmond_facing_bay_back.jpeg" data-full="images/gallery/Richmond_facing_bay_back.jpeg" width="675" height="900" alt="Calm waterfront with a graffiti-covered abandoned concrete building on a rocky shoreline, viewed from a pier with a metal railing, under a wide blue sky with wispy clouds." loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.richmondbay.caption">SF Bay from Richmond</div>
+    </div>
+    <div class="gallery-item" data-category="nature" data-location="Richmond, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Richmond_Regional_Park_facing_mountain.jpeg" data-full="images/gallery/Richmond_Regional_Park_facing_mountain.jpeg" width="675" height="900" alt="Beautiful view of the river and the mountains from Richmond Regional Park" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.richmondpark.caption">Richmond Regional Park</div>
+    </div>
+    <div class="gallery-item" data-category="coast" data-location="Richmond, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Richmond_SFbay_view.jpeg" data-full="images/gallery/Richmond_SFbay_view.jpeg" width="675" height="900" alt="Sunset view with sea gull in San Francisco Bay from Richmond" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.richmondview.caption">SF Bay view from Richmond</div>
+    </div>
+    <div class="gallery-item" data-category="cityscapes" data-location="San Francisco, California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/tmpdk2t3a5.jpeg" data-full="images/gallery/tmpdk2t3a5.jpeg" width="900" height="675" alt="Japantown" loading="lazy">
+      <div class="gallery-caption" data-i18n="gallery.item.tmpdk2t3a5.caption">Japantown</div>
+    </div>
+    <!-- GALLERY_MANAGER_INSERT -->
+  </div>
+  <p class="gallery-empty-state" id="galleryEmptyState" data-i18n="gallery.emptyState" role="status">No photos in this category yet — check back soon.</p>
+</section>
+</main>
+
+<!-- Lightbox overlay - only ONE of these needed for the whole page, sits outside the section -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Photo viewer">
+  <div class="lightbox-counter" id="lightboxCounter" aria-live="polite"></div>
+  <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Close photo viewer">✕</button>
+  <button type="button" class="lightbox-prev" id="lightboxPrev" aria-label="Previous photo">←</button>
+  <div class="lightbox-stage">
+    <img class="lightbox-img" id="lightboxImg" src="" alt="" decoding="async">
+    <div class="lightbox-info">
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+      <div class="lightbox-meta" id="lightboxMeta"></div>
+    </div>
+  </div>
+  <button type="button" class="lightbox-next" id="lightboxNext" aria-label="Next photo">→</button>
+</div>
+<div class="settings-overlay" id="toolsOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="toolsTitle">
+<section id="tools" class="settings-panel tools-panel">
+  <div class="settings-header reveal">
+    <span class="section-eyebrow" data-i18n="tools.eyebrow">Travel Tools</span>
+    <div class="settings-title-row">
+      <h2 id="toolsTitle" data-i18n-html="tools.heading">Plan With <em>Confidence</em></h2>
+      <button class="settings-close" id="toolsClose" type="button" aria-label="Close tools">✕</button>
+    </div>
+    <p data-i18n="tools.intro">Currency, clocks, tip &amp; sales tax (all 50 states), gas or EV road costs, and emergency numbers.</p>
+  </div>
+
+  <div class="tools-grid">
+    <div class="tool-card tool-card-wide reveal">
+      <div class="settings-group-label" data-i18n="tools.currencyLabel">Live Currency Converter</div>
+      <div class="settings-group-sub" data-i18n="tools.currencySub">Uses Frankfurter daily exchange rates</div>
+      <div class="tool-form currency-tool">
+        <label class="tool-field">
+          <span data-i18n="tools.amount">Amount</span>
+          <input id="currencyAmount" type="number" min="0" step="0.01" value="100" inputmode="decimal">
+        </label>
+        <label class="tool-field">
+          <span data-i18n="tools.from">From</span>
+          <select id="currencyFrom">
+            <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="JPY">JPY</option><option value="CNY">CNY</option><option value="HKD">HKD</option><option value="CHF">CHF</option><option value="MXN">MXN</option>
+          </select>
+        </label>
+        <button class="tool-swap" id="currencySwap" type="button" aria-label="Swap currencies">⇄</button>
+        <label class="tool-field">
+          <span data-i18n="tools.to">To</span>
+          <select id="currencyTo">
+            <option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="JPY">JPY</option><option value="CNY">CNY</option><option value="HKD">HKD</option><option value="CHF">CHF</option><option value="MXN">MXN</option>
+          </select>
+        </label>
+      </div>
+      <div class="tool-result" id="currencyResult" aria-live="polite">Ready</div>
+      <div class="tool-meta" id="currencyMeta">Rates update daily.</div>
+    </div>
+
+    <div class="tool-card reveal reveal-delay-1">
+      <div class="settings-group-label" data-i18n="tools.clockLabel">World Clock</div>
+      <div class="settings-group-sub" data-i18n="tools.clockSub">Key time zones for planning calls, arrivals, and check-ins.</div>
+      <div class="clock-list" id="worldClockList"></div>
+    </div>
+
+    <div class="tool-card reveal reveal-delay-2">
+      <div class="settings-group-label" data-i18n="tools.tipLabel">Tip &amp; Sales Tax</div>
+      <div class="settings-group-sub" data-i18n="tools.tipSub">Restaurant or purchase total — pick any U.S. state for typical sales tax, then add tip.</div>
+      <div class="tool-form stacked">
+        <label class="tool-field">
+          <span data-i18n="tools.salesTaxState">State</span>
+          <select id="salesTaxState"></select>
+        </label>
+        <label class="tool-field"><span data-i18n="tools.bill">Amount / bill</span><input id="billAmount" type="number" min="0" step="0.01" value="80" inputmode="decimal"></label>
+        <div class="tool-two-col">
+          <label class="tool-field"><span data-i18n="tools.tax">Tax %</span><input id="taxRate" type="number" min="0" step="0.01" value="8.82" inputmode="decimal"></label>
+          <label class="tool-field"><span data-i18n="tools.tip">Tip %</span><input id="tipRate" type="number" min="0" step="1" value="20" inputmode="decimal"></label>
+        </div>
+        <p class="tool-field-hint" data-i18n="tools.taxHint">Tax auto-fills from the state (approximate combined rate). Adjust if needed.</p>
+      </div>
+      <div class="tool-result" id="tipResult" aria-live="polite">$0.00</div>
+      <div class="tool-meta" id="tipMeta"></div>
+    </div>
+
+    <div class="tool-card reveal" id="driveToolCard" data-drive-mode="gas">
+      <div class="settings-group-label" data-i18n="tools.driveLabel">Road Trip Cost</div>
+      <div class="settings-group-sub" data-i18n="tools.driveSub">Drive time and energy cost for gas cars or EVs.</div>
+      <div class="tool-form stacked">
+        <div class="tool-seg" role="group" aria-label="Vehicle type">
+          <button type="button" class="tool-seg-btn active" data-drive-type="gas" data-i18n="tools.driveGas">Gas</button>
+          <button type="button" class="tool-seg-btn" data-drive-type="ev" data-i18n="tools.driveEv">EV</button>
+        </div>
+        <label class="tool-field"><span data-i18n="tools.driveDist">Distance</span><input id="driveDist" type="number" min="0" step="1" value="400" inputmode="decimal"></label>
+        <label class="tool-field"><span data-i18n="tools.driveSpeed">Avg speed</span><input id="driveSpeed" type="number" min="1" step="1" value="60" inputmode="decimal"></label>
+        <div class="tool-two-col drive-gas-field">
+          <label class="tool-field"><span id="driveEconLabel" data-i18n="tools.driveMpg">MPG / L/100km</span><input id="driveMpg" type="number" min="0.1" step="0.1" value="28" inputmode="decimal"></label>
+          <label class="tool-field"><span id="drivePriceLabel" data-i18n="tools.driveFuel">Fuel $/gal or $/L</span><input id="driveFuel" type="number" min="0" step="0.01" value="3.80" inputmode="decimal"></label>
+        </div>
+        <div class="tool-two-col drive-ev-field">
+          <label class="tool-field"><span id="driveEvEconLabel" data-i18n="tools.driveEvEcon">mi/kWh or kWh/100km</span><input id="driveEvEcon" type="number" min="0.1" step="0.1" value="3.5" inputmode="decimal"></label>
+          <label class="tool-field"><span data-i18n="tools.driveEvPrice">Electricity $/kWh</span><input id="driveEvPrice" type="number" min="0" step="0.01" value="0.16" inputmode="decimal"></label>
+        </div>
+      </div>
+      <div class="tool-result tool-result-sm" id="driveResult" aria-live="polite">—</div>
+      <div class="tool-meta" id="driveMeta"></div>
+    </div>
+
+    <div class="tool-card reveal reveal-delay-2">
+      <div class="settings-group-label" data-i18n="tools.emergencyLabel">Useful Numbers</div>
+      <div class="settings-group-sub" data-i18n="tools.emergencySub">Keep these handy while traveling in the United States.</div>
+      <ul class="tool-info-list" id="emergencyList">
+        <li><strong>911</strong> — <span data-i18n="tools.em911">Emergency (police, fire, ambulance)</span></li>
+        <li><strong>511</strong> — <span data-i18n="tools.em511">Traffic &amp; road conditions (many states)</span></li>
+        <li><strong>988</strong> — <span data-i18n="tools.em988">Suicide &amp; Crisis Lifeline</span></li>
+        <li><strong>1-800-222-1222</strong> — <span data-i18n="tools.emPoison">Poison Control</span></li>
+        <li><strong>311</strong> — <span data-i18n="tools.em311">Non-emergency city services (where available)</span></li>
+      </ul>
+      <div class="tool-meta" data-i18n="tools.emNote">Dial 911 only for real emergencies. Save your country’s embassy number too.</div>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="settingsTitle">
+<section id="settings" class="settings-panel">
+  <div class="settings-header reveal">
+    <span class="section-eyebrow" data-i18n="settings.eyebrow">Personalize</span>
+    <div class="settings-title-row">
+      <h2 id="settingsTitle" data-i18n-html="settings.heading">Make It <em>Yours</em></h2>
+      <button class="settings-close" id="settingsClose" type="button" aria-label="Close settings">✕</button>
+    </div>
+    <p data-i18n="settings.intro">Your preferences are saved on this device.</p>
+  </div>
+  <div class="settings-grid">
+
+    <div class="settings-group reveal">
+      <div class="settings-group-label" data-i18n="settings.themeLabel">🎨 Theme</div>
+      <div class="settings-group-sub" data-i18n="settings.themeSub">Every section adapts to your chosen palette.</div>
+      <div class="theme-swatch-grid" id="themeSwatchGrid">
+        <button class="theme-swatch active" data-theme-val="default">
+          <div class="theme-swatch-preview"><span style="background:#07101c;"></span><span style="background:#c9a259;"></span><span style="background:#b85c42;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeDefault">Midnight Atlas</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button class="theme-swatch" data-theme-val="minimal">
+          <div class="theme-swatch-preview"><span style="background:#f7f6f3;"></span><span style="background:#1e3a5f;"></span><span style="background:#8b7355;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeMinimal">Gallery Daylight</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button class="theme-swatch" data-theme-val="elegant">
+          <div class="theme-swatch-preview"><span style="background:#f6f1e8;"></span><span style="background:#7a2e2e;"></span><span style="background:#b8956a;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeElegant">Heritage Paper</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button class="theme-swatch" data-theme-val="luxury">
+          <div class="theme-swatch-preview"><span style="background:#0c0c0c;"></span><span style="background:#c4a462;"></span><span style="background:#a8a29a;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeLuxury">Grand Tour</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button class="theme-swatch" data-theme-val="glass">
+          <div class="theme-swatch-preview"><span style="background:#0b1424;"></span><span style="background:#8eb6d4;"></span><span style="background:#d4a574;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeGlass">Twilight Glass</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button class="theme-swatch" data-theme-val="nature">
+          <div class="theme-swatch-preview"><span style="background:#141c18;"></span><span style="background:#8fa884;"></span><span style="background:#c9a66b;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeNature">Field Notes</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-group reveal reveal-delay-1">
+      <div class="settings-group-label">🌐 <span data-i18n="settings.languageLabel">Language</span></div>
+      <div class="settings-group-sub" data-i18n="settings.languageSub">Translates all guide content, including region &amp; city details.</div>
+      <div class="pill-group" id="langPillGroup">
+        <button class="pill-btn active" data-lang-val="en"><span>English</span><span class="pill-check">✓</span></button>
+        <button class="pill-btn" data-lang-val="es"><span>Español <span class="pill-btn-native">Spanish</span></span><span class="pill-check">✓</span></button>
+        <button class="pill-btn" data-lang-val="zh"><span>中文 <span class="pill-btn-native">Chinese</span></span><span class="pill-check">✓</span></button>
+        <button class="pill-btn" data-lang-val="ja"><span>日本語 <span class="pill-btn-native">Japanese</span></span><span class="pill-check">✓</span></button>
+      </div>
+    </div>
+
+    <div class="settings-group reveal reveal-delay-2">
+      <div class="settings-group-label">📐 <span data-i18n="settings.unitsLabel">Units</span></div>
+      <div class="settings-group-sub" data-i18n="settings.unitsSub">Applied to temperatures and road-trip distances.</div>
+      <div class="settings-subgroup">
+        <div class="settings-subgroup-label" data-i18n="settings.temperature">Temperature</div>
+        <div class="units-row" id="unitTempGroup">
+          <button class="pill-btn active" data-unit-val="f"><span>°F</span><span class="pill-check">✓</span></button>
+          <button class="pill-btn" data-unit-val="c"><span>°C</span><span class="pill-check">✓</span></button>
+        </div>
+      </div>
+      <div class="settings-subgroup">
+        <div class="settings-subgroup-label" data-i18n="settings.distance">Distance</div>
+        <div class="units-row" id="unitDistGroup">
+          <button class="pill-btn active" data-unit-val="mi"><span data-i18n="settings.miles">Miles</span><span class="pill-check">✓</span></button>
+          <button class="pill-btn" data-unit-val="km"><span data-i18n="settings.km">Kilometers</span><span class="pill-check">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group settings-group-wide reveal reveal-delay-3">
+      <div class="settings-group-label">♿ <span data-i18n="settings.accessibilityLabel">Accessibility</span></div>
+      <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Tone down animation or turn off the cursor trail — handy for motion sensitivity, older devices, or just a calmer feel.</div>
+      <div class="settings-subgroup-row">
+        <div class="settings-subgroup">
+          <div class="settings-subgroup-label" data-i18n="settings.reduceMotion">Motion</div>
+          <div class="units-row" id="motionPillGroup">
+            <button class="pill-btn active" data-motion-val="off"><span data-i18n="settings.motionStandard">Standard</span><span class="pill-check">✓</span></button>
+            <button class="pill-btn" data-motion-val="on"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
+          </div>
+        </div>
+        <div class="settings-subgroup">
+          <div class="settings-subgroup-label" data-i18n="settings.cursorEffect">Cursor Trail</div>
+          <div class="units-row" id="cursorPillGroup">
+            <button class="pill-btn active" data-cursor-val="on"><span data-i18n="settings.cursorOn">On</span><span class="pill-check">✓</span></button>
+            <button class="pill-btn" data-cursor-val="off"><span data-i18n="settings.cursorOff">Off</span><span class="pill-check">✓</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div>
+<footer class="gallery-app-footer">
+  <a href="index.html" class="gallery-app-footer-home">
+    <span aria-hidden="true">✦</span>
+    <span data-i18n="gallery.backToGuide">Back to the Guide</span>
+  </a>
+  <p class="gallery-app-footer-copy" data-i18n-html="footer.copyright">© 2026 USA Travel Guide · Created by Tim G</p>
+  <a href="https://github.com/TGthms/usa-travel-guide" class="footer-github-link" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+<script src="assets/js/app.js" defer></script>
+</body>
+</html>
