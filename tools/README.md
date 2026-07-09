@@ -13,10 +13,12 @@ python3 tools/gallery_manager.py
 
 Your browser opens **http://127.0.0.1:8791**. Then:
 
-1. Set **category**, **location**, and **date** (applied to the whole batch)
-2. **Drop** photos (or click to choose) — multi-select is fine
-3. Edit captions if you want
-4. Click **Add to gallery**
+1. Set **defaults** (category / location / date) — applied when photos are dropped  
+2. **Drop** photos (multi-select OK)  
+3. **Per photo**, adjust caption, category, location, and date  
+4. Optionally **Apply defaults to queue** to reset all rows  
+5. Reorder with ↑ / ↓, then **Add all to gallery**  
+6. In **Library**, search/filter, **Save** metadata edits, or **Remove** entirely  
 
 Done. Refresh `gallery.html` to see them.
 

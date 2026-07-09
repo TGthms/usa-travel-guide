@@ -255,13 +255,20 @@ def insert_i18n(slug: str, caption: str) -> None:
         if f'"{key}"' in block:
             return src
         # Find last gallery.item caption line in block
-        matches = list(re.finditer(r'^[ \t]*"gallery\.item\.[^"]+\.caption": .*,\s*$', block, re.M))
+        # Match a single key/value pair (keys must stay one-per-line)
+        matches = list(
+            re.finditer(
+                r'^[ \t]*"gallery\.item\.[^"]+\.caption":\s*"[^"]*",\s*$',
+                block,
+                re.M,
+            )
+        )
         if matches:
             last = matches[-1]
             insert_at = start + last.end()
-            # ensure newline
-            if not src[insert_at - 1] == "\n":
-                pass
+            # `$` ends before `\n` — step past newline so the new key is on its own line
+            if insert_at < len(src) and src[insert_at] == "\n":
+                insert_at += 1
             return src[:insert_at] + line + src[insert_at:]
         # No gallery items yet — insert near start of block after opening
         return src[:start] + "\n" + line + src[start:]
@@ -399,14 +406,22 @@ def remove_i18n(slug: str) -> int:
     """Remove gallery.item.{slug}.caption from every language block in app.js."""
     key = f"gallery.item.{slug}.caption"
     text = APP_JS.read_text(encoding="utf-8")
+    # Whole-line form
     new, n = re.subn(
-        rf'^[ \t]*"{re.escape(key)}":\s*.*?,\s*\n',
+        rf'^[ \t]*"{re.escape(key)}":\s*"[^"]*",\s*\n',
         "",
         text,
         flags=re.M,
     )
+    # Inline form (legacy bug left multiple keys on one line)
+    new2, n2 = re.subn(
+        rf'[ \t]*"{re.escape(key)}":\s*"[^"]*",\s*',
+        "",
+        new,
+    )
+    n += n2
     if n:
-        APP_JS.write_text(new, encoding="utf-8")
+        APP_JS.write_text(new2, encoding="utf-8")
     return n
 
 
@@ -461,6 +476,107 @@ def remove_one(slug: str, filename: str | None = None) -> dict:
     }
 
 
+def update_i18n_caption(slug: str, caption: str) -> int:
+    """Set gallery.item.{slug}.caption in every language block to the new English caption."""
+    key = f"gallery.item.{slug}.caption"
+    cap_js = (
+        caption.replace("\\", "\\\\")
+        .replace('"', '\\"')
+        .replace("\n", " ")
+    )
+    text = APP_JS.read_text(encoding="utf-8")
+    new, n = re.subn(
+        rf'("{re.escape(key)}":\s*)"[^"]*"',
+        rf'\1"{cap_js}"',
+        text,
+    )
+    if n:
+        APP_JS.write_text(new, encoding="utf-8")
+    return n
+
+
+def update_one(
+    slug: str,
+    *,
+    category: str | None = None,
+    location: str | None = None,
+    date: str | None = None,
+    caption: str | None = None,
+    alt: str | None = None,
+) -> dict:
+    """Update metadata for an existing gallery photo (no re-upload)."""
+    slug = re.sub(r"[^a-z0-9]", "", slug.lower())
+    items = list_photos()
+    item = next((p for p in items if p["slug"] == slug), None)
+    if not item:
+        raise FileNotFoundError(f"No gallery entry found for '{slug}'")
+
+    category = category if category is not None else item["category"]
+    location = location if location is not None else item["location"]
+    date = date if date is not None else item["date"]
+    caption = (caption if caption is not None else item["caption"]).strip()
+    alt = (alt if alt is not None else caption).strip()
+    if category not in CATEGORIES:
+        raise ValueError(f"Invalid category '{category}'")
+
+    text = GALLERY_HTML.read_text(encoding="utf-8")
+    item_m = re.search(
+        rf'<div class="gallery-item"[^>]*>\s*'
+        rf'<img src="([^"]+)" data-full="([^"]+)" width="(\d+)" height="(\d+)" alt="[^"]*" loading="lazy">\s*'
+        rf'<div class="gallery-caption"[^>]*data-i18n="gallery\.item\.{re.escape(slug)}\.caption"[^>]*>[^<]*</div>\s*'
+        rf'</div>',
+        text,
+        re.S,
+    )
+    if not item_m:
+        # Fallback without requiring width/height
+        item_m = re.search(
+            rf'<div class="gallery-item"[^>]*>\s*'
+            rf'<img src="([^"]+)" data-full="([^"]+)"[^>]*alt="[^"]*"[^>]*>\s*'
+            rf'<div class="gallery-caption"[^>]*data-i18n="gallery\.item\.{re.escape(slug)}\.caption"[^>]*>[^<]*</div>\s*'
+            rf'</div>',
+            text,
+            re.S,
+        )
+        if not item_m:
+            raise RuntimeError(f"Could not locate HTML block for '{slug}'")
+        tw, th = 900, 600
+        thumb, full = item_m.group(1), item_m.group(2)
+        old_block = item_m.group(0)
+    else:
+        thumb, full = item_m.group(1), item_m.group(2)
+        tw, th = int(item_m.group(3)), int(item_m.group(4))
+        old_block = item_m.group(0)
+
+    filename = Path(full).name
+    new_block = html_item_block(
+        slug=slug,
+        category=category,
+        location=location,
+        date=date,
+        caption=caption,
+        alt=alt,
+        tw=tw,
+        th=th,
+        filename=filename,
+    ).rstrip("\n")
+
+    text = text.replace(old_block, new_block, 1)
+    GALLERY_HTML.write_text(text, encoding="utf-8")
+    i18n_n = update_i18n_caption(slug, caption)
+
+    return {
+        "slug": slug,
+        "filename": filename,
+        "category": category,
+        "location": location,
+        "date": date,
+        "caption": caption,
+        "i18n_updated": i18n_n,
+        "status": "updated",
+    }
+
+
 # ── Web UI ──────────────────────────────────────────────────────────────────
 
 UI_HTML = r"""<!DOCTYPE html>
@@ -482,109 +598,111 @@ UI_HTML = r"""<!DOCTYPE html>
     color: var(--text); min-height: 100vh; line-height: 1.5;
   }
   header {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    padding: 20px 28px; border-bottom: 1px solid var(--border);
-    background: rgba(11,18,32,.85); backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    background: rgba(11,18,32,.9); backdrop-filter: blur(12px);
     position: sticky; top: 0; z-index: 10;
   }
   header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; }
   header h1 span { color: var(--accent); font-style: italic; }
   header p { color: var(--muted); font-size: 13px; }
-  main { max-width: 960px; margin: 0 auto; padding: 28px 20px 80px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 18px 90px; }
   .card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 22px; margin-bottom: 18px;
+    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
   }
-  .card h2 { font-size: 14px; letter-spacing: .12em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 14px; font-weight: 600; }
+  .card h2 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 12px; font-weight: 600; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
-  label { display: flex; flex-direction: column; gap: 6px; font-size: 11px;
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  label { display: flex; flex-direction: column; gap: 6px; font-size: 10px;
     letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   input, select, textarea {
     background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text); padding: 11px 12px; font: 500 14px system-ui; outline: none;
+    color: var(--text); padding: 10px 11px; font: 500 13px system-ui; outline: none; width: 100%;
   }
   input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   .drop {
     border: 2px dashed var(--border); border-radius: var(--radius);
-    padding: 40px 20px; text-align: center; cursor: pointer;
+    padding: 36px 18px; text-align: center; cursor: pointer;
     transition: border-color .2s, background .2s; background: var(--card);
   }
   .drop.drag { border-color: var(--accent); background: rgba(201,162,89,.08); }
   .drop strong { display: block; font-size: 16px; margin-bottom: 6px; }
   .drop span { color: var(--muted); font-size: 13px; }
-  .queue { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-  .row {
-    display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center;
-    background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+  .queue { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .q-card {
+    display: grid; grid-template-columns: 88px 1fr auto; gap: 14px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+    align-items: start;
   }
-  .row img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; background: #000; }
-  .row .meta { min-width: 0; }
-  .row .meta input { width: 100%; margin-top: 4px; }
-  .row .meta .name { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .row button {
+  @media (max-width: 640px) {
+    .q-card { grid-template-columns: 72px 1fr; }
+    .q-card .side { grid-column: 1 / -1; display: flex; gap: 8px; }
+  }
+  .q-card img { width: 88px; height: 88px; object-fit: cover; border-radius: 8px; background: #000; }
+  .q-card .fields { display: grid; gap: 8px; min-width: 0; }
+  .q-card .name { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .q-card .side { display: flex; flex-direction: column; gap: 6px; }
+  .icon-btn {
     background: transparent; border: 1px solid var(--border); color: var(--muted);
-    border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 12px;
+    border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 12px; min-width: 40px;
   }
-  .row button:hover { color: var(--err); border-color: var(--err); }
-  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; align-items: center; }
+  .icon-btn:hover { color: var(--text); border-color: var(--accent); }
+  .icon-btn.danger:hover { color: var(--err); border-color: var(--err); }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; align-items: center; }
   .btn {
-    appearance: none; border: 0; border-radius: 8px; padding: 12px 20px;
-    font: 650 13px system-ui; letter-spacing: .06em; text-transform: uppercase;
-    cursor: pointer; transition: transform .15s, opacity .15s;
+    appearance: none; border: 0; border-radius: 8px; padding: 11px 16px;
+    font: 650 12px system-ui; letter-spacing: .05em; text-transform: uppercase;
+    cursor: pointer; transition: transform .15s, opacity .15s, background .15s;
   }
   .btn:disabled { opacity: .45; cursor: not-allowed; }
   .btn-primary { background: var(--accent); color: #0b1220; }
   .btn-primary:hover:not(:disabled) { background: var(--accent2); }
   .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-danger { background: transparent; color: var(--err); border: 1px solid rgba(224,112,112,.45); }
+  .btn-danger:hover:not(:disabled) { background: rgba(224,112,112,.15); }
   .log {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12px; background: var(--bg); border-radius: 8px; padding: 12px;
-    max-height: 220px; overflow: auto; color: var(--muted); white-space: pre-wrap;
+    font-size: 12px; background: var(--bg); border-radius: 8px; padding: 12px; margin-top: 12px;
+    max-height: 200px; overflow: auto; color: var(--muted); white-space: pre-wrap;
   }
   .log .ok { color: var(--ok); }
   .log .err { color: var(--err); }
-  .existing { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-  .existing figure {
-    margin: 0; background: var(--card); border-radius: 8px; overflow: hidden;
-    border: 1px solid var(--border); display: flex; flex-direction: column;
+  .existing { display: flex; flex-direction: column; gap: 12px; }
+  .e-card {
+    display: grid; grid-template-columns: 100px 1fr; gap: 14px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px;
   }
-  .existing img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-  .existing figcaption { padding: 10px; font-size: 11px; color: var(--muted); flex: 1; display: flex; flex-direction: column; gap: 6px; }
-  .existing .cap-title { color: var(--text); font-size: 12px; font-weight: 600; line-height: 1.3; }
-  .existing .cap-meta { font-size: 10px; opacity: .85; }
-  .existing .rm {
-    margin-top: auto; width: 100%;
-    background: transparent; border: 1px solid var(--border); color: var(--muted);
-    border-radius: 6px; padding: 8px; cursor: pointer; font-size: 11px; font-weight: 600;
-    letter-spacing: .04em; text-transform: uppercase;
-  }
-  .existing .rm:hover { color: #fff; background: rgba(224,112,112,.2); border-color: var(--err); }
-  .existing .rm:disabled { opacity: .5; cursor: wait; }
-  .existing-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
-  .existing-head h2 { margin-bottom: 0; }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: rgba(201,162,89,.15);
-    color: var(--accent); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+  @media (max-width: 640px) { .e-card { grid-template-columns: 1fr; } }
+  .e-card img { width: 100%; max-width: 100px; aspect-ratio: 1; object-fit: cover; border-radius: 8px; background: #000; }
+  .e-card .fields { display: grid; gap: 8px; min-width: 0; }
+  .e-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .e-actions .btn { padding: 8px 12px; font-size: 11px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 14px; }
+  .toolbar label { flex: 1 1 160px; }
+  .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(201,162,89,.15);
+    color: var(--accent); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
   .hint { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.55; }
-  .btn-danger { background: transparent; color: var(--err); border: 1px solid rgba(224,112,112,.45); }
-  .btn-danger:hover:not(:disabled) { background: rgba(224,112,112,.15); }
+  .row-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .badge-warn { color: #e0b060; font-size: 11px; }
 </style>
 </head>
 <body>
 <header>
   <div>
     <h1>✦ <span>Gallery Manager</span></h1>
-    <p>Add or remove trip photos · clears full image, thumb, HTML &amp; captions</p>
+    <p>Per-photo category · location · date · caption · add / edit / remove</p>
   </div>
   <div class="pill" id="countPill">0 in gallery</div>
 </header>
 <main>
   <section class="card">
-    <h2>Batch defaults</h2>
-    <div class="grid2">
+    <h2>Defaults for new photos</h2>
+    <div class="grid3">
       <label>Category
-        <select id="category">
+        <select id="defCategory">
           <option value="coast">Coast</option>
           <option value="landmarks">Landmarks</option>
           <option value="nature">Nature</option>
@@ -593,24 +711,25 @@ UI_HTML = r"""<!DOCTYPE html>
           <option value="food-culture">Food &amp; Culture</option>
         </select>
       </label>
-      <label>Date <input id="date" type="text" placeholder="July 2026" value=""></label>
-      <label style="grid-column: 1 / -1">Location
-        <input id="location" type="text" placeholder="e.g. Big Sur, California">
-      </label>
+      <label>Date <input id="defDate" type="text" placeholder="July 2026"></label>
+      <label>Location <input id="defLocation" type="text" placeholder="e.g. Big Sur, California"></label>
     </div>
-    <p class="hint">These apply to every photo in the queue. You can still edit each caption before uploading.</p>
+    <div class="row-actions">
+      <button class="btn btn-ghost" type="button" id="applyDefaultsBtn">Apply defaults to queue</button>
+    </div>
+    <p class="hint">New drops inherit these values. Each photo in the queue has its own fields you can change independently.</p>
   </section>
 
   <section class="card">
-    <h2>Add photos</h2>
+    <h2>Upload queue</h2>
     <div class="drop" id="drop">
       <strong>Drop photos here</strong>
-      <span>or click to choose · JPEG, PNG, HEIC, WebP · multi-select OK</span>
+      <span>or click to choose · multi-select · JPEG / PNG / HEIC / WebP</span>
       <input type="file" id="fileInput" accept="image/*,.heic,.HEIC" multiple hidden>
     </div>
     <div class="queue" id="queue"></div>
     <div class="actions">
-      <button class="btn btn-primary" id="uploadBtn" disabled>Add to gallery</button>
+      <button class="btn btn-primary" id="uploadBtn" disabled>Add all to gallery</button>
       <button class="btn btn-ghost" id="clearBtn" type="button">Clear queue</button>
       <span class="hint" id="status"></span>
     </div>
@@ -618,19 +737,39 @@ UI_HTML = r"""<!DOCTYPE html>
   </section>
 
   <section class="card">
-    <div class="existing-head">
-      <h2>Already in gallery</h2>
-      <button class="btn btn-danger" id="removeSelectedBtn" type="button" disabled style="display:none">Remove selected</button>
+    <h2>Library</h2>
+    <div class="toolbar">
+      <label>Search
+        <input id="libSearch" type="search" placeholder="Caption, location, slug…">
+      </label>
+      <label>Filter category
+        <select id="libFilter">
+          <option value="">All categories</option>
+          <option value="coast">Coast</option>
+          <option value="landmarks">Landmarks</option>
+          <option value="nature">Nature</option>
+          <option value="roads">Roads</option>
+          <option value="cityscapes">Cityscapes</option>
+          <option value="food-culture">Food &amp; Culture</option>
+        </select>
+      </label>
     </div>
-    <p class="hint" style="margin-top:0;margin-bottom:14px">
-      Remove deletes <strong>everything</strong> for that photo: full image, thumbnail, HTML block, and i18n caption keys.
+    <p class="hint" style="margin-top:0;margin-bottom:12px">
+      Edit fields and <strong>Save</strong> to update category / location / date / caption without re-uploading.
+      <strong>Remove</strong> deletes full image, thumb, HTML, and all language keys.
     </p>
     <div class="existing" id="existing"></div>
   </section>
 </main>
 <script>
-const $ = (s) => document.querySelector(s);
+const CATS = [
+  ['coast','Coast'],['landmarks','Landmarks'],['nature','Nature'],
+  ['roads','Roads'],['cityscapes','Cityscapes'],['food-culture','Food & Culture']
+];
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const queue = [];
+let library = [];
 const drop = $('#drop');
 const fileInput = $('#fileInput');
 const queueEl = $('#queue');
@@ -638,6 +777,13 @@ const logEl = $('#log');
 const statusEl = $('#status');
 const uploadBtn = $('#uploadBtn');
 
+function catOptions(selected) {
+  return CATS.map(([v,l]) =>
+    `<option value="${v}"${v===selected?' selected':''}>${l}</option>`).join('');
+}
+function escAttr(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
 function log(msg, cls='') {
   logEl.hidden = false;
   const line = document.createElement('div');
@@ -646,52 +792,95 @@ function log(msg, cls='') {
   logEl.appendChild(line);
   logEl.scrollTop = logEl.scrollHeight;
 }
+function defaults() {
+  return {
+    category: $('#defCategory').value,
+    location: $('#defLocation').value.trim() || 'United States',
+    date: $('#defDate').value.trim() || new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
+  };
+}
+function captionFromName(name) {
+  return name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
 
 function renderQueue() {
   queueEl.innerHTML = '';
+  if (!queue.length) {
+    uploadBtn.disabled = true;
+    return;
+  }
   queue.forEach((item, i) => {
     const row = document.createElement('div');
-    row.className = 'row';
+    row.className = 'q-card';
     row.innerHTML = `
       <img src="${item.preview}" alt="">
-      <div class="meta">
-        <div class="name">${item.file.name}</div>
-        <input type="text" value="${item.caption.replace(/"/g, '&quot;')}" data-i="${i}" class="cap">
+      <div class="fields">
+        <div class="name">${escAttr(item.file.name)}${item.warn ? ' · <span class="badge-warn">'+item.warn+'</span>' : ''}</div>
+        <label>Caption <input data-k="caption" data-i="${i}" value="${escAttr(item.caption)}"></label>
+        <div class="grid3">
+          <label>Category <select data-k="category" data-i="${i}">${catOptions(item.category)}</select></label>
+          <label>Date <input data-k="date" data-i="${i}" value="${escAttr(item.date)}"></label>
+          <label>Location <input data-k="location" data-i="${i}" value="${escAttr(item.location)}"></label>
+        </div>
       </div>
-      <button type="button" data-rm="${i}">Remove</button>`;
+      <div class="side">
+        <button type="button" class="icon-btn" data-up="${i}" title="Move up">↑</button>
+        <button type="button" class="icon-btn" data-dn="${i}" title="Move down">↓</button>
+        <button type="button" class="icon-btn danger" data-rm="${i}" title="Remove from queue">✕</button>
+      </div>`;
     queueEl.appendChild(row);
   });
-  uploadBtn.disabled = queue.length === 0;
-  queueEl.querySelectorAll('.cap').forEach(inp => {
-    inp.addEventListener('input', e => { queue[+e.target.dataset.i].caption = e.target.value; });
+  uploadBtn.disabled = false;
+
+  $$('[data-k]', queueEl).forEach(el => {
+    const sync = () => { queue[+el.dataset.i][el.dataset.k] = el.value; };
+    el.addEventListener('input', sync);
+    el.addEventListener('change', sync);
   });
-  queueEl.querySelectorAll('[data-rm]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const i = +btn.dataset.rm;
-      URL.revokeObjectURL(queue[i].preview);
-      queue.splice(i, 1);
-      renderQueue();
-    });
-  });
+  $$('[data-rm]', queueEl).forEach(btn => btn.addEventListener('click', () => {
+    const i = +btn.dataset.rm;
+    URL.revokeObjectURL(queue[i].preview);
+    queue.splice(i, 1);
+    renderQueue();
+  }));
+  $$('[data-up]', queueEl).forEach(btn => btn.addEventListener('click', () => {
+    const i = +btn.dataset.up;
+    if (i <= 0) return;
+    [queue[i-1], queue[i]] = [queue[i], queue[i-1]];
+    renderQueue();
+  }));
+  $$('[data-dn]', queueEl).forEach(btn => btn.addEventListener('click', () => {
+    const i = +btn.dataset.dn;
+    if (i >= queue.length - 1) return;
+    [queue[i+1], queue[i]] = [queue[i], queue[i+1]];
+    renderQueue();
+  }));
 }
 
 function addFiles(fileList) {
+  const d = defaults();
+  const existingNames = new Set(library.map(p => (p.filename || '').toLowerCase()));
   [...fileList].forEach(file => {
     if (!file.type.startsWith('image/') && !/\.(heic|heif|jpe?g|png|webp)$/i.test(file.name)) return;
-    const caption = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
-    queue.push({ file, caption, preview: URL.createObjectURL(file) });
+    const stem = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g,'') + '.jpeg';
+    const warn = existingNames.has(stem) ? 'similar name may exist' : '';
+    queue.push({
+      file,
+      preview: URL.createObjectURL(file),
+      caption: captionFromName(file.name),
+      category: d.category,
+      location: d.location,
+      date: d.date,
+      warn,
+    });
   });
   renderQueue();
 }
 
 drop.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', () => { addFiles(fileInput.files); fileInput.value = ''; });
-['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => {
-  e.preventDefault(); drop.classList.add('drag');
-}));
-['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => {
-  e.preventDefault(); drop.classList.remove('drag');
-}));
+['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
 drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
 
 $('#clearBtn').addEventListener('click', () => {
@@ -700,44 +889,103 @@ $('#clearBtn').addEventListener('click', () => {
   renderQueue();
   statusEl.textContent = '';
 });
+$('#applyDefaultsBtn').addEventListener('click', () => {
+  const d = defaults();
+  queue.forEach(q => { q.category = d.category; q.location = d.location; q.date = d.date; });
+  renderQueue();
+  statusEl.textContent = 'Defaults applied to queue';
+});
+$('#defDate').value = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
-$('#date').value = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
-
-async function loadExisting() {
-  const res = await fetch('/api/list');
-  const data = await res.json();
-  $('#countPill').textContent = data.length + ' in gallery';
-  const box = $('#existing');
-  box.innerHTML = data.length ? '' : '<p class="hint">No photos yet.</p>';
-  data.slice().reverse().forEach(item => {
-    const fig = document.createElement('figure');
-    const slug = item.slug || '';
-    const loc = item.location || '';
-    fig.innerHTML = `
-      <img src="/site/${item.thumb}?t=${Date.now()}" alt="">
-      <figcaption>
-        <div class="pill">${item.category || ''}</div>
-        <div class="cap-title"></div>
-        <div class="cap-meta"></div>
-        <button type="button" class="rm" data-slug="${slug}" data-file="${(item.filename || '').replace(/"/g, '')}">Remove</button>
-      </figcaption>`;
-    fig.querySelector('.cap-title').textContent = item.caption || slug;
-    fig.querySelector('.cap-meta').textContent = [loc, item.date].filter(Boolean).join(' · ');
-    box.appendChild(fig);
-  });
-  box.querySelectorAll('.rm').forEach(btn => {
-    btn.addEventListener('click', () => removePhoto(btn));
+function filteredLibrary() {
+  const q = ($('#libSearch').value || '').trim().toLowerCase();
+  const cat = $('#libFilter').value;
+  return library.filter(item => {
+    if (cat && item.category !== cat) return false;
+    if (!q) return true;
+    const hay = [item.caption, item.location, item.date, item.slug, item.category, item.filename]
+      .join(' ').toLowerCase();
+    return hay.includes(q);
   });
 }
 
-async function removePhoto(btn) {
-  const slug = btn.dataset.slug;
-  const filename = btn.dataset.file || '';
-  if (!slug) return;
-  const label = btn.closest('figure')?.querySelector('.cap-title')?.textContent || slug;
-  if (!confirm(`Remove “${label}” permanently?\n\nThis deletes:\n• Full image\n• Thumbnail\n• Gallery HTML block\n• Caption keys (all languages)`)) {
+function renderLibrary() {
+  const data = filteredLibrary();
+  $('#countPill').textContent = library.length + ' in gallery';
+  const box = $('#existing');
+  if (!library.length) {
+    box.innerHTML = '<p class="hint">No photos yet — drop some above.</p>';
     return;
   }
+  if (!data.length) {
+    box.innerHTML = '<p class="hint">No photos match your search/filter.</p>';
+    return;
+  }
+  box.innerHTML = '';
+  data.slice().reverse().forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'e-card';
+    card.dataset.slug = item.slug;
+    card.innerHTML = `
+      <img src="/site/${item.thumb}?t=${Date.now()}" alt="">
+      <div class="fields">
+        <label>Caption <input data-f="caption" value="${escAttr(item.caption)}"></label>
+        <div class="grid3">
+          <label>Category <select data-f="category">${catOptions(item.category)}</select></label>
+          <label>Date <input data-f="date" value="${escAttr(item.date)}"></label>
+          <label>Location <input data-f="location" value="${escAttr(item.location)}"></label>
+        </div>
+        <div class="e-actions">
+          <button type="button" class="btn btn-primary save-btn">Save</button>
+          <button type="button" class="btn btn-danger rm-btn">Remove</button>
+          <span class="hint" style="margin:0" data-slug-label>${escAttr(item.slug)}</span>
+        </div>
+      </div>`;
+    box.appendChild(card);
+    $('.save-btn', card).addEventListener('click', () => saveExisting(card, item));
+    $('.rm-btn', card).addEventListener('click', () => removePhoto(card, item));
+  });
+}
+
+async function loadExisting() {
+  const res = await fetch('/api/list');
+  library = await res.json();
+  renderLibrary();
+}
+
+async function saveExisting(card, item) {
+  const payload = {
+    slug: item.slug,
+    filename: item.filename,
+    caption: $('[data-f=caption]', card).value.trim(),
+    category: $('[data-f=category]', card).value,
+    date: $('[data-f=date]', card).value.trim(),
+    location: $('[data-f=location]', card).value.trim(),
+  };
+  const btn = $('.save-btn', card);
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  logEl.hidden = false;
+  try {
+    const res = await fetch('/api/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    log(`✓ Updated ${item.slug} · ${data.caption}`, 'ok');
+    await loadExisting();
+  } catch (err) {
+    log(`✗ Update ${item.slug}: ${err.message}`, 'err');
+    btn.disabled = false;
+    btn.textContent = 'Save';
+  }
+}
+
+async function removePhoto(card, item) {
+  if (!confirm(`Remove “${item.caption || item.slug}” permanently?\n\nDeletes full image, thumb, HTML block, and all caption keys.`)) return;
+  const btn = $('.rm-btn', card);
   btn.disabled = true;
   btn.textContent = 'Removing…';
   logEl.hidden = false;
@@ -745,25 +993,24 @@ async function removePhoto(btn) {
     const res = await fetch('/api/remove', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug, filename }),
+      body: JSON.stringify({ slug: item.slug, filename: item.filename }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || res.statusText);
-    const files = (data.files_removed || []).join(', ') || 'none left on disk';
-    log(`✓ Removed ${slug} · HTML=${data.html_removed} · i18n=${data.i18n_keys_removed} · files: ${files}`, 'ok');
+    log(`✓ Removed ${item.slug} · files: ${(data.files_removed||[]).join(', ')||'—'}`, 'ok');
     await loadExisting();
   } catch (err) {
-    log(`✗ Remove ${slug}: ${err.message}`, 'err');
+    log(`✗ Remove ${item.slug}: ${err.message}`, 'err');
     btn.disabled = false;
     btn.textContent = 'Remove';
   }
 }
 
+$('#libSearch').addEventListener('input', renderLibrary);
+$('#libFilter').addEventListener('change', renderLibrary);
+
 uploadBtn.addEventListener('click', async () => {
   if (!queue.length) return;
-  const category = $('#category').value;
-  const location = $('#location').value.trim() || 'United States';
-  const date = $('#date').value.trim() || new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
   uploadBtn.disabled = true;
   statusEl.textContent = 'Uploading…';
   logEl.innerHTML = '';
@@ -772,15 +1019,15 @@ uploadBtn.addEventListener('click', async () => {
   for (const item of [...queue]) {
     const fd = new FormData();
     fd.append('file', item.file);
-    fd.append('category', category);
-    fd.append('location', location);
-    fd.append('date', date);
-    fd.append('caption', item.caption);
+    fd.append('category', item.category || 'coast');
+    fd.append('location', (item.location || '').trim() || 'United States');
+    fd.append('date', (item.date || '').trim() || defaults().date);
+    fd.append('caption', (item.caption || '').trim() || captionFromName(item.file.name));
     try {
       const res = await fetch('/api/add', { method: 'POST', body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || res.statusText);
-      log(`✓ ${item.file.name} → ${data.filename} (${data.thumb_size})`, 'ok');
+      log(`✓ ${item.file.name} → ${data.filename} [${data.category}] ${data.location || ''}`, 'ok');
       ok++;
       URL.revokeObjectURL(item.preview);
       const idx = queue.indexOf(item);
@@ -865,6 +1112,28 @@ class Handler(BaseHTTPRequestHandler):
                     self._json(400, {"error": "Missing slug"})
                     return
                 result = remove_one(slug, filename)
+                self._json(200, result)
+            except FileNotFoundError as e:
+                self._json(404, {"error": str(e)})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+
+        if path == "/api/update":
+            try:
+                payload = json.loads(body.decode("utf-8") or "{}")
+                slug = (payload.get("slug") or "").strip()
+                if not slug:
+                    self._json(400, {"error": "Missing slug"})
+                    return
+                result = update_one(
+                    slug,
+                    category=payload.get("category"),
+                    location=payload.get("location"),
+                    date=payload.get("date"),
+                    caption=payload.get("caption"),
+                    alt=payload.get("alt"),
+                )
                 self._json(200, result)
             except FileNotFoundError as e:
                 self._json(404, {"error": str(e)})
