@@ -31,12 +31,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Strip internal / non-public files
+        # Defense-in-depth: Gallery Manager and other local-only tooling must
+        # never ship to GitHub Pages even if accidentally force-added to git.
+        run: |
+          rm -rf tools "Add Photos.command"
+          find . -name '__pycache__' -type d -prune -exec rm -rf {} +
+          find . -name '.DS_Store' -delete
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
+          # Upload entire repository (minus stripped internal tooling)
           path: '.'
       - name: Deploy to GitHub Pages
         id: deployment

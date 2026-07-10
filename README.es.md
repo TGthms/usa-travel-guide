@@ -28,7 +28,7 @@
 | 📸 **Contenido de destinos seleccionado** | Incluye monumentos, ciudades y lugares emblemáticos de todo el país. |
 | 🖼️ **Galería de fotos** | Una galería filtrable de fotografías de viaje — explora por paisajes urbanos, monumentos, naturaleza, costas, gastronomía y cultura, o rutas por carretera. |
 | 🌦️ **Consejos según la temporada** | Destaca las mejores épocas para visitar cada región y destino. |
-| 🧰 **Caja de herramientas de viaje** | Utilidades rápidas para decisiones comunes de viaje: tipo de cambio en tiempo real (API de Frankfurter), husos horarios y cálculo de cuentas en restaurantes. |
+| 🧰 **Herramientas de viaje** | Página dedicada: tipo de cambio en vivo, reloj mundial, propina e impuesto de ventas (50 estados), coste de viaje (gasolina/eléctrico) y números de emergencia. |
 | 🌐 **Soporte multilingüe** | Disponible en inglés, español, chino y japonés para una mayor accesibilidad. |
 | ⚙️ **Preferencias personalizables** | Permite ajustar opciones como el idioma y las unidades de medida. |
 | ♿️ **Funciones de accesibilidad** | Reduce la animación o desactiva el efecto del cursor — útil para la sensibilidad al movimiento, dispositivos antiguos o simplemente para una experiencia más tranquila. |

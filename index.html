@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="The ultimate travel guide to the United States — explore regions, top destinations, road trips, seasons, culture, and essential travel tips across all 50 states.">
 <meta name="theme-color" content="#07101c">
 <meta name="color-scheme" content="dark light">
@@ -43,7 +43,7 @@
         <div class="modal-tag" id="modal-tag"></div>
         <div class="modal-title" id="modal-title"></div>
       </div>
-      <button class="modal-close" id="modal-close" aria-label="Close modal">✕</button>
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close modal">✕</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
   </div>
@@ -59,14 +59,14 @@
     <li><a href="#practical"    data-section="practical" data-i18n="nav.practical">Essentials</a></li>
     <li><a href="#seasons"      data-section="seasons" data-i18n="nav.seasons">Seasons</a></li>
     <li><a href="#culture"      data-section="culture" data-i18n="nav.culture">Culture</a></li>
-    <li><a href="#routes"       data-section="routes" data-i18n="nav.routes">Road Trips</a></li>
+    <li><a href="#routes"       data-section="routes" data-i18n="nav.routes">Trips</a></li>
     <li><a href="#tips"         data-section="tips" data-i18n="nav.tips">Tips</a></li>
   </ul>
   <div class="nav-actions">
-    <button class="nav-tool-btn" id="toolsOpen" type="button" aria-haspopup="dialog" aria-controls="toolsOverlay" data-i18n-aria="nav.tools" aria-label="Travel tools">🧰</button>
+    <a href="tools.html" class="nav-tool-btn" data-i18n-aria="nav.tools" aria-label="Travel tools" title="Travel tools">🧰</a>
     <button class="nav-settings-btn" id="settingsOpen" type="button" aria-haspopup="dialog" aria-controls="settingsOverlay" data-i18n-aria="nav.settings" aria-label="Settings">⚙️</button>
   </div>
-  <button class="nav-hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+  <button type="button" class="nav-hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </nav>
@@ -80,11 +80,11 @@
   <a href="#culture"      class="nav-mobile-link" data-i18n="nav.culture">Culture</a>
   <a href="#routes"       class="nav-mobile-link" data-i18n="nav.routes">Road Trips</a>
   <a href="#tips"         class="nav-mobile-link" data-i18n="nav.tips">Tips</a>
-  <button class="nav-mobile-link nav-mobile-settings" id="mobileToolsBtn" type="button" data-i18n="nav.tools">Tools</button>
+  <a href="tools.html" class="nav-mobile-link" data-i18n="nav.tools">Tools</a>
   <button class="nav-mobile-link nav-mobile-settings" id="mobileSettingsBtn" type="button" data-i18n="nav.settings">Settings</button>
 </nav>
 
-<main id="main">
+<main id="main" tabindex="-1">
 <section id="hero">
   <div class="hero-bg" id="heroBg"></div>
   <canvas id="dotMap" aria-hidden="true"></canvas>
@@ -209,8 +209,8 @@
     </div>
     <p data-i18n="regions.intro">Each region carries its own accent, cuisine, pace, and soul — from the liberal Northeast to the Wild West.</p>
     <div class="dest-nav-btns regions-nav-btns">
-      <button class="dest-nav-btn" id="regionScrollLeft" aria-label="Scroll regions left">←</button>
-      <button class="dest-nav-btn" id="regionScrollRight" aria-label="Scroll regions right">→</button>
+      <button type="button" class="dest-nav-btn" id="regionScrollLeft" aria-label="Scroll regions left">←</button>
+      <button type="button" class="dest-nav-btn" id="regionScrollRight" aria-label="Scroll regions right">→</button>
     </div>
   </div>
 
@@ -341,19 +341,19 @@
       </h2>
     </div>
     <div class="dest-nav-btns reveal">
-      <button class="dest-nav-btn" id="destScrollLeft" aria-label="Scroll Left">←</button>
-      <button class="dest-nav-btn" id="destScrollRight" aria-label="Scroll Right">→</button>
+      <button type="button" class="dest-nav-btn" id="destScrollLeft" aria-label="Scroll Left">←</button>
+      <button type="button" class="dest-nav-btn" id="destScrollRight" aria-label="Scroll Right">→</button>
     </div>
   </div>
 
   <div class="dest-filter-bar reveal" id="destFilterBar">
-    <button class="dest-filter-btn active" data-filter="all" data-i18n="dest.filterAll">All Cities</button>
-    <button class="dest-filter-btn" data-filter="northeast" data-i18n="regions.ne.name">The Northeast</button>
-    <button class="dest-filter-btn" data-filter="south" data-i18n="regions.so.name">The South</button>
-    <button class="dest-filter-btn" data-filter="midwest" data-i18n="regions.mw.name">The Midwest</button>
-    <button class="dest-filter-btn" data-filter="west" data-i18n="regions.we.name">The West</button>
-    <button class="dest-filter-btn" data-filter="southwest" data-i18n="regions.sw.name">The Southwest</button>
-    <button class="dest-filter-btn dest-filter-saved" data-filter="saved" id="savedFilterBtn"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" style="vertical-align:-1px;margin-right:5px;"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><span data-i18n="dest.filterSaved">Saved</span> (<span id="savedCount">0</span>)</button>
+    <button type="button" class="dest-filter-btn active" data-filter="all" data-i18n="dest.filterAll">All Cities</button>
+    <button type="button" class="dest-filter-btn" data-filter="northeast" data-i18n="regions.ne.name">The Northeast</button>
+    <button type="button" class="dest-filter-btn" data-filter="south" data-i18n="regions.so.name">The South</button>
+    <button type="button" class="dest-filter-btn" data-filter="midwest" data-i18n="regions.mw.name">The Midwest</button>
+    <button type="button" class="dest-filter-btn" data-filter="west" data-i18n="regions.we.name">The West</button>
+    <button type="button" class="dest-filter-btn" data-filter="southwest" data-i18n="regions.sw.name">The Southwest</button>
+    <button type="button" class="dest-filter-btn dest-filter-saved" data-filter="saved" id="savedFilterBtn"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" style="vertical-align:-1px;margin-right:5px;"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><span data-i18n="dest.filterSaved">Saved</span> (<span id="savedCount">0</span>)</button>
   </div>
 
   <div class="dest-carousel-wrapper reveal">
@@ -371,7 +371,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -387,7 +387,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -403,7 +403,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -419,7 +419,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -435,7 +435,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -451,7 +451,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -467,7 +467,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -483,7 +483,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -499,7 +499,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -515,7 +515,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -531,7 +531,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -547,7 +547,7 @@
             <div class="dest-meta-item"><span class="dest-meta-label" data-i18n="dest.budget">Budget</span><span class="dest-meta-val">$$$</span></div>
           </div>
         </div>
-        <button class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         <div class="dest-arrow">→</div>
       </div>
 
@@ -751,107 +751,6 @@
 </section>
 </main>
 
-<div class="settings-overlay" id="toolsOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="toolsTitle">
-<section id="tools" class="settings-panel tools-panel">
-  <div class="settings-header reveal">
-    <span class="section-eyebrow" data-i18n="tools.eyebrow">Travel Tools</span>
-    <div class="settings-title-row">
-      <h2 id="toolsTitle" data-i18n-html="tools.heading">Plan With <em>Confidence</em></h2>
-      <button class="settings-close" id="toolsClose" type="button" aria-label="Close tools">✕</button>
-    </div>
-    <p data-i18n="tools.intro">Currency, clocks, tip &amp; sales tax (all 50 states), gas or EV road costs, and emergency numbers.</p>
-  </div>
-
-  <div class="tools-grid">
-    <div class="tool-card tool-card-wide reveal">
-      <div class="settings-group-label" data-i18n="tools.currencyLabel">Live Currency Converter</div>
-      <div class="settings-group-sub" data-i18n="tools.currencySub">Uses Frankfurter daily exchange rates</div>
-      <div class="tool-form currency-tool">
-        <label class="tool-field">
-          <span data-i18n="tools.amount">Amount</span>
-          <input id="currencyAmount" type="number" min="0" step="0.01" value="100" inputmode="decimal">
-        </label>
-        <label class="tool-field">
-          <span data-i18n="tools.from">From</span>
-          <select id="currencyFrom">
-            <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="JPY">JPY</option><option value="CNY">CNY</option><option value="HKD">HKD</option><option value="CHF">CHF</option><option value="MXN">MXN</option>
-          </select>
-        </label>
-        <button class="tool-swap" id="currencySwap" type="button" aria-label="Swap currencies">⇄</button>
-        <label class="tool-field">
-          <span data-i18n="tools.to">To</span>
-          <select id="currencyTo">
-            <option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="JPY">JPY</option><option value="CNY">CNY</option><option value="HKD">HKD</option><option value="CHF">CHF</option><option value="MXN">MXN</option>
-          </select>
-        </label>
-      </div>
-      <div class="tool-result" id="currencyResult" aria-live="polite">Ready</div>
-      <div class="tool-meta" id="currencyMeta">Rates update daily.</div>
-    </div>
-
-    <div class="tool-card reveal reveal-delay-1">
-      <div class="settings-group-label" data-i18n="tools.clockLabel">World Clock</div>
-      <div class="settings-group-sub" data-i18n="tools.clockSub">Key time zones for planning calls, arrivals, and check-ins.</div>
-      <div class="clock-list" id="worldClockList"></div>
-    </div>
-
-    <div class="tool-card reveal reveal-delay-2">
-      <div class="settings-group-label" data-i18n="tools.tipLabel">Tip &amp; Sales Tax</div>
-      <div class="settings-group-sub" data-i18n="tools.tipSub">Restaurant or purchase total — pick any U.S. state for typical sales tax, then add tip.</div>
-      <div class="tool-form stacked">
-        <label class="tool-field">
-          <span data-i18n="tools.salesTaxState">State</span>
-          <select id="salesTaxState"></select>
-        </label>
-        <label class="tool-field"><span data-i18n="tools.bill">Amount / bill</span><input id="billAmount" type="number" min="0" step="0.01" value="80" inputmode="decimal"></label>
-        <div class="tool-two-col">
-          <label class="tool-field"><span data-i18n="tools.tax">Tax %</span><input id="taxRate" type="number" min="0" step="0.01" value="8.82" inputmode="decimal"></label>
-          <label class="tool-field"><span data-i18n="tools.tip">Tip %</span><input id="tipRate" type="number" min="0" step="1" value="20" inputmode="decimal"></label>
-        </div>
-        <p class="tool-field-hint" data-i18n="tools.taxHint">Tax auto-fills from the state (approximate combined rate). Adjust if needed.</p>
-      </div>
-      <div class="tool-result" id="tipResult" aria-live="polite">$0.00</div>
-      <div class="tool-meta" id="tipMeta"></div>
-    </div>
-
-    <div class="tool-card reveal" id="driveToolCard" data-drive-mode="gas">
-      <div class="settings-group-label" data-i18n="tools.driveLabel">Road Trip Cost</div>
-      <div class="settings-group-sub" data-i18n="tools.driveSub">Drive time and energy cost for gas cars or EVs.</div>
-      <div class="tool-form stacked">
-        <div class="tool-seg" role="group" aria-label="Vehicle type">
-          <button type="button" class="tool-seg-btn active" data-drive-type="gas" data-i18n="tools.driveGas">Gas</button>
-          <button type="button" class="tool-seg-btn" data-drive-type="ev" data-i18n="tools.driveEv">EV</button>
-        </div>
-        <label class="tool-field"><span data-i18n="tools.driveDist">Distance</span><input id="driveDist" type="number" min="0" step="1" value="400" inputmode="decimal"></label>
-        <label class="tool-field"><span data-i18n="tools.driveSpeed">Avg speed</span><input id="driveSpeed" type="number" min="1" step="1" value="60" inputmode="decimal"></label>
-        <div class="tool-two-col drive-gas-field">
-          <label class="tool-field"><span id="driveEconLabel" data-i18n="tools.driveMpg">MPG / L/100km</span><input id="driveMpg" type="number" min="0.1" step="0.1" value="28" inputmode="decimal"></label>
-          <label class="tool-field"><span id="drivePriceLabel" data-i18n="tools.driveFuel">Fuel $/gal or $/L</span><input id="driveFuel" type="number" min="0" step="0.01" value="3.80" inputmode="decimal"></label>
-        </div>
-        <div class="tool-two-col drive-ev-field">
-          <label class="tool-field"><span id="driveEvEconLabel" data-i18n="tools.driveEvEcon">mi/kWh or kWh/100km</span><input id="driveEvEcon" type="number" min="0.1" step="0.1" value="3.5" inputmode="decimal"></label>
-          <label class="tool-field"><span data-i18n="tools.driveEvPrice">Electricity $/kWh</span><input id="driveEvPrice" type="number" min="0" step="0.01" value="0.16" inputmode="decimal"></label>
-        </div>
-      </div>
-      <div class="tool-result tool-result-sm" id="driveResult" aria-live="polite">—</div>
-      <div class="tool-meta" id="driveMeta"></div>
-    </div>
-
-    <div class="tool-card reveal reveal-delay-2">
-      <div class="settings-group-label" data-i18n="tools.emergencyLabel">Useful Numbers</div>
-      <div class="settings-group-sub" data-i18n="tools.emergencySub">Keep these handy while traveling in the United States.</div>
-      <ul class="tool-info-list" id="emergencyList">
-        <li><strong>911</strong> — <span data-i18n="tools.em911">Emergency (police, fire, ambulance)</span></li>
-        <li><strong>511</strong> — <span data-i18n="tools.em511">Traffic &amp; road conditions (many states)</span></li>
-        <li><strong>988</strong> — <span data-i18n="tools.em988">Suicide &amp; Crisis Lifeline</span></li>
-        <li><strong>1-800-222-1222</strong> — <span data-i18n="tools.emPoison">Poison Control</span></li>
-        <li><strong>311</strong> — <span data-i18n="tools.em311">Non-emergency city services (where available)</span></li>
-      </ul>
-      <div class="tool-meta" data-i18n="tools.emNote">Dial 911 only for real emergencies. Save your country’s embassy number too.</div>
-    </div>
-  </div>
-</section>
-</div>
 
 <div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="settingsTitle">
 <section id="settings" class="settings-panel">
@@ -869,27 +768,27 @@
       <div class="settings-group-label" data-i18n="settings.themeLabel">🎨 Theme</div>
       <div class="settings-group-sub" data-i18n="settings.themeSub">Every section adapts to your chosen palette.</div>
       <div class="theme-swatch-grid" id="themeSwatchGrid">
-        <button class="theme-swatch active" data-theme-val="default">
+        <button type="button" class="theme-swatch active" data-theme-val="default">
           <div class="theme-swatch-preview"><span style="background:#07101c;"></span><span style="background:#c9a259;"></span><span style="background:#b85c42;"></span></div>
           <div class="theme-swatch-name"><span data-i18n="settings.themeDefault">Midnight Atlas</span><span class="theme-swatch-check">✓</span></div>
         </button>
-        <button class="theme-swatch" data-theme-val="minimal">
+        <button type="button" class="theme-swatch" data-theme-val="minimal">
           <div class="theme-swatch-preview"><span style="background:#f7f6f3;"></span><span style="background:#1e3a5f;"></span><span style="background:#8b7355;"></span></div>
           <div class="theme-swatch-name"><span data-i18n="settings.themeMinimal">Gallery Daylight</span><span class="theme-swatch-check">✓</span></div>
         </button>
-        <button class="theme-swatch" data-theme-val="elegant">
+        <button type="button" class="theme-swatch" data-theme-val="elegant">
           <div class="theme-swatch-preview"><span style="background:#f6f1e8;"></span><span style="background:#7a2e2e;"></span><span style="background:#b8956a;"></span></div>
           <div class="theme-swatch-name"><span data-i18n="settings.themeElegant">Heritage Paper</span><span class="theme-swatch-check">✓</span></div>
         </button>
-        <button class="theme-swatch" data-theme-val="luxury">
+        <button type="button" class="theme-swatch" data-theme-val="luxury">
           <div class="theme-swatch-preview"><span style="background:#0c0c0c;"></span><span style="background:#c4a462;"></span><span style="background:#a8a29a;"></span></div>
           <div class="theme-swatch-name"><span data-i18n="settings.themeLuxury">Grand Tour</span><span class="theme-swatch-check">✓</span></div>
         </button>
-        <button class="theme-swatch" data-theme-val="glass">
+        <button type="button" class="theme-swatch" data-theme-val="glass">
           <div class="theme-swatch-preview"><span style="background:#0b1424;"></span><span style="background:#8eb6d4;"></span><span style="background:#d4a574;"></span></div>
           <div class="theme-swatch-name"><span data-i18n="settings.themeGlass">Twilight Glass</span><span class="theme-swatch-check">✓</span></div>
         </button>
-        <button class="theme-swatch" data-theme-val="nature">
+        <button type="button" class="theme-swatch" data-theme-val="nature">
           <div class="theme-swatch-preview"><span style="background:#141c18;"></span><span style="background:#8fa884;"></span><span style="background:#c9a66b;"></span></div>
           <div class="theme-swatch-name"><span data-i18n="settings.themeNature">Field Notes</span><span class="theme-swatch-check">✓</span></div>
         </button>
@@ -900,10 +799,10 @@
       <div class="settings-group-label">🌐 <span data-i18n="settings.languageLabel">Language</span></div>
       <div class="settings-group-sub" data-i18n="settings.languageSub">Translates all guide content, including region &amp; city details.</div>
       <div class="pill-group" id="langPillGroup">
-        <button class="pill-btn active" data-lang-val="en"><span>English</span><span class="pill-check">✓</span></button>
-        <button class="pill-btn" data-lang-val="es"><span>Español <span class="pill-btn-native">Spanish</span></span><span class="pill-check">✓</span></button>
-        <button class="pill-btn" data-lang-val="zh"><span>中文 <span class="pill-btn-native">Chinese</span></span><span class="pill-check">✓</span></button>
-        <button class="pill-btn" data-lang-val="ja"><span>日本語 <span class="pill-btn-native">Japanese</span></span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn active" data-lang-val="en"><span>English</span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-lang-val="es"><span>Español <span class="pill-btn-native">Spanish</span></span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-lang-val="zh"><span>中文 <span class="pill-btn-native">Chinese</span></span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-lang-val="ja"><span>日本語 <span class="pill-btn-native">Japanese</span></span><span class="pill-check">✓</span></button>
       </div>
     </div>
 
@@ -913,15 +812,15 @@
       <div class="settings-subgroup">
         <div class="settings-subgroup-label" data-i18n="settings.temperature">Temperature</div>
         <div class="units-row" id="unitTempGroup">
-          <button class="pill-btn active" data-unit-val="f"><span>°F</span><span class="pill-check">✓</span></button>
-          <button class="pill-btn" data-unit-val="c"><span>°C</span><span class="pill-check">✓</span></button>
+          <button type="button" class="pill-btn active" data-unit-val="f"><span>°F</span><span class="pill-check">✓</span></button>
+          <button type="button" class="pill-btn" data-unit-val="c"><span>°C</span><span class="pill-check">✓</span></button>
         </div>
       </div>
       <div class="settings-subgroup">
         <div class="settings-subgroup-label" data-i18n="settings.distance">Distance</div>
         <div class="units-row" id="unitDistGroup">
-          <button class="pill-btn active" data-unit-val="mi"><span data-i18n="settings.miles">Miles</span><span class="pill-check">✓</span></button>
-          <button class="pill-btn" data-unit-val="km"><span data-i18n="settings.km">Kilometers</span><span class="pill-check">✓</span></button>
+          <button type="button" class="pill-btn active" data-unit-val="mi"><span data-i18n="settings.miles">Miles</span><span class="pill-check">✓</span></button>
+          <button type="button" class="pill-btn" data-unit-val="km"><span data-i18n="settings.km">Kilometers</span><span class="pill-check">✓</span></button>
         </div>
       </div>
     </div>
@@ -933,15 +832,15 @@
         <div class="settings-subgroup">
           <div class="settings-subgroup-label" data-i18n="settings.reduceMotion">Motion</div>
           <div class="units-row" id="motionPillGroup">
-            <button class="pill-btn active" data-motion-val="off"><span data-i18n="settings.motionStandard">Standard</span><span class="pill-check">✓</span></button>
-            <button class="pill-btn" data-motion-val="on"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn active" data-motion-val="off"><span data-i18n="settings.motionStandard">Standard</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn" data-motion-val="on"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
           </div>
         </div>
         <div class="settings-subgroup">
           <div class="settings-subgroup-label" data-i18n="settings.cursorEffect">Cursor Trail</div>
           <div class="units-row" id="cursorPillGroup">
-            <button class="pill-btn active" data-cursor-val="on"><span data-i18n="settings.cursorOn">On</span><span class="pill-check">✓</span></button>
-            <button class="pill-btn" data-cursor-val="off"><span data-i18n="settings.cursorOff">Off</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn active" data-cursor-val="on"><span data-i18n="settings.cursorOn">On</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn" data-cursor-val="off"><span data-i18n="settings.cursorOff">Off</span><span class="pill-check">✓</span></button>
           </div>
         </div>
       </div>
@@ -984,7 +883,8 @@
       <h4 data-i18n="footer.planTitle">Plan Your Trip</h4>
       <ul>
         <li><a href="#routes" data-i18n="nav.routes">Road Trips</a></li>
-        <li><a href="#regions" data-i18n="footer.parks">National Parks</a></li>
+        <li><a href="tools.html" data-i18n="nav.tools">Tools</a></li>
+        <li><a href="gallery.html" data-i18n="nav.gallery">Gallery</a></li>
         <li><a href="#seasons" data-i18n="footer.whenToVisit">When to Visit</a></li>
         <li><a href="#practical" data-i18n="footer.visa">Visa &amp; Entry</a></li>
         <li><a href="#tips" data-i18n="nav.tips">Travel Tips</a></li>

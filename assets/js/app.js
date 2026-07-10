@@ -1,12 +1,95 @@
 'use strict';
 
+/* ═══════════════════════════════════════════════════════════════════════
+   USA Travel Guide — client application
+   Shared by index.html · gallery.html · tools.html
+
+   Design goals for extreme environments (watchOS Safari, low-memory
+   webviews, feature-incomplete browsers):
+   · Never throw on missing APIs (IntersectionObserver, matchMedia, …)
+   · Skip GPU-heavy work (cursor trail, hero particle map) when constrained
+   · One full-res gallery image in flight at a time
+   · Preferences survive sandboxed storage via safeStorage
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── CAPABILITY / ENVIRONMENT ── */
+function safeMatchMedia(query) {
+  try {
+    if (typeof window.matchMedia === 'function') return window.matchMedia(query);
+  } catch (e) { /* some webviews throw on unknown queries */ }
+  return { matches: false, media: query, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} };
+}
+
+function isConstrainedViewport() {
+  try {
+    const w = window.innerWidth || 0;
+    const h = window.innerHeight || 0;
+    // watchOS / wearable webviews are typically well under 320 CSS px
+    if ((w > 0 && w <= 320) || (h > 0 && h <= 280)) return true;
+    if (safeMatchMedia('(max-width: 320px), (max-height: 280px)').matches) return true;
+    // Optional Client Hints — ignore if absent
+    if (typeof navigator.deviceMemory === 'number' && navigator.deviceMemory > 0 && navigator.deviceMemory < 1) return true;
+  } catch (e) { /* ignore */ }
+  return false;
+}
+
+const ENV = {
+  constrained: isConstrainedViewport(),
+  hasIO: typeof IntersectionObserver === 'function',
+  hasRAF: typeof requestAnimationFrame === 'function',
+  hasXHR: typeof XMLHttpRequest === 'function',
+  reduceMotion: safeMatchMedia('(prefers-reduced-motion: reduce)').matches
+};
+
+function raf(fn) {
+  if (ENV.hasRAF) return requestAnimationFrame(fn);
+  return setTimeout(() => fn(Date.now()), 16);
+}
+
+/** Observe elements entering the viewport; fall back to immediate reveal. */
+function observeWhenVisible(elements, onVisible, options) {
+  const list = elements && elements.length != null ? Array.from(elements) : [];
+  if (!list.length) return null;
+  if (!ENV.hasIO) {
+    list.forEach(onVisible);
+    return null;
+  }
+  try {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          onVisible(entry.target);
+          try { obs.unobserve(entry.target); } catch (e) { /* ignore */ }
+        }
+      });
+    }, options || { threshold: 0.08 });
+    list.forEach((el) => { try { obs.observe(el); } catch (e) { onVisible(el); } });
+    return obs;
+  } catch (e) {
+    list.forEach(onVisible);
+    return null;
+  }
+}
+
+// Prevent a single unhandled rejection from blanking constrained webviews.
+window.addEventListener('unhandledrejection', (e) => {
+  try { if (e && typeof e.preventDefault === 'function') e.preventDefault(); } catch (err) { /* ignore */ }
+});
+
 /* ── LOADER ── */
 window.addEventListener('load', () => {
   const loader = document.getElementById('loader');
   if (!loader) return;
   // Gallery mini-app can dismiss sooner — less “full site boot” feel.
-  const delay = document.body.classList.contains('page-gallery') ? 700 : 1400;
-  setTimeout(() => loader.classList.add('gone'), delay);
+  // Constrained viewports skip the wait entirely (less chance of a hung boot).
+  if (ENV.constrained) {
+    loader.classList.add('gone');
+    return;
+  }
+  const isMiniApp = document.body.classList.contains('page-gallery')
+    || document.body.classList.contains('page-tools');
+  const delay = isMiniApp ? 700 : 1400;
+  setTimeout(() => { try { loader.classList.add('gone'); } catch (e) { /* ignore */ } }, delay);
 });
 
 const I18N = {
@@ -261,15 +344,17 @@ const I18N = {
     "gallery.backToGuide": "Volver a la guía",
     "gallery.pageIntro": "Cada parada del viaje hasta ahora, organizada por categoría — se añaden nuevas fotos a medida que continúa el viaje.",
     "gallery.item.sfgoldengate.caption": "Golden Gate Bridge",
-    "gallery.item.bixby.caption": "Puente Bixby",
-    "gallery.item.carmel.caption": "Carmel-by-the-Sea",
-    "gallery.item.garrapataview.caption": "Mirador de Playa Garrapata",
-    "gallery.item.garrapata.caption": "Playa Garrapata",
-    "gallery.item.granitecanyon.caption": "Puente Granite Canyon",
-    "gallery.item.hurricanepoint.caption": "Hurricane Point",
-    "gallery.item.richmondbay.caption": "Bahía de SF desde Richmond",
-    "gallery.item.richmondpark.caption": "Parque Regional de Richmond",
-    "gallery.item.richmondview.caption": "Vista de la Bahía de SF desde Richmond",
+    "gallery.item.bixby.caption": "Bixby Bridge",
+    "gallery.item.carmel.caption": "Carmel by the Sea",
+    "gallery.item.garrapataview.caption": "Garrapata Beach Overlook",
+    "gallery.item.garrapata.caption": "Garrapata Beach",
+    "gallery.item.granitecanyon.caption": "Granite Canyon Bridge",
+    "gallery.item.hurricanepoint.caption": "Hurricane Point Panorama",
+    "gallery.item.richmondbay.caption": "SF Bay from Richmond",
+    "gallery.item.richmondpark.caption": "Richmond Regional Park",
+    "gallery.item.richmondview.caption": "SF Bay view from Richmond",
+    "gallery.item.japantown.caption": "Japantown",
+    "gallery.item.ca1facingpacific.caption": "CA-1 frente al Pacífico",
     "settings.eyebrow": "Preferencias",
     "settings.heading": "Crea <em>tu propia experiencia</em>",
     "settings.intro": "Las preferencias se guardan en este dispositivo",
@@ -301,6 +386,7 @@ const I18N = {
     "tools.eyebrow": "Caja de herramientas",
     "tools.heading": "Planifica tu viaje <em>con más tranquilidad</em>",
     "tools.intro": "Divisas, relojes, propinas, coste de carretera, impuestos y teléfonos útiles — todo listo.",
+    "tools.backToGuide": "Volver a la guía",
     "tools.currencyLabel": "Conversor de divisas en vivo",
     "tools.currencySub": "Usa los tipos de cambio diarios de Frankfurter",
     "tools.amount": "Cantidad",
@@ -594,17 +680,19 @@ const I18N = {
     "gallery.emptyState": "该分类暂无照片——敬请期待",
     "gallery.viewAll": "查看完整相册",
     "gallery.backToGuide": "返回指南",
-    "gallery.pageIntro": "目前旅途中的每一站，按类别整理——旅程仍在继续，新照片会持续更新。",
+    "gallery.pageIntro": "一份持续更新的旅途影像集「照片版权归 Tim G 所有，受 CC BY 4.0 协议保护 — 注明作者后方可使用」",
     "gallery.item.sfgoldengate.caption": "Golden Gate Bridge",
-    "gallery.item.bixby.caption": "比克斯比大桥",
-    "gallery.item.carmel.caption": "海边卡梅尔小镇",
-    "gallery.item.garrapataview.caption": "加拉帕塔海滩观景台",
-    "gallery.item.garrapata.caption": "加拉帕塔海滩",
-    "gallery.item.granitecanyon.caption": "花岗岩峡谷大桥",
-    "gallery.item.hurricanepoint.caption": "飓风角",
-    "gallery.item.richmondbay.caption": "从里士满眺望旧金山湾",
-    "gallery.item.richmondpark.caption": "里士满区域公园",
-    "gallery.item.richmondview.caption": "里士满旧金山湾景",
+    "gallery.item.bixby.caption": "Bixby Bridge",
+    "gallery.item.carmel.caption": "Carmel by the Sea",
+    "gallery.item.garrapataview.caption": "Garrapata Beach Overlook",
+    "gallery.item.garrapata.caption": "Garrapata Beach",
+    "gallery.item.granitecanyon.caption": "Granite Canyon Bridge",
+    "gallery.item.hurricanepoint.caption": "Hurricane Point Panorama",
+    "gallery.item.richmondbay.caption": "SF Bay from Richmond",
+    "gallery.item.richmondpark.caption": "Richmond Regional Park",
+    "gallery.item.richmondview.caption": "SF Bay view from Richmond",
+    "gallery.item.japantown.caption": "Japantown",
+    "gallery.item.ca1facingpacific.caption": "CA-1 facing Pacific",
     "settings.eyebrow": "偏好设置",
     "settings.heading": "打造<em>专属于你的体验</em>",
     "settings.intro": "偏好设置会保存在这台设备上",
@@ -636,6 +724,7 @@ const I18N = {
     "tools.eyebrow": "工具箱",
     "tools.heading": "更从容地<em>规划旅程</em>",
     "tools.intro": "汇率、时钟、小费、公路费用、销售税与紧急电话——一应俱全。",
+    "tools.backToGuide": "返回指南",
     "tools.currencyLabel": "实时汇率换算",
     "tools.currencySub": "使用 Frankfurter 每日汇率",
     "tools.amount": "金额",
@@ -931,15 +1020,17 @@ const I18N = {
     "gallery.backToGuide": "ガイドに戻る",
     "gallery.pageIntro": "これまでの道中のすべての立ち寄り先をカテゴリー別に整理。旅の続きとともに新しい写真も追加されます。",
     "gallery.item.sfgoldengate.caption": "Golden Gate Bridge",
-    "gallery.item.bixby.caption": "ビクスビー橋",
-    "gallery.item.carmel.caption": "カーメル・バイ・ザ・シー",
-    "gallery.item.garrapataview.caption": "ガラパタ・ビーチ展望台",
-    "gallery.item.garrapata.caption": "ガラパタ・ビーチ",
-    "gallery.item.granitecanyon.caption": "グラナイト・キャニオン橋",
-    "gallery.item.hurricanepoint.caption": "ハリケーン・ポイント",
-    "gallery.item.richmondbay.caption": "リッチモンドから見るSF湾",
-    "gallery.item.richmondpark.caption": "リッチモンド・リージョナル・パーク",
-    "gallery.item.richmondview.caption": "リッチモンドのSF湾の眺め",
+    "gallery.item.bixby.caption": "Bixby Bridge",
+    "gallery.item.carmel.caption": "Carmel by the Sea",
+    "gallery.item.garrapataview.caption": "Garrapata Beach Overlook",
+    "gallery.item.garrapata.caption": "Garrapata Beach",
+    "gallery.item.granitecanyon.caption": "Granite Canyon Bridge",
+    "gallery.item.hurricanepoint.caption": "Hurricane Point Panorama",
+    "gallery.item.richmondbay.caption": "SF Bay from Richmond",
+    "gallery.item.richmondpark.caption": "Richmond Regional Park",
+    "gallery.item.richmondview.caption": "SF Bay view from Richmond",
+    "gallery.item.japantown.caption": "Japantown",
+    "gallery.item.ca1facingpacific.caption": "太平洋に面したCA-1",
     "settings.eyebrow": "パーソナライズ",
     "settings.heading": "自分だけの<em>旅のかたちに</em>",
     "settings.intro": "お好みのビジュアルテーマを選び、表示言語を切り替え、使い慣れた単位を設定できます。設定内容は、この端末に保存されます。",
@@ -971,6 +1062,7 @@ const I18N = {
     "tools.eyebrow": "旅行ツール",
     "tools.heading": "安心して<em>旅を計画</em>",
     "tools.intro": "為替、時計、チップ、ロードトリップ費用、売上税、緊急連絡先をまとめて。",
+    "tools.backToGuide": "ガイドに戻る",
     "tools.currencyLabel": "ライブ通貨換算",
     "tools.currencySub": "Frankfurter の日次為替レートを使用",
     "tools.amount": "金額",
@@ -1047,14 +1139,22 @@ function applyLanguage(lang) {
   });
   document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : lang === 'es' ? 'es' : 'en');
   document.documentElement.setAttribute('data-lang', lang);
-  // Keep page-specific titles (gallery mini-app vs main guide).
+  // Keep page-specific titles (gallery / tools mini-apps vs main guide).
   const onGallery = document.body.classList.contains('page-gallery');
+  const onTools = document.body.classList.contains('page-tools');
   const titles = onGallery
     ? {
         en: 'Photo Gallery — America, A Travel Guide',
         es: 'Galería — América, Una Guía de Viaje',
         zh: '相册 — 美国旅行指南',
         ja: 'ギャラリー — アメリカ旅行ガイド'
+      }
+    : onTools
+    ? {
+        en: 'Travel Tools — America, A Travel Guide',
+        es: 'Herramientas — América, Una Guía de Viaje',
+        zh: '旅行工具 — 美国旅行指南',
+        ja: '旅行ツール — アメリカ旅行ガイド'
       }
     : {
         en: 'America — A Travel Guide',
@@ -1068,10 +1168,8 @@ function applyLanguage(lang) {
     const d = getModalData(currentModalKey);
     if (d) openModal(d.tag, d.title, d.body);
   }
-  // Keep the Tools panel's live-generated text (clock, currency, tip) in the
-  // new language immediately, instead of waiting for the next input/tick.
-  const toolsEl = document.getElementById('toolsOverlay');
-  if (toolsEl && toolsEl.classList.contains('open')) {
+  // Refresh live-generated tools text when language changes (tools page).
+  if (document.body.classList.contains('page-tools') || document.getElementById('currencyAmount')) {
     if (typeof updateWorldClock === 'function') updateWorldClock();
     if (typeof updateTipEstimator === 'function') updateTipEstimator();
     if (typeof updateCurrency === 'function') updateCurrency();
@@ -1156,9 +1254,7 @@ function detectLanguage() {
 }
 
 function detectTheme() {
-  try {
-    if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'minimal';
-  } catch (e) { /* ignore */ }
+  if (safeMatchMedia('(prefers-color-scheme: light)').matches) return 'minimal';
   return 'default';
 }
 
@@ -1182,16 +1278,14 @@ function detectUnits() {
 }
 
 function detectReduceMotionDefault() {
-  try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
-  catch (e) { return false; }
+  return ENV.reduceMotion || ENV.constrained;
 }
 
 function detectCursorDefault() {
   // No trail on touch-first / no-hover devices (phones, most tablets, watch).
-  try {
-    if (window.matchMedia('(hover: none)').matches) return false;
-    if (window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(pointer: fine)').matches) return false;
-  } catch (e) { /* ignore */ }
+  if (ENV.constrained) return false;
+  if (safeMatchMedia('(hover: none)').matches) return false;
+  if (safeMatchMedia('(pointer: coarse)').matches && !safeMatchMedia('(pointer: fine)').matches) return false;
   return true;
 }
 
@@ -1229,8 +1323,8 @@ document.documentElement.setAttribute('data-reduce-motion', reduceMotion ? 'true
 /* Respects the manual Settings toggle AND the OS-level preference — either
    one being "on" is enough to calm things down. Checked live (not cached)
    so it also reacts if the OS setting changes mid-session. */
-const prefersReducedMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
-function motionActive() { return reduceMotion || prefersReducedMotionMQ.matches; }
+const prefersReducedMotionMQ = safeMatchMedia('(prefers-reduced-motion: reduce)');
+function motionActive() { return reduceMotion || prefersReducedMotionMQ.matches || ENV.constrained; }
 function scrollBehaviorPref() { return motionActive() ? 'auto' : 'smooth'; }
 
 /* ── THEME SWATCHES ── */
@@ -1367,11 +1461,18 @@ function fitCanvasToDPR(canvas, ctx) {
 // window drag-resizing doesn't repeatedly reallocate canvas buffers.
 function onResizeRAF(fn) {
   let pending = false;
-  window.addEventListener('resize', () => {
+  const run = () => {
     if (pending) return;
     pending = true;
-    requestAnimationFrame(() => { fn(); pending = false; });
-  }, { passive: true });
+    raf(() => { try { fn(); } catch (e) { /* ignore */ } pending = false; });
+  };
+  try {
+    window.addEventListener('resize', run, { passive: true });
+    window.addEventListener('orientationchange', run, { passive: true });
+    if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
+      window.visualViewport.addEventListener('resize', run, { passive: true });
+    }
+  } catch (e) { /* ignore */ }
 }
 
 /* ── PROGRESS BAR ── */
@@ -1396,7 +1497,9 @@ window.addEventListener('scroll', () => {
 
   // Prefer devices that can hover with a fine pointer (mice / trackpads).
   // pointer:coarse alone is wrong on hybrid convertibles that report both.
-  const canHoverFine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  // Always off on constrained / wearable webviews (GPU + battery budget).
+  const canHoverFine = !ENV.constrained
+    && safeMatchMedia('(hover: hover) and (pointer: fine)').matches;
   if (!canHoverFine) {
     c.classList.add('is-disabled');
     c.setAttribute('aria-hidden', 'true');
@@ -1463,7 +1566,7 @@ window.addEventListener('scroll', () => {
   function startLoop() {
     if (running) return;
     running = true;
-    rafId = requestAnimationFrame(tick);
+    rafId = raf(tick);
   }
   function stopLoop() {
     running = false;
@@ -1474,7 +1577,7 @@ window.addEventListener('scroll', () => {
 
   function tick() {
     if (!running) return;
-    rafId = requestAnimationFrame(tick);
+    rafId = raf(tick);
     ctx.clearRect(0, 0, cssW, cssH);
 
     // Respect the "Cursor Trail" Settings toggle and reduced-motion preference.
@@ -1536,9 +1639,19 @@ window.addEventListener('scroll', () => {
 (function() {
   // Only present in the homepage hero — other pages (e.g. gallery.html) that
   // share this script simply don't have this canvas, so bail out quietly.
+  // Constrained webviews (watch / low-memory): skip forever-running RAF +
+  // thousands of particles — a common cause of “A problem occurred”.
   const canvas = document.getElementById('dotMap');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  if (ENV.constrained || ENV.reduceMotion || motionActive()) {
+    canvas.style.display = 'none';
+    return;
+  }
+  const ctx = canvas.getContext('2d', { alpha: true });
+  if (!ctx) {
+    canvas.style.display = 'none';
+    return;
+  }
   const dots = [];
   let W, H, needRebuild = true;
 
@@ -1559,8 +1672,10 @@ window.addEventListener('scroll', () => {
 
   function buildDots() {
     dots.length = 0;
+    // Density scales with viewport — desktop stays rich, phones stay light.
+    const density = Math.min(W || 800, H || 600) < 700 ? 3200 : 7000;
     stateData.forEach(({cx,cy,rx,ry}) => {
-      const n = Math.floor(rx * ry * 9000);
+      const n = Math.floor(rx * ry * density);
       for (let i = 0; i < n; i++) {
         const angle = Math.random() * Math.PI * 2;
         const r = Math.sqrt(Math.random());
@@ -1605,9 +1720,9 @@ window.addEventListener('scroll', () => {
       ctx.fill();
     });
     ctx.globalAlpha = 1;
-    requestAnimationFrame(draw);
+    raf(draw);
   }
-  requestAnimationFrame(draw);
+  raf(draw);
 })();
 
 /* ── NAVBAR + ACTIVE LINK ── */
@@ -1615,14 +1730,18 @@ const navbar = document.getElementById('navbar');
 const sections = document.querySelectorAll('section[id]:not(#settings):not(#tools)');
 const navLinks = document.querySelectorAll('.nav-links a[data-section]');
 const isGalleryPage = document.body.classList.contains('page-gallery');
+const isToolsPage = document.body.classList.contains('page-tools');
+const isMiniAppPage = isGalleryPage || isToolsPage;
 
 window.addEventListener('scroll', () => {
   const y = window.scrollY;
   if (navbar) navbar.classList.toggle('scrolled', y > 60);
 
-  // Full photo page: keep Gallery highlighted (only real content section).
-  if (isGalleryPage) {
-    navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === 'gallery'));
+  // Mini-apps use their own chrome (no section spy on guide nav links).
+  if (isMiniAppPage) {
+    if (isGalleryPage) {
+      navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === 'gallery'));
+    }
     return;
   }
 
@@ -1648,18 +1767,24 @@ if (document.getElementById('hero')) {
 
 /* ── PARALLAX ── */
 const heroBg  = document.getElementById('heroBg');
-window.addEventListener('scroll', () => {
-  if (motionActive()) { heroBg.style.translate = '0px 0px'; return; }
-  const y = window.scrollY;
-  if (y < window.innerHeight * 1.2) {
-    heroBg.style.translate = `0px ${y * 0.38}px`;
-  }
-}, { passive: true });
+if (heroBg) {
+  window.addEventListener('scroll', () => {
+    if (motionActive()) { heroBg.style.translate = '0px 0px'; return; }
+    const y = window.scrollY;
+    if (y < window.innerHeight * 1.2) {
+      heroBg.style.translate = `0px ${y * 0.38}px`;
+    }
+  }, { passive: true });
+}
 
 /* ── HERO SCROLL CLICK ── */
-document.getElementById('heroScroll').addEventListener('click', () => {
-  document.getElementById('intro').scrollIntoView({ behavior: scrollBehaviorPref() });
-});
+const heroScrollBtn = document.getElementById('heroScroll');
+if (heroScrollBtn) {
+  heroScrollBtn.addEventListener('click', () => {
+    const intro = document.getElementById('intro');
+    if (intro) intro.scrollIntoView({ behavior: scrollBehaviorPref() });
+  });
+}
 
 /* ── REGIONS CAROUSEL (mirrors destinations pattern; grid on desktop, carousel below 1100px) ── */
 const regionsTrack = document.getElementById('regionsTrack');
@@ -1667,26 +1792,31 @@ const regionBtnLeft = document.getElementById('regionScrollLeft');
 const regionBtnRight = document.getElementById('regionScrollRight');
 
 function regionScrollStep() {
+  if (!regionsTrack) return 300;
   const card = regionsTrack.querySelector('.region-card');
   if (!card) return 300;
   const style = getComputedStyle(regionsTrack);
   const gap = parseFloat(style.columnGap || style.gap || 16);
   return card.getBoundingClientRect().width + gap;
 }
-regionBtnLeft.addEventListener('click', () => {
-  regionsTrack.scrollBy({ left: -regionScrollStep(), behavior: scrollBehaviorPref() });
-});
-regionBtnRight.addEventListener('click', () => {
-  regionsTrack.scrollBy({ left: regionScrollStep(), behavior: scrollBehaviorPref() });
-});
+if (regionsTrack && regionBtnLeft && regionBtnRight) {
+  regionBtnLeft.addEventListener('click', () => {
+    regionsTrack.scrollBy({ left: -regionScrollStep(), behavior: scrollBehaviorPref() });
+  });
+  regionBtnRight.addEventListener('click', () => {
+    regionsTrack.scrollBy({ left: regionScrollStep(), behavior: scrollBehaviorPref() });
+  });
 
-function updateRegionBtns() {
-  const maxScroll = regionsTrack.scrollWidth - regionsTrack.clientWidth;
-  regionBtnLeft.disabled = regionsTrack.scrollLeft <= 5;
-  regionBtnRight.disabled = regionsTrack.scrollLeft >= maxScroll - 5;
+  function updateRegionBtns() {
+    const maxScroll = regionsTrack.scrollWidth - regionsTrack.clientWidth;
+    regionBtnLeft.disabled = regionsTrack.scrollLeft <= 5;
+    regionBtnRight.disabled = regionsTrack.scrollLeft >= maxScroll - 5;
+  }
+  regionsTrack.addEventListener('scroll', updateRegionBtns, {passive: true});
+  setTimeout(updateRegionBtns, 500);
+  // Recalculate button state when the layout switches grid ↔ carousel
+  onResizeRAF(updateRegionBtns);
 }
-regionsTrack.addEventListener('scroll', updateRegionBtns, {passive: true});
-setTimeout(updateRegionBtns, 500);
 
 /* ── DESTINATION FAVORITES ──
    A lightweight "save for later" system. Persists the same way as other
@@ -1735,8 +1865,10 @@ const destEmptyStateDefaultKey = destEmptyState ? destEmptyState.getAttribute('d
 const EMPTY_STATE_SAVED_TEXT = { en: "You haven't saved any cities yet. Tap the heart icon on a city card to save it.", es: "Aún no has guardado ninguna ciudad. Toca el icono del corazón en una tarjeta de ciudad para guardarla.", zh: "你还没有收藏任何城市。点击城市卡片上的心形图标即可收藏。", ja: "まだお気に入りの都市がありません。都市カードのハートアイコンをタップして保存しましょう。" };
 
 function applyDestFilter(filter) {
+  const track = document.getElementById('destTrack');
+  if (!track) return;
   let visibleCount = 0;
-  destTrack.querySelectorAll('.dest-card').forEach(card => {
+  track.querySelectorAll('.dest-card').forEach(card => {
     const match = filter === 'all' || (filter === 'saved' ? favorites.has(card.dataset.dest) : card.dataset.region === filter);
     card.classList.toggle('filtered-out', !match);
     if (match) visibleCount++;
@@ -1761,7 +1893,8 @@ if (destFilterBar) {
     destFilterBar.querySelectorAll('.dest-filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     applyDestFilter(btn.dataset.filter);
-    destTrack.scrollTo({ left: 0, behavior: scrollBehaviorPref() });
+    const track = document.getElementById('destTrack');
+    if (track) track.scrollTo({ left: 0, behavior: scrollBehaviorPref() });
   });
 }
 
@@ -1771,12 +1904,14 @@ const btnLeft = document.getElementById('destScrollLeft');
 const btnRight = document.getElementById('destScrollRight');
 
 function updateCarouselBtns() {
+  if (!destTrack || !btnLeft || !btnRight) return;
   const maxScroll = destTrack.scrollWidth - destTrack.clientWidth;
   btnLeft.disabled = destTrack.scrollLeft <= 5;
   btnRight.disabled = destTrack.scrollLeft >= maxScroll - 5;
 }
 
 function destScrollStep() {
+  if (!destTrack) return 344;
   const card = destTrack.querySelector('.dest-card');
   if (!card) return 344;
   const style = getComputedStyle(destTrack);
@@ -1784,36 +1919,34 @@ function destScrollStep() {
   return card.getBoundingClientRect().width + gap;
 }
 
-btnLeft.addEventListener('click', () => {
-  destTrack.scrollBy({ left: -destScrollStep(), behavior: scrollBehaviorPref() });
-});
-btnRight.addEventListener('click', () => {
-  destTrack.scrollBy({ left: destScrollStep(), behavior: scrollBehaviorPref() });
-});
-destTrack.addEventListener('scroll', updateCarouselBtns, {passive: true});
-// Initial check
-setTimeout(updateCarouselBtns, 500);
+if (destTrack && btnLeft && btnRight) {
+  btnLeft.addEventListener('click', () => {
+    destTrack.scrollBy({ left: -destScrollStep(), behavior: scrollBehaviorPref() });
+  });
+  btnRight.addEventListener('click', () => {
+    destTrack.scrollBy({ left: destScrollStep(), behavior: scrollBehaviorPref() });
+  });
+  destTrack.addEventListener('scroll', updateCarouselBtns, {passive: true});
+  setTimeout(updateCarouselBtns, 500);
+  onResizeRAF(updateCarouselBtns);
+}
 
 } // end homepage-only guard (if #hero present)
 
 /* ── SCROLL REVEAL ── */
 const allReveal = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-const revObs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revObs.unobserve(e.target); } });
-}, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
-allReveal.forEach(el => revObs.observe(el));
+observeWhenVisible(allReveal, (el) => { el.classList.add('visible'); }, {
+  threshold: 0.05,
+  rootMargin: '0px 0px -40px 0px'
+});
 
 /* ── TEMPERATURE BARS ── */
-const tempObs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.querySelectorAll('.temp-fill').forEach(b => b.classList.add('animated'));
-      tempObs.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.3 });
 const tb = document.getElementById('tempBars');
-if (tb) tempObs.observe(tb);
+if (tb) {
+  observeWhenVisible([tb], (el) => {
+    el.querySelectorAll('.temp-fill').forEach((b) => b.classList.add('animated'));
+  }, { threshold: 0.3 });
+}
 
 /* ── SMOOTH ANCHORS ── */
 document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -1915,8 +2048,8 @@ function unlockBodyScroll() {
   }
 
   // Restore smooth anchors on the next frame (after paint settles).
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
+  raf(() => {
+    raf(() => {
       html.style.scrollBehavior = prevInline;
       html.classList.remove('scroll-instant');
     });
@@ -1925,7 +2058,6 @@ function unlockBodyScroll() {
 
 function openSettings(trigger) {
   if (!settingsOverlay || settingsOverlay.classList.contains('open')) return;
-  if (toolsOverlay && toolsOverlay.classList.contains('open')) closeTools();
   // Don't open settings over an open lightbox — close it first so scroll lock stays sane.
   if (typeof closeLightbox === 'function' && document.getElementById('lightbox')?.classList.contains('open')) {
     closeLightbox();
@@ -1962,57 +2094,18 @@ document.addEventListener('keydown', e => {
 });
 
 
-/* ── TRAVEL TOOLS DIALOG ── */
-const toolsOverlay = document.getElementById('toolsOverlay');
-const toolsOpenBtn = document.getElementById('toolsOpen');
-const mobileToolsBtn = document.getElementById('mobileToolsBtn'); // may be null on gallery mini-app
-const toolsCloseBtn = document.getElementById('toolsClose');
-let lastToolsTrigger = null;
-
-function openTools(trigger) {
-  if (!toolsOverlay || toolsOverlay.classList.contains('open')) return;
-  if (settingsOverlay && settingsOverlay.classList.contains('open')) closeSettings();
-  if (typeof closeLightbox === 'function' && document.getElementById('lightbox')?.classList.contains('open')) {
-    closeLightbox();
-  }
-  lastToolsTrigger = trigger || document.activeElement;
-  closeMobileNav();
-  lockBodyScroll();
-  toolsOverlay.classList.add('open');
-  toolsOverlay.setAttribute('aria-hidden', 'false');
-  toolsOverlay.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
-  updateWorldClock();
-  updateTipEstimator();
-  updateCurrency();
+/* ── TRAVEL TOOLS ──
+   Tools live on tools.html (mini-app). Nav icons are plain links.
+   Legacy open/close helpers remain as no-ops so older hooks never throw. */
+function openTools() { /* tools are a dedicated page now */ }
+function closeTools() { /* no-op */ }
+function refreshToolsLive() {
+  if (typeof updateWorldClock === 'function') updateWorldClock();
+  if (typeof updateTipEstimator === 'function') updateTipEstimator();
+  if (typeof updateCurrency === 'function') updateCurrency();
   if (typeof updateDriveCost === 'function') updateDriveCost();
   if (typeof updateSalesTax === 'function') updateSalesTax();
-  if (worldClockInterval) clearInterval(worldClockInterval);
-  worldClockInterval = setInterval(updateWorldClock, 30000);
-  if (toolsCloseBtn) setTimeout(() => toolsCloseBtn.focus(), 100);
 }
-
-function closeTools() {
-  if (!toolsOverlay || !toolsOverlay.classList.contains('open')) return;
-  const restoreY = lockedScrollY;
-  toolsOverlay.classList.remove('open');
-  toolsOverlay.setAttribute('aria-hidden', 'true');
-  unlockBodyScroll();
-  if (worldClockInterval) { clearInterval(worldClockInterval); worldClockInterval = null; }
-  if (lastToolsTrigger && typeof lastToolsTrigger.focus === 'function') {
-    try { lastToolsTrigger.focus({ preventScroll: true }); }
-    catch (e) { lastToolsTrigger.focus(); }
-  }
-  try { window.scrollTo({ top: restoreY, left: 0, behavior: 'instant' }); }
-  catch (e) { window.scrollTo(0, restoreY); }
-}
-
-if (toolsOpenBtn) toolsOpenBtn.addEventListener('click', () => openTools(toolsOpenBtn));
-if (mobileToolsBtn) mobileToolsBtn.addEventListener('click', () => openTools(mobileToolsBtn));
-if (toolsCloseBtn) toolsCloseBtn.addEventListener('click', closeTools);
-if (toolsOverlay) toolsOverlay.addEventListener('click', e => { if (e.target === toolsOverlay) closeTools(); });
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && toolsOverlay && toolsOverlay.classList.contains('open')) closeTools();
-});
 
 // Dynamic UI strings for the Tools panel (currency converter, tip estimator,
 // world clock). These are generated at runtime rather than sitting in static
@@ -2105,9 +2198,7 @@ function updateWorldClock() {
     return `<div class="clock-row"><div><div class="clock-city">${cities[city] || city}</div><div class="clock-zone">${zone.replace('_', ' ')}</div></div><div class="clock-time">${time}</div></div>`;
   }).join('');
 }
-// The clock only needs to tick while the Tools panel is actually visible —
-// starting/stopping the interval with the dialog avoids a timer running for
-// the entire session (and doing DOM work) when nobody can see it.
+// World clock interval — started only when the tools page is active.
 let worldClockInterval = null;
 
 /* Approximate average combined state + local sales tax (%).
@@ -2263,7 +2354,20 @@ document.querySelectorAll('[data-drive-type]').forEach(btn => {
 [driveDist, driveSpeed, driveMpg, driveFuel, driveEvEcon, driveEvPrice].forEach(el => {
   if (el) el.addEventListener('input', updateDriveCost);
 });
-setDriveMode('gas');
+if (driveToolCard) setDriveMode('gas');
+
+// Tools mini-app: start live widgets immediately (page is always "open").
+if (document.body.classList.contains('page-tools') || currencyAmount || worldClockList) {
+  refreshToolsLive();
+  if (worldClockList) {
+    if (worldClockInterval) clearInterval(worldClockInterval);
+    worldClockInterval = setInterval(updateWorldClock, 30000);
+  }
+  // Reveal tool cards without waiting for scroll (above-the-fold mini-app).
+  document.querySelectorAll('#tools .reveal, .tools-page .reveal').forEach(el => {
+    el.classList.add('visible');
+  });
+}
 
 /* ── MODAL SYSTEM ── */
 const overlay   = document.getElementById('modal-overlay');
@@ -2680,28 +2784,23 @@ const GALLERY_PLACEHOLDER_TEXT = {
   ja: '写真はまだ追加されていません'
 };
 
-// --- Entrance animation: each tile fades/rises into place the first time
-// it scrolls into view, then is left alone (mirrors the site's .reveal system,
-// but kept separate so hiding/showing tiles via filters never fights with it).
-const galleryObs = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('in-view');
-      galleryObs.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -4% 0px' });
+// --- Reveal captions when tiles approach the viewport (safe without IO).
 
-// --- Image loading state: tile keeps a skeleton min-height until the photo
+// --- Image loading state: tile keeps a skeleton min-height until the thumb
 // loads, then sizes to the image's natural aspect ratio (masonry columns pack
-// without holes). Cached images may already be .complete before we attach
-// listeners; failed loads get a deliberate placeholder.
+// without holes). Grid always uses thumbs — never full-res — for paint stability.
 function watchImageLoad(img) {
   if (!img) return;
   const item = img.closest('.gallery-item');
   const onOk = () => {
     img.classList.add('loaded');
-    if (item) item.classList.add('img-ready');
+    if (item) {
+      item.classList.add('img-ready');
+      // If already on-screen when the thumb finishes, show caption immediately.
+      if (item.getBoundingClientRect().top < window.innerHeight + 80) {
+        item.classList.add('is-revealed', 'in-view');
+      }
+    }
   };
   if (img.complete && img.naturalWidth > 0) {
     onOk();
@@ -2743,25 +2842,32 @@ function ensureZoomHint(item) {
 }
 
 function initGalleryItem(item, index) {
-  item.style.transitionDelay = `${(index % 6) * 60}ms`; // gentle stagger, resets every 6 tiles
+  if (!ENV.constrained) {
+    item.style.transitionDelay = `${(index % 6) * 60}ms`;
+  }
   if (!item.hasAttribute('aria-label')) {
     const cap = item.querySelector('.gallery-caption');
     if (cap) item.setAttribute('aria-label', cap.textContent.trim());
   }
   ensureZoomHint(item);
-  galleryObs.observe(item);
   const img = item.querySelector('img');
   if (img) {
     img.setAttribute('decoding', 'async');
     // Eager-load the first few above-the-fold tiles on the dedicated gallery page.
-    if (document.body.classList.contains('page-gallery') && index < 4) {
+    // On constrained viewports only warm the first tile (memory budget).
+    const eagerCount = ENV.constrained ? 1 : 4;
+    if (document.body.classList.contains('page-gallery') && index < eagerCount) {
       img.loading = 'eager';
-      img.fetchPriority = 'high';
+      try { img.fetchPriority = 'high'; } catch (e) { /* ignore */ }
     }
   }
   watchImageLoad(img);
 }
-document.querySelectorAll('.gallery-item').forEach(initGalleryItem);
+const galleryItems = document.querySelectorAll('.gallery-item');
+galleryItems.forEach(initGalleryItem);
+observeWhenVisible(galleryItems, (node) => {
+  node.classList.add('is-revealed', 'in-view');
+}, { threshold: 0.08, rootMargin: '40px 0px 40px 0px' });
 
 function refreshVisibleGalleryItems() {
   visibleItems = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.load-error)')];
@@ -2823,11 +2929,8 @@ filterBtns.forEach(btn => {
         matchCount++;
         item.classList.remove('fade-out', 'hidden');
         item.style.transitionDelay = `${(index % 6) * 40}ms`;
-        // Re-trigger entrance if the tile was previously hidden.
-        item.classList.remove('in-view');
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => item.classList.add('in-view'));
-        });
+        // Keep already-visible tiles stable (re-toggling in-view caused flicker).
+        item.classList.add('is-revealed', 'in-view');
       } else if (!item.classList.contains('hidden')) {
         item.classList.add('fade-out');
         const t = setTimeout(() => {
@@ -2857,53 +2960,405 @@ const lightboxCloseBtn = document.getElementById('lightboxClose');
 const lightboxNextBtn = document.getElementById('lightboxNext');
 const lightboxPrevBtn = document.getElementById('lightboxPrev');
 
-function preload(src) {
-  if (!src) return;
-  const i = new Image();
-  i.decoding = 'async';
-  i.src = src;
-}
-
 function galleryFullSrc(img) {
   if (!img) return '';
   return img.getAttribute('data-full') || img.currentSrc || img.src || '';
 }
+function galleryThumbSrc(img) {
+  if (!img) return '';
+  return img.currentSrc || img.src || '';
+}
 
-function renderLightboxContent(index) {
-  if (!lightbox) return;
+/*
+  Lightbox loading model (full quality, one photo at a time):
+  - Grid always uses thumbs.
+  - Viewer always displays the FULL asset for the photo currently on screen.
+  - On open/arrow: show the NEW photo's thumb immediately, then upgrade to full.
+  - Centered progress bar + % over the thumb while the single full download runs.
+  - Only one full download is in flight; navigating aborts the previous XHR.
+*/
+let lightboxLoadToken = 0;
+let lightboxXhr = null;
+let lightboxDecodeImg = null;
+// Session cache: full path → object URL (instant re-open / back-nav)
+const lightboxFullCache = new Map();
+
+const lightboxProgress = document.getElementById('lightboxProgress');
+const lightboxProgressFill = document.getElementById('lightboxProgressFill');
+const lightboxProgressPct = document.getElementById('lightboxProgressPct');
+const lightboxProgressMsg = document.getElementById('lightboxProgressMsg');
+
+const LIGHTBOX_PROGRESS_TEXT = {
+  en: { loading: 'Loading full photo…', preparing: 'Preparing…', almost: 'Almost ready…', failed: 'Couldn’t load full photo' },
+  es: { loading: 'Cargando foto completa…', preparing: 'Preparando…', almost: 'Casi listo…', failed: 'No se pudo cargar la foto' },
+  zh: { loading: '正在加载高清照片…', preparing: '准备中…', almost: '即将完成…', failed: '高清照片加载失败' },
+  ja: { loading: 'フルサイズを読み込み中…', preparing: '準備中…', almost: 'まもなく完了…', failed: '読み込みに失敗しました' }
+};
+function lightboxProgressText() {
+  return LIGHTBOX_PROGRESS_TEXT[currentLang] || LIGHTBOX_PROGRESS_TEXT.en;
+}
+
+function setLightboxProgressUI({ visible, percent, indeterminate, message }) {
+  if (!lightboxProgress) return;
+  if (!visible) {
+    lightboxProgress.hidden = true;
+    lightboxProgress.classList.remove('is-indeterminate');
+    lightboxProgress.removeAttribute('aria-busy');
+    if (lightboxProgressFill) lightboxProgressFill.style.width = '0%';
+    if (lightboxProgressPct) lightboxProgressPct.textContent = '0%';
+    return;
+  }
+  lightboxProgress.hidden = false;
+  lightboxProgress.setAttribute('aria-busy', 'true');
+  const t = lightboxProgressText();
+  if (lightboxProgressMsg) lightboxProgressMsg.textContent = message || t.loading;
+  if (indeterminate) {
+    lightboxProgress.classList.add('is-indeterminate');
+    if (lightboxProgressPct) lightboxProgressPct.textContent = '…';
+    if (lightboxProgressFill) lightboxProgressFill.style.width = '35%';
+  } else {
+    lightboxProgress.classList.remove('is-indeterminate');
+    const pct = Math.max(0, Math.min(100, Math.round(percent || 0)));
+    if (lightboxProgressFill) lightboxProgressFill.style.width = pct + '%';
+    if (lightboxProgressPct) lightboxProgressPct.textContent = pct + '%';
+  }
+}
+
+function hideLightboxProgressSoon() {
+  // Brief beat at 100% so the bar doesn’t vanish mid-glance
+  setLightboxProgressUI({ visible: true, percent: 100, message: lightboxProgressText().almost });
+  setTimeout(() => {
+    if (lightboxImg && !lightboxImg.classList.contains('is-loading')) {
+      setLightboxProgressUI({ visible: false });
+    }
+  }, 280);
+}
+
+function cancelLightboxLoad() {
+  lightboxLoadToken += 1;
+  if (lightboxXhr) {
+    try { lightboxXhr.abort(); } catch (e) { /* ignore */ }
+    lightboxXhr = null;
+  }
+  if (lightboxDecodeImg) {
+    try {
+      lightboxDecodeImg.onload = null;
+      lightboxDecodeImg.onerror = null;
+      lightboxDecodeImg.src = '';
+    } catch (e) { /* ignore */ }
+    lightboxDecodeImg = null;
+  }
+  if (lightboxImg) lightboxImg.classList.remove('is-loading');
+  setLightboxProgressUI({ visible: false });
+}
+
+function updateLightboxChrome(item, index) {
+  if (!item) return;
+  const img = item.querySelector('img');
+  if (lightboxImg) lightboxImg.alt = (img && img.alt) || '';
+  const cap = item.querySelector('.gallery-caption');
+  if (lightboxCaption) lightboxCaption.textContent = cap ? cap.textContent.trim() : '';
+  const location = item.dataset.location || '';
+  const date = item.dataset.date || '';
+  if (lightboxMeta) lightboxMeta.textContent = [location, date].filter(Boolean).join(' · ');
+  if (lightboxCounter) lightboxCounter.textContent = `${index + 1} / ${visibleItems.length}`;
+  if (lightbox) {
+    lightbox.setAttribute('aria-label', (lightboxCaption && lightboxCaption.textContent) || 'Photo');
+  }
+  const multi = visibleItems.length > 1;
+  if (lightboxNextBtn) lightboxNextBtn.hidden = !multi;
+  if (lightboxPrevBtn) lightboxPrevBtn.hidden = !multi;
+}
+
+function applyLightboxFullSrc(displaySrc, fullKey, token) {
+  if (token !== lightboxLoadToken || !lightboxImg) return;
+  lightboxImg.src = displaySrc;
+  if (fullKey) lightboxImg.setAttribute('data-full-src', fullKey);
+  else lightboxImg.removeAttribute('data-full-src');
+  lightboxImg.classList.remove('is-loading');
+  hideLightboxProgressSoon();
+}
+
+function decodeThenApply(displaySrc, fullKey, token, onFail) {
+  const probe = new Image();
+  lightboxDecodeImg = probe;
+  probe.decoding = 'async';
+  const done = (ok) => {
+    if (lightboxDecodeImg === probe) lightboxDecodeImg = null;
+    if (!ok) {
+      if (typeof onFail === 'function') onFail();
+      return;
+    }
+    applyLightboxFullSrc(displaySrc, fullKey, token);
+  };
+  probe.onload = () => {
+    if (typeof probe.decode === 'function') {
+      probe.decode().then(() => done(true)).catch(() => done(true));
+    } else {
+      done(true);
+    }
+  };
+  probe.onerror = () => done(false);
+  // Final stretch of the bar while the browser decodes pixels
+  if (token === lightboxLoadToken) {
+    setLightboxProgressUI({
+      visible: true,
+      percent: 96,
+      message: lightboxProgressText().preparing
+    });
+  }
+  probe.src = displaySrc;
+}
+
+function failLightboxLoad(token, thumbFallback) {
+  if (token !== lightboxLoadToken) return;
+  // Prefer still showing something rather than a dead stage
+  if (thumbFallback && lightboxImg && !lightboxImg.getAttribute('data-full-src')) {
+    lightboxImg.src = thumbFallback;
+    lightboxImg.removeAttribute('data-full-src');
+  }
+  if (lightboxImg) lightboxImg.classList.remove('is-loading');
+  setLightboxProgressUI({
+    visible: true,
+    percent: 0,
+    message: lightboxProgressText().failed
+  });
+  setTimeout(() => {
+    if (token === lightboxLoadToken) setLightboxProgressUI({ visible: false });
+  }, 1400);
+}
+
+/**
+ * Fallback when XHR can't report progress (file://, blocked XHR, etc.).
+ * Uses the browser's normal image loader (same as <img src>) so the full
+ * photo still appears, with a smooth estimated % so the wait feels clear.
+ */
+function loadFullViaImageFallback(fullUrl, token, thumbFallback) {
+  if (token !== lightboxLoadToken) return;
+  if (lightboxImg) lightboxImg.classList.add('is-loading');
+  setLightboxProgressUI({
+    visible: true,
+    percent: 8,
+    message: lightboxProgressText().loading
+  });
+
+  let pct = 8;
+  const tick = setInterval(() => {
+    if (token !== lightboxLoadToken) {
+      clearInterval(tick);
+      return;
+    }
+    // Ease toward 90% while waiting — real completion jumps to 100%
+    if (pct < 90) {
+      pct += Math.max(1, (90 - pct) * 0.07);
+      setLightboxProgressUI({
+        visible: true,
+        percent: Math.round(pct),
+        message: lightboxProgressText().loading
+      });
+    }
+  }, 120);
+
+  const probe = new Image();
+  lightboxDecodeImg = probe;
+  probe.decoding = 'async';
+  const finish = (ok) => {
+    clearInterval(tick);
+    if (lightboxDecodeImg === probe) lightboxDecodeImg = null;
+    if (token !== lightboxLoadToken) return;
+    if (ok) {
+      // Cache the plain URL (no blob) so revisits skip the wait
+      lightboxFullCache.set(fullUrl, fullUrl);
+      setLightboxProgressUI({
+        visible: true,
+        percent: 100,
+        message: lightboxProgressText().almost
+      });
+      applyLightboxFullSrc(fullUrl, fullUrl, token);
+    } else {
+      failLightboxLoad(token, thumbFallback);
+    }
+  };
+  probe.onload = () => {
+    if (typeof probe.decode === 'function') {
+      probe.decode().then(() => finish(true)).catch(() => finish(true));
+    } else {
+      finish(true);
+    }
+  };
+  probe.onerror = () => finish(false);
+  probe.src = fullUrl;
+}
+
+function loadFullWithProgress(fullUrl, token, thumbFallback) {
+  if (!fullUrl) return;
+
+  // Resolve to an absolute URL so XHR/fetch always hit the right origin/path
+  let absoluteUrl = fullUrl;
+  try {
+    absoluteUrl = new URL(fullUrl, window.location.href).href;
+  } catch (e) { /* keep relative */ }
+
+  // Instant path: already downloaded this session
+  if (lightboxFullCache.has(fullUrl) || lightboxFullCache.has(absoluteUrl)) {
+    const cached = lightboxFullCache.get(fullUrl) || lightboxFullCache.get(absoluteUrl);
+    setLightboxProgressUI({ visible: true, percent: 100, message: lightboxProgressText().almost });
+    decodeThenApply(cached, fullUrl, token, () => {
+      // Stale blob URL — drop cache and reload
+      lightboxFullCache.delete(fullUrl);
+      lightboxFullCache.delete(absoluteUrl);
+      loadFullWithProgress(fullUrl, token, thumbFallback);
+    });
+    return;
+  }
+
+  if (lightboxImg) lightboxImg.classList.add('is-loading');
+  setLightboxProgressUI({
+    visible: true,
+    percent: 0,
+    message: lightboxProgressText().loading
+  });
+
+  // file:// and some sandboxes block XHR to local files — skip straight to img fallback
+  if (window.location.protocol === 'file:') {
+    loadFullViaImageFallback(fullUrl, token, thumbFallback);
+    return;
+  }
+
+  const xhr = new XMLHttpRequest();
+  lightboxXhr = xhr;
+  let gotProgress = false;
+
+  try {
+    xhr.open('GET', absoluteUrl, true);
+    xhr.responseType = 'blob';
+  } catch (err) {
+    lightboxXhr = null;
+    loadFullViaImageFallback(fullUrl, token, thumbFallback);
+    return;
+  }
+
+  xhr.onprogress = (e) => {
+    if (token !== lightboxLoadToken) return;
+    if (e.lengthComputable && e.total > 0) {
+      gotProgress = true;
+      // Reserve 0–92% for network; decode uses the rest
+      const netPct = Math.min(92, Math.round((e.loaded / e.total) * 92));
+      setLightboxProgressUI({
+        visible: true,
+        percent: Math.max(1, netPct),
+        message: lightboxProgressText().loading
+      });
+    } else if (e.loaded > 0) {
+      gotProgress = true;
+      // Partial progress without total — show indeterminate, not 0%
+      setLightboxProgressUI({
+        visible: true,
+        indeterminate: true,
+        message: lightboxProgressText().loading
+      });
+    }
+  };
+
+  xhr.onload = () => {
+    if (token !== lightboxLoadToken) return;
+    lightboxXhr = null;
+    // status 0 is success on some local servers / opaque edge cases when a body exists
+    const body = xhr.response;
+    const hasBody = body && (typeof body.size !== 'number' || body.size > 0);
+    const statusOk = xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300);
+    if (statusOk && hasBody) {
+      setLightboxProgressUI({
+        visible: true,
+        percent: gotProgress ? 94 : 90,
+        message: lightboxProgressText().preparing
+      });
+      try {
+        const objUrl = URL.createObjectURL(body);
+        lightboxFullCache.set(fullUrl, objUrl);
+        lightboxFullCache.set(absoluteUrl, objUrl);
+        decodeThenApply(objUrl, fullUrl, token, () => {
+          // Blob decode failed — try plain URL via img loader
+          try { URL.revokeObjectURL(objUrl); } catch (e) { /* ignore */ }
+          lightboxFullCache.delete(fullUrl);
+          lightboxFullCache.delete(absoluteUrl);
+          loadFullViaImageFallback(fullUrl, token, thumbFallback);
+        });
+      } catch (err) {
+        loadFullViaImageFallback(fullUrl, token, thumbFallback);
+      }
+    } else {
+      // XHR didn't yield a usable body — img path usually still works
+      loadFullViaImageFallback(fullUrl, token, thumbFallback);
+    }
+  };
+
+  xhr.onerror = () => {
+    if (token !== lightboxLoadToken) return;
+    lightboxXhr = null;
+    loadFullViaImageFallback(fullUrl, token, thumbFallback);
+  };
+
+  xhr.onabort = () => {
+    if (lightboxXhr === xhr) lightboxXhr = null;
+  };
+
+  try {
+    xhr.send();
+  } catch (err) {
+    lightboxXhr = null;
+    loadFullViaImageFallback(fullUrl, token, thumbFallback);
+  }
+}
+
+function showLightboxPhoto(index, { fromNav = false } = {}) {
+  if (!lightbox || !lightboxImg) return;
   const item = visibleItems[index];
   if (!item) return;
   const img = item.querySelector('img');
   if (!img) return;
-  // Grid shows lightweight thumbs; lightbox loads the full-resolution asset.
-  lightboxImg.src = galleryFullSrc(img);
-  lightboxImg.alt = img.alt || '';
-  const cap = item.querySelector('.gallery-caption');
-  lightboxCaption.textContent = cap ? cap.textContent.trim() : '';
-  const location = item.dataset.location || '';
-  const date = item.dataset.date || '';
-  lightboxMeta.textContent = [location, date].filter(Boolean).join(' · ');
-  lightboxCounter.textContent = `${index + 1} / ${visibleItems.length}`;
-  // Hide nav arrows when there's only one photo to show.
-  const multi = visibleItems.length > 1;
-  if (lightboxNextBtn) lightboxNextBtn.hidden = !multi;
-  if (lightboxPrevBtn) lightboxPrevBtn.hidden = !multi;
-  // Warm neighbor full-size images so next/prev feels instant.
-  if (multi) {
-    const next = visibleItems[(index + 1) % visibleItems.length];
-    const prev = visibleItems[(index - 1 + visibleItems.length) % visibleItems.length];
-    if (next) preload(galleryFullSrc(next.querySelector('img')));
-    if (prev) preload(galleryFullSrc(prev.querySelector('img')));
+
+  // Abort any in-flight download so only the photo the user is viewing loads.
+  cancelLightboxLoad();
+  const token = lightboxLoadToken;
+
+  updateLightboxChrome(item, index);
+
+  const full = galleryFullSrc(img);
+  const thumb = galleryThumbSrc(img);
+  if (!full && !thumb) return;
+
+  // Already showing this full asset — nothing to do.
+  if (full && lightboxImg.getAttribute('data-full-src') === full && lightboxImg.getAttribute('src')) {
+    lightboxImg.classList.remove('is-loading');
+    setLightboxProgressUI({ visible: false });
+    return;
   }
+
+  // Instant feedback: always paint the new photo's thumb first (open + arrows).
+  // Full-res then upgrades in place while the centered progress bar runs.
+  // Arrow nav especially: swap off the previous full so users see which photo
+  // they're on immediately, not a stalled previous frame.
+  if (thumb) {
+    lightboxImg.src = thumb;
+    lightboxImg.removeAttribute('data-full-src');
+  }
+
+  if (!full) {
+    lightboxImg.classList.remove('is-loading');
+    setLightboxProgressUI({ visible: false });
+    return;
+  }
+
+  loadFullWithProgress(full, token, thumb);
 }
 
 function openLightbox(index) {
   if (!lightbox || index < 0 || visibleItems.length === 0) return;
   currentIndex = index;
-  renderLightboxContent(index);
+  showLightboxPhoto(index, { fromNav: false });
   lightbox.classList.add('open');
   lightbox.setAttribute('aria-hidden', 'false');
-  lightbox.setAttribute('aria-label', lightboxCaption.textContent || 'Photo');
   lockBodyScroll();
   if (lightboxCloseBtn) lightboxCloseBtn.focus();
 }
@@ -2914,10 +3369,13 @@ function closeLightbox() {
   const restoreY = lockedScrollY;
   lightbox.classList.remove('open');
   lightbox.setAttribute('aria-hidden', 'true');
-  // Drop the heavy full-res decode when the viewer closes.
+  // Abort download + free the displayed full bitmap when the viewer closes.
+  cancelLightboxLoad();
   if (lightboxImg) {
     lightboxImg.removeAttribute('src');
+    lightboxImg.removeAttribute('data-full-src');
     lightboxImg.alt = '';
+    lightboxImg.classList.remove('is-loading');
   }
   unlockBodyScroll();
   if (lastFocusedThumb && typeof lastFocusedThumb.focus === 'function') {
@@ -2930,24 +3388,19 @@ function closeLightbox() {
     catch (e) { window.scrollTo(0, restoreY); }
   };
   pin();
-  requestAnimationFrame(() => {
+  raf(() => {
     pin();
-    requestAnimationFrame(pin);
+    raf(pin);
   });
 }
-// Crossfade between photos: fade the current image out, swap its content
-// once it's actually invisible, then fade the new one in.
-let navTimer = null;
+
+// Immediate nav — full quality for the new current photo only (no delayed
+// crossfade that briefly showed thumbs / dimmed the stage).
 function navigate(step) {
   if (!lightboxImg || visibleItems.length < 2) return;
-  lightboxImg.classList.add('switching');
-  if (navTimer) clearTimeout(navTimer);
-  navTimer = setTimeout(() => {
-    currentIndex = (currentIndex + step + visibleItems.length) % visibleItems.length;
-    renderLightboxContent(currentIndex);
-    lightboxImg.classList.remove('switching');
-    navTimer = null;
-  }, motionActive() ? 0 : 180);
+  if (!lightbox.classList.contains('open')) return;
+  currentIndex = (currentIndex + step + visibleItems.length) % visibleItems.length;
+  showLightboxPhoto(currentIndex, { fromNav: true });
 }
 function showNext() { navigate(1); }
 function showPrev() { navigate(-1); }

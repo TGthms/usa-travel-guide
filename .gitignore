@@ -1,2 +1,22 @@
+# macOS / editor noise
 .DS_Store
+**/.DS_Store
 .vscode/
+.idea/
+*.swp
+*~
+
+# Internal photo workflow (not part of the published site)
+# Local Gallery Manager + launcher — never deploy to GitHub Pages
+tools/
+Add Photos.command
+**/__pycache__/
+*.py[cod]
+*.pyo
+.Python
+
+# Local temp / scratch from image workflows
+images/gallery/tmp*
+images/gallery/thumbs/tmp*
+*.tmp
+.cache/

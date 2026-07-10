@@ -212,7 +212,16 @@
 }
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; overflow-x: hidden; color-scheme: dark; }
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  color-scheme: dark;
+  /* Stop iOS/Android from auto-inflating text and breaking layouts */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Prefer dynamic viewport units where supported (mobile URL bars) */
+  height: 100%;
+}
 /* Used while restoring scroll after closing overlays — must win over smooth. */
 html.scroll-instant,
 html.scroll-instant * { scroll-behavior: auto !important; }
@@ -231,7 +240,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   transition: background 0.45s ease, color 0.45s ease;
+  /* Prevent horizontal rubber-band overscroll that reveals empty gutters */
+  overscroll-behavior-x: none;
+  min-height: 100%;
+  min-height: 100dvh;
 }
+/* Media never forces horizontal scroll across languages / breakpoints */
+img, video, canvas, svg { max-width: 100%; height: auto; }
+/* Canvas trail and map keep explicit full-viewport sizing */
+#cursorCanvas, #dotMap { max-width: none; height: 100%; }
+/* Lightbox image uses its own max-width rules (don't let height:auto collapse it oddly) */
+.lightbox .lightbox-img { height: auto; }
 
 /* Quiet editorial paper grain — stays behind content (never over modals). */
 body { isolation: isolate; }
@@ -255,14 +274,22 @@ html[data-theme="elegant"] body::before {
   mix-blend-mode: multiply;
 }
 
-/* Skip link — visually hidden until keyboard focus (a11y). Without these
-   rules the raw "Skip to main content" text sits permanently at the top. */
+/* Skip link — fully removed from the visual layout until keyboard focus.
+   Uses the classic clip technique (not off-screen transform), so it never
+   “peeks” during load, reduced-motion, or accidental :focus from the mouse. */
 .skip-link {
   position: absolute;
-  top: 0;
-  left: 16px;
-  z-index: 10001;
-  padding: 12px 20px;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  /* Keep out of paint until focused */
+  pointer-events: none;
   background: var(--accent-1);
   color: var(--text-inv);
   font-family: var(--ff-body);
@@ -270,16 +297,49 @@ html[data-theme="elegant"] body::before {
   font-weight: 700;
   letter-spacing: .04em;
   text-decoration: none;
-  border-radius: 0 0 8px 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.35);
-  transform: translateY(-120%);
-  transition: transform .25s cubic-bezier(.22,1,.36,1);
+  z-index: 10001;
 }
-.skip-link:focus,
+/* Keyboard only — :focus-visible avoids random mouse/programmatic flashes */
 .skip-link:focus-visible {
-  transform: translateY(0);
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top, 0px));
+  left: max(12px, env(safe-area-inset-left, 0px));
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 12px 18px;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: nowrap;
+  pointer-events: auto;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
   outline: 2px solid var(--text-main);
   outline-offset: 3px;
+}
+/* Older engines without :focus-visible still get a working skip target */
+@supports not selector(:focus-visible) {
+  .skip-link:focus {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px));
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 12px 18px;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: nowrap;
+    pointer-events: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+/* Skip target: allow focus without a visible ring on the whole page chrome */
+#main:focus {
+  outline: none;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -345,74 +405,95 @@ html[data-theme="elegant"] body::before {
 .gallery-empty-state.show { display: block; }
 
 /* Each photo tile: natural height from the image; break-inside avoids so a
-   card never splits across columns. */
+   card never splits across columns.
+   ── Stability notes (black-hover / paint bugs) ──
+   Do NOT: opacity on the tile + opacity on the img + dark ::after overlay +
+   box-shadow/hover layer promotion + backface-visibility. That combination
+   causes intermittent black tiles on Safari/Chrome when GPU re-composites
+   large color-managed photos. Keep the image layer dead-simple. */
 .gallery-item {
-  position: relative; border-radius: 10px; overflow: hidden; cursor: pointer;
-  display: inline-block; width: 100%;
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  display: inline-block;
+  width: 100%;
   margin: 0 0 16px;
   vertical-align: top;
   break-inside: avoid;
   -webkit-column-break-inside: avoid;
   page-break-inside: avoid;
-  /* Neutral skeleton — never pure black (hover paint bugs looked like a black flash) */
-  background: var(--bg-surface);
-  opacity: 0;
-  transition: opacity .4s ease, box-shadow .25s ease, border-color .25s ease;
+  /* Neutral skeleton — never pure black */
+  background: var(--bg-surface-2);
   border: 1px solid var(--border-light);
+  /* Visible as soon as it enters layout; no tile-level opacity animation */
+  opacity: 1;
+  transition: border-color .2s ease;
   /* Skeleton height until the real photo dimensions are known */
   min-height: 140px;
+  -webkit-tap-highlight-color: transparent;
 }
 .gallery-item.img-ready { min-height: 0; }
-.gallery-item.in-view { opacity: 1; }
-/* Hover: border/shadow only — no transform/scale on the photo (GPU scale +
-   dark overlays caused intermittent black flashes on some images). */
+/* Soft entrance only after first paint of the image (class toggled in JS) */
+.gallery-item.is-revealed .gallery-caption { opacity: 1; }
+
+/* Hover: border only — no shadow, no transform, no filter on the photo.
+   Shadows force a new compositing layer and were a common black-flash trigger. */
 @media (hover: hover) and (pointer: fine) {
   .gallery-item:hover,
   .gallery-item:focus-visible {
-    box-shadow: 0 12px 28px rgba(0,0,0,.22);
     border-color: var(--border-med);
     outline: none;
   }
   .gallery-item:focus-visible {
-    box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-1), 0 12px 28px rgba(0,0,0,.22);
+    outline: 2px solid var(--accent-1);
+    outline-offset: 2px;
   }
   .gallery-item:hover .gallery-zoom-hint,
   .gallery-item:focus-visible .gallery-zoom-hint { opacity: 1; }
 }
 
-/* Filtering a category out: quick shrink/fade, then removed from layout.
-   Filtering one in: fades/rises back, same as the initial reveal. */
-.gallery-item.fade-out { opacity: 0; transition-duration: .28s; pointer-events: none; }
+/* Filtering a category out: fade, then display:none. */
+.gallery-item.fade-out {
+  opacity: 0;
+  transition: opacity .28s ease;
+  pointer-events: none;
+}
 .gallery-item.hidden { display: none; }
 
 .gallery-item img {
-  width: 100%; height: auto; display: block;
+  width: 100%;
+  height: auto;
+  display: block;
   vertical-align: middle;
-  opacity: 0; transition: opacity .4s ease;
   /* Natural aspect ratio — no crop in the grid */
   object-fit: contain;
-  /* Keep image on its own layer without hover scale (avoids black flash) */
-  backface-visibility: hidden;
+  object-position: center;
+  /* Solid underpaint so any decode frame never shows black */
+  background-color: var(--bg-surface-2);
+  /* Fade-in only the first time the thumb arrives — never on hover */
+  opacity: 0;
+  transition: opacity .35s ease;
+  /* Explicitly avoid GPU “layer tricks” that black-out wide-gamut JPEGs */
+  transform: none;
+  filter: none;
+  backface-visibility: visible;
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none; /* clicks hit the tile, not the img */
 }
 .gallery-item img.loaded { opacity: 1; }
 
-/* Caption-only gradient (bottom strip) — not a full-tile dark overlay */
-.gallery-item::after {
-  content: '';
-  position: absolute; left: 0; right: 0; bottom: 0; height: 42%;
-  background: linear-gradient(to top, rgba(0,0,0,.62) 0%, rgba(0,0,0,.2) 55%, transparent 100%);
-  opacity: 1; pointer-events: none; z-index: 1;
-}
-.gallery-item.load-error::after { display: none; }
-
+/* No full-tile dark ::after overlay — that was a major black-flash source.
+   Caption carries its own soft gradient background instead. */
 .gallery-zoom-hint {
   position: absolute; top: 12px; right: 12px; z-index: 3;
   width: 34px; height: 34px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,.4); color: #fff; border: 1px solid rgba(255,255,255,.25);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  /* Solid bg — no backdrop-filter over the photo */
+  background: rgba(0,0,0,.5); color: #fff; border: 1px solid rgba(255,255,255,.22);
   opacity: 0;
-  transition: opacity .25s ease;
+  transition: opacity .2s ease;
   pointer-events: none;
 }
 .gallery-zoom-hint svg { width: 15px; height: 15px; }
@@ -421,31 +502,36 @@ html[data-theme="elegant"] body::before {
    haven't uploaded to images/gallery/ yet), show a deliberate "no photo yet"
    placeholder instead of an empty box - so an unfinished gallery still reads
    as intentional, styled work rather than looking broken. */
-.gallery-item.load-error { border: 1px dashed var(--border-med); cursor: default; box-shadow: none; min-height: 180px; }
-.gallery-item.load-error:hover { transform: none; box-shadow: none; }
+.gallery-item.load-error { border: 1px dashed var(--border-med); cursor: default; min-height: 180px; }
+.gallery-item.load-error:hover { border-color: var(--border-med); }
 .gallery-item.load-error img { display: none; }
 .gallery-item-placeholder {
   position: absolute; inset: 0; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 20px;
   color: var(--text-mute); font-family: var(--ff-body); z-index: 2;
   min-height: 180px;
+  background: var(--bg-surface);
 }
 .gallery-item-placeholder .ph-icon { font-size: 1.8rem; opacity: .5; }
 .gallery-item-placeholder .ph-text { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; }
 
 .gallery-caption {
-  position: absolute; bottom: 0; left: 0; right: 0; padding: 18px 16px 14px;
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 28px 14px 12px;
   color: #fff; font-family: var(--ff-body); font-size: 13px; font-weight: 600;
   letter-spacing: .01em; line-height: 1.3;
   opacity: 0;
-  transition: opacity .35s ease;
+  transition: opacity .3s ease;
   z-index: 2; pointer-events: none;
-  text-shadow: 0 1px 8px rgba(0,0,0,.45);
+  text-shadow: 0 1px 6px rgba(0,0,0,.55);
+  /* Gradient lives on the caption, not a pseudo over the whole image */
+  background: linear-gradient(to top, rgba(0,0,0,.58) 0%, rgba(0,0,0,.18) 55%, transparent 100%);
 }
-.gallery-item.in-view .gallery-caption { opacity: 1; }
 
 @media (hover: none) {
   .gallery-zoom-hint { display: none; }
+  /* Touch: always show captions once revealed */
+  .gallery-item.is-revealed .gallery-caption { opacity: 1; }
 }
 
 /* Segmented control (Gas / EV) */
@@ -478,6 +564,10 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
   display: flex; align-items: center; justify-content: center; flex-direction: column;
   opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity .35s ease, visibility .35s ease; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  overscroll-behavior: contain;
+  /* Fill dynamic viewport on mobile browsers with collapsing chrome */
+  min-height: 100%;
+  min-height: 100dvh;
 }
 .lightbox.open { opacity: 1; visibility: visible; pointer-events: auto; }
 
@@ -491,20 +581,120 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
 }
 
 .lightbox-stage {
-  transform: scale(.94) translateY(18px); transition: transform .45s cubic-bezier(.22,1,.36,1);
   display: flex; flex-direction: column; align-items: center; max-width: min(1200px, 100%);
   width: 100%;
+  min-height: 120px;
+  position: relative;
 }
-.lightbox.open .lightbox-stage { transform: scale(1) translateY(0); }
+.lightbox.open .lightbox-stage { opacity: 1; }
+
+/* Image frame: progress overlays the center of the current (thumb/full) photo */
+.lightbox-frame {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: min(92vw, 100%, 1600px);
+  max-height: min(82dvh, 1200px);
+}
 
 .lightbox-img {
-  max-width: min(92vw, 1200px); max-height: min(78vh, 900px); width: auto; height: auto;
-  border-radius: 8px; touch-action: pan-y;
-  box-shadow: 0 40px 90px rgba(0,0,0,.55);
-  transition: opacity .18s ease; /* crossfade when switching photos, see JS */
-  object-fit: contain; background: rgba(255,255,255,.03);
+  max-width: min(92vw, 100%, 1600px); max-height: min(82dvh, 1200px); width: auto; height: auto;
+  border-radius: 8px; touch-action: pan-y pinch-zoom;
+  box-shadow: 0 16px 48px rgba(0,0,0,.45);
+  object-fit: contain;
+  background: #141414;
+  min-width: min(28vw, 200px);
+  min-height: min(22vh, 160px);
+  display: block;
 }
-.lightbox-img.switching { opacity: 0; }
+.lightbox-img.is-loading {
+  cursor: progress;
+}
+
+/* Centered pill over the photo while full-res loads */
+.lightbox-progress {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  width: min(260px, 70%);
+  min-width: 160px;
+  max-width: 300px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(8, 10, 14, 0.78);
+  border: 1px solid rgba(255,255,255,.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 12px 32px rgba(0,0,0,.4);
+  pointer-events: none;
+}
+.lightbox-progress[hidden] { display: none !important; }
+.lightbox-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  overflow: hidden;
+}
+.lightbox-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-1-dk, #9a7840), var(--accent-1, #c9a259), var(--accent-1-lt, #e0c48a));
+  transition: width .12s linear;
+  will-change: width;
+}
+.lightbox-progress.is-indeterminate .lightbox-progress-fill {
+  width: 35% !important;
+  animation: lightboxIndeterminate 1s ease-in-out infinite;
+}
+@keyframes lightboxIndeterminate {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+.lightbox-progress-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+  font-family: var(--ff-body);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: rgba(255,255,255,.88);
+}
+.lightbox-progress-pct {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--accent-1-lt, #e0c48a);
+  min-width: 3.2em;
+  text-align: right;
+  flex-shrink: 0;
+}
+.lightbox-progress-msg {
+  color: rgba(255,255,255,.82);
+  font-weight: 500;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 400px) {
+  .lightbox-progress {
+    width: min(220px, 78%);
+    min-width: 140px;
+    padding: 10px 12px;
+  }
+  .lightbox-progress-msg { font-size: 10.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightbox-progress-fill { transition: none; }
+  .lightbox-progress.is-indeterminate .lightbox-progress-fill { animation: none; width: 50% !important; }
+}
 
 .lightbox-info {
   text-align: center; margin-top: 16px; max-width: min(640px, 92vw);
@@ -524,9 +714,10 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
 .lightbox-close:focus-visible, .lightbox-prev:focus-visible, .lightbox-next:focus-visible {
   opacity: 1; background: rgba(0,0,0,.55); border-color: rgba(255,255,255,.35);
 }
+/* Keep base translateY(-50%) on prev/next when hovering so buttons don't jump */
 .lightbox-close:hover, .lightbox-close:focus-visible { transform: rotate(90deg); }
-.lightbox-prev:hover, .lightbox-prev:focus-visible { transform: translateY(-50%) translateX(-3px); }
-.lightbox-next:hover, .lightbox-next:focus-visible { transform: translateY(-50%) translateX(3px); }
+.lightbox-prev:hover, .lightbox-prev:focus-visible { transform: translateY(-50%) translateX(-2px); }
+.lightbox-next:hover, .lightbox-next:focus-visible { transform: translateY(-50%) translateX(2px); }
 .lightbox-close { top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }
 .lightbox-prev { left: max(8px, env(safe-area-inset-left)); top: 50%; transform: translateY(-50%); }
 .lightbox-next { right: max(8px, env(safe-area-inset-right)); top: 50%; transform: translateY(-50%); }
@@ -546,7 +737,7 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
   .lightbox-prev, .lightbox-next { font-size: 18px; min-width: 44px; min-height: 44px; }
   .lightbox-close { font-size: 18px; min-width: 44px; min-height: 44px; }
   .lightbox-counter { top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); font-size: 9px; }
-  .lightbox-img { max-width: 96vw; max-height: 68vh; border-radius: 6px; }
+  .lightbox-img { max-width: 96vw; max-height: 68dvh; border-radius: 6px; }
 }
 /* Single-column gallery on very narrow devices (watch / mini browsers). */
 @media (max-width: 360px) {
@@ -558,7 +749,7 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
 /* Phones in landscape have very little vertical space - shrink the image
    so the caption/controls never get squeezed off-screen. */
 @media (max-height: 500px) and (orientation: landscape) {
-  .lightbox-img { max-height: 56vh; }
+  .lightbox-img { max-height: 56dvh; }
   .lightbox-info { margin-top: 8px; }
   .lightbox-prev, .lightbox-next { min-width: 40px; min-height: 40px; font-size: 16px; }
   .gallery-filters { position: static; }
@@ -568,7 +759,7 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
   .gallery-grid { column-count: 4; column-gap: 18px; max-width: 1400px; }
   .gallery-item { margin-bottom: 18px; }
   .gallery-filters { max-width: 1400px; }
-  .lightbox-img { max-height: min(82vh, 1100px); max-width: min(90vw, 1600px); }
+  .lightbox-img { max-height: min(82dvh, 1100px); max-width: min(90vw, 1600px); }
 }
 
 /* Short viewports generally (landscape phones/tablets, small laptop windows,
@@ -671,8 +862,8 @@ html[data-theme="elegant"] .gallery-teaser-cta { color: #fff; }
   .gallery-teaser-content { padding: 24px 20px; }
 }
 
-/* ═══ GALLERY MINI-APP ═══
-   Dedicated chrome for gallery.html — not a clone of the guide navigation. */
+/* ═══ MINI-APP CHROME (gallery + tools) ═══
+   Shared fixed bar / footer for dedicated pages — not a clone of the guide nav. */
 .gallery-app-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   display: grid;
@@ -690,7 +881,8 @@ html[data-theme="elegant"] .gallery-teaser-cta { color: #fff; }
 .gallery-app-back {
   justify-self: start;
   display: inline-flex; align-items: center; gap: 8px;
-  min-height: 44px; padding: 8px 12px 8px 8px;
+  min-height: 44px; min-width: 44px;
+  padding: 8px 12px 8px 8px;
   border-radius: 999px;
   border: 1px solid var(--border-light);
   background: var(--bg-card);
@@ -699,8 +891,16 @@ html[data-theme="elegant"] .gallery-teaser-cta { color: #fff; }
   font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
   text-decoration: none;
   transition: color .2s ease, border-color .2s ease, background .2s ease;
+  /* Never shrink the control into a half-read label */
+  flex-shrink: 0;
 }
 .gallery-app-back svg { width: 16px; height: 16px; flex-shrink: 0; transition: transform .2s ease; }
+/* Full phrase only — never ellipsis (“Back to the g…”) */
+.gallery-app-back-label {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
 .gallery-app-back:hover,
 .gallery-app-back:focus-visible {
   color: var(--accent-1); border-color: var(--border-med); background: var(--bg-card-hov); outline: none;
@@ -712,26 +912,72 @@ html[data-theme="elegant"] .gallery-teaser-cta { color: #fff; }
   display: inline-flex; align-items: center; gap: 8px;
   font-family: var(--ff-display); font-size: 1.15rem; font-weight: 700;
   color: var(--text-main); letter-spacing: -.01em; white-space: nowrap;
+  /* Center title can yield; back/actions stay intact */
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  justify-content: center;
 }
 .gallery-app-mark { color: var(--accent-1); font-style: italic; }
 .gallery-app-actions {
   justify-self: end;
   margin-left: 0 !important;
 }
-body.page-gallery #gallery {
+body.page-gallery #gallery,
+body.page-tools #tools.tools-page {
   padding-top: calc(80px + env(safe-area-inset-top, 0px));
   padding-bottom: 72px;
 }
-body.page-gallery .gallery-app-header {
+body.page-gallery .gallery-app-header,
+body.page-tools .tools-app-header {
   max-width: 1200px; margin-left: auto; margin-right: auto; margin-bottom: 28px;
 }
 /* Sticky filters sit just under the mini-app bar */
 body.page-gallery .gallery-filters {
   top: calc(64px + env(safe-area-inset-top, 0px));
 }
-/* Slimmer loader subcopy on the mini-app */
-body.page-gallery .loader-sub { letter-spacing: .18em; }
-body.page-gallery #progress-bar { height: 2px; }
+/* Slimmer loader subcopy on mini-app pages */
+body.page-gallery .loader-sub,
+body.page-tools .loader-sub { letter-spacing: .18em; }
+body.page-gallery #progress-bar,
+body.page-tools #progress-bar { height: 2px; }
+
+/* Tools page — full scrollable layout (not a modal panel) */
+body.page-tools #tools.tools-page {
+  padding-left: var(--section-x);
+  padding-right: var(--section-x);
+  max-width: none;
+  margin: 0 auto;
+}
+body.page-tools .tools-page .tools-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+body.page-tools .tools-page .tool-card {
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  min-height: 100%;
+}
+body.page-tools .tools-page .tool-card-wide {
+  grid-column: 1 / -1;
+}
+body.page-tools .tools-page .clock-list {
+  max-height: min(320px, 50vh);
+}
+@media (max-width: 900px) {
+  body.page-tools .tools-page .tools-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (min-width: 1600px) {
+  body.page-tools .tools-app-header,
+  body.page-tools .tools-page .tools-grid {
+    max-width: 1400px;
+  }
+}
 .gallery-app-footer {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: 16px 24px;
@@ -750,26 +996,37 @@ body.page-gallery #progress-bar { height: 2px; }
   font-size: 12px; color: var(--text-mute); margin: 0;
   flex: 1 1 200px; text-align: center;
 }
+/* Below ~720px the full “Back to the Guide” label collides with the title.
+   Prefer icon-only (aria-label still announces the action) — never truncate. */
+@media (max-width: 720px) {
+  .gallery-app-back-label { display: none; }
+  .gallery-app-back {
+    padding: 10px;
+    border-radius: 50%;
+    justify-content: center;
+    gap: 0;
+  }
+}
 @media (max-width: 640px) {
   .gallery-app-bar {
     grid-template-columns: auto 1fr auto;
     padding-left: 12px; padding-right: 12px;
-  }
-  .gallery-app-back-label { /* keep icon + short label; hide long text on tiny screens via max-width */
-    max-width: 9.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    gap: 8px;
   }
   .gallery-app-title { font-size: 1rem; }
   .gallery-app-footer { flex-direction: column; text-align: center; }
   .gallery-app-footer-copy { text-align: center; order: 3; }
 }
 @media (max-width: 400px) {
-  .gallery-app-back-label { display: none; }
-  .gallery-app-back { padding: 10px; border-radius: 50%; }
+  .gallery-app-title { font-size: 0.95rem; }
+  .gallery-app-actions { gap: 6px; }
 }
 @media (min-width: 1600px) {
   body.page-gallery .gallery-app-header,
   body.page-gallery .gallery-filters,
   body.page-gallery .gallery-grid,
+  body.page-tools .tools-app-header,
+  body.page-tools .tools-page .tools-grid,
   .gallery-app-footer { max-width: 1400px; }
 }
 
@@ -784,14 +1041,18 @@ body.page-gallery #progress-bar { height: 2px; }
 /* ═══ SETTINGS DIALOG ═══ */
 .settings-overlay {
   position: fixed; inset: 0; z-index: 1002; padding: 24px;
+  padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
   background: rgba(0,0,0,.58); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity .3s ease, visibility .3s ease;
+  overscroll-behavior: contain;
 }
 .settings-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; }
 .settings-panel {
-  width: min(1120px, 100%); max-height: min(86vh, 900px); overflow: auto;
+  width: min(1120px, 100%); max-height: min(86dvh, 900px); overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: clamp(22px, 3vw, 42px); background: var(--bg-surface); border: 1px solid var(--border-light);
   border-radius: var(--radius-lg); box-shadow: 0 36px 80px rgba(0,0,0,.4); position: relative;
   transform: translateY(14px) scale(.985); transition: transform .28s cubic-bezier(.22,1,.36,1);
@@ -821,14 +1082,28 @@ body.page-gallery #progress-bar { height: 2px; }
 .settings-group-sub { font-size: 12.5px; color: var(--text-mute); margin-bottom: 22px; line-height: 1.6; }
 
 
-/* Travel tools */
-.tools-panel { width: min(1180px, 100%); max-height: min(88vh, 920px); }
+/* Travel tools (page layout; legacy .tools-panel kept harmless if ever reused) */
+.tools-panel { width: min(1180px, 100%); max-height: min(88dvh, 920px); }
 .tools-grid {
   max-width: 1200px; margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   align-items: stretch;
+}
+/* On the dedicated tools page, never clamp height like a dialog */
+body.page-tools .tools-panel,
+body.page-tools #tools.tools-page {
+  max-height: none;
+  width: 100%;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  transform: none;
+  padding-left: 0;
+  padding-right: 0;
 }
 .tool-card {
   padding: 22px 20px; border: 1px solid var(--border-light); border-radius: var(--radius);
@@ -845,8 +1120,11 @@ body.page-gallery #progress-bar { height: 2px; }
 .tool-field input, .tool-field select {
   width: 100%; min-height: 44px; padding: 11px 12px; border: 1px solid var(--border-light);
   border-radius: var(--radius); background: var(--bg-base); color: var(--text-main);
-  font: 500 14px var(--ff-body); outline: none;
+  /* 16px minimum prevents iOS Safari from zooming the page on focus */
+  font: 500 16px var(--ff-body); outline: none;
   color-scheme: inherit;
+  -webkit-appearance: none;
+  appearance: none;
 }
 /* Ensure select options stay readable on dark & light themes */
 .tool-field option { background: var(--bg-surface); color: var(--text-main); }
@@ -999,8 +1277,14 @@ nav.scrolled {
   width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid var(--border-light); border-radius: 999px; background: var(--bg-card);
   color: var(--text-main); cursor: pointer; font-size: 17px; line-height: 1; transition: all .25s;
+  text-decoration: none; /* tools/gallery icons may be <a> links */
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
-.nav-settings-btn:hover, .nav-tool-btn:hover { border-color: var(--accent-1); color: var(--accent-1); background: var(--bg-card-hov); transform: translateY(-2px); }
+.nav-settings-btn:hover, .nav-tool-btn:hover,
+.nav-settings-btn:focus-visible, .nav-tool-btn:focus-visible {
+  border-color: var(--accent-1); color: var(--accent-1); background: var(--bg-card-hov); transform: translateY(-2px); outline: none;
+}
 
 /* Hamburger */
 .nav-hamburger { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; min-width: 44px; min-height: 44px; padding: 4px; background: none; border: none; z-index: 201; }
@@ -1183,6 +1467,10 @@ nav.scrolled {
 .region-name { font-family: var(--ff-display); font-size: 1.55rem; font-weight: 700; line-height: 1.12; margin-bottom: 12px; color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,.35); }
 .region-desc { font-size: 13px; color: rgba(255,255,255,0.86); line-height: 1.65; margin-bottom: 16px; max-height: 0; overflow: hidden; transition: max-height .55s cubic-bezier(.22,1,.36,1), opacity .45s; opacity: 0; }
 .region-card:hover .region-desc { max-height: 140px; opacity: 1; }
+/* Touch devices have no hover — keep a short description readable without hover */
+@media (hover: none) {
+  .region-desc { max-height: 4.8em; opacity: 1; -webkit-line-clamp: 3; display: -webkit-box; -webkit-box-orient: vertical; }
+}
 .region-spots { display: flex; gap: 8px; flex-wrap: wrap; }
 .region-spot { font-size: 11px; font-weight: 500; letter-spacing: .04em; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.32); color: rgba(255,255,255,0.88); border-radius: 999px; transition: all .25s; cursor: pointer; backdrop-filter: blur(6px); background: rgba(0,0,0,.18); }
 .region-card:hover .region-spot:hover { border-color: var(--accent-1); color: var(--text-inv); background: var(--accent-1); }
@@ -1213,6 +1501,8 @@ nav.scrolled {
   display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; 
   padding: 20px 60px 40px; scroll-behavior: smooth; margin: 0 -60px;
   -ms-overflow-style: none; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 .dest-track::-webkit-scrollbar { display: none; }
 .dest-card { 
@@ -1413,12 +1703,14 @@ nav.scrolled {
 /* ═══ MODAL OVERLAY ═══ */
 #modal-overlay {
   position: fixed; inset: 0; z-index: 1000; background: var(--modal-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .4s, visibility .4s; padding: 24px;
+  display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .4s, visibility .4s;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  overscroll-behavior: contain;
 }
 #modal-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; }
 .modal-box {
   background: var(--bg-surface); border: 1px solid var(--border-med); border-radius: 12px;
-  max-width: 750px; width: 100%; max-height: 85vh; overflow-y: auto;
+  max-width: 750px; width: 100%; max-height: min(85dvh, 85vh); overflow-y: auto; -webkit-overflow-scrolling: touch;
   transform: scale(.9) translateY(30px); transition: transform .5s cubic-bezier(.22,1,.36,1); position: relative;
   box-shadow: 0 40px 80px rgba(0,0,0,0.5);
 }
@@ -1498,7 +1790,10 @@ h1, h2, h3, .hero-desc, .intro-body, .intro-pull, p { overflow-wrap: break-word;
    never land underneath it, whether scrolled via JS or a plain # link. */
 section[id], footer[id] { scroll-margin-top: 90px; }
 
-/* ═══ RESPONSIVE ═══ */
+/* ═══ RESPONSIVE ═══
+   Breakpoints cover: large tablet/small laptop (1100), tablet portrait &
+   large phones landscape (860), phones (540), narrow phones (400),
+   wearable/mini webviews (280), plus short-viewport rules earlier. */
 @media (max-width: 1100px) {
   .regions-nav-btns { display: flex; }
   .regions-track {
@@ -1506,12 +1801,22 @@ section[id], footer[id] { scroll-margin-top: 90px; }
     overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
     padding: 4px 60px 28px; margin: 0 -60px;
     -ms-overflow-style: none; scrollbar-width: none;
+    /* Touch momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
   }
   .regions-track::-webkit-scrollbar { display: none; }
-  .region-card { flex: 0 0 300px; scroll-snap-align: center; }
+  .region-card { flex: 0 0 min(300px, 78vw); scroll-snap-align: center; }
   .practical-grid { grid-template-columns: repeat(2,1fr); }
   .culture-tiles { grid-template-columns: repeat(3,1fr); }
   .footer-top { grid-template-columns: 1fr 1fr; }
+  .routes-grid { grid-template-columns: repeat(2, 1fr); }
+  /* Destinations carousel stays usable on tablets */
+  .dest-track {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  .dest-card { flex: 0 0 min(320px, 78vw); }
 }
 @media (max-width: 860px) {
   nav { padding: 20px 24px; }
@@ -1519,13 +1824,14 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .nav-links { display: none; }
   .nav-actions { margin-left: auto; gap: 8px; }
   .nav-hamburger { display: flex; }
-  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, footer { padding-left: 24px; padding-right: 24px; }
+  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, footer,
+  .gallery-teaser-section { padding-left: 24px; padding-right: 24px; }
   .hero-content { padding: 0 24px 80px; }
   .intro-grid { grid-template-columns: 1fr; }
   .intro-right { display: none; }
   .intro-facts { grid-template-columns: repeat(2,1fr); }
   .regions-track { padding: 4px 24px 28px; margin: 0 -24px; }
-  .region-card { flex: 0 0 268px; height: 440px; }
+  .region-card { flex: 0 0 min(268px, 78vw); height: min(440px, 70vh); }
   .practical-grid { grid-template-columns: 1fr; background: none; border: none; gap: 16px; }
   .prac-card { border: 1px solid var(--border-light); border-radius: 8px; }
   .seasons-grid { grid-template-columns: 1fr; gap: 48px; }
@@ -1533,13 +1839,13 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .routes-grid { grid-template-columns: 1fr; }
   .tips-grid { grid-template-columns: 1fr; }
   .footer-top { grid-template-columns: 1fr; gap: 40px; }
-  .settings-overlay { padding: 12px; align-items: stretch; }
-  .settings-panel { max-height: calc(100vh - 24px); padding: 26px 18px; }
+  .settings-overlay { padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); align-items: stretch; }
+  .settings-panel { max-height: calc(100dvh - 24px); padding: 26px 18px; }
   .settings-title-row { align-items: center; }
   .settings-close { flex-basis: 40px; width: 40px; height: 40px; }
   .settings-grid { grid-template-columns: 1fr; }
   /* tools-grid already collapses at 900px; keep panel usable on phones */
-  .tools-panel { max-height: calc(100dvh - 24px); }
+  .tools-panel { max-height: calc(100dvh - 24px); width: min(100%, 1180px); }
   .theme-swatch-grid { grid-template-columns: repeat(3, 1fr); }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
   .hero-stats { display: none; }
@@ -1549,9 +1855,30 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .regions-header-wrapper p { text-align: left; max-width: 100%; }
   .culture-intro { grid-template-columns: 1fr; gap: 32px; }
   .dest-track { padding: 10px 24px 30px; margin: 0 -24px;}
-  .dest-card { flex: 0 0 280px; height: 380px;}
+  .dest-card { flex: 0 0 min(280px, 82vw); height: min(380px, 62vh);}
   .modal-facts { grid-template-columns: 1fr 1fr; }
   .modal-header, .modal-body { padding-left: 24px; padding-right: 24px; }
+  .modal-title { font-size: clamp(1.5rem, 6vw, 2rem); }
+  .modal-header { padding-top: 28px; padding-bottom: 18px; }
+  /* Mobile nav: account for notches + bottom home indicator */
+  .nav-mobile {
+    padding-top: max(100px, calc(80px + env(safe-area-inset-top, 0px)));
+    padding-bottom: max(40px, env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Keep sticky gallery filters under the mini-app bar on phones */
+  body.page-gallery .gallery-filters {
+    top: calc(60px + env(safe-area-inset-top, 0px));
+  }
+}
+/* Mid phones / small tablets in portrait — avoid cramped 3-col swatches */
+@media (max-width: 720px) {
+  .theme-swatch-grid { grid-template-columns: repeat(2, 1fr); }
+  .intro-facts { gap: 10px; }
+  .fact-card { padding: 18px 14px; }
+  .currency-tool { grid-template-columns: 1fr; }
+  .currency-tool .tool-swap { grid-column: auto; width: 100%; }
 }
 @media (max-width: 540px) {
   .tool-two-col { grid-template-columns: 1fr; }
@@ -1559,17 +1886,27 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .culture-tiles { grid-template-columns: repeat(2,1fr); }
   .seasons-right { grid-template-columns: 1fr; }
   .modal-facts { grid-template-columns: 1fr; }
-  .region-card { flex-basis: 240px; height: 420px; }
+  .region-card { flex-basis: min(240px, 82vw); height: min(420px, 68vh); }
+  .btn-primary, .btn-ghost { min-height: 44px; }
+  .gallery-filter { min-height: 44px; }
+  /* Sticky filters: leave room for gallery mini-app bar on phones */
+  body.page-gallery .gallery-filters {
+    top: calc(56px + env(safe-area-inset-top, 0px));
+  }
 }
 @media (max-width: 400px) {
   .hero-cta { width: 100%; }
   .hero-cta .btn-primary, .hero-cta .btn-ghost { flex: 1 1 auto; justify-content: center; }
-  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, footer { padding-left: 14px; padding-right: 14px; }
+  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, footer,
+  .gallery-teaser-section { padding-left: 14px; padding-right: 14px; }
   nav { padding-left: 14px; padding-right: 14px; }
   .hero-content { padding-left: 14px; padding-right: 14px; }
   .hero-h1 { font-size: clamp(2.4rem, 14vw, 3.5rem); }
   .section-header h2, #practical h2, .tips-header h2 { font-size: clamp(1.7rem, 8vw, 2.2rem) !important; }
   .loader-bar { width: min(240px, 70vw); }
+  .theme-swatch-grid { grid-template-columns: 1fr 1fr; }
+  .regions-track { padding: 4px 14px 28px; margin: 0 -14px; }
+  .dest-track { padding: 10px 14px 30px; margin: 0 -14px; }
 }
 /* Ultra-narrow / wearable webviews (~Apple Watch size and similar). */
 @media (max-width: 280px) {
@@ -1583,6 +1920,16 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .hero-desc { font-size: 13px; }
   .gallery-caption { font-size: 10px; }
   .settings-panel { padding: 16px 12px; }
+  .theme-swatch-grid { grid-template-columns: 1fr; }
+  .culture-tiles { grid-template-columns: 1fr; }
+}
+/* Foldables / split-screen: very short + moderately wide */
+@media (max-height: 500px) and (min-width: 600px) {
+  #hero { min-height: 320px; height: 100dvh; }
+  .hero-content { padding-bottom: 40px; }
+  .hero-stats { display: none; }
+  .hero-scroll { display: none; }
+  .settings-panel, .tools-panel { max-height: calc(100dvh - 16px); }
 }
 /* Safe areas for notched phones / Dynamic Island when not already covered. */
 @supports (padding: max(0px)) {
@@ -1605,6 +1952,71 @@ section[id], footer[id] { scroll-margin-top: 90px; }
     padding-left: clamp(60px, 6vw, 120px);
     padding-right: clamp(60px, 6vw, 120px);
   }
+}
+
+/* ═══ CONSTRAINED / WEARABLE WEBVIEWS (watchOS Safari, mini browsers) ═══
+   Goal: zero “A problem occurred” from GPU/memory thrash. Prefer content
+   over effects — effects are progressive enhancement on larger screens. */
+@media (max-width: 320px), (max-height: 280px) {
+  #cursorCanvas,
+  #dotMap,
+  body::before,
+  #progress-bar { display: none !important; }
+
+  /* Skip boot splash — less time stuck on a spinner */
+  #loader { display: none !important; }
+
+  /* Instant content — no scroll-reveal waiting on IO / animations */
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .gallery-item img,
+  .gallery-caption {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .gallery-item { min-height: 0; }
+  .gallery-item.is-revealed .gallery-caption { opacity: 1 !important; }
+
+  /* Blur is expensive and flaky on tiny GPUs */
+  nav,
+  .gallery-app-bar,
+  .settings-overlay,
+  .lightbox,
+  .lightbox-progress,
+  .nav-mobile,
+  #modal-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  html { scroll-behavior: auto; }
+  #hero { min-height: 220px; height: auto; padding-bottom: 24px; }
+  .hero-h1 { font-size: clamp(1.6rem, 12vw, 2.2rem); margin-bottom: 12px; }
+  .hero-stats, .hero-scroll { display: none !important; }
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+
+  .lightbox-img {
+    max-width: 96vw;
+    max-height: 55dvh;
+    min-width: 0;
+    min-height: 0;
+    box-shadow: none;
+  }
+  .lightbox-progress {
+    width: min(200px, 80%);
+    min-width: 120px;
+    padding: 8px 10px;
+  }
+  .lightbox-progress-msg { font-size: 10px; }
+  .lightbox-progress-pct { font-size: 11px; }
+
+  .settings-panel,
+  .tools-panel { max-height: none; }
+  .tool-card { padding: 14px 12px; }
 }
 
 /* ═══ THEME-SPECIFIC FINISH ═══
