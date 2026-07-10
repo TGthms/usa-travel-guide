@@ -656,6 +656,27 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
   /* JS eases the width every frame — keep CSS transition short so it feels fluid */
   transition: width .08s linear;
   will-change: width;
+  position: relative;
+}
+/* Soft sheen while decode/render is the long wait — bar feels alive even if % holds */
+.lightbox-progress.is-decoding .lightbox-progress-fill {
+  background-image:
+    linear-gradient(
+      105deg,
+      transparent 0%,
+      transparent 38%,
+      rgba(255, 255, 255, 0.28) 50%,
+      transparent 62%,
+      transparent 100%
+    ),
+    linear-gradient(90deg, var(--accent-1-dk, #9a7840), var(--accent-1, #c9a259), var(--accent-1-lt, #e0c48a));
+  background-size: 220% 100%, 100% 100%;
+  background-position: 120% 0, 0 0;
+  animation: lightboxDecodeSheen 1.35s ease-in-out infinite;
+}
+@keyframes lightboxDecodeSheen {
+  0%   { background-position: 120% 0, 0 0; }
+  100% { background-position: -120% 0, 0 0; }
 }
 .lightbox-progress.is-indeterminate .lightbox-progress-fill {
   width: 35% !important;
@@ -703,6 +724,7 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
 }
 @media (prefers-reduced-motion: reduce) {
   .lightbox-progress-fill { transition: none; }
+  .lightbox-progress.is-decoding .lightbox-progress-fill { animation: none; }
   .lightbox-progress.is-indeterminate .lightbox-progress-fill { animation: none; width: 50% !important; }
 }
 
