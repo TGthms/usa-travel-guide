@@ -45,6 +45,13 @@ function raf(fn) {
   if (ENV.hasRAF) return requestAnimationFrame(fn);
   return setTimeout(() => fn(Date.now()), 16);
 }
+function cancelRaf(id) {
+  if (id == null) return;
+  try {
+    if (ENV.hasRAF) cancelAnimationFrame(id);
+    else clearTimeout(id);
+  } catch (e) { /* ignore */ }
+}
 
 /** Observe elements entering the viewport; fall back to immediate reveal. */
 function observeWhenVisible(elements, onVisible, options) {
@@ -2998,40 +3005,176 @@ function lightboxProgressText() {
   return LIGHTBOX_PROGRESS_TEXT[currentLang] || LIGHTBOX_PROGRESS_TEXT.en;
 }
 
-function setLightboxProgressUI({ visible, percent, indeterminate, message }) {
-  if (!lightboxProgress) return;
-  if (!visible) {
-    lightboxProgress.hidden = true;
-    lightboxProgress.classList.remove('is-indeterminate');
-    lightboxProgress.removeAttribute('aria-busy');
-    if (lightboxProgressFill) lightboxProgressFill.style.width = '0%';
-    if (lightboxProgressPct) lightboxProgressPct.textContent = '0%';
-    return;
-  }
+/*
+  Smooth progress controller
+  ──────────────────────────
+  Real XHR often jumps 0% → ~100% in one event (HTTP/2, cache, CDN), then the
+  browser spends a long time decoding a multi‑MB JPEG with no events — so a
+  naive bar freezes at 96%. We always ease the *displayed* value toward a
+  target, and during the decode phase we keep creeping the target so the bar
+  never sits still.
+*/
+let lbProgDisplay = 0;
+let lbProgTarget = 0;
+let lbProgRaf = 0;
+let lbProgMsgKey = 'loading';
+let lbProgVisible = false;
+let lbProgDecodeTimer = 0;
+
+function lbProgPaint() {
+  if (!lightboxProgress || !lbProgVisible) return;
+  const pct = Math.max(0, Math.min(100, Math.round(lbProgDisplay)));
   lightboxProgress.hidden = false;
-  lightboxProgress.setAttribute('aria-busy', 'true');
+  lightboxProgress.classList.remove('is-indeterminate');
+  lightboxProgress.setAttribute('aria-busy', pct < 100 ? 'true' : 'false');
+  if (lightboxProgressFill) lightboxProgressFill.style.width = pct + '%';
+  if (lightboxProgressPct) lightboxProgressPct.textContent = pct + '%';
   const t = lightboxProgressText();
-  if (lightboxProgressMsg) lightboxProgressMsg.textContent = message || t.loading;
-  if (indeterminate) {
-    lightboxProgress.classList.add('is-indeterminate');
-    if (lightboxProgressPct) lightboxProgressPct.textContent = '…';
-    if (lightboxProgressFill) lightboxProgressFill.style.width = '35%';
-  } else {
-    lightboxProgress.classList.remove('is-indeterminate');
-    const pct = Math.max(0, Math.min(100, Math.round(percent || 0)));
-    if (lightboxProgressFill) lightboxProgressFill.style.width = pct + '%';
-    if (lightboxProgressPct) lightboxProgressPct.textContent = pct + '%';
+  if (lightboxProgressMsg) {
+    lightboxProgressMsg.textContent =
+      lbProgMsgKey === 'preparing' ? t.preparing
+      : lbProgMsgKey === 'almost' ? t.almost
+      : lbProgMsgKey === 'failed' ? t.failed
+      : t.loading;
   }
 }
 
-function hideLightboxProgressSoon() {
-  // Brief beat at 100% so the bar doesn’t vanish mid-glance
-  setLightboxProgressUI({ visible: true, percent: 100, message: lightboxProgressText().almost });
-  setTimeout(() => {
-    if (lightboxImg && !lightboxImg.classList.contains('is-loading')) {
-      setLightboxProgressUI({ visible: false });
+function lbProgTick() {
+  lbProgRaf = 0;
+  if (!lbProgVisible) return;
+  const diff = lbProgTarget - lbProgDisplay;
+  // Ease: larger gap → faster catch-up (feels responsive), never freeze
+  if (Math.abs(diff) < 0.35) {
+    lbProgDisplay = lbProgTarget;
+  } else {
+    const ease = diff > 0 ? Math.max(0.55, diff * 0.14) : diff * 0.2;
+    lbProgDisplay += ease;
+    if (lbProgDisplay > lbProgTarget && diff > 0) lbProgDisplay = lbProgTarget;
+  }
+  lbProgPaint();
+  if (Math.abs(lbProgTarget - lbProgDisplay) >= 0.35) {
+    lbProgRaf = raf(lbProgTick);
+  }
+}
+
+function lbProgStart() {
+  lbProgVisible = true;
+  lbProgDisplay = 0;
+  lbProgTarget = 4; // never sit on 0%
+  lbProgMsgKey = 'loading';
+  if (lbProgDecodeTimer) { clearInterval(lbProgDecodeTimer); lbProgDecodeTimer = 0; }
+  if (lbProgRaf) { cancelRaf(lbProgRaf); lbProgRaf = 0; }
+  lbProgPaint();
+  lbProgRaf = raf(lbProgTick);
+}
+
+/** Raise the target (network or phase). Display eases toward it. */
+function lbProgSetTarget(pct, msgKey) {
+  if (!lbProgVisible) lbProgVisible = true;
+  const next = Math.max(0, Math.min(100, pct));
+  // Only move forward during a load (no jitter backwards)
+  if (next >= lbProgTarget) lbProgTarget = next;
+  if (msgKey) lbProgMsgKey = msgKey;
+  if (lightboxProgress) lightboxProgress.hidden = false;
+  if (!lbProgRaf) lbProgRaf = raf(lbProgTick);
+  else lbProgPaint();
+}
+
+/** Decode phase: keep the bar crawling 78→98 so multi‑MB decode never looks stuck. */
+function lbProgBeginDecode() {
+  lbProgMsgKey = 'preparing';
+  if (lbProgTarget < 78) lbProgTarget = 78;
+  if (lbProgDecodeTimer) clearInterval(lbProgDecodeTimer);
+  lbProgDecodeTimer = setInterval(() => {
+    if (!lbProgVisible) {
+      clearInterval(lbProgDecodeTimer);
+      lbProgDecodeTimer = 0;
+      return;
     }
-  }, 280);
+    if (lbProgTarget < 98) {
+      // Slow crawl — larger files take longer; user always sees motion
+      lbProgTarget = Math.min(98, lbProgTarget + 0.9);
+      if (!lbProgRaf) lbProgRaf = raf(lbProgTick);
+    }
+  }, 90);
+  if (!lbProgRaf) lbProgRaf = raf(lbProgTick);
+}
+
+function lbProgComplete(onDone) {
+  if (lbProgDecodeTimer) { clearInterval(lbProgDecodeTimer); lbProgDecodeTimer = 0; }
+  lbProgMsgKey = 'almost';
+  lbProgTarget = 100;
+  let settled = false;
+  const finish = () => {
+    if (settled) return;
+    settled = true;
+    lbProgDisplay = 100;
+    lbProgPaint();
+    setTimeout(() => {
+      lbProgHide();
+      if (typeof onDone === 'function') onDone();
+    }, 240);
+  };
+  if (!lbProgRaf) lbProgRaf = raf(lbProgTick);
+  const wait = setInterval(() => {
+    if (lbProgDisplay >= 99.2 || lbProgTarget >= 100 && lbProgDisplay >= 97) {
+      clearInterval(wait);
+      finish();
+    } else if (!lbProgRaf) {
+      lbProgRaf = raf(lbProgTick);
+    }
+  }, 32);
+  setTimeout(() => {
+    try { clearInterval(wait); } catch (e) { /* ignore */ }
+    finish();
+  }, 700);
+}
+
+function lbProgHide() {
+  lbProgVisible = false;
+  if (lbProgDecodeTimer) { clearInterval(lbProgDecodeTimer); lbProgDecodeTimer = 0; }
+  if (lbProgRaf) { cancelRaf(lbProgRaf); lbProgRaf = 0; }
+  lbProgDisplay = 0;
+  lbProgTarget = 0;
+  lbProgMsgKey = 'loading';
+  if (!lightboxProgress) return;
+  lightboxProgress.hidden = true;
+  lightboxProgress.classList.remove('is-indeterminate');
+  lightboxProgress.removeAttribute('aria-busy');
+  if (lightboxProgressFill) lightboxProgressFill.style.width = '0%';
+  if (lightboxProgressPct) lightboxProgressPct.textContent = '0%';
+}
+
+function lbProgFail() {
+  if (lbProgDecodeTimer) { clearInterval(lbProgDecodeTimer); lbProgDecodeTimer = 0; }
+  lbProgVisible = true;
+  lbProgMsgKey = 'failed';
+  lbProgTarget = 0;
+  lbProgDisplay = 0;
+  lbProgPaint();
+  if (lightboxProgressFill) lightboxProgressFill.style.width = '0%';
+}
+
+// Back-compat shim used by older call sites during the refactor window
+function setLightboxProgressUI({ visible, percent, indeterminate, message }) {
+  if (!visible) { lbProgHide(); return; }
+  if (indeterminate) {
+    // Map indeterminate to a gentle crawl instead of a frozen fake bar
+    lbProgStart();
+    lbProgBeginDecode();
+    return;
+  }
+  if (!lbProgVisible) lbProgStart();
+  const msgKey = message && /prepar/i.test(message) ? 'preparing'
+    : message && /almost|ready|完成|listo/i.test(message) ? 'almost'
+    : message && /fail|no se|失败|失敗/i.test(message) ? 'failed'
+    : 'loading';
+  if (msgKey === 'failed') { lbProgFail(); return; }
+  lbProgSetTarget(percent || 0, msgKey);
+}
+
+function hideLightboxProgressSoon() {
+  lbProgComplete();
 }
 
 function cancelLightboxLoad() {
@@ -3049,7 +3192,7 @@ function cancelLightboxLoad() {
     lightboxDecodeImg = null;
   }
   if (lightboxImg) lightboxImg.classList.remove('is-loading');
-  setLightboxProgressUI({ visible: false });
+  lbProgHide();
 }
 
 function updateLightboxChrome(item, index) {
@@ -3076,15 +3219,18 @@ function applyLightboxFullSrc(displaySrc, fullKey, token) {
   if (fullKey) lightboxImg.setAttribute('data-full-src', fullKey);
   else lightboxImg.removeAttribute('data-full-src');
   lightboxImg.classList.remove('is-loading');
-  hideLightboxProgressSoon();
+  lbProgComplete();
 }
 
 function decodeThenApply(displaySrc, fullKey, token, onFail) {
+  // Network done → keep bar moving through the (often long) decode gap
+  lbProgBeginDecode();
   const probe = new Image();
   lightboxDecodeImg = probe;
   probe.decoding = 'async';
   const done = (ok) => {
     if (lightboxDecodeImg === probe) lightboxDecodeImg = null;
+    if (token !== lightboxLoadToken) return;
     if (!ok) {
       if (typeof onFail === 'function') onFail();
       return;
@@ -3099,65 +3245,43 @@ function decodeThenApply(displaySrc, fullKey, token, onFail) {
     }
   };
   probe.onerror = () => done(false);
-  // Final stretch of the bar while the browser decodes pixels
-  if (token === lightboxLoadToken) {
-    setLightboxProgressUI({
-      visible: true,
-      percent: 96,
-      message: lightboxProgressText().preparing
-    });
-  }
   probe.src = displaySrc;
 }
 
 function failLightboxLoad(token, thumbFallback) {
   if (token !== lightboxLoadToken) return;
-  // Prefer still showing something rather than a dead stage
   if (thumbFallback && lightboxImg && !lightboxImg.getAttribute('data-full-src')) {
     lightboxImg.src = thumbFallback;
     lightboxImg.removeAttribute('data-full-src');
   }
   if (lightboxImg) lightboxImg.classList.remove('is-loading');
-  setLightboxProgressUI({
-    visible: true,
-    percent: 0,
-    message: lightboxProgressText().failed
-  });
+  lbProgFail();
   setTimeout(() => {
-    if (token === lightboxLoadToken) setLightboxProgressUI({ visible: false });
+    if (token === lightboxLoadToken) lbProgHide();
   }, 1400);
 }
 
 /**
  * Fallback when XHR can't report progress (file://, blocked XHR, etc.).
- * Uses the browser's normal image loader (same as <img src>) so the full
- * photo still appears, with a smooth estimated % so the wait feels clear.
+ * Smooth estimated progress + img loader so the full photo still appears.
  */
 function loadFullViaImageFallback(fullUrl, token, thumbFallback) {
   if (token !== lightboxLoadToken) return;
   if (lightboxImg) lightboxImg.classList.add('is-loading');
-  setLightboxProgressUI({
-    visible: true,
-    percent: 8,
-    message: lightboxProgressText().loading
-  });
-
-  let pct = 8;
+  if (!lbProgVisible) lbProgStart();
+  // Synthetic network crawl (0→72) while the browser fetches via Image()
+  let synth = Math.max(lbProgTarget, 6);
+  lbProgSetTarget(synth, 'loading');
   const tick = setInterval(() => {
     if (token !== lightboxLoadToken) {
       clearInterval(tick);
       return;
     }
-    // Ease toward 90% while waiting — real completion jumps to 100%
-    if (pct < 90) {
-      pct += Math.max(1, (90 - pct) * 0.07);
-      setLightboxProgressUI({
-        visible: true,
-        percent: Math.round(pct),
-        message: lightboxProgressText().loading
-      });
+    if (synth < 72) {
+      synth = Math.min(72, synth + 1.6);
+      lbProgSetTarget(synth, 'loading');
     }
-  }, 120);
+  }, 80);
 
   const probe = new Image();
   lightboxDecodeImg = probe;
@@ -3167,33 +3291,29 @@ function loadFullViaImageFallback(fullUrl, token, thumbFallback) {
     if (lightboxDecodeImg === probe) lightboxDecodeImg = null;
     if (token !== lightboxLoadToken) return;
     if (ok) {
-      // Cache the plain URL (no blob) so revisits skip the wait
       lightboxFullCache.set(fullUrl, fullUrl);
-      setLightboxProgressUI({
-        visible: true,
-        percent: 100,
-        message: lightboxProgressText().almost
-      });
       applyLightboxFullSrc(fullUrl, fullUrl, token);
     } else {
       failLightboxLoad(token, thumbFallback);
     }
   };
   probe.onload = () => {
+    clearInterval(tick);
+    // Network-ish phase done → animate through prepare while decoding
+    lbProgBeginDecode();
     if (typeof probe.decode === 'function') {
       probe.decode().then(() => finish(true)).catch(() => finish(true));
     } else {
       finish(true);
     }
   };
-  probe.onerror = () => finish(false);
+  probe.onerror = () => { clearInterval(tick); finish(false); };
   probe.src = fullUrl;
 }
 
 function loadFullWithProgress(fullUrl, token, thumbFallback) {
   if (!fullUrl) return;
 
-  // Resolve to an absolute URL so XHR/fetch always hit the right origin/path
   let absoluteUrl = fullUrl;
   try {
     absoluteUrl = new URL(fullUrl, window.location.href).href;
@@ -3202,9 +3322,9 @@ function loadFullWithProgress(fullUrl, token, thumbFallback) {
   // Instant path: already downloaded this session
   if (lightboxFullCache.has(fullUrl) || lightboxFullCache.has(absoluteUrl)) {
     const cached = lightboxFullCache.get(fullUrl) || lightboxFullCache.get(absoluteUrl);
-    setLightboxProgressUI({ visible: true, percent: 100, message: lightboxProgressText().almost });
+    lbProgStart();
+    lbProgSetTarget(70, 'loading');
     decodeThenApply(cached, fullUrl, token, () => {
-      // Stale blob URL — drop cache and reload
       lightboxFullCache.delete(fullUrl);
       lightboxFullCache.delete(absoluteUrl);
       loadFullWithProgress(fullUrl, token, thumbFallback);
@@ -3213,13 +3333,8 @@ function loadFullWithProgress(fullUrl, token, thumbFallback) {
   }
 
   if (lightboxImg) lightboxImg.classList.add('is-loading');
-  setLightboxProgressUI({
-    visible: true,
-    percent: 0,
-    message: lightboxProgressText().loading
-  });
+  lbProgStart();
 
-  // file:// and some sandboxes block XHR to local files — skip straight to img fallback
   if (window.location.protocol === 'file:') {
     loadFullViaImageFallback(fullUrl, token, thumbFallback);
     return;
@@ -3228,6 +3343,7 @@ function loadFullWithProgress(fullUrl, token, thumbFallback) {
   const xhr = new XMLHttpRequest();
   lightboxXhr = xhr;
   let gotProgress = false;
+  let lastNetPct = 4;
 
   try {
     xhr.open('GET', absoluteUrl, true);
@@ -3242,53 +3358,54 @@ function loadFullWithProgress(fullUrl, token, thumbFallback) {
     if (token !== lightboxLoadToken) return;
     if (e.lengthComputable && e.total > 0) {
       gotProgress = true;
-      // Reserve 0–92% for network; decode uses the rest
-      const netPct = Math.min(92, Math.round((e.loaded / e.total) * 92));
-      setLightboxProgressUI({
-        visible: true,
-        percent: Math.max(1, netPct),
-        message: lightboxProgressText().loading
-      });
+      // Network owns 4% → 72% (leave headroom for decode crawl)
+      const netPct = 4 + Math.round((e.loaded / e.total) * 68);
+      lastNetPct = Math.max(lastNetPct, Math.min(72, netPct));
+      lbProgSetTarget(lastNetPct, 'loading');
     } else if (e.loaded > 0) {
       gotProgress = true;
-      // Partial progress without total — show indeterminate, not 0%
-      setLightboxProgressUI({
-        visible: true,
-        indeterminate: true,
-        message: lightboxProgressText().loading
-      });
+      // Unknown total: nudge forward slowly from bytes (capped)
+      lastNetPct = Math.min(72, lastNetPct + 2.5);
+      lbProgSetTarget(lastNetPct, 'loading');
     }
   };
 
   xhr.onload = () => {
     if (token !== lightboxLoadToken) return;
     lightboxXhr = null;
-    // status 0 is success on some local servers / opaque edge cases when a body exists
     const body = xhr.response;
     const hasBody = body && (typeof body.size !== 'number' || body.size > 0);
     const statusOk = xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300);
     if (statusOk && hasBody) {
-      setLightboxProgressUI({
-        visible: true,
-        percent: gotProgress ? 94 : 90,
-        message: lightboxProgressText().preparing
-      });
+      // If the download finished in one burst (no intermediate events), ease
+      // through the network band instead of jumping straight to prepare.
+      if (!gotProgress) {
+        lbProgSetTarget(40, 'loading');
+        setTimeout(() => {
+          if (token !== lightboxLoadToken) return;
+          lbProgSetTarget(72, 'loading');
+        }, 80);
+      } else {
+        lbProgSetTarget(72, 'loading');
+      }
       try {
         const objUrl = URL.createObjectURL(body);
         lightboxFullCache.set(fullUrl, objUrl);
         lightboxFullCache.set(absoluteUrl, objUrl);
-        decodeThenApply(objUrl, fullUrl, token, () => {
-          // Blob decode failed — try plain URL via img loader
-          try { URL.revokeObjectURL(objUrl); } catch (e) { /* ignore */ }
-          lightboxFullCache.delete(fullUrl);
-          lightboxFullCache.delete(absoluteUrl);
-          loadFullViaImageFallback(fullUrl, token, thumbFallback);
-        });
+        // Slight delay so the bar can animate into the 70s before decode crawl
+        setTimeout(() => {
+          if (token !== lightboxLoadToken) return;
+          decodeThenApply(objUrl, fullUrl, token, () => {
+            try { URL.revokeObjectURL(objUrl); } catch (e) { /* ignore */ }
+            lightboxFullCache.delete(fullUrl);
+            lightboxFullCache.delete(absoluteUrl);
+            loadFullViaImageFallback(fullUrl, token, thumbFallback);
+          });
+        }, gotProgress ? 30 : 120);
       } catch (err) {
         loadFullViaImageFallback(fullUrl, token, thumbFallback);
       }
     } else {
-      // XHR didn't yield a usable body — img path usually still works
       loadFullViaImageFallback(fullUrl, token, thumbFallback);
     }
   };
