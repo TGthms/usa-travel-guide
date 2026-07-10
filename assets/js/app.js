@@ -772,7 +772,7 @@ const I18N = {
     "footer.parks": "国家公园",
     "footer.whenToVisit": "最佳季节",
     "footer.visa": "签证与入境",
-    "footer.copyright": "© 2026 美国旅行指南 &nbsp;·&nbsp; 心怀热爱，畅游在自由的公路上 | 由 Tim G 创作 · 含有部分与 AI 协作的内容",
+    "footer.copyright": "© 2026 美国旅行指南 &nbsp;·&nbsp; 心怀热爱，畅游在自由的公路上 | Tim G 制作",
     "footer.motto": "自由的土地，勇者的家园 🇺🇸"
   },
 
