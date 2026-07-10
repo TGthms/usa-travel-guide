@@ -46,37 +46,45 @@
   --rc-ne: #1a3a5c; --rc-so: #2a1a0a; --rc-mw: #1a3020; --rc-we: #1a1038; --rc-sw: #2a1008;
 }
 
-/* Theme: Modern Minimal — cool gallery white, ink, indigo accent (not neon SaaS blue) */
+/* Theme: Gallery Daylight — Apple-like light product palette
+   Cool silver white + soft black type + confident blue accent.
+   Avoids the previous warm-cream + navy + serif clash that felt “off”. */
 [data-theme="minimal"] {
-  --bg-base:     #f7f6f3;
+  /* Apple product gray / pure white surfaces */
+  --bg-base:     #f5f5f7;
   --bg-surface:  #ffffff;
-  --bg-surface-2:#eceae4;
+  --bg-surface-2:#e8e8ed;
   --bg-card:     #ffffff;
-  --bg-card-hov: #f0eeea;
+  --bg-card-hov: #f5f5f7;
 
-  --accent-1:    #1e3a5f;
-  --accent-1-lt: #2f5384;
-  --accent-1-dk: #142843;
-  --accent-2:    #8b7355;
+  /* Apple blue family — clear on white, not heavy navy */
+  --accent-1:    #0071e3;
+  --accent-1-lt: #2997ff;
+  --accent-1-dk: #0066cc;
+  --accent-2:    #6e6e73;
 
-  --text-main:   #141414;
-  --text-dim:    #4a4a4a;
-  --text-mute:   #8a8a8a;
+  /* Soft black + mid grays (SF Pro palette values) */
+  --text-main:   #1d1d1f;
+  --text-dim:    #6e6e73;
+  --text-mute:   #86868b;
   --text-inv:    #ffffff;
 
-  --border-light: rgba(20, 20, 20, 0.1);
-  --border-med:   rgba(30, 58, 95, 0.35);
+  --border-light: rgba(0, 0, 0, 0.08);
+  --border-med:   rgba(0, 0, 0, 0.18);
 
-  --nav-bg:      rgba(247, 246, 243, 0.92);
+  /* Frosted white nav like apple.com */
+  --nav-bg:      rgba(255, 255, 255, 0.78);
   --modal-bg:    rgba(255, 255, 255, 0.97);
 
-  --ff-display:  'Fraunces', 'Noto Serif SC', 'Noto Serif JP', Georgia, serif;
-  --ff-serif:    'Public Sans', 'Noto Sans SC', 'Noto Sans JP', system-ui, sans-serif;
-  --ff-body:     'Public Sans', 'Noto Sans SC', 'Noto Sans JP', system-ui, sans-serif;
+  /* Clean sans throughout — display serif fights a daylight product look */
+  --ff-display:  'Public Sans', 'Noto Sans SC', 'Noto Sans JP', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --ff-serif:    'Public Sans', 'Noto Sans SC', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  --ff-body:     'Public Sans', 'Noto Sans SC', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
   --body-weight: 400;
-  --shadow-card: 0 14px 36px rgba(20, 20, 20, 0.08);
+  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.06);
 
-  --rc-ne: #dce6f2; --rc-so: #f0e6dc; --rc-mw: #e2ebe4; --rc-we: #e8e4f0; --rc-sw: #f0e2de;
+  /* Soft neutral region tints (cool, not muddy) */
+  --rc-ne: #e8eef6; --rc-so: #f3efe9; --rc-mw: #e9f0ea; --rc-we: #eceaf3; --rc-sw: #f2ebe8;
 }
 
 /* Theme: Classic Elegant — warm paper, burgundy, readable sans body (never all-serif) */
@@ -2038,8 +2046,51 @@ html[data-theme="elegant"] .gallery-filter.active {
 }
 html[data-theme="minimal"] .hero-bg {
   background:
-    radial-gradient(ellipse 70% 55% at 28% 48%, rgba(30, 58, 95, 0.08) 0%, transparent 70%),
-    linear-gradient(165deg, #ffffff 0%, #f7f6f3 42%, #eceae4 100%);
+    radial-gradient(ellipse 70% 55% at 28% 48%, rgba(0, 113, 227, 0.06) 0%, transparent 70%),
+    linear-gradient(180deg, #ffffff 0%, #f5f5f7 55%, #e8e8ed 100%);
+}
+/* Daylight type: product-page clarity (tighter tracking, less “magazine serif”) */
+html[data-theme="minimal"] .hero-h1,
+html[data-theme="minimal"] .section-header h2,
+html[data-theme="minimal"] .intro-left h2,
+html[data-theme="minimal"] .nav-logo,
+html[data-theme="minimal"] .gallery-app-title {
+  font-style: normal;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+html[data-theme="minimal"] .hero-h1 em,
+html[data-theme="minimal"] .section-header h2 em,
+html[data-theme="minimal"] .intro-left h2 em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--accent-1);
+}
+html[data-theme="minimal"] .section-eyebrow,
+html[data-theme="minimal"] .hero-eyebrow {
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  color: var(--text-mute);
+}
+html[data-theme="minimal"] .section-eyebrow::after,
+html[data-theme="minimal"] .hero-eyebrow::before {
+  background: var(--border-med);
+  opacity: 1;
+}
+html[data-theme="minimal"] body::before {
+  opacity: 0.02;
+  mix-blend-mode: multiply;
+}
+html[data-theme="minimal"] .btn-primary {
+  border-radius: 980px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+html[data-theme="minimal"] .btn-ghost {
+  border-radius: 980px;
+}
+html[data-theme="minimal"] nav {
+  border-bottom: 1px solid var(--border-light);
 }
 html[data-theme="elegant"] .hero-bg {
   background:

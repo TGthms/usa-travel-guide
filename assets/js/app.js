@@ -1334,7 +1334,7 @@ function updateThemeUI(theme) {
 }
 const THEME_META_COLORS = {
   default: '#07101c',
-  minimal: '#f7f6f3',
+  minimal: '#f5f5f7',
   elegant: '#f6f1e8',
   luxury: '#0c0c0c',
   glass: '#0b1424',
