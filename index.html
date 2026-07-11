@@ -35,6 +35,14 @@
     if (osDark && (t === 'minimal' || t === 'elegant')) t = 'default';
     document.documentElement.setAttribute('data-theme', t);
     document.documentElement.style.colorScheme = (t === 'minimal' || t === 'elegant') ? 'light' : 'dark';
+    // Early motion preference (avoids flash of full animation before app.js)
+    var m = localStorage.getItem('usa-travel-motion');
+    if (!m && localStorage.getItem('usa-travel-reduce-motion') === 'on') m = 'reduced';
+    if (m !== 'full' && m !== 'reduced' && m !== 'off') m = null;
+    var osReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (m) document.documentElement.setAttribute('data-motion', m);
+    var eff = m === 'off' ? 'off' : ((m === 'reduced' || osReduce) ? 'reduced' : (m === 'full' ? 'full' : (osReduce ? 'reduced' : null)));
+    if (eff) document.documentElement.setAttribute('data-motion-effective', eff);
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'default');
   }
@@ -107,21 +115,20 @@
 <main id="main" tabindex="-1">
 <section id="hero">
   <div class="hero-bg" id="heroBg"></div>
-  <canvas id="dotMap" aria-hidden="true"></canvas>
 
   <div class="hero-content">
     <p class="hero-eyebrow" data-i18n="hero.eyebrow">The Ultimate Travel Guide</p>
     <h1 class="hero-h1" data-i18n-html="hero.headline">
       Land of<br>
-      <em>Endless Wonder</em>
+      <em>Endless&nbsp;Wonder</em>
     </h1>
     <p class="hero-desc" data-i18n="hero.desc">
       From the Atlantic's crashing shores to Pacific sunsets, from Arctic tundra to subtropical keys —
       the United States holds more landscapes, cultures, and stories than any single journey could capture.
     </p>
     <div class="hero-cta">
-      <a href="#intro" class="btn-primary" data-i18n="hero.ctaPrimary">Begin Exploring</a>
-      <a href="#destinations" class="btn-ghost" data-i18n="hero.ctaGhost">Top Destinations ↓</a>
+      <a href="#intro" class="btn-primary" data-i18n-html="hero.ctaPrimary">Begin&nbsp;Exploring</a>
+      <a href="#destinations" class="btn-ghost" data-i18n-html="hero.ctaGhost">Top&nbsp;Destinations&nbsp;↓</a>
     </div>
   </div>
 
@@ -356,8 +363,8 @@
   <div class="dest-header-wrapper">
     <div>
       <span class="section-eyebrow reveal" data-i18n="dest.eyebrow">Must-See Destinations</span>
-      <h2 class="reveal" style="font-family:var(--ff-display);font-size:clamp(2.2rem,3.5vw,3.2rem);font-weight:700;line-height:1.1;letter-spacing:-.02em;margin-top:8px;" data-i18n-html="dest.heading">
-        Cities That Changed<br><em style="font-style:italic;color:var(--accent-1);font-weight:400;">the World</em>
+      <h2 class="section-title reveal" data-i18n-html="dest.heading">
+        Cities That Changed<br><em>the World</em>
       </h2>
     </div>
     <div class="dest-nav-btns reveal">
@@ -580,8 +587,8 @@
 <section id="practical">
   <div style="max-width:1200px;margin:0 auto 60px;">
     <span class="section-eyebrow reveal" data-i18n="prac.eyebrow">Before You Go</span>
-    <h2 class="reveal" style="font-family:var(--ff-display);font-size:clamp(2.2rem,3.5vw,3.2rem);font-weight:700;line-height:1.1;letter-spacing:-.02em;margin-top:8px;" data-i18n-html="prac.heading">
-      Travel <em style="font-style:italic;color:var(--accent-1);font-weight:400;">Essentials</em>
+    <h2 class="section-title reveal" data-i18n-html="prac.heading">
+      Travel <em>Essentials</em>
     </h2>
   </div>
   <div class="practical-grid">
@@ -880,13 +887,14 @@
 
     <div class="settings-group settings-group-wide reveal reveal-delay-4">
       <div class="settings-group-label">♿ <span data-i18n="settings.accessibilityLabel">Accessibility</span></div>
-      <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Tone down animation or turn off the cursor trail — handy for motion sensitivity, older devices, or just a calmer feel.</div>
+      <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Choose how much motion you want: full effects, a calmer reduced mode, or animations off. You can also disable the cursor trail.</div>
       <div class="settings-subgroup-row">
         <div class="settings-subgroup">
-          <div class="settings-subgroup-label" data-i18n="settings.reduceMotion">Motion</div>
+          <div class="settings-subgroup-label" data-i18n="settings.reduceMotion">Animations</div>
           <div class="units-row" id="motionPillGroup">
-            <button type="button" class="pill-btn active" data-motion-val="off"><span data-i18n="settings.motionStandard">Standard</span><span class="pill-check">✓</span></button>
-            <button type="button" class="pill-btn" data-motion-val="on"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn active" data-motion-val="full"><span data-i18n="settings.motionFull">Full</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn" data-motion-val="reduced"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn" data-motion-val="off"><span data-i18n="settings.motionOff">Off</span><span class="pill-check">✓</span></button>
           </div>
         </div>
         <div class="settings-subgroup">
@@ -903,27 +911,22 @@
 </section>
 </div>
 
-<footer>
-  <div class="footer-top footer-top--simple">
-    <div class="footer-brand">
-      <div class="nav-logo" style="font-size:26px;">✦ <span>America</span></div>
-      <p data-i18n="footer.tagline">A complete travel guide to the United States — 50 states, countless stories, one unforgettable journey.</p>
-      <div class="footer-social">
-        <a href="https://tgthms.github.io/about/" class="footer-about-link" target="_blank" rel="noopener" data-i18n="footer.aboutMe">About Me</a>
-        <a href="https://github.com/TGthms/usa-travel-guide" class="footer-github-link" target="_blank" rel="noopener">GitHub</a>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <a href="#hero" class="site-footer-brand nav-logo">✦ <span>America</span></a>
+    <p class="site-footer-tagline" data-i18n="footer.tagline">A complete travel guide to the United States — 50 states, countless stories, one unforgettable journey.</p>
+    <div class="site-footer-actions">
+      <a href="https://tgthms.github.io/about/" class="footer-about-link" target="_blank" rel="noopener" data-i18n="footer.aboutMe">About Me</a>
+      <a href="https://github.com/TGthms/usa-travel-guide" class="footer-github-link" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="site-footer-meta">
+      <p class="site-footer-copy" data-i18n-html="footer.copyright">© 2026 USA Travel Guide · Made with passion for the open road · Created by Tim G · In collaboration with AI</p>
+      <p class="site-footer-motto" data-i18n="footer.motto">Land of the free, home of the brave 🇺🇸</p>
+      <div class="footer-legal-links" role="navigation" aria-label="Legal">
+        <a href="privacy.html" data-i18n="legal.privacyLink">Privacy Policy</a>
+        <span class="footer-legal-sep" aria-hidden="true">·</span>
+        <a href="terms.html" data-i18n="legal.termsLink">Terms of Use</a>
       </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div class="footer-bottom-copy">
-      <p data-i18n-html="footer.copyright">© 2026 USA Travel Guide &nbsp;·&nbsp; Made with passion for the open road | Created by Tim G · In collaboration with AI</p>
-      <p class="footer-motto" data-i18n="footer.motto">Land of the free, home of the brave 🇺🇸</p>
-    </div>
-    <!-- Apple-style bottom legal strip (not <nav> — site chrome uses #navbar) -->
-    <div class="footer-legal-links" role="navigation" aria-label="Legal">
-      <a href="privacy.html" data-i18n="legal.privacyLink">Privacy Policy</a>
-      <span class="footer-legal-sep" aria-hidden="true">|</span>
-      <a href="terms.html" data-i18n="legal.termsLink">Terms of Use</a>
     </div>
   </div>
 </footer>

@@ -7,7 +7,7 @@
    Design goals for extreme environments (watchOS Safari, low-memory
    webviews, feature-incomplete browsers):
    · Never throw on missing APIs (IntersectionObserver, matchMedia, …)
-   · Skip GPU-heavy work (cursor trail, hero particle map) when constrained
+   · Skip GPU-heavy work (cursor trail) when constrained / mobile
    · One full-res gallery image in flight at a time
    · Preferences survive sandboxed storage via safeStorage
    ═══════════════════════════════════════════════════════════════════════ */
@@ -33,13 +33,33 @@ function isConstrainedViewport() {
   return false;
 }
 
+/** Phones / tablets / coarse pointers — skip perpetual GPU effects that jank scroll. */
+function isMobileOrCoarsePointer() {
+  try {
+    if (safeMatchMedia('(max-width: 900px)').matches) return true;
+    if (safeMatchMedia('(pointer: coarse)').matches) return true;
+    if (typeof navigator.maxTouchPoints === 'number' && navigator.maxTouchPoints > 1
+        && safeMatchMedia('(max-width: 1200px)').matches) return true;
+    if (typeof navigator.deviceMemory === 'number' && navigator.deviceMemory > 0 && navigator.deviceMemory <= 4) return true;
+  } catch (e) { /* ignore */ }
+  return false;
+}
+
 const ENV = {
   constrained: isConstrainedViewport(),
+  mobile: isMobileOrCoarsePointer(),
   hasIO: typeof IntersectionObserver === 'function',
   hasRAF: typeof requestAnimationFrame === 'function',
   hasXHR: typeof XMLHttpRequest === 'function',
   reduceMotion: safeMatchMedia('(prefers-reduced-motion: reduce)').matches
 };
+
+// Let CSS disable GPU-heavy layers without waiting for full script paint.
+try {
+  if (ENV.mobile || ENV.constrained) {
+    document.documentElement.setAttribute('data-mobile-lite', 'true');
+  }
+} catch (e) { /* ignore */ }
 
 function raf(fn) {
   if (ENV.hasRAF) return requestAnimationFrame(fn);
@@ -87,16 +107,16 @@ window.addEventListener('unhandledrejection', (e) => {
 window.addEventListener('load', () => {
   const loader = document.getElementById('loader');
   if (!loader) return;
-  // Gallery mini-app can dismiss sooner — less “full site boot” feel.
-  // Constrained viewports skip the wait entirely (less chance of a hung boot).
-  if (ENV.constrained) {
+  // Keep the splash short — long artificial waits hurt first interaction.
+  // Constrained / mobile skip the wait entirely.
+  if (ENV.constrained || ENV.mobile) {
     loader.classList.add('gone');
     return;
   }
   const isMiniApp = document.body.classList.contains('page-gallery')
     || document.body.classList.contains('page-tools')
     || document.body.classList.contains('page-legal');
-  const delay = isMiniApp ? 700 : 1400;
+  const delay = isMiniApp ? 400 : 700;
   setTimeout(() => { try { loader.classList.add('gone'); } catch (e) { /* ignore */ } }, delay);
 });
 
@@ -115,10 +135,10 @@ const I18N = {
     "nav.tools": "Herramientas",
 
     "hero.eyebrow": "La guía de viaje definitiva",
-    "hero.headline": "Tierra de<br><em>Maravillas Infinitas</em>",
+    "hero.headline": "Tierra de<br><em>Maravillas&nbsp;Infinitas</em>",
     "hero.desc": "Desde las costas embravecidas del Atlántico hasta los atardeceres del Pacífico, desde la tundra ártica hasta los cayos subtropicales: Estados Unidos alberga más paisajes, culturas e historias de las que un solo viaje podría abarcar.",
-    "hero.ctaPrimary": "Comenzar a explorar",
-    "hero.ctaGhost": "Destinos principales ↓",
+    "hero.ctaPrimary": "Comenzar&nbsp;a&nbsp;explorar",
+    "hero.ctaGhost": "Destinos&nbsp;principales&nbsp;↓",
     "hero.statStates": "Estados únicos",
     "hero.statParks": "Parques nacionales",
     "hero.statMiles": "Millas cuadradas",
@@ -403,10 +423,11 @@ const I18N = {
     "settings.miles": "Millas",
     "settings.km": "Kilómetros",
     "settings.accessibilityLabel": "Accesibilidad",
-    "settings.accessibilitySub": "Reduce la animación o desactiva el efecto del cursor: ideal para la sensibilidad al movimiento, dispositivos más antiguos o simplemente una experiencia más tranquila.",
-    "settings.reduceMotion": "Movimiento",
-    "settings.motionStandard": "Estándar",
-    "settings.motionReduced": "Reducido",
+    "settings.accessibilitySub": "Elige cuánta animación quieres: completa, un modo reducido más calmado, o sin animaciones. También puedes desactivar el rastro del cursor.",
+    "settings.reduceMotion": "Animaciones",
+    "settings.motionFull": "Completas",
+    "settings.motionReduced": "Reducidas",
+    "settings.motionOff": "Desactivadas",
     "settings.cursorEffect": "Efecto de cursor",
     "settings.cursorOn": "Activado",
     "settings.cursorOff": "Desactivado",
@@ -492,7 +513,7 @@ const I18N = {
     "hero.headline": "无尽奇境<br><em>近在咫尺</em>",
     "hero.desc": "从大西洋的浩瀚海岸，到太平洋的鎏金落日；从北境苔原的寂静辽阔，到南方海岛的温润悠然——美国的风光、人文与故事，远不止一段旅程可以丈量",
     "hero.ctaPrimary": "开始探索",
-    "hero.ctaGhost": "热门目的地 ↓",
+    "hero.ctaGhost": "热门目的地&nbsp;↓",
     "hero.statStates": "个州",
     "hero.statParks": "座国家公园",
     "hero.statMiles": "平方英里",
@@ -777,10 +798,11 @@ const I18N = {
     "settings.miles": "英里",
     "settings.km": "公里",
     "settings.accessibilityLabel": "无障碍",
-    "settings.accessibilitySub": "减弱动态效果，或关闭光标特效——适合对动态效果敏感的用户、性能较弱的设备，或偏好更沉静的体验。",
-    "settings.reduceMotion": "动效",
-    "settings.motionStandard": "标准",
+    "settings.accessibilitySub": "选择动画强度：完整、减弱（更平静、更易用），或关闭。也可单独关闭光标拖尾。",
+    "settings.reduceMotion": "动画",
+    "settings.motionFull": "完整",
     "settings.motionReduced": "减弱",
+    "settings.motionOff": "关闭",
     "settings.cursorEffect": "光标特效",
     "settings.cursorOn": "开启",
     "settings.cursorOff": "关闭",
@@ -866,7 +888,7 @@ const I18N = {
     "hero.headline": "終わりなき<br><em>驚異の大地へ</em>",
     "hero.desc": "大西洋の波打ち際から太平洋に沈む夕日まで、極北のツンドラから亜熱帯の島々まで——アメリカには、一度の旅では出会い尽くせないほどの風景と物語が息づいています。",
     "hero.ctaPrimary": "旅を始める",
-    "hero.ctaGhost": "人気の目的地 ↓",
+    "hero.ctaGhost": "人気の目的地&nbsp;↓",
     "hero.statStates": "の個性豊かな州",
     "hero.statParks": "の国立公園",
     "hero.statMiles": "平方マイルの大地",
@@ -1151,10 +1173,11 @@ const I18N = {
     "settings.miles": "マイル",
     "settings.km": "キロメートル",
     "settings.accessibilityLabel": "アクセシビリティ",
-    "settings.accessibilitySub": "アニメーションを控えめにしたり、カーソルエフェクトをオフにできます。動きに敏感な方、非力なデバイス、落ち着いた体験がお好みの方に。",
-    "settings.reduceMotion": "モーション",
-    "settings.motionStandard": "標準",
+    "settings.accessibilitySub": "アニメーションの量を選べます：フル／控えめ（アクセシビリティ向けの穏やかな動き）／オフ。カーソルの軌跡も個別にオフにできます。",
+    "settings.reduceMotion": "アニメーション",
+    "settings.motionFull": "フル",
     "settings.motionReduced": "控えめ",
+    "settings.motionOff": "オフ",
     "settings.cursorEffect": "カーソルエフェクト",
     "settings.cursorOn": "オン",
     "settings.cursorOff": "オフ",
@@ -1450,8 +1473,11 @@ function detectUnits() {
   return { temp: imperial ? 'f' : 'c', dist: imperial ? 'mi' : 'km' };
 }
 
-function detectReduceMotionDefault() {
-  return ENV.reduceMotion || ENV.constrained;
+/** Default animation level: OS “reduce motion” → reduced; constrained → off. */
+function detectMotionModeDefault() {
+  if (ENV.constrained) return 'off';
+  if (ENV.reduceMotion) return 'reduced';
+  return 'full';
 }
 
 function detectCursorDefault() {
@@ -1460,6 +1486,19 @@ function detectCursorDefault() {
   if (safeMatchMedia('(hover: none)').matches) return false;
   if (safeMatchMedia('(pointer: coarse)').matches && !safeMatchMedia('(pointer: fine)').matches) return false;
   return true;
+}
+
+/** Migrate legacy on/off reduce-motion storage → full | reduced | off. */
+function loadMotionModePreference() {
+  if (safeStorage.has('usa-travel-motion')) {
+    const v = safeStorage.get('usa-travel-motion', 'full');
+    if (v === 'full' || v === 'reduced' || v === 'off') return v;
+  }
+  // Legacy: usa-travel-reduce-motion on = reduced-like (was near-off), off = full
+  if (safeStorage.has('usa-travel-reduce-motion')) {
+    return safeStorage.get('usa-travel-reduce-motion', 'off') === 'on' ? 'reduced' : 'full';
+  }
+  return detectMotionModeDefault();
 }
 
 /* ── SETTINGS STATE ──
@@ -1477,9 +1516,8 @@ let currentTempUnit = safeStorage.has('usa-travel-temp-unit')
 let currentDistUnit = safeStorage.has('usa-travel-dist-unit')
   ? safeStorage.get('usa-travel-dist-unit', 'mi')
   : detectedUnits.dist;
-let reduceMotion = safeStorage.has('usa-travel-reduce-motion')
-  ? safeStorage.get('usa-travel-reduce-motion', 'off') === 'on'
-  : detectReduceMotionDefault();
+/** User preference: full | reduced | off */
+let motionMode = loadMotionModePreference();
 let cursorEffectEnabled = safeStorage.has('usa-travel-cursor-fx')
   ? safeStorage.get('usa-travel-cursor-fx', 'on') !== 'off'
   : detectCursorDefault();
@@ -1492,16 +1530,56 @@ if (!SUPPORTED_LANGS.includes(currentLang)) currentLang = 'en';
 if (currentTempUnit !== 'f' && currentTempUnit !== 'c') currentTempUnit = 'f';
 if (currentDistUnit !== 'mi' && currentDistUnit !== 'km') currentDistUnit = 'mi';
 if (!['thumb', 'medium', 'full'].includes(galleryQuality)) galleryQuality = 'medium';
+if (!['full', 'reduced', 'off'].includes(motionMode)) motionMode = 'full';
 
-document.documentElement.setAttribute('data-reduce-motion', reduceMotion ? 'true' : 'false');
-
-/* Respects the manual Settings toggle AND the OS-level preference — either
-   one being "on" is enough to calm things down. Checked live (not cached)
-   so it also reacts if the OS setting changes mid-session. */
+/* Respects the Settings choice AND the OS-level preference. Checked live so
+   OS flips mid-session still calm things down. Constrained devices force off. */
 const prefersReducedMotionMQ = safeMatchMedia('(prefers-reduced-motion: reduce)');
 const prefersColorSchemeDarkMQ = safeMatchMedia('(prefers-color-scheme: dark)');
-function motionActive() { return reduceMotion || prefersReducedMotionMQ.matches || ENV.constrained; }
-function scrollBehaviorPref() { return motionActive() ? 'auto' : 'smooth'; }
+
+/**
+ * Effective animation level after combining user + OS + device.
+ * - off: no motion
+ * - reduced: short, opacity-first, a11y-friendly motion
+ * - full: standard experience
+ */
+function getEffectiveMotionMode() {
+  if (ENV.constrained) return 'off';
+  if (motionMode === 'off') return 'off';
+  // OS “prefers reduced motion” never upgrades past reduced
+  if (motionMode === 'reduced' || prefersReducedMotionMQ.matches) return 'reduced';
+  return 'full';
+}
+
+/** True when non-essential motion should be avoided (reduced or off). */
+function motionActive() {
+  return getEffectiveMotionMode() !== 'full';
+}
+function motionIsOff() {
+  return getEffectiveMotionMode() === 'off';
+}
+function motionIsReduced() {
+  return getEffectiveMotionMode() === 'reduced';
+}
+
+function applyMotionModeToDom() {
+  const effective = getEffectiveMotionMode();
+  // User's explicit choice (for Settings UI)
+  document.documentElement.setAttribute('data-motion', motionMode);
+  // What CSS should actually paint
+  document.documentElement.setAttribute('data-motion-effective', effective);
+  // Legacy flag: only fully-off matches the old hard cut
+  document.documentElement.setAttribute('data-reduce-motion', effective === 'off' ? 'true' : 'false');
+}
+
+applyMotionModeToDom();
+
+/** Instant anchors when motion is reduced/off or on mobile (smoother under load). */
+function scrollBehaviorPref() {
+  const mode = getEffectiveMotionMode();
+  if (mode !== 'full' || ENV.mobile) return 'auto';
+  return 'smooth';
+}
 
 /* ── THEME SWATCHES ──
    currentTheme = user's preferred choice (Settings / storage).
@@ -1588,26 +1666,28 @@ distPills.forEach(p => p.addEventListener('click', () => {
 }));
 updateUnitUI();
 
-/* ── ACCESSIBILITY PILLS (Reduce Motion / Cursor Effect) ── */
+/* ── ACCESSIBILITY PILLS (Animations: full / reduced / off · Cursor Effect) ── */
 const motionPills = document.querySelectorAll('#motionPillGroup .pill-btn');
 function updateMotionUI() {
-  motionPills.forEach(p => p.classList.toggle('active', p.dataset.motionVal === (reduceMotion ? 'on' : 'off')));
+  motionPills.forEach(p => p.classList.toggle('active', p.dataset.motionVal === motionMode));
+}
+function setMotionMode(next, { persist = true } = {}) {
+  if (!['full', 'reduced', 'off'].includes(next)) next = 'full';
+  motionMode = next;
+  if (persist) safeStorage.set('usa-travel-motion', motionMode);
+  applyMotionModeToDom();
+  updateMotionUI();
+  if (typeof updateCursorUI === 'function') updateCursorUI();
 }
 motionPills.forEach(p => p.addEventListener('click', () => {
-  reduceMotion = p.dataset.motionVal === 'on';
-  safeStorage.set('usa-travel-reduce-motion', reduceMotion ? 'on' : 'off');
-  document.documentElement.setAttribute('data-reduce-motion', reduceMotion ? 'true' : 'false');
-  updateMotionUI();
-  // Cursor trail also respects reduced motion — keep its canvas state in sync.
-  if (typeof updateCursorUI === 'function') updateCursorUI();
+  setMotionMode(p.dataset.motionVal || 'full', { persist: true });
 }));
 updateMotionUI();
 
 const cursorPills = document.querySelectorAll('#cursorPillGroup .pill-btn');
 function updateCursorUI() {
   cursorPills.forEach(p => p.classList.toggle('active', p.dataset.cursorVal === (cursorEffectEnabled ? 'on' : 'off')));
-  // Keep the overlay canvas in sync so disabling the trail takes effect
-  // immediately (including when reduced-motion is on).
+  // Keep the overlay canvas in sync — trail is off in reduced/off modes.
   const cursorCanvasEl = document.getElementById('cursorCanvas');
   if (cursorCanvasEl) {
     const off = !cursorEffectEnabled || motionActive();
@@ -1621,11 +1701,15 @@ cursorPills.forEach(p => p.addEventListener('click', () => {
   updateCursorUI();
 }));
 updateCursorUI();
-// If the OS reduced-motion preference flips mid-session, restyle the canvas.
+// If the OS reduced-motion preference flips mid-session, re-apply effective mode.
+function onOsMotionPreferenceChange() {
+  applyMotionModeToDom();
+  updateCursorUI();
+}
 if (typeof prefersReducedMotionMQ.addEventListener === 'function') {
-  prefersReducedMotionMQ.addEventListener('change', updateCursorUI);
+  prefersReducedMotionMQ.addEventListener('change', onOsMotionPreferenceChange);
 } else if (typeof prefersReducedMotionMQ.addListener === 'function') {
-  prefersReducedMotionMQ.addListener(updateCursorUI);
+  prefersReducedMotionMQ.addListener(onOsMotionPreferenceChange);
 }
 
 /* ── GALLERY QUALITY PILLS (thumb / medium / full) ── */
@@ -1656,11 +1740,12 @@ function getCssVar(name) {
 // Sizes a canvas's backing store to the device pixel ratio so drawing stays
 // crisp on Retina / HiDPI / 4K+ screens instead of looking soft/blurry, while
 // letting the rest of the drawing code keep working in plain CSS-pixel units.
-// Capped at 3x so very-high-DPR mobile panels don't allocate huge buffers.
+// Capped lower on mobile so we don't allocate multi‑megapixel bitmaps.
 // Explicit CSS width/height keep clientX/clientY coordinates aligned with the
 // drawing buffer after the bitmap is scaled up for DPR.
 function fitCanvasToDPR(canvas, ctx) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const maxDpr = ENV.mobile || ENV.constrained ? 1.5 : 3;
+  const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
   const cssW = window.innerWidth;
   const cssH = window.innerHeight;
   canvas.style.width = cssW + 'px';
@@ -1673,32 +1758,58 @@ function fitCanvasToDPR(canvas, ctx) {
 
 // Throttles a resize handler to at most once per animation frame so live
 // window drag-resizing doesn't repeatedly reallocate canvas buffers.
+// Ignores pure height-only visualViewport changes (mobile URL bar show/hide),
+// which used to thrash canvas rebuilds mid-scroll and could crash Safari.
 function onResizeRAF(fn) {
   let pending = false;
-  const run = () => {
+  let lastW = window.innerWidth || 0;
+  let lastH = window.innerHeight || 0;
+  const run = (force) => {
     if (pending) return;
     pending = true;
-    raf(() => { try { fn(); } catch (e) { /* ignore */ } pending = false; });
+    raf(() => {
+      pending = false;
+      try {
+        const w = window.innerWidth || 0;
+        const h = window.innerHeight || 0;
+        // Treat as meaningful only if width changed or height jumped a lot
+        // (orientation / keyboard), not the ~50–100px URL-bar collapse.
+        const dw = Math.abs(w - lastW);
+        const dh = Math.abs(h - lastH);
+        if (!force && dw < 40 && dh < 140) return;
+        lastW = w;
+        lastH = h;
+        fn();
+      } catch (e) { /* ignore */ }
+    });
   };
   try {
-    window.addEventListener('resize', run, { passive: true });
-    window.addEventListener('orientationchange', run, { passive: true });
-    if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
-      window.visualViewport.addEventListener('resize', run, { passive: true });
-    }
+    window.addEventListener('resize', () => run(false), { passive: true });
+    window.addEventListener('orientationchange', () => run(true), { passive: true });
+    // Intentionally NOT listening to visualViewport.resize — that fires on
+    // every iOS chrome show/hide and caused mid-scroll canvas reallocations.
   } catch (e) { /* ignore */ }
 }
 
-/* ── PROGRESS BAR ── */
+/* ── SCROLL UI (progress + nav) — one rAF-throttled handler ── */
 const progressBar = document.getElementById('progress-bar');
+let scrollUiPending = false;
+function updateScrollUi() {
+  scrollUiPending = false;
+  const y = window.scrollY || document.documentElement.scrollTop || 0;
+  if (progressBar) {
+    const h = document.documentElement;
+    const scrollable = h.scrollHeight - h.clientHeight;
+    const pct = scrollable > 0 ? (h.scrollTop / scrollable) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }
+  // Navbar / section spy live in handlers registered below; fire a shared hook.
+  if (typeof onPageScroll === 'function') onPageScroll(y);
+}
 window.addEventListener('scroll', () => {
-  if (!progressBar) return;
-  const h = document.documentElement;
-  const scrollable = h.scrollHeight - h.clientHeight;
-  // Guard against div-by-zero: on very large / short-content viewports (e.g. TVs,
-  // zoomed-out desktops) the page may not scroll at all, so scrollable can be 0.
-  const pct = scrollable > 0 ? (h.scrollTop / scrollable) * 100 : 0;
-  progressBar.style.width = pct + '%';
+  if (scrollUiPending) return;
+  scrollUiPending = true;
+  raf(updateScrollUi);
 }, { passive: true });
 
 /* ── CURSOR TRAIL ──
@@ -1849,96 +1960,6 @@ window.addEventListener('scroll', () => {
   }
 })();
 
-/* ── DOT MAP (Theme Aware) ── */
-(function() {
-  // Only present in the homepage hero — other pages (e.g. gallery.html) that
-  // share this script simply don't have this canvas, so bail out quietly.
-  // Constrained webviews (watch / low-memory): skip forever-running RAF +
-  // thousands of particles — a common cause of “A problem occurred”.
-  const canvas = document.getElementById('dotMap');
-  if (!canvas) return;
-  if (ENV.constrained || ENV.reduceMotion || motionActive()) {
-    canvas.style.display = 'none';
-    return;
-  }
-  const ctx = canvas.getContext('2d', { alpha: true });
-  if (!ctx) {
-    canvas.style.display = 'none';
-    return;
-  }
-  const dots = [];
-  let W, H, needRebuild = true;
-
-  const stateData = [
-    {cx:.78,cy:.20,rx:.05,ry:.05},{cx:.82,cy:.18,rx:.04,ry:.04},{cx:.80,cy:.24,rx:.04,ry:.04},
-    {cx:.72,cy:.38,rx:.06,ry:.06},{cx:.76,cy:.44,rx:.05,ry:.07},{cx:.70,cy:.50,rx:.04,ry:.06},
-    {cx:.64,cy:.45,rx:.06,ry:.05},{cx:.58,cy:.48,rx:.05,ry:.05},{cx:.62,cy:.38,rx:.05,ry:.05},
-    {cx:.55,cy:.28,rx:.09,ry:.08},{cx:.60,cy:.30,rx:.07,ry:.06},{cx:.50,cy:.32,rx:.07,ry:.06},
-    {cx:.44,cy:.28,rx:.07,ry:.07},{cx:.48,cy:.22,rx:.06,ry:.05},
-    {cx:.42,cy:.35,rx:.08,ry:.08},{cx:.36,cy:.35,rx:.07,ry:.08},{cx:.38,cy:.25,rx:.07,ry:.07},
-    {cx:.28,cy:.30,rx:.08,ry:.09},{cx:.24,cy:.38,rx:.07,ry:.08},{cx:.30,cy:.42,rx:.06,ry:.06},
-    {cx:.22,cy:.45,rx:.08,ry:.07},{cx:.28,cy:.50,rx:.06,ry:.06},
-    {cx:.12,cy:.28,rx:.06,ry:.12},{cx:.10,cy:.40,rx:.05,ry:.08},{cx:.14,cy:.50,rx:.06,ry:.06},
-    {cx:.40,cy:.52,rx:.08,ry:.09},{cx:.44,cy:.58,rx:.05,ry:.06},
-    {cx:.74,cy:.52,rx:.04,ry:.04},{cx:.76,cy:.58,rx:.03,ry:.05},
-    {cx:.08,cy:.72,rx:.06,ry:.04},{cx:.20,cy:.74,rx:.04,ry:.02},
-  ];
-
-  function buildDots() {
-    dots.length = 0;
-    // Density scales with viewport — desktop stays rich, phones stay light.
-    const density = Math.min(W || 800, H || 600) < 700 ? 3200 : 7000;
-    stateData.forEach(({cx,cy,rx,ry}) => {
-      const n = Math.floor(rx * ry * density);
-      for (let i = 0; i < n; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const r = Math.sqrt(Math.random());
-        dots.push({
-          nx: cx + r * rx * Math.cos(angle),
-          ny: cy + r * ry * Math.sin(angle),
-          alpha: 0,
-          target: .15 + Math.random() * .5,
-          delay: Math.random() * 2.8,
-          pulse: Math.random() * Math.PI * 2,
-          size: .8 + Math.random() * 1.4,
-        });
-      }
-    });
-    needRebuild = false;
-  }
-
-  function resize() {
-    ({ width: W, height: H } = fitCanvasToDPR(canvas, ctx));
-    needRebuild = true;
-  }
-  resize();
-  onResizeRAF(resize);
-
-  let t0 = null;
-  function draw(ts) {
-    if (needRebuild) buildDots();
-    if (!t0) t0 = ts;
-    const elapsed = (ts - t0) / 1000;
-    ctx.clearRect(0, 0, W, H);
-    const mw = W * .65, mh = H * .58, mx2 = W * .16, my2 = H * .16;
-    
-    ctx.fillStyle = getCssVar('--accent-1'); // Theme aware color
-
-    dots.forEach(d => {
-      if (elapsed < d.delay) return;
-      d.alpha = Math.min(d.target, d.alpha + .008);
-      const pulse = motionActive() ? 1 : (Math.sin(elapsed * .55 + d.pulse) * .15 + .85);
-      ctx.globalAlpha = d.alpha * pulse;
-      ctx.beginPath();
-      ctx.arc(mx2 + d.nx * mw, my2 + d.ny * mh, d.size * .5, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    ctx.globalAlpha = 1;
-    raf(draw);
-  }
-  raf(draw);
-})();
-
 /* ── NAVBAR + ACTIVE LINK ── */
 const navbar = document.getElementById('navbar');
 const sections = document.querySelectorAll('section[id]:not(#settings):not(#tools)');
@@ -1947,8 +1968,28 @@ const isGalleryPage = document.body.classList.contains('page-gallery');
 const isToolsPage = document.body.classList.contains('page-tools');
 const isMiniAppPage = isGalleryPage || isToolsPage;
 
-window.addEventListener('scroll', () => {
-  const y = window.scrollY;
+// Cache section tops — avoid layout thrash from offsetTop on every scroll tick.
+let sectionTopsCache = [];
+let sectionTopsDirty = true;
+function invalidateSectionTops() { sectionTopsDirty = true; }
+function refreshSectionTops() {
+  if (!sectionTopsDirty) return;
+  sectionTopsCache = [];
+  sections.forEach((s) => {
+    sectionTopsCache.push({ id: s.id, top: s.offsetTop });
+  });
+  sectionTopsDirty = false;
+}
+try {
+  window.addEventListener('resize', invalidateSectionTops, { passive: true });
+  window.addEventListener('orientationchange', invalidateSectionTops, { passive: true });
+  if (typeof ResizeObserver === 'function') {
+    const ro = new ResizeObserver(() => { invalidateSectionTops(); });
+    sections.forEach((s) => { try { ro.observe(s); } catch (e) { /* ignore */ } });
+  }
+} catch (e) { /* ignore */ }
+
+function onPageScroll(y) {
   if (navbar) navbar.classList.toggle('scrolled', y > 60);
 
   // Mini-apps use their own chrome (no section spy on guide nav links).
@@ -1959,11 +2000,15 @@ window.addEventListener('scroll', () => {
     return;
   }
 
+  refreshSectionTops();
   let current = '';
-  sections.forEach(s => { if (y >= s.offsetTop - 200) current = s.id; });
+  const threshold = y + 200;
+  for (let i = 0; i < sectionTopsCache.length; i++) {
+    if (threshold >= sectionTopsCache[i].top) current = sectionTopsCache[i].id;
+  }
   // Homepage teaser uses id="gallery" — highlight Gallery while it's in view.
   navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === current));
-}, { passive: true });
+}
 
 // Initial paint (e.g. gallery page load, deep-linked homepage section)
 if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 60);
@@ -1979,17 +2024,8 @@ if (isGalleryPage) {
    block is skipped there instead of throwing on missing elements. */
 if (document.getElementById('hero')) {
 
-/* ── PARALLAX ── */
-const heroBg  = document.getElementById('heroBg');
-if (heroBg) {
-  window.addEventListener('scroll', () => {
-    if (motionActive()) { heroBg.style.translate = '0px 0px'; return; }
-    const y = window.scrollY;
-    if (y < window.innerHeight * 1.2) {
-      heroBg.style.translate = `0px ${y * 0.38}px`;
-    }
-  }, { passive: true });
-}
+/* ── PARALLAX removed — caused scroll jank and layer promotion cost on many GPUs.
+   Hero background is a static gradient (see .hero-bg). */
 
 /* ── HERO SCROLL CLICK ── */
 const heroScrollBtn = document.getElementById('heroScroll');
@@ -3371,11 +3407,12 @@ function refreshFunFact(animate) {
     if (wrap) wrap.scrollTop = 0;
     funFactAnimating = false;
   };
-  if (animate && !ENV.reduceMotion) {
+  // Full + reduced: short fade; off: instant swap
+  if (animate && !motionIsOff()) {
     funFactAnimating = true;
     textEl.classList.remove('is-visible');
     textEl.classList.add('is-swapping');
-    setTimeout(apply, 200);
+    setTimeout(apply, motionIsReduced() ? 140 : 200);
   } else {
     apply();
   }

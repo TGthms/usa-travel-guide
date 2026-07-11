@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  Una guía de viaje por Estados Unidos con un diseño cuidado — que abarca 5 regiones, 12 ciudades destino, 3 rutas por carretera, una galería de fotos filtrable, consejos de viaje según la temporada, aspectos culturales destacados y toda la información práctica esencial para planificar tu viaje.
+  Una guía de viaje por Estados Unidos con un diseño cuidado — 5 regiones, 12 ciudades, rutas por carretera, galería filtrable, herramientas de viaje, temporadas, cultura, datos curiosos sobre América y lo esencial para planificar.
 </p>
 
 <p align="center">
@@ -23,24 +23,38 @@
 
 | | |
 |---|---|
-| 🌍 **Cobertura completa del país** | Abarca los 50 estados de EE. UU. con información regional organizada por categorías. |
-| 🧭 **Organización por regiones** | El contenido está estructurado en las principales regiones geográficas: Noreste, Sur, Medio Oeste, Oeste y Suroeste. |
-| 📸 **Contenido de destinos seleccionado** | Incluye monumentos, ciudades y lugares emblemáticos de todo el país. |
-| 🖼️ **Galería de fotos** | Una galería filtrable de fotografías de viaje — explora por paisajes urbanos, monumentos, naturaleza, costas, gastronomía y cultura, o rutas por carretera. |
-| 🌦️ **Consejos según la temporada** | Destaca las mejores épocas para visitar cada región y destino. |
-| 🧰 **Herramientas de viaje** | Página dedicada: tipo de cambio en vivo, reloj mundial, propina e impuesto de ventas (50 estados), coste de viaje (gasolina/eléctrico) y números de emergencia. |
-| 🌐 **Soporte multilingüe** | Disponible en inglés, español, chino y japonés para una mayor accesibilidad. |
-| ⚙️ **Preferencias personalizables** | Permite ajustar opciones como el idioma y las unidades de medida. |
-| ♿️ **Funciones de accesibilidad** | Reduce la animación o desactiva el efecto del cursor — útil para la sensibilidad al movimiento, dispositivos antiguos o simplemente para una experiencia más tranquila. |
-| 🗂️ **Contenido bien organizado** | Información estructurada para facilitar la navegación y exploración. |
+| 🌍 **Cobertura completa** | Los 50 estados, organizados por regiones (Noreste, Sur, Medio Oeste, Oeste, Suroeste). |
+| 🏙️ **Ciudades destino** | Doce ciudades con tarjetas en arte CSS (sin necesidad de foto), valoraciones y modales con detalle. |
+| 🔗 **Enlaces útiles** | Turismo oficial, transporte, parques y museos desde cada modal de ciudad. |
+| 🖼️ **Galería de fotos** | Galería filtrable con búsqueda, orden, calidad (miniatura / media / completa) y lightbox. *Compatible con HDR* |
+| 🧰 **Herramientas de viaje** | Divisas, reloj mundial, propina e impuestos (50 estados), coste de viaje (gasolina/EV) y emergencias. |
+| 🌦️ **Temporadas, cultura y rutas** | Cuándo viajar, cultura y road trips clásicos. |
+| 🎲 **Datos curiosos de América** | Un dato al azar cada vez, en una tarjeta de altura fija — decenas de datos en cada idioma. |
+| 🌐 **Multilingüe** | Inglés, español, chino y japonés (incluida la documentación legal). |
+| ⚙️ **Personalización** | Temas, idioma, °F/°C y millas/km, calidad de galería — guardados en el dispositivo. |
+| ♿️ **Animaciones: Completas / Reducidas / Desactivadas** | Niveles de movimiento accesibles: efectos completos, fades suaves, o sin animación decorativa. El rastro del cursor se puede desactivar por separado. Respeta “prefers-reduced-motion” del sistema. |
+| 📱 **Listo para móvil** | Hero ligero, scroll instantáneo en táctil y optimizaciones de rendimiento. |
+| 🔒 **Privacidad y términos** | [Política de privacidad](privacy.html) y [Términos de uso](terms.html), con aviso de enlaces externos. |
 
-> *Próximamente, más funciones.*
+---
+
+## 🚀 Inicio rápido
+
+Sitio estático — ábrelo en local o publícalo (p. ej. GitHub Pages).
+
+```bash
+open index.html
+# o
+python3 -m http.server 8080
+```
+
+Páginas: `index.html` · `gallery.html` · `tools.html` · `privacy.html` · `terms.html`
 
 ---
 
 ## 💬 Comentarios
 
-Este es un proyecto personal impulsado por el interés propio — ¡los reportes de errores y las sugerencias son bienvenidos!
+Proyecto personal impulsado por el interés — ¡reportes de errores y sugerencias son bienvenidos!
 
 📧 **contact.timg@icloud.com**
 
@@ -48,6 +62,9 @@ Este es un proyecto personal impulsado por el interés propio — ¡los reportes
 
 ## 📄 Licencia y aspectos legales
 
-El proyecto está bajo licencia MIT — consulta [LICENSE](LICENSE).
+- **Código:** MIT — ver [LICENSE](LICENSE).
+- **Fotos** en `/images`: © 2026 Tim G (TGthms), **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — uso libre con crédito.
+- **Fuentes web:** Google Fonts — Fraunces, Public Sans, Special Elite, Noto Sans/Serif (SC/JP). Licencias abiertas (SIL OFL / Apache según el caso).
+- **Políticas del sitio:** [Privacidad](privacy.html) · [Términos](terms.html)
 
-Todas las fotos en `/images` son © 2026 TGthms y están licenciadas bajo **CC BY 4.0** — de uso libre con atribución.
+Crédito sugerido: *“Photo © Tim G (@TGthms), licensed under CC BY 4.0.”*

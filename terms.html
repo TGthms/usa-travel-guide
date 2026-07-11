@@ -25,6 +25,14 @@
     if (osDark && (t === 'minimal' || t === 'elegant')) t = 'default';
     document.documentElement.setAttribute('data-theme', t);
     document.documentElement.style.colorScheme = (t === 'minimal' || t === 'elegant') ? 'light' : 'dark';
+    // Early motion preference (avoids flash of full animation before app.js)
+    var m = localStorage.getItem('usa-travel-motion');
+    if (!m && localStorage.getItem('usa-travel-reduce-motion') === 'on') m = 'reduced';
+    if (m !== 'full' && m !== 'reduced' && m !== 'off') m = null;
+    var osReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (m) document.documentElement.setAttribute('data-motion', m);
+    var eff = m === 'off' ? 'off' : ((m === 'reduced' || osReduce) ? 'reduced' : (m === 'full' ? 'full' : (osReduce ? 'reduced' : null)));
+    if (eff) document.documentElement.setAttribute('data-motion-effective', eff);
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'default');
   }
@@ -147,13 +155,14 @@
 
     <div class="settings-group settings-group-wide reveal reveal-delay-4">
       <div class="settings-group-label">♿ <span data-i18n="settings.accessibilityLabel">Accessibility</span></div>
-      <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Tone down animation or turn off the cursor trail — handy for motion sensitivity, older devices, or just a calmer feel.</div>
+      <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Choose how much motion you want: full effects, a calmer reduced mode, or animations off. You can also disable the cursor trail.</div>
       <div class="settings-subgroup-row">
         <div class="settings-subgroup">
-          <div class="settings-subgroup-label" data-i18n="settings.reduceMotion">Motion</div>
+          <div class="settings-subgroup-label" data-i18n="settings.reduceMotion">Animations</div>
           <div class="units-row" id="motionPillGroup">
-            <button type="button" class="pill-btn active" data-motion-val="off"><span data-i18n="settings.motionStandard">Standard</span><span class="pill-check">✓</span></button>
-            <button type="button" class="pill-btn" data-motion-val="on"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn active" data-motion-val="full"><span data-i18n="settings.motionFull">Full</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn" data-motion-val="reduced"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn" data-motion-val="off"><span data-i18n="settings.motionOff">Off</span><span class="pill-check">✓</span></button>
           </div>
         </div>
         <div class="settings-subgroup">
