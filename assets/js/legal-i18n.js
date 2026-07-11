@@ -9,7 +9,7 @@ window.LEGAL_I18N = {
       title: 'Privacy Policy',
       eyebrow: 'Legal',
       updatedLabel: 'Updated',
-      updatedDate: 'July 10, 2026',
+      updatedDate: 'July 11, 2026',
       onThisPage: 'On this page',
       lead: 'This Privacy Policy describes how <strong>America — A Travel Guide</strong> (the “Site,” “we,” “us”) handles information when you visit or use this website, including the guide, photo gallery, and tools. We designed the Site to work well with as little personal data as possible.',
       toc: [
@@ -65,7 +65,7 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>Fonts.</strong> Web fonts may be loaded from Google Fonts so text displays correctly across languages. That request may include technical data such as your IP address, subject to Google’s policies.</li>
 <li><strong>Exchange rates (Tools).</strong> The currency converter may request rates from a public API (for example Frankfurter). Only the currency codes needed for the conversion are sent for that request.</li>
-<li><strong>Linked sites.</strong> Links to GitHub, About Me, maps, or other destinations are provided for convenience. Those sites have their own privacy practices; this policy does not cover them.</li>
+<li><strong>External / outbound links.</strong> For convenience, the Site includes links to third-party websites—including official city tourism bureaus, public-transit agencies, National Park Service pages, museums, GitHub, About Me, and similar resources (for example “Helpful links” on destination cards). Clicking such a link leaves the Site and takes you to a service we do not operate. Those operators may collect information under their own privacy policies; this policy does not cover them. We do not receive your activity on those external sites by virtue of the link alone, and a link does not mean we endorse or control that third party.</li>
 </ul>`
         },
         {
@@ -110,7 +110,7 @@ window.LEGAL_I18N = {
       title: 'Política de privacidad',
       eyebrow: 'Legal',
       updatedLabel: 'Actualizado',
-      updatedDate: '10 de julio de 2026',
+      updatedDate: '11 de julio de 2026',
       onThisPage: 'En esta página',
       lead: 'Esta Política de privacidad describe cómo <strong>América — Una Guía de Viaje</strong> (el “Sitio”, “nosotros”) trata la información cuando visitas o usas este sitio web, incluida la guía, la galería de fotos y las herramientas. Diseñamos el Sitio para funcionar con la menor cantidad posible de datos personales.',
       toc: [
@@ -166,7 +166,7 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>Fuentes tipográficas.</strong> Pueden cargarse fuentes web desde Google Fonts para mostrar el texto correctamente en varios idiomas. Esa solicitud puede incluir datos técnicos como tu dirección IP, sujetos a las políticas de Google.</li>
 <li><strong>Tipos de cambio (Herramientas).</strong> El conversor de divisas puede solicitar cotizaciones a una API pública (por ejemplo Frankfurter). Solo se envían los códigos de moneda necesarios para la conversión.</li>
-<li><strong>Sitios enlazados.</strong> Los enlaces a GitHub, Sobre mí, mapas u otros destinos se ofrecen por comodidad. Esos sitios tienen sus propias prácticas de privacidad; esta política no los cubre.</li>
+<li><strong>Enlaces externos / de salida.</strong> Por comodidad, el Sitio incluye enlaces a sitios de terceros—incluidas oficinas oficiales de turismo de ciudades, agencias de transporte público, páginas del National Park Service, museos, GitHub, Sobre mí y recursos similares (por ejemplo “Enlaces útiles” en las tarjetas de destinos). Al hacer clic, abandonas el Sitio y pasas a un servicio que no operamos. Esos operadores pueden recopilar información según sus propias políticas de privacidad; esta política no los cubre. No recibimos tu actividad en esos sitios externos solo por el hecho del enlace, y un enlace no implica respaldo ni control sobre ese tercero.</li>
 </ul>`
         },
         {
@@ -211,7 +211,7 @@ window.LEGAL_I18N = {
       title: '隐私政策',
       eyebrow: '法律信息',
       updatedLabel: '更新日期',
-      updatedDate: '2026年7月10日',
+      updatedDate: '2026年7月11日',
       onThisPage: '本页目录',
       lead: '本《隐私政策》说明<strong>美国 — 旅行指南</strong>（以下简称“本网站”“我们”）在您访问或使用本网站（包括指南、相册与工具）时如何处理相关信息。我们尽量在尽量少收集个人数据的前提下提供服务。',
       toc: [
@@ -267,7 +267,7 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>字体。</strong>可能从 Google Fonts 加载网络字体，以便多语言正确显示。该请求可能包含 IP 地址等技术数据，受 Google 政策约束。</li>
 <li><strong>汇率（工具页）。</strong>货币换算器可能向公开 API（例如 Frankfurter）请求汇率，仅发送换算所需的货币代码。</li>
-<li><strong>外链网站。</strong>指向 GitHub、关于我、地图等链接仅为便利提供。这些网站有各自的隐私实践，本政策不涵盖它们。</li>
+<li><strong>外部／外链网站。</strong>为方便使用，本网站会提供指向第三方网站的链接——包括城市官方旅游局、公共交通机构、国家公园管理局页面、博物馆、GitHub、关于我以及类似资源（例如目的地卡片中的“实用链接”）。点击此类链接即离开本网站，进入我们不运营的服务。这些运营方可能按其自身隐私政策收集信息；本政策不涵盖它们。我们不会仅因链接本身而获得您在那些外部网站上的活动，且链接并不表示我们认可或控制该第三方。</li>
 </ul>`
         },
         {
@@ -312,7 +312,7 @@ window.LEGAL_I18N = {
       title: 'プライバシーポリシー',
       eyebrow: 'リーガル',
       updatedLabel: '更新日',
-      updatedDate: '2026年7月10日',
+      updatedDate: '2026年7月11日',
       onThisPage: 'このページの内容',
       lead: '本プライバシーポリシーは、<strong>アメリカ — 旅行ガイド</strong>（以下「本サイト」「当方」）が、ガイド・フォトギャラリー・ツールを含む本ウェブサイトの利用時に情報をどのように扱うかを説明します。本サイトは、できるだけ少ない個人データで快適に使えるよう設計されています。',
       toc: [
@@ -368,7 +368,7 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>フォント。</strong> 多言語表示のため Google Fonts からウェブフォントを読み込むことがあります。その際 IP アドレス等の技術データが含まれる場合があり、Google の方針が適用されます。</li>
 <li><strong>為替（ツール）。</strong> 通貨換算は公開 API（例：Frankfurter）にレートを問い合わせることがあり、換算に必要な通貨コードのみを送信します。</li>
-<li><strong>外部リンク。</strong> GitHub、About Me、地図等へのリンクは便宜のために提供します。各サイトのプライバシー慣行は本ポリシーの対象外です。</li>
+<li><strong>外部／アウトバウンドリンク。</strong> 便宜のため、本サイトは第三者ウェブサイトへのリンクを含みます。都市の公式観光局、公共交通機関、National Park Service のページ、博物館、GitHub、About Me、および同様のリソース（例：目的地カードの「役立つリンク」）が含まれます。そのようなリンクをクリックすると本サイトを離れ、当方が運営していないサービスへ移動します。各運営者は独自のプライバシーポリシーに基づき情報を収集する場合があり、本ポリシーの対象外です。リンクがあること自体により、当方がそれらの外部サイト上でのお客様の行動を受け取ることはなく、リンクは当該第三者の推奨や管理を意味しません。</li>
 </ul>`
         },
         {
@@ -416,7 +416,7 @@ window.LEGAL_I18N = {
       title: 'Terms of Use',
       eyebrow: 'Legal',
       updatedLabel: 'Updated',
-      updatedDate: 'July 10, 2026',
+      updatedDate: 'July 11, 2026',
       onThisPage: 'On this page',
       lead: 'These Terms of Use (“Terms”) govern your access to and use of <strong>America — A Travel Guide</strong> (the “Site”), including the main guide, photo gallery, tools, and related pages operated by <strong>Tim G</strong> (GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>). By using the Site, you agree to these Terms. If you do not agree, please do not use the Site.',
       toc: [
@@ -473,6 +473,7 @@ window.LEGAL_I18N = {
 <li>Travel rules, prices, hours, road conditions, and requirements change frequently.</li>
 <li>Always verify critical details with official government sources, carriers, and local authorities before you travel.</li>
 <li>Interactive tools (currency, tip, drive cost, clocks) produce estimates only and may be incomplete or outdated.</li>
+<li>Outbound “helpful” or official tourism / transit / park links are provided as starting points only; schedules, fees, and policies on those sites can change without notice on this Site.</li>
 </ul>
 <p>You assume full responsibility for decisions you make based on the Site. We are not liable for losses arising from reliance on Site content.</p>`
         },
@@ -492,7 +493,13 @@ window.LEGAL_I18N = {
         {
           id: 'third-party',
           title: 'Third-party links & tools',
-          html: `<p>The Site may link to third-party websites or call third-party APIs (for example exchange rates or font delivery). Those services are not under our control. We do not endorse and are not responsible for their content, availability, or practices. Your use of third-party services is at your own risk and subject to their terms and privacy policies.</p>`
+          html: `<p>The Site may link to third-party websites or call third-party APIs (for example exchange rates or font delivery). Those services are not under our control.</p>
+<ul>
+<li><strong>Destination and travel links.</strong> City and destination cards may include “Helpful links” to official tourism sites, transit agencies, National Park Service pages, museums, and similar external resources. These links are provided solely for convenience and planning reference. They do <strong>not</strong> create a partnership, sponsorship, agency, or endorsement relationship with any linked organization unless we expressly say so in writing.</li>
+<li><strong>No control or warranty.</strong> We do not operate, monitor, or guarantee the accuracy, safety, availability, or privacy practices of third-party sites or APIs. Content, URLs, branding, and policies on those sites may change or break without notice.</li>
+<li><strong>Your responsibility.</strong> When you leave the Site via an external link, you do so at your own risk and become subject to that third party’s terms and privacy policy. Verify critical travel, booking, or payment details directly with the official source.</li>
+</ul>
+<p>If a third-party link is broken, outdated, or inappropriate, you may contact us so we can consider an update; we are not obligated to maintain any particular external URL.</p>`
         },
         {
           id: 'privacy',
@@ -532,7 +539,7 @@ window.LEGAL_I18N = {
       title: 'Términos de uso',
       eyebrow: 'Legal',
       updatedLabel: 'Actualizado',
-      updatedDate: '10 de julio de 2026',
+      updatedDate: '11 de julio de 2026',
       onThisPage: 'En esta página',
       lead: 'Estos Términos de uso (“Términos”) rigen tu acceso y uso de <strong>América — Una Guía de Viaje</strong> (el “Sitio”), incluida la guía principal, la galería de fotos, las herramientas y páginas relacionadas operadas por <strong>Tim G</strong> (GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>). Al usar el Sitio, aceptas estos Términos. Si no estás de acuerdo, no uses el Sitio.',
       toc: [
@@ -589,6 +596,7 @@ window.LEGAL_I18N = {
 <li>Las normas de viaje, precios, horarios, condiciones de carreteras y requisitos cambian con frecuencia.</li>
 <li>Verifica siempre los detalles críticos con fuentes oficiales, transportistas y autoridades locales antes de viajar.</li>
 <li>Las herramientas interactivas (divisas, propina, coste de viaje, relojes) producen solo estimaciones y pueden estar incompletas o desactualizadas.</li>
+<li>Los enlaces externos “útiles” o a turismo / transporte / parques oficiales se ofrecen solo como punto de partida; horarios, tarifas y políticas en esos sitios pueden cambiar sin aviso en este Sitio.</li>
 </ul>
 <p>Asumes plena responsabilidad por las decisiones que tomes basándote en el Sitio. No somos responsables de pérdidas derivadas de la confianza en el contenido del Sitio.</p>`
         },
@@ -608,7 +616,13 @@ window.LEGAL_I18N = {
         {
           id: 'third-party',
           title: 'Enlaces y herramientas de terceros',
-          html: `<p>El Sitio puede enlazar a sitios de terceros o llamar a API de terceros (por ejemplo tipos de cambio o entrega de fuentes). Esos servicios no están bajo nuestro control. No respaldamos ni somos responsables de su contenido, disponibilidad o prácticas. Tu uso de servicios de terceros es bajo tu propio riesgo y sujeto a sus términos y políticas de privacidad.</p>`
+          html: `<p>El Sitio puede enlazar a sitios de terceros o llamar a API de terceros (por ejemplo tipos de cambio o entrega de fuentes). Esos servicios no están bajo nuestro control.</p>
+<ul>
+<li><strong>Enlaces de destinos y viaje.</strong> Las tarjetas de ciudades y destinos pueden incluir “Enlaces útiles” a sitios oficiales de turismo, agencias de transporte, páginas del National Park Service, museos y recursos externos similares. Se ofrecen solo por comodidad y como referencia de planificación. <strong>No</strong> crean una relación de asociación, patrocinio, agencia ni respaldo con la organización enlazada, salvo que lo indiquemos expresamente por escrito.</li>
+<li><strong>Sin control ni garantía.</strong> No operamos, supervisamos ni garantizamos la exactitud, seguridad, disponibilidad o prácticas de privacidad de sitios o API de terceros. El contenido, las URL, la marca y las políticas de esos sitios pueden cambiar o fallar sin previo aviso.</li>
+<li><strong>Tu responsabilidad.</strong> Cuando abandonas el Sitio mediante un enlace externo, lo haces bajo tu propio riesgo y quedas sujeto a los términos y la política de privacidad de ese tercero. Verifica detalles críticos de viaje, reservas o pagos directamente con la fuente oficial.</li>
+</ul>
+<p>Si un enlace de terceros está roto, desactualizado o es inapropiado, puedes contactarnos para que consideremos una actualización; no estamos obligados a mantener ninguna URL externa concreta.</p>`
         },
         {
           id: 'privacy',
@@ -648,7 +662,7 @@ window.LEGAL_I18N = {
       title: '使用条款',
       eyebrow: '法律信息',
       updatedLabel: '更新日期',
-      updatedDate: '2026年7月10日',
+      updatedDate: '2026年7月11日',
       onThisPage: '本页目录',
       lead: '本《使用条款》（以下简称“条款”）规范您对<strong>美国 — 旅行指南</strong>（以下简称“本网站”）的访问与使用，包括主指南、相册、工具及相关页面，由 <strong>Tim G</strong>（GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>）运营。使用本网站即表示您同意本条款。若不同意，请勿使用本网站。',
       toc: [
@@ -705,6 +719,7 @@ window.LEGAL_I18N = {
 <li>旅行规定、价格、开放时间、路况与要求经常变化。</li>
 <li>出行前务必向官方政府来源、承运人与地方当局核实关键细节。</li>
 <li>互动工具（货币、小费、自驾费用、时钟）仅提供估算，可能不完整或过时。</li>
+<li>外链“实用链接”或官方旅游／交通／公园链接仅作起点参考；那些网站上的时刻、费用与政策可能变更，而本网站未必同步更新。</li>
 </ul>
 <p>您须对基于本网站作出的决定自行承担责任。我们不对因依赖网站内容造成的损失负责。</p>`
         },
@@ -724,7 +739,13 @@ window.LEGAL_I18N = {
         {
           id: 'third-party',
           title: '第三方链接与工具',
-          html: `<p>本网站可能链接第三方网站或调用第三方 API（例如汇率或字体交付）。这些服务不受我们控制。我们不认可亦不对其内容、可用性或实践负责。您使用第三方服务的风险自负，并受其条款与隐私政策约束。</p>`
+          html: `<p>本网站可能链接第三方网站或调用第三方 API（例如汇率或字体交付）。这些服务不受我们控制。</p>
+<ul>
+<li><strong>目的地与旅行链接。</strong>城市与目的地卡片可能包含指向官方旅游网站、公共交通机构、国家公园管理局页面、博物馆及类似外部资源的“实用链接”。仅供便利与规划参考，除非我们书面明确说明，否则<strong>不</strong>构成与被链接机构的合伙、赞助、代理或背书关系。</li>
+<li><strong>无控制与无保证。</strong>我们不运营、监控或保证第三方网站或 API 的准确性、安全性、可用性或隐私实践。其内容、URL、品牌与政策可能不经通知而变更或失效。</li>
+<li><strong>您的责任。</strong>通过外链离开本网站时，风险自负，并受该第三方条款与隐私政策约束。请直接向官方来源核实关键旅行、预订或支付细节。</li>
+</ul>
+<p>若第三方链接失效、过时或不适当，可联系我们以便考虑更新；我们无义务维持任何特定外部 URL。</p>`
         },
         {
           id: 'privacy',
@@ -764,7 +785,7 @@ window.LEGAL_I18N = {
       title: '利用規約',
       eyebrow: 'リーガル',
       updatedLabel: '更新日',
-      updatedDate: '2026年7月10日',
+      updatedDate: '2026年7月11日',
       onThisPage: 'このページの内容',
       lead: '本利用規約（以下「本規約」）は、<strong>アメリカ — 旅行ガイド</strong>（以下「本サイト」）へのアクセスおよび利用（メインガイド、フォトギャラリー、ツールおよび関連ページを含み、<strong>Tim G</strong>（GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>）が運営）を規律します。本サイトを利用することにより、本規約に同意したものとみなします。同意されない場合はご利用をお控えください。',
       toc: [
@@ -821,6 +842,7 @@ window.LEGAL_I18N = {
 <li>渡航規則、価格、営業時間、道路状況、要件は頻繁に変わります。</li>
 <li>渡航前に、政府機関・運送事業者・現地当局の公式情報で重要事項を必ず確認してください。</li>
 <li>インタラクティブなツール（通貨・チップ・ドライブ費用・時計）は概算のみであり、不完全または古い場合があります。</li>
+<li>外部の「役立つリンク」や公式観光／交通／公園リンクは出発点としてのみ提供します。それらのサイト上の時刻・料金・方針は、本サイトに予告なく変更されることがあります。</li>
 </ul>
 <p>本サイトに基づく判断の責任はすべてお客様にあります。本サイト内容への依拠から生じた損失について当方は責任を負いません。</p>`
         },
@@ -840,7 +862,13 @@ window.LEGAL_I18N = {
         {
           id: 'third-party',
           title: '第三者リンクとツール',
-          html: `<p>本サイトは第三者サイトへリンクしたり、第三者 API（為替やフォント配信など）を呼び出したりする場合があります。それらは当方の管理下にありません。内容・可用性・慣行について当方は保証せず責任を負いません。第三者サービスの利用は自己責任であり、各サービスの規約・プライバシーポリシーに従います。</p>`
+          html: `<p>本サイトは第三者サイトへリンクしたり、第三者 API（為替やフォント配信など）を呼び出したりする場合があります。それらは当方の管理下にありません。</p>
+<ul>
+<li><strong>目的地・旅行リンク。</strong> 都市・目的地カードには、公式観光サイト、公共交通機関、National Park Service のページ、博物館などの「役立つリンク」が含まれる場合があります。便宜および計画の参考のためにのみ提供され、書面で明示しない限り、リンク先組織との提携・スポンサー・代理・推奨関係を<strong>意味しません</strong>。</li>
+<li><strong>管理・保証なし。</strong> 第三者サイトや API の正確性・安全性・可用性・プライバシー慣行について、当方は運営・監視・保証しません。内容、URL、ブランド、方針は予告なく変更または無効になる場合があります。</li>
+<li><strong>お客様の責任。</strong> 外部リンクで本サイトを離れる場合は自己責任であり、当該第三者の規約およびプライバシーポリシーが適用されます。重要な旅行・予約・支払いの詳細は、公式ソースで直接確認してください。</li>
+</ul>
+<p>第三者リンクが壊れている、古い、または不適切である場合はご連絡ください（更新を検討します）。特定の外部 URL を維持する義務は負いません。</p>`
         },
         {
           id: 'privacy',

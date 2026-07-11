@@ -1703,40 +1703,252 @@ body.page-tools #tools.tools-page {
 .dest-nav-btn:hover { background: var(--accent-1); color: var(--text-inv); border-color: var(--accent-1); transform: scale(1.1); }
 .dest-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; background: transparent; color: var(--text-dim); }
 
-.dest-bg { position: absolute; inset: 0; transition: transform .8s cubic-bezier(.22,1,.36,1); }
-.dest-card:hover .dest-bg { transform: scale(1.08); }
-
-/* Dest City Gradients */
-.db-nyc { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
-.db-la  { background: linear-gradient(160deg, #3f1d38 0%, #1a0f18 100%); }
-.db-chi { background: linear-gradient(160deg, #0c2b3d 0%, #051017 100%); }
-.db-mia { background: linear-gradient(160deg, #0d383b 0%, #061718 100%); }
-.db-nola{ background: linear-gradient(160deg, #2b1238 0%, #0d0412 100%); }
-.db-veg { background: linear-gradient(135deg, #4a1c15 0%, #1f0b08 100%); }
-.db-sf {
-  /* Real photo layers on top of a fog-over-the-bay gradient fallback, sized
-     and weighted to match the plain two-stop gradients used by the other
-     .db-* destination cards above/below so the grid stays visually even
-     whether or not this particular photo has been uploaded yet. */
-  background-image:
-    url('../../images/SFgolden_gate_bridge-photo-by_timg.jpeg'),
-    linear-gradient(160deg, #35506b 0%, #7a4a3a 55%, #170e12 100%);
-  background-size: cover, cover;
-  background-position: center, center;
+/* Destination cards — designed to look rich even without photography */
+.dest-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transition: transform .8s cubic-bezier(.22,1,.36,1);
+  background-color: #0c1220;
+  --sky: rgba(255,255,255,0.14);
+  --glow: rgba(255,255,255,0.12);
+  --accent-line: rgba(255,255,255,0.35);
 }
-.db-sea { background: linear-gradient(160deg, #17382d 0%, #081712 100%); }
-.db-aus { background: linear-gradient(160deg, #402c1a 0%, #1c1109 100%); }
-.db-dc  { background: linear-gradient(160deg, #1f2738 0%, #0a0d14 100%); }
-.db-hon { background: linear-gradient(160deg, #0f4032 0%, #061c15 100%); }
-.db-bos { background: linear-gradient(160deg, #381a17 0%, #170908 100%); }
+.dest-card:hover .dest-bg { transform: scale(1.05); }
 
-/* Add overlay circles for flavor */
-.dest-bg::after { content:''; position:absolute; inset:0; background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 60%); }
+/* Soft vignette + light bloom (shared) */
+.dest-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 28%),
+    radial-gradient(ellipse 90% 70% at 12% 8%, rgba(255,255,255,0.16) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 92% 78%, rgba(0,0,0,0.3) 0%, transparent 50%),
+    linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 48%);
+}
 
-.dest-content { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 24px; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%); }
+/* Large monogram watermark (city initials) — pure CSS via data-dest */
+.dest-bg::before {
+  content: '';
+  position: absolute;
+  right: -4%;
+  top: 6%;
+  z-index: 0;
+  font-family: var(--ff-display);
+  font-size: clamp(4.6rem, 12vw, 6.4rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 0.85;
+  color: rgba(255,255,255,0.13);
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  transform: rotate(-10deg);
+  text-shadow: 0 12px 48px rgba(0,0,0,0.25);
+  transition: color .35s ease, transform .8s cubic-bezier(.22,1,.36,1);
+}
+.dest-card:hover .dest-bg::before {
+  color: rgba(255,255,255,0.18);
+  transform: rotate(-8deg) scale(1.04);
+}
+.dest-card[data-dest="nyc"] .dest-bg::before { content: 'NYC'; }
+.dest-card[data-dest="la"] .dest-bg::before { content: 'LA'; }
+.dest-card[data-dest="chicago"] .dest-bg::before { content: 'CHI'; }
+.dest-card[data-dest="miami"] .dest-bg::before { content: 'MIA'; }
+.dest-card[data-dest="nola"] .dest-bg::before { content: 'NOLA'; }
+.dest-card[data-dest="vegas"] .dest-bg::before { content: 'LV'; }
+.dest-card[data-dest="sf"] .dest-bg::before { content: 'SF'; }
+.dest-card[data-dest="seattle"] .dest-bg::before { content: 'SEA'; }
+.dest-card[data-dest="austin"] .dest-bg::before { content: 'ATX'; }
+.dest-card[data-dest="dc"] .dest-bg::before { content: 'DC'; }
+.dest-card[data-dest="honolulu"] .dest-bg::before { content: 'HNL'; }
+.dest-card[data-dest="boston"] .dest-bg::before { content: 'BOS'; }
+
+/*
+ * Layered CSS art (no photo required):
+ * 1–8 skyline bars, 9 glow orb, 10 diagonal sheen, 11 accent hairline, 12 city gradient
+ */
+.dest-card .dest-bg {
+  background-image:
+    linear-gradient(var(--sky), var(--sky)),
+    linear-gradient(var(--sky), var(--sky)),
+    linear-gradient(var(--sky), var(--sky)),
+    linear-gradient(var(--sky), var(--sky)),
+    linear-gradient(var(--sky), var(--sky)),
+    linear-gradient(var(--sky), var(--sky)),
+    linear-gradient(var(--sky), var(--sky)),
+    linear-gradient(var(--sky), var(--sky)),
+    radial-gradient(ellipse 55% 42% at 78% 18%, var(--glow) 0%, transparent 70%),
+    linear-gradient(125deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%),
+    linear-gradient(var(--accent-line), var(--accent-line)),
+    var(--dest-grad, linear-gradient(160deg, #1a2438 0%, #0a101c 100%));
+  background-size:
+    9% 26%, 6% 36%, 11% 20%, 7% 42%, 10% 30%, 5% 24%, 8% 38%, 13% 22%,
+    100% 100%,
+    100% 100%,
+    100% 2px,
+    100% 100%;
+  background-position:
+    5% 100%, 16% 100%, 26% 100%, 38% 100%, 50% 100%, 62% 100%, 74% 100%, 86% 100%,
+    0 0,
+    0 0,
+    0 0,
+    0 0;
+  background-repeat: no-repeat;
+}
+
+/* Per-city color stories — vivid even without photos */
+.db-nyc {
+  --dest-grad: linear-gradient(145deg, #2a4a78 0%, #152038 40%, #1a1030 100%);
+  --sky: rgba(212,175,100,0.28);
+  --glow: rgba(201,162,89,0.32);
+  --accent-line: rgba(201,162,89,0.55);
+}
+.db-la {
+  --dest-grad: linear-gradient(155deg, #9a4a6e 0%, #4a1e38 42%, #1a0c18 100%);
+  --sky: rgba(255,190,130,0.26);
+  --glow: rgba(255,140,100,0.28);
+  --accent-line: rgba(255,170,120,0.5);
+}
+.db-chi {
+  --dest-grad: linear-gradient(150deg, #1e5a7a 0%, #0c2c40 48%, #061018 100%);
+  --sky: rgba(150,200,230,0.28);
+  --glow: rgba(100,180,220,0.28);
+  --accent-line: rgba(140,200,230,0.5);
+}
+.db-mia {
+  --dest-grad: linear-gradient(150deg, #1290a0 0%, #0a4550 45%, #051820 100%);
+  --sky: rgba(100,240,220,0.24);
+  --glow: rgba(80,220,200,0.3);
+  --accent-line: rgba(80,230,210,0.5);
+}
+.db-nola {
+  --dest-grad: linear-gradient(150deg, #6e3488 0%, #321450 48%, #0e0618 100%);
+  --sky: rgba(230,170,255,0.24);
+  --glow: rgba(200,120,255,0.28);
+  --accent-line: rgba(210,150,255,0.5);
+}
+.db-veg {
+  --dest-grad: linear-gradient(140deg, #a83828 0%, #541810 38%, #1a0806 100%);
+  --sky: rgba(255,140,90,0.26);
+  --glow: rgba(255,90,60,0.3);
+  --accent-line: rgba(255,120,80,0.55);
+}
+.db-sf {
+  --dest-grad: linear-gradient(155deg, #4a7a9c 0%, #2a4a5c 35%, #8a4a38 72%, #1a0e12 100%);
+  --sky: rgba(210,225,255,0.26);
+  --glow: rgba(160,200,255,0.28);
+  --accent-line: rgba(180,210,255,0.5);
+}
+.db-sea {
+  --dest-grad: linear-gradient(150deg, #1e7058 0%, #0e3830 48%, #061610 100%);
+  --sky: rgba(120,230,190,0.24);
+  --glow: rgba(80,200,160,0.28);
+  --accent-line: rgba(100,220,180,0.5);
+}
+.db-aus {
+  --dest-grad: linear-gradient(150deg, #a06a30 0%, #543818 45%, #1c1208 100%);
+  --sky: rgba(255,210,110,0.26);
+  --glow: rgba(255,180,80,0.28);
+  --accent-line: rgba(255,190,100,0.5);
+}
+.db-dc {
+  --dest-grad: linear-gradient(150deg, #364a72 0%, #182038 48%, #080c14 100%);
+  --sky: rgba(190,210,245,0.26);
+  --glow: rgba(140,170,230,0.28);
+  --accent-line: rgba(180,200,240,0.5);
+}
+.db-hon {
+  --dest-grad: linear-gradient(150deg, #1ea088 0%, #0e5848 42%, #062018 100%);
+  --sky: rgba(90,250,210,0.22);
+  --glow: rgba(60,220,180,0.3);
+  --accent-line: rgba(80,240,200,0.5);
+}
+.db-bos {
+  --dest-grad: linear-gradient(150deg, #7a3430 0%, #401818 48%, #140808 100%);
+  --sky: rgba(255,170,150,0.24);
+  --glow: rgba(230,120,100,0.28);
+  --accent-line: rgba(255,150,130,0.5);
+}
+
+.dest-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.9) 0%,
+    rgba(0,0,0,0.5) 40%,
+    rgba(0,0,0,0.1) 68%,
+    transparent 100%
+  );
+}
 .dest-tag { font-family: var(--ff-serif); font-size: 10px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-1); margin-bottom: 8px; }
 .dest-name { font-family: var(--ff-display); font-size: 1.8rem; font-weight: 700; line-height: 1.1; margin-bottom: 12px; color: #fff;}
 .dest-desc { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Helpful links inside destination modals */
+.modal-links {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border-light);
+}
+.modal-links-label {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-1);
+  margin: 0 0 12px;
+}
+.modal-links-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.modal-links-list a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main);
+  text-decoration: none;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  transition: border-color .2s, background .2s, color .2s, transform .2s;
+}
+.modal-links-list a::after {
+  content: '↗';
+  font-size: 12px;
+  opacity: 0.55;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.modal-links-list a:hover {
+  border-color: var(--accent-1);
+  color: var(--accent-1);
+  background: var(--bg-card-hov);
+  transform: translateX(2px);
+}
+.modal-links-list a:hover::after { opacity: 1; }
+.modal-links-list a:focus-visible {
+  outline: 2px solid var(--accent-1);
+  outline-offset: 2px;
+}
 .dest-meta { display: flex; gap: 16px; flex-wrap: wrap; }
 .dest-meta-item { display: flex; flex-direction: column; gap: 4px; }
 .dest-meta-label { font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
