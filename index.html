@@ -892,8 +892,16 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <p data-i18n-html="footer.copyright">© 2026 USA Travel Guide &nbsp;·&nbsp; Made with passion for the open road | Created by Tim G · In collaboration with AI</p>
-    <p style="font-size:11px;font-weight: 500;letter-spacing:.08em;color:var(--text-dim);" data-i18n="footer.motto">Land of the free, home of the brave 🇺🇸</p>
+    <div class="footer-bottom-copy">
+      <p data-i18n-html="footer.copyright">© 2026 USA Travel Guide &nbsp;·&nbsp; Made with passion for the open road | Created by Tim G · In collaboration with AI</p>
+      <p class="footer-motto" data-i18n="footer.motto">Land of the free, home of the brave 🇺🇸</p>
+    </div>
+    <!-- Apple-style bottom legal strip (not <nav> — site chrome uses #navbar) -->
+    <div class="footer-legal-links" role="navigation" aria-label="Legal">
+      <a href="privacy.html" data-i18n="legal.privacyLink">Privacy Policy</a>
+      <span class="footer-legal-sep" aria-hidden="true">|</span>
+      <a href="terms.html" data-i18n="legal.termsLink">Terms of Use</a>
+    </div>
   </div>
 </footer>
 

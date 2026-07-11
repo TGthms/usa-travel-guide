@@ -94,7 +94,8 @@ window.addEventListener('load', () => {
     return;
   }
   const isMiniApp = document.body.classList.contains('page-gallery')
-    || document.body.classList.contains('page-tools');
+    || document.body.classList.contains('page-tools')
+    || document.body.classList.contains('page-legal');
   const delay = isMiniApp ? 700 : 1400;
   setTimeout(() => { try { loader.classList.add('gone'); } catch (e) { /* ignore */ } }, delay);
 });
@@ -449,6 +450,15 @@ const I18N = {
 
     "footer.tagline": "Una guía de viaje completa por Estados Unidos: 50 estados, incontables historias, un viaje inolvidable.",
     "footer.aboutMe": "Sobre mí",
+    "legal.privacyLink": "Política de privacidad",
+    "legal.termsLink": "Términos de uso",
+    "legal.privacyTitle": "Privacidad",
+    "legal.termsTitle": "Términos",
+    "legal.privacyHeading": "Política de privacidad",
+    "legal.termsHeading": "Términos de uso",
+    "legal.legalLabel": "Legal",
+    "legal.updated": "Actualizado",
+    "legal.onThisPage": "En esta página",
     "footer.regionsTitle": "Regiones",
     "footer.destTitle": "Destinos",
     "footer.planTitle": "Planifica tu viaje",
@@ -808,6 +818,15 @@ const I18N = {
 
     "footer.tagline": "一份关于美国的完整旅行指南——广袤之中，故事缓缓展开，成为一段值得铭记的旅程",
     "footer.aboutMe": "关于我",
+    "legal.privacyLink": "隐私政策",
+    "legal.termsLink": "使用条款",
+    "legal.privacyTitle": "隐私政策",
+    "legal.termsTitle": "使用条款",
+    "legal.privacyHeading": "隐私政策",
+    "legal.termsHeading": "使用条款",
+    "legal.legalLabel": "法律信息",
+    "legal.updated": "更新日期",
+    "legal.onThisPage": "本页目录",
     "footer.regionsTitle": "五大地区",
     "footer.destTitle": "推荐地点",
     "footer.planTitle": "行程规划",
@@ -1167,6 +1186,15 @@ const I18N = {
 
     "footer.tagline": "アメリカ合衆国を巡る完全ガイド——50の州、数えきれない物語、そして一生忘れられない旅の記憶。",
     "footer.aboutMe": "自己紹介",
+    "legal.privacyLink": "プライバシーポリシー",
+    "legal.termsLink": "利用規約",
+    "legal.privacyTitle": "プライバシー",
+    "legal.termsTitle": "利用規約",
+    "legal.privacyHeading": "プライバシーポリシー",
+    "legal.termsHeading": "利用規約",
+    "legal.legalLabel": "リーガル",
+    "legal.updated": "更新日",
+    "legal.onThisPage": "このページの内容",
     "footer.regionsTitle": "地域",
     "footer.destTitle": "目的地",
     "footer.planTitle": "旅の計画",
@@ -1226,9 +1254,13 @@ function applyLanguage(lang) {
   });
   document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : lang === 'es' ? 'es' : 'en');
   document.documentElement.setAttribute('data-lang', lang);
-  // Keep page-specific titles (gallery / tools mini-apps vs main guide).
+  // Keep page-specific titles (gallery / tools / legal vs main guide).
   const onGallery = document.body.classList.contains('page-gallery');
   const onTools = document.body.classList.contains('page-tools');
+  const onLegal = document.body.classList.contains('page-legal');
+  const legalKind = onLegal
+    ? (location.pathname.indexOf('terms') >= 0 || /terms\.html$/i.test(location.href) ? 'terms' : 'privacy')
+    : null;
   const titles = onGallery
     ? {
         en: 'Photo Gallery — America, A Travel Guide',
@@ -1243,6 +1275,20 @@ function applyLanguage(lang) {
         zh: '旅行工具 — 美国旅行指南',
         ja: '旅行ツール — アメリカ旅行ガイド'
       }
+    : legalKind === 'terms'
+    ? {
+        en: 'Terms of Use — America, A Travel Guide',
+        es: 'Términos de uso — América, Una Guía de Viaje',
+        zh: '使用条款 — 美国旅行指南',
+        ja: '利用規約 — アメリカ旅行ガイド'
+      }
+    : legalKind === 'privacy'
+    ? {
+        en: 'Privacy Policy — America, A Travel Guide',
+        es: 'Política de privacidad — América, Una Guía de Viaje',
+        zh: '隐私政策 — 美国旅行指南',
+        ja: 'プライバシーポリシー — アメリカ旅行ガイド'
+      }
     : {
         en: 'America — A Travel Guide',
         es: 'América — Una Guía de Viaje',
@@ -1251,6 +1297,8 @@ function applyLanguage(lang) {
       };
   document.title = titles[lang] || titles.en;
   applyUnits(); // re-stamp unit spans that may have been inside translated HTML
+  if (typeof renderLegalPage === 'function') renderLegalPage(lang);
+  if (typeof updateLegalLangSwitch === 'function') updateLegalLangSwitch(lang);
   if (currentModalKey) {
     const d = getModalData(currentModalKey);
     if (d) openModal(d.tag, d.title, d.body);
@@ -2905,9 +2953,98 @@ document.querySelectorAll('[data-modal]').forEach(el => {
   });
 });
 
+/* ── LEGAL PAGES (privacy / terms) multi-language body ── */
+function getLegalPageKind() {
+  if (!document.body.classList.contains('page-legal')) return null;
+  const attr = document.body.getAttribute('data-legal-page');
+  if (attr === 'privacy' || attr === 'terms') return attr;
+  if (/terms\.html/i.test(location.pathname) || /terms\.html/i.test(location.href)) return 'terms';
+  return 'privacy';
+}
+
+function renderLegalPage(lang) {
+  const kind = getLegalPageKind();
+  const root = document.getElementById('legalDoc');
+  if (!kind || !root) return;
+  const pack = (typeof window.LEGAL_I18N !== 'undefined' && window.LEGAL_I18N[kind]) || null;
+  if (!pack) return;
+  const data = pack[lang] || pack.en;
+  if (!data) return;
+
+  const topTitle = document.getElementById('legalTopTitle');
+  if (topTitle) topTitle.textContent = data.title;
+
+  const tocHtml = (data.toc || []).map((t) =>
+    `<li><a href="#${t.id}">${t.label}</a></li>`
+  ).join('');
+
+  const sectionsHtml = (data.sections || []).map((s) =>
+    `<section id="${s.id}" class="legal-section"><h2>${s.title}</h2>${s.html}</section>`
+  ).join('');
+
+  const otherPage = kind === 'privacy' ? 'terms.html' : 'privacy.html';
+  const otherKey = kind === 'privacy' ? 'legal.termsLink' : 'legal.privacyLink';
+  const otherLabel = (I18N[lang] && I18N[lang][otherKey])
+    || (lang === 'en' ? (kind === 'privacy' ? 'Terms of Use' : 'Privacy Policy')
+      : (window.LEGAL_I18N[kind === 'privacy' ? 'terms' : 'privacy'][lang] || {}).title)
+    || (kind === 'privacy' ? 'Terms of Use' : 'Privacy Policy');
+  const backLabel = (I18N[lang] && I18N[lang]['gallery.backToGuide'])
+    || (lang === 'es' ? 'Volver a la guía' : lang === 'zh' ? '返回指南' : lang === 'ja' ? 'ガイドに戻る' : 'Back to the Guide');
+
+  root.innerHTML = `
+    <header class="legal-doc-header">
+      <p class="legal-eyebrow">${data.eyebrow || 'Legal'}</p>
+      <h1>${data.title}</h1>
+      <p class="legal-updated">${data.updatedLabel || 'Updated'} ${data.updatedDate || ''}</p>
+      <p class="legal-lead">${data.lead || ''}</p>
+    </header>
+    <nav class="legal-toc" aria-label="${data.onThisPage || 'On this page'}">
+      <h2 class="legal-toc-title">${data.onThisPage || 'On this page'}</h2>
+      <ol>${tocHtml}</ol>
+    </nav>
+    ${sectionsHtml}
+    <footer class="legal-doc-footer">
+      <p>
+        <a href="${otherPage}">${otherLabel}</a>
+        <span aria-hidden="true"> · </span>
+        <a href="index.html">${backLabel}</a>
+      </p>
+      <p class="legal-copy">${data.footerNote || ''}</p>
+    </footer>
+  `;
+}
+
+function updateLegalLangSwitch(lang) {
+  document.querySelectorAll('#legalLangSwitch .legal-lang-btn, #legalLangSwitch [data-lang-val]').forEach((btn) => {
+    const on = btn.getAttribute('data-lang-val') === lang;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+// Top-bar language switcher on legal pages (also writes to the same preference as Settings)
+const legalLangSwitch = document.getElementById('legalLangSwitch');
+if (legalLangSwitch) {
+  legalLangSwitch.querySelectorAll('[data-lang-val]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const next = btn.getAttribute('data-lang-val');
+      if (!SUPPORTED_LANGS.includes(next)) return;
+      currentLang = next;
+      safeStorage.set('usa-travel-lang', currentLang);
+      if (typeof updateLangUI === 'function') updateLangUI(currentLang);
+      applyLanguage(currentLang);
+    });
+  });
+}
+
 /* ── APPLY SAVED PREFERENCES ON LOAD (must run after everything above is defined) ── */
 applyLanguage(currentLang);
 applyUnits();
+// Legal body depends on LEGAL_I18N (loaded before app.js) — ensure first paint
+if (document.body.classList.contains('page-legal')) {
+  renderLegalPage(currentLang);
+  updateLegalLangSwitch(currentLang);
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // GALLERY — filtering, scroll-in animation, image loading state, lightbox

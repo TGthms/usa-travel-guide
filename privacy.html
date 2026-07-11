@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Privacy Policy for America — A Travel Guide. How we handle information when you use this website.">
+<meta name="theme-color" content="#07101c">
+<meta name="color-scheme" content="dark light">
+<title>Privacy Policy — America, A Travel Guide</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23060b18'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='%23e8a435'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Special+Elite&family=Noto+Serif+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('usa-travel-theme');
+    if (!t) {
+      t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
+        ? 'minimal' : 'default';
+    }
+    if (['default','minimal','elegant','luxury','glass','nature'].indexOf(t) < 0) t = 'default';
+    var osDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (osDark && (t === 'minimal' || t === 'elegant')) t = 'default';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.style.colorScheme = (t === 'minimal' || t === 'elegant') ? 'light' : 'dark';
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'default');
+  }
+})();
+</script>
+</head>
+<body class="page-legal" data-legal-page="privacy">
+
+<a class="skip-link" href="#main">Skip to main content</a>
+<div id="progress-bar"></div>
+
+<header class="legal-topbar" role="banner">
+  <a href="index.html" class="gallery-app-back" data-i18n-aria="gallery.backToGuide" aria-label="Back to the Guide">
+    <span aria-hidden="true">←</span>
+    <span class="gallery-app-back-label" data-i18n="gallery.backToGuide">Back to the Guide</span>
+  </a>
+  <div class="gallery-app-title">
+    <span class="gallery-app-mark" aria-hidden="true">✦</span>
+    <span id="legalTopTitle" data-i18n="legal.privacyTitle">Privacy Policy</span>
+  </div>
+  <div class="nav-actions gallery-app-actions legal-topbar-actions">
+    <div class="legal-lang-switch" id="legalLangSwitch" role="group" aria-label="Language">
+      <button type="button" class="legal-lang-btn" data-lang-val="en" aria-pressed="true">EN</button>
+      <button type="button" class="legal-lang-btn" data-lang-val="es" aria-pressed="false">ES</button>
+      <button type="button" class="legal-lang-btn" data-lang-val="zh" aria-pressed="false">中文</button>
+      <button type="button" class="legal-lang-btn" data-lang-val="ja" aria-pressed="false">日本語</button>
+    </div>
+    <button class="nav-settings-btn" id="settingsOpen" type="button" aria-haspopup="dialog" aria-controls="settingsOverlay" data-i18n-aria="nav.settings" aria-label="Settings">⚙️</button>
+  </div>
+</header>
+
+<main id="main" class="legal-main">
+  <article class="legal-doc" id="legalDoc">
+    <!-- Filled by legal-i18n.js + app.js according to language settings -->
+    <p class="legal-lead">Loading…</p>
+  </article>
+</main>
+
+<div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="settingsTitle">
+<section id="settings" class="settings-panel">
+  <div class="settings-header reveal">
+    <span class="section-eyebrow" data-i18n="settings.eyebrow">Personalize</span>
+    <div class="settings-title-row">
+      <h2 id="settingsTitle" data-i18n-html="settings.heading">Make It <em>Yours</em></h2>
+      <button class="settings-close" id="settingsClose" type="button" aria-label="Close settings">✕</button>
+    </div>
+    <p data-i18n="settings.intro">Your preferences are saved on this device.</p>
+  </div>
+  <div class="settings-grid">
+
+    <div class="settings-group reveal">
+      <div class="settings-group-label" data-i18n="settings.themeLabel">🎨 Theme</div>
+      <div class="settings-group-sub" data-i18n="settings.themeSub">Every section adapts to your chosen palette.</div>
+      <div class="theme-swatch-grid" id="themeSwatchGrid">
+        <button type="button" class="theme-swatch active" data-theme-val="default">
+          <div class="theme-swatch-preview"><span style="background:#07101c;"></span><span style="background:#c9a259;"></span><span style="background:#b85c42;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeDefault">Midnight Atlas</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button type="button" class="theme-swatch" data-theme-val="minimal">
+          <div class="theme-swatch-preview"><span style="background:#f5f5f7;"></span><span style="background:#0071e3;"></span><span style="background:#1d1d1f;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeMinimal">Gallery Daylight</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button type="button" class="theme-swatch" data-theme-val="elegant">
+          <div class="theme-swatch-preview"><span style="background:#f6f1e8;"></span><span style="background:#7a2e2e;"></span><span style="background:#b8956a;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeElegant">Heritage Paper</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button type="button" class="theme-swatch" data-theme-val="luxury">
+          <div class="theme-swatch-preview"><span style="background:#0c0c0c;"></span><span style="background:#c4a462;"></span><span style="background:#a8a29a;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeLuxury">Grand Tour</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button type="button" class="theme-swatch" data-theme-val="glass">
+          <div class="theme-swatch-preview"><span style="background:#000000;"></span><span style="background:#0a84ff;"></span><span style="background:#f5f5f7;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeGlass">Twilight Glass</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+        <button type="button" class="theme-swatch" data-theme-val="nature">
+          <div class="theme-swatch-preview"><span style="background:#141c18;"></span><span style="background:#8fa884;"></span><span style="background:#c9a66b;"></span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeNature">Field Notes</span><span class="theme-swatch-check">✓</span></div>
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-group reveal reveal-delay-1">
+      <div class="settings-group-label">🌐 <span data-i18n="settings.languageLabel">Language</span></div>
+      <div class="settings-group-sub" data-i18n="settings.languageSub">Translates all guide content, including region &amp; city details.</div>
+      <div class="pill-group" id="langPillGroup">
+        <button type="button" class="pill-btn active" data-lang-val="en"><span>English</span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-lang-val="es"><span>Español <span class="pill-btn-native">Spanish</span></span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-lang-val="zh"><span>中文 <span class="pill-btn-native">Chinese</span></span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-lang-val="ja"><span>日本語 <span class="pill-btn-native">Japanese</span></span><span class="pill-check">✓</span></button>
+      </div>
+    </div>
+
+    <div class="settings-group reveal reveal-delay-2">
+      <div class="settings-group-label">📐 <span data-i18n="settings.unitsLabel">Units</span></div>
+      <div class="settings-group-sub" data-i18n="settings.unitsSub">Applied to temperatures and road-trip distances.</div>
+      <div class="settings-subgroup">
+        <div class="settings-subgroup-label" data-i18n="settings.temperature">Temperature</div>
+        <div class="units-row" id="unitTempGroup">
+          <button type="button" class="pill-btn active" data-unit-val="f"><span>°F</span><span class="pill-check">✓</span></button>
+          <button type="button" class="pill-btn" data-unit-val="c"><span>°C</span><span class="pill-check">✓</span></button>
+        </div>
+      </div>
+      <div class="settings-subgroup">
+        <div class="settings-subgroup-label" data-i18n="settings.distance">Distance</div>
+        <div class="units-row" id="unitDistGroup">
+          <button type="button" class="pill-btn active" data-unit-val="mi"><span data-i18n="settings.miles">Miles</span><span class="pill-check">✓</span></button>
+          <button type="button" class="pill-btn" data-unit-val="km"><span data-i18n="settings.km">Kilometers</span><span class="pill-check">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group reveal reveal-delay-3">
+      <div class="settings-group-label">🖼️ <span data-i18n="settings.galleryQualityLabel">Gallery photo quality</span></div>
+      <div class="settings-group-sub" data-i18n="settings.galleryQualitySub">What loads when you open a photo. Medium is sharp and fast; Full is the original camera file (heavier).</div>
+      <div class="units-row" id="galleryQualityGroup">
+        <button type="button" class="pill-btn" data-gallery-quality="thumb"><span data-i18n="settings.qualityThumb">Thumbnail</span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn active" data-gallery-quality="medium"><span data-i18n="settings.qualityMedium">Medium</span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-gallery-quality="full"><span data-i18n="settings.qualityFull">Full</span><span class="pill-check">✓</span></button>
+      </div>
+    </div>
+
+    <div class="settings-group settings-group-wide reveal reveal-delay-4">
+      <div class="settings-group-label">♿ <span data-i18n="settings.accessibilityLabel">Accessibility</span></div>
+      <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Tone down animation or turn off the cursor trail — handy for motion sensitivity, older devices, or just a calmer feel.</div>
+      <div class="settings-subgroup-row">
+        <div class="settings-subgroup">
+          <div class="settings-subgroup-label" data-i18n="settings.reduceMotion">Motion</div>
+          <div class="units-row" id="motionPillGroup">
+            <button type="button" class="pill-btn active" data-motion-val="off"><span data-i18n="settings.motionStandard">Standard</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn" data-motion-val="on"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
+          </div>
+        </div>
+        <div class="settings-subgroup">
+          <div class="settings-subgroup-label" data-i18n="settings.cursorEffect">Cursor Trail</div>
+          <div class="units-row" id="cursorPillGroup">
+            <button type="button" class="pill-btn active" data-cursor-val="on"><span data-i18n="settings.cursorOn">On</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn" data-cursor-val="off"><span data-i18n="settings.cursorOff">Off</span><span class="pill-check">✓</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div>
+
+<footer class="legal-site-footer">
+  <div class="legal-site-footer-inner">
+    <a href="index.html" class="legal-footer-home">✦ America</a>
+    <div class="legal-footer-nav" role="navigation" aria-label="Legal">
+      <a href="privacy.html" aria-current="page" data-i18n="legal.privacyLink">Privacy Policy</a>
+      <a href="terms.html" data-i18n="legal.termsLink">Terms of Use</a>
+      <a href="https://tgthms.github.io/about/" target="_blank" rel="noopener" data-i18n="footer.aboutMe">About Me</a>
+      <a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/legal-i18n.js"></script>
+<script src="assets/js/app.js" defer></script>
+</body>
+</html>

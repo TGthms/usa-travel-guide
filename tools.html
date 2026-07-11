@@ -293,12 +293,21 @@
 </div>
 
 <footer class="gallery-app-footer">
-  <a href="index.html" class="gallery-app-footer-home">
-    <span aria-hidden="true">✦</span>
-    <span data-i18n="tools.backToGuide">Back to the Guide</span>
-  </a>
-  <p class="gallery-app-footer-copy" data-i18n-html="footer.copyright">© 2026 USA Travel Guide · Created by Tim G</p>
-  <a href="gallery.html" class="gallery-app-footer-home" data-i18n="nav.gallery">Gallery</a>
+  <div class="gallery-app-footer-row">
+    <a href="index.html" class="gallery-app-footer-home">
+      <span aria-hidden="true">✦</span>
+      <span data-i18n="tools.backToGuide">Back to the Guide</span>
+    </a>
+    <p class="gallery-app-footer-copy" data-i18n-html="footer.copyright">© 2026 USA Travel Guide · Created by Tim G</p>
+    <div class="footer-social gallery-app-footer-links">
+      <a href="gallery.html" class="footer-about-link" data-i18n="nav.gallery">Gallery</a>
+    </div>
+  </div>
+  <div class="footer-legal-links" role="navigation" aria-label="Legal">
+    <a href="privacy.html" data-i18n="legal.privacyLink">Privacy Policy</a>
+    <span class="footer-legal-sep" aria-hidden="true">|</span>
+    <a href="terms.html" data-i18n="legal.termsLink">Terms of Use</a>
+  </div>
 </footer>
 
 <script src="assets/js/app.js" defer></script>
