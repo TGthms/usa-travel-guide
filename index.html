@@ -20,6 +20,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Special+Elite&family=Noto+Serif+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css">
+<!-- First paint: saved theme, else OS light → Daylight / dark → Midnight Atlas.
+     Night safety: if OS is dark, never first-paint a light theme (force Midnight Atlas). -->
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('usa-travel-theme');
+    if (!t) {
+      t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
+        ? 'minimal' : 'default';
+    }
+    if (['default','minimal','elegant','luxury','glass','nature'].indexOf(t) < 0) t = 'default';
+    var osDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (osDark && (t === 'minimal' || t === 'elegant')) t = 'default';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.style.colorScheme = (t === 'minimal' || t === 'elegant') ? 'light' : 'dark';
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'default');
+  }
+})();
+</script>
 </head>
 <body>
 
@@ -785,7 +805,7 @@
           <div class="theme-swatch-name"><span data-i18n="settings.themeLuxury">Grand Tour</span><span class="theme-swatch-check">✓</span></div>
         </button>
         <button type="button" class="theme-swatch" data-theme-val="glass">
-          <div class="theme-swatch-preview"><span style="background:#0b1424;"></span><span style="background:#8eb6d4;"></span><span style="background:#d4a574;"></span></div>
+          <div class="theme-swatch-preview"><span style="background:#000000;"></span><span style="background:#0a84ff;"></span><span style="background:#f5f5f7;"></span></div>
           <div class="theme-swatch-name"><span data-i18n="settings.themeGlass">Twilight Glass</span><span class="theme-swatch-check">✓</span></div>
         </button>
         <button type="button" class="theme-swatch" data-theme-val="nature">
@@ -825,7 +845,17 @@
       </div>
     </div>
 
-    <div class="settings-group settings-group-wide reveal reveal-delay-3">
+    <div class="settings-group reveal reveal-delay-3">
+      <div class="settings-group-label">🖼️ <span data-i18n="settings.galleryQualityLabel">Gallery photo quality</span></div>
+      <div class="settings-group-sub" data-i18n="settings.galleryQualitySub">What loads when you open a photo. Medium is sharp and fast; Full is the original camera file (heavier).</div>
+      <div class="units-row" id="galleryQualityGroup">
+        <button type="button" class="pill-btn" data-gallery-quality="thumb"><span data-i18n="settings.qualityThumb">Thumbnail</span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn active" data-gallery-quality="medium"><span data-i18n="settings.qualityMedium">Medium</span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-gallery-quality="full"><span data-i18n="settings.qualityFull">Full</span><span class="pill-check">✓</span></button>
+      </div>
+    </div>
+
+    <div class="settings-group settings-group-wide reveal reveal-delay-4">
       <div class="settings-group-label">♿ <span data-i18n="settings.accessibilityLabel">Accessibility</span></div>
       <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Tone down animation or turn off the cursor trail — handy for motion sensitivity, older devices, or just a calmer feel.</div>
       <div class="settings-subgroup-row">
@@ -851,44 +881,14 @@
 </div>
 
 <footer>
-  <div class="footer-top">
+  <div class="footer-top footer-top--simple">
     <div class="footer-brand">
       <div class="nav-logo" style="font-size:26px;">✦ <span>America</span></div>
       <p data-i18n="footer.tagline">A complete travel guide to the United States — 50 states, countless stories, one unforgettable journey.</p>
       <div class="footer-social">
+        <a href="https://tgthms.github.io/about/" class="footer-about-link" target="_blank" rel="noopener" data-i18n="footer.aboutMe">About Me</a>
         <a href="https://github.com/TGthms/usa-travel-guide" class="footer-github-link" target="_blank" rel="noopener">GitHub</a>
       </div>
-    </div>
-    <div class="footer-col">
-      <h4 data-i18n="footer.regionsTitle">Regions</h4>
-      <ul>
-        <li><a href="#regions" data-i18n="regions.ne.name">The Northeast</a></li>
-        <li><a href="#regions" data-i18n="regions.so.name">The South</a></li>
-        <li><a href="#regions" data-i18n="regions.mw.name">The Midwest</a></li>
-        <li><a href="#regions" data-i18n="regions.we.name">The West</a></li>
-        <li><a href="#regions" data-i18n="regions.sw.name">The Southwest</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4 data-i18n="footer.destTitle">Destinations</h4>
-      <ul>
-        <li><a href="#destinations" data-i18n="dest.nyc.name">New York City</a></li>
-        <li><a href="#destinations" data-i18n="dest.la.name">Los Angeles</a></li>
-        <li><a href="#destinations" data-i18n="dest.chicago.name">Chicago</a></li>
-        <li><a href="#destinations" data-i18n="dest.vegas.name">Las Vegas</a></li>
-        <li><a href="#destinations" data-i18n="dest.miami.name">Miami</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4 data-i18n="footer.planTitle">Plan Your Trip</h4>
-      <ul>
-        <li><a href="#routes" data-i18n="nav.routes">Road Trips</a></li>
-        <li><a href="tools.html" data-i18n="nav.tools">Tools</a></li>
-        <li><a href="gallery.html" data-i18n="nav.gallery">Gallery</a></li>
-        <li><a href="#seasons" data-i18n="footer.whenToVisit">When to Visit</a></li>
-        <li><a href="#practical" data-i18n="footer.visa">Visa &amp; Entry</a></li>
-        <li><a href="#tips" data-i18n="nav.tips">Travel Tips</a></li>
-      </ul>
     </div>
   </div>
   <div class="footer-bottom">

@@ -349,7 +349,23 @@ const I18N = {
     "gallery.emptyState": "Aún no hay fotos en esta categoría. Vuelve pronto.",
     "gallery.viewAll": "Ver galería completa",
     "gallery.backToGuide": "Volver a la guía",
-    "gallery.pageIntro": "Cada parada del viaje hasta ahora, organizada por categoría — se añaden nuevas fotos a medida que continúa el viaje.",
+    "gallery.pageIntro": "Cada parada del viaje hasta ahora — las más recientes primero. Busca, ordena por lugar o estado y filtra por categoría.",
+    "gallery.searchLabel": "Buscar fotos",
+    "gallery.searchPlaceholder": "Buscar título, ciudad, estado, fecha…",
+    "gallery.sortLabel": "Ordenar",
+    "gallery.sortNewest": "Más recientes",
+    "gallery.sortOldest": "Más antiguas",
+    "gallery.sortLocation": "Ubicación (ciudad)",
+    "gallery.sortState": "Estado",
+    "gallery.sortCategory": "Categoría",
+    "gallery.loadFull": "Cargar calidad máxima",
+    "gallery.loadingFull": "Cargando original…",
+    "gallery.showingFull": "Calidad máxima",
+    "settings.galleryQualityLabel": "Calidad de la galería",
+    "settings.galleryQualitySub": "Qué se carga al abrir una foto. Media es nítida y rápida; Completa es el archivo original de la cámara (más pesado).",
+    "settings.qualityThumb": "Miniatura",
+    "settings.qualityMedium": "Media",
+    "settings.qualityFull": "Completa",
     "gallery.item.sfgoldengate.caption": "Golden Gate Bridge",
     "gallery.item.bixby.caption": "Bixby Bridge",
     "gallery.item.carmel.caption": "Carmel by the Sea",
@@ -362,6 +378,10 @@ const I18N = {
     "gallery.item.richmondview.caption": "SF Bay view from Richmond",
     "gallery.item.japantown.caption": "Japantown",
     "gallery.item.ca1facingpacific.caption": "CA-1 frente al Pacífico",
+    "gallery.item.disneyland.caption": "Disneyland",
+    "gallery.item.manchesterave.caption": "Manchester Ave",
+    "gallery.item.harborboulevard.caption": "Harbor Boulevard",
+    "gallery.item.motelearlymorning.caption": "Motel - early morning",
     "settings.eyebrow": "Preferencias",
     "settings.heading": "Crea <em>tu propia experiencia</em>",
     "settings.intro": "Las preferencias se guardan en este dispositivo",
@@ -428,6 +448,7 @@ const I18N = {
     "tools.emNote": "Llama al 911 solo en emergencias reales. Guarda también el teléfono de tu embajada.",
 
     "footer.tagline": "Una guía de viaje completa por Estados Unidos: 50 estados, incontables historias, un viaje inolvidable.",
+    "footer.aboutMe": "Sobre mí",
     "footer.regionsTitle": "Regiones",
     "footer.destTitle": "Destinos",
     "footer.planTitle": "Planifica tu viaje",
@@ -687,7 +708,23 @@ const I18N = {
     "gallery.emptyState": "该分类暂无照片——敬请期待",
     "gallery.viewAll": "查看完整相册",
     "gallery.backToGuide": "返回指南",
-    "gallery.pageIntro": "一份持续更新的旅途影像集「照片版权归 Tim G 所有，受 CC BY 4.0 协议保护 — 注明作者后方可使用」",
+    "gallery.pageIntro": "旅途中的每一站——默认按时间从新到旧排列。可搜索，也可按地点、州分类筛选。",
+    "gallery.searchLabel": "搜索照片",
+    "gallery.searchPlaceholder": "搜索标题、城市、州、日期…",
+    "gallery.sortLabel": "排序",
+    "gallery.sortNewest": "最新优先",
+    "gallery.sortOldest": "最早优先",
+    "gallery.sortLocation": "地点（城市）",
+    "gallery.sortState": "州",
+    "gallery.sortCategory": "分类",
+    "gallery.loadFull": "加载原图",
+    "gallery.loadingFull": "正在加载原图…",
+    "gallery.showingFull": "已是原图",
+    "settings.galleryQualityLabel": "相册画质",
+    "settings.galleryQualitySub": "打开照片时默认加载的清晰度。中等画质兼顾清晰与流畅；原图为相机原始文件（更耗流量与性能）。",
+    "settings.qualityThumb": "缩略图",
+    "settings.qualityMedium": "中等",
+    "settings.qualityFull": "原图",
     "gallery.item.sfgoldengate.caption": "Golden Gate Bridge",
     "gallery.item.bixby.caption": "Bixby Bridge",
     "gallery.item.carmel.caption": "Carmel by the Sea",
@@ -700,6 +737,10 @@ const I18N = {
     "gallery.item.richmondview.caption": "SF Bay view from Richmond",
     "gallery.item.japantown.caption": "Japantown",
     "gallery.item.ca1facingpacific.caption": "CA-1 facing Pacific",
+    "gallery.item.disneyland.caption": "Disneyland",
+    "gallery.item.manchesterave.caption": "Manchester Ave",
+    "gallery.item.harborboulevard.caption": "Harbor Boulevard",
+    "gallery.item.motelearlymorning.caption": "Motel - early morning",
     "settings.eyebrow": "偏好设置",
     "settings.heading": "打造<em>专属于你的体验</em>",
     "settings.intro": "偏好设置会保存在这台设备上",
@@ -766,6 +807,7 @@ const I18N = {
     "tools.emNote": "仅在真正紧急时拨打 911。也请保存本国使领馆电话。",
 
     "footer.tagline": "一份关于美国的完整旅行指南——广袤之中，故事缓缓展开，成为一段值得铭记的旅程",
+    "footer.aboutMe": "关于我",
     "footer.regionsTitle": "五大地区",
     "footer.destTitle": "推荐地点",
     "footer.planTitle": "行程规划",
@@ -1025,7 +1067,23 @@ const I18N = {
     "gallery.emptyState": "このカテゴリーの写真はまだありません。お楽しみに。",
     "gallery.viewAll": "ギャラリーをすべて表示",
     "gallery.backToGuide": "ガイドに戻る",
-    "gallery.pageIntro": "これまでの道中のすべての立ち寄り先をカテゴリー別に整理。旅の続きとともに新しい写真も追加されます。",
+    "gallery.pageIntro": "これまでの道中のすべての立ち寄り先。新しい順が初期設定です。検索や場所・州での並べ替え、カテゴリー絞り込みもできます。",
+    "gallery.searchLabel": "写真を検索",
+    "gallery.searchPlaceholder": "キャプション、都市、州、日付で検索…",
+    "gallery.sortLabel": "並べ替え",
+    "gallery.sortNewest": "新しい順",
+    "gallery.sortOldest": "古い順",
+    "gallery.sortLocation": "場所（都市）",
+    "gallery.sortState": "州",
+    "gallery.sortCategory": "カテゴリー",
+    "gallery.loadFull": "フル画質を読み込む",
+    "gallery.loadingFull": "原寸を読み込み中…",
+    "gallery.showingFull": "フル画質",
+    "settings.galleryQualityLabel": "ギャラリー画質",
+    "settings.galleryQualitySub": "写真を開いたときに読み込む解像度。中画質はくっきり＆軽快、フルはカメラの原寸ファイル（重い）です。",
+    "settings.qualityThumb": "サムネイル",
+    "settings.qualityMedium": "中画質",
+    "settings.qualityFull": "フル",
     "gallery.item.sfgoldengate.caption": "Golden Gate Bridge",
     "gallery.item.bixby.caption": "Bixby Bridge",
     "gallery.item.carmel.caption": "Carmel by the Sea",
@@ -1038,6 +1096,10 @@ const I18N = {
     "gallery.item.richmondview.caption": "SF Bay view from Richmond",
     "gallery.item.japantown.caption": "Japantown",
     "gallery.item.ca1facingpacific.caption": "太平洋に面したCA-1",
+    "gallery.item.disneyland.caption": "Disneyland",
+    "gallery.item.manchesterave.caption": "Manchester Ave",
+    "gallery.item.harborboulevard.caption": "Harbor Boulevard",
+    "gallery.item.motelearlymorning.caption": "Motel - early morning",
     "settings.eyebrow": "パーソナライズ",
     "settings.heading": "自分だけの<em>旅のかたちに</em>",
     "settings.intro": "お好みのビジュアルテーマを選び、表示言語を切り替え、使い慣れた単位を設定できます。設定内容は、この端末に保存されます。",
@@ -1104,6 +1166,7 @@ const I18N = {
     "tools.emNote": "本当の緊急時のみ 911 へ。大使館の番号も保存しておきましょう。",
 
     "footer.tagline": "アメリカ合衆国を巡る完全ガイド——50の州、数えきれない物語、そして一生忘れられない旅の記憶。",
+    "footer.aboutMe": "自己紹介",
     "footer.regionsTitle": "地域",
     "footer.destTitle": "目的地",
     "footer.planTitle": "旅の計画",
@@ -1122,12 +1185,19 @@ const I18N = {
    back to English just restores that snapshot rather than looking anything
    up. Switching to zh/ja overwrites content from the I18N dictionary above,
    keyed by the same data-i18n attribute already present in the markup. */
-const i18nEls = document.querySelectorAll('[data-i18n], [data-i18n-html], [data-i18n-aria]');
+const i18nEls = document.querySelectorAll('[data-i18n], [data-i18n-html], [data-i18n-aria], [data-i18n-placeholder]');
 const i18nOriginals = new Map();
 i18nEls.forEach(el => {
   const isHtml = el.hasAttribute('data-i18n-html');
   const isAria = el.hasAttribute('data-i18n-aria');
-  i18nOriginals.set(el, isAria ? el.getAttribute('aria-label') : isHtml ? el.innerHTML : el.textContent);
+  const isPh = el.hasAttribute('data-i18n-placeholder');
+  i18nOriginals.set(
+    el,
+    isAria ? el.getAttribute('aria-label')
+      : isPh ? el.getAttribute('placeholder')
+      : isHtml ? el.innerHTML
+      : el.textContent
+  );
 });
 
 function applyLanguage(lang) {
@@ -1135,13 +1205,23 @@ function applyLanguage(lang) {
   i18nEls.forEach(el => {
     const isHtml = el.hasAttribute('data-i18n-html');
     const isAria = el.hasAttribute('data-i18n-aria');
-    const key = isAria ? el.getAttribute('data-i18n-aria') : isHtml ? el.getAttribute('data-i18n-html') : el.getAttribute('data-i18n');
+    const isPh = el.hasAttribute('data-i18n-placeholder');
+    const key = isAria ? el.getAttribute('data-i18n-aria')
+      : isPh ? el.getAttribute('data-i18n-placeholder')
+      : isHtml ? el.getAttribute('data-i18n-html')
+      : el.getAttribute('data-i18n');
     const translated = dict && dict[key];
     if (lang === 'en' || !translated) {
       const orig = i18nOriginals.get(el);
-      if (isAria) el.setAttribute('aria-label', orig); else if (isHtml) el.innerHTML = orig; else el.textContent = orig;
+      if (isAria) el.setAttribute('aria-label', orig);
+      else if (isPh) el.setAttribute('placeholder', orig);
+      else if (isHtml) el.innerHTML = orig;
+      else el.textContent = orig;
     } else {
-      if (isAria) el.setAttribute('aria-label', translated); else if (isHtml) el.innerHTML = translated; else el.textContent = translated;
+      if (isAria) el.setAttribute('aria-label', translated);
+      else if (isPh) el.setAttribute('placeholder', translated);
+      else if (isHtml) el.innerHTML = translated;
+      else el.textContent = translated;
     }
   });
   document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : lang === 'es' ? 'es' : 'en');
@@ -1260,9 +1340,28 @@ function detectLanguage() {
   return 'en';
 }
 
+/* Themes that are bright on-screen — never force these at night (OS dark). */
+const LIGHT_THEMES = ['minimal', 'elegant'];
+
 function detectTheme() {
+  /* First visit only (no saved Settings choice):
+     · OS light mode  → Gallery Daylight (`minimal`)
+     · OS dark mode / no preference → Midnight Atlas (`default`) — site default */
   if (safeMatchMedia('(prefers-color-scheme: light)').matches) return 'minimal';
   return 'default';
+}
+
+/**
+ * Preferred theme from Settings may be light (e.g. Gallery Daylight), but when
+ * the OS is in dark mode we force Midnight Atlas so a bright page never stays
+ * on at night. Dark preferences (Twilight Glass, etc.) are left alone.
+ */
+function effectiveTheme(preferred) {
+  const p = preferred || 'default';
+  if (LIGHT_THEMES.includes(p) && safeMatchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'default';
+  }
+  return p;
 }
 
 function detectUnits() {
@@ -1317,24 +1416,29 @@ let reduceMotion = safeStorage.has('usa-travel-reduce-motion')
 let cursorEffectEnabled = safeStorage.has('usa-travel-cursor-fx')
   ? safeStorage.get('usa-travel-cursor-fx', 'on') !== 'off'
   : detectCursorDefault();
+// Gallery lightbox quality: thumb | medium (default) | full
+let galleryQuality = safeStorage.get('usa-travel-gallery-quality', 'medium');
 
 // Guard against corrupt storage values
 if (!['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'].includes(currentTheme)) currentTheme = 'default';
 if (!SUPPORTED_LANGS.includes(currentLang)) currentLang = 'en';
 if (currentTempUnit !== 'f' && currentTempUnit !== 'c') currentTempUnit = 'f';
 if (currentDistUnit !== 'mi' && currentDistUnit !== 'km') currentDistUnit = 'mi';
+if (!['thumb', 'medium', 'full'].includes(galleryQuality)) galleryQuality = 'medium';
 
-document.documentElement.setAttribute('data-theme', currentTheme);
 document.documentElement.setAttribute('data-reduce-motion', reduceMotion ? 'true' : 'false');
 
 /* Respects the manual Settings toggle AND the OS-level preference — either
    one being "on" is enough to calm things down. Checked live (not cached)
    so it also reacts if the OS setting changes mid-session. */
 const prefersReducedMotionMQ = safeMatchMedia('(prefers-reduced-motion: reduce)');
+const prefersColorSchemeDarkMQ = safeMatchMedia('(prefers-color-scheme: dark)');
 function motionActive() { return reduceMotion || prefersReducedMotionMQ.matches || ENV.constrained; }
 function scrollBehaviorPref() { return motionActive() ? 'auto' : 'smooth'; }
 
-/* ── THEME SWATCHES ── */
+/* ── THEME SWATCHES ──
+   currentTheme = user's preferred choice (Settings / storage).
+   Effective paint may be Midnight Atlas when OS is dark and preference is light. */
 const themeSwatches = document.querySelectorAll('.theme-swatch');
 function updateThemeUI(theme) {
   themeSwatches.forEach(sw => sw.classList.toggle('active', sw.dataset.themeVal === theme));
@@ -1344,7 +1448,7 @@ const THEME_META_COLORS = {
   minimal: '#f5f5f7',
   elegant: '#f6f1e8',
   luxury: '#0c0c0c',
-  glass: '#0b1424',
+  glass: '#000000',
   nature: '#141c18'
 };
 function applyThemeChrome(theme) {
@@ -1353,17 +1457,33 @@ function applyThemeChrome(theme) {
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', THEME_META_COLORS[theme] || THEME_META_COLORS.default);
 }
+function applyThemePreference(preferred, { persist = false } = {}) {
+  if (!['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'].includes(preferred)) {
+    preferred = 'default';
+  }
+  currentTheme = preferred;
+  if (persist) safeStorage.set('usa-travel-theme', preferred);
+  const active = effectiveTheme(preferred);
+  document.documentElement.setAttribute('data-theme', active);
+  applyThemeChrome(active);
+  // Swatches show the user's choice; night override still paints Midnight Atlas
+  updateThemeUI(preferred);
+}
 themeSwatches.forEach(sw => {
   sw.addEventListener('click', () => {
-    currentTheme = sw.dataset.themeVal;
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    safeStorage.set('usa-travel-theme', currentTheme);
-    updateThemeUI(currentTheme);
-    applyThemeChrome(currentTheme);
+    applyThemePreference(sw.dataset.themeVal, { persist: true });
   });
 });
-updateThemeUI(currentTheme);
-applyThemeChrome(currentTheme);
+applyThemePreference(currentTheme, { persist: false });
+// If the OS flips to dark overnight, force Midnight Atlas over a light Settings pick
+function onColorSchemeChange() {
+  applyThemePreference(currentTheme, { persist: false });
+}
+if (typeof prefersColorSchemeDarkMQ.addEventListener === 'function') {
+  prefersColorSchemeDarkMQ.addEventListener('change', onColorSchemeChange);
+} else if (typeof prefersColorSchemeDarkMQ.addListener === 'function') {
+  prefersColorSchemeDarkMQ.addListener(onColorSchemeChange);
+}
 
 /* ── LANGUAGE PILLS ── */
 const langPills = document.querySelectorAll('#langPillGroup .pill-btn');
@@ -1440,6 +1560,26 @@ if (typeof prefersReducedMotionMQ.addEventListener === 'function') {
 } else if (typeof prefersReducedMotionMQ.addListener === 'function') {
   prefersReducedMotionMQ.addListener(updateCursorUI);
 }
+
+/* ── GALLERY QUALITY PILLS (thumb / medium / full) ── */
+const galleryQualityPills = document.querySelectorAll('#galleryQualityGroup .pill-btn');
+function updateGalleryQualityUI() {
+  galleryQualityPills.forEach(p => {
+    p.classList.toggle('active', p.dataset.galleryQuality === galleryQuality);
+  });
+}
+galleryQualityPills.forEach(p => p.addEventListener('click', () => {
+  const next = p.dataset.galleryQuality;
+  if (!['thumb', 'medium', 'full'].includes(next)) return;
+  galleryQuality = next;
+  safeStorage.set('usa-travel-gallery-quality', galleryQuality);
+  updateGalleryQualityUI();
+  // If lightbox is open, reload current photo at the new quality.
+  if (typeof showLightboxPhoto === 'function' && lightbox && lightbox.classList.contains('open')) {
+    try { showLightboxPhoto(currentIndex, { fromNav: true, force: true }); } catch (e) { /* ignore */ }
+  }
+}));
+updateGalleryQualityUI();
 
 /* ── UTILITY: GET CSS VARIABLE ── */
 function getCssVar(name) {
@@ -2776,10 +2916,15 @@ applyUnits();
 const galleryGrid = document.getElementById('galleryGrid');
 const filterBtns = document.querySelectorAll('.gallery-filter');
 const galleryEmptyState = document.getElementById('galleryEmptyState');
+const gallerySearchInput = document.getElementById('gallerySearch');
+const gallerySortSelect = document.getElementById('gallerySort');
 let visibleItems = [...document.querySelectorAll('.gallery-item:not(.load-error)')];
 let currentIndex = 0;
 let lastFocusedThumb = null; // so closing the lightbox returns focus sensibly
 let filterFadeTimers = new WeakMap();
+let galleryActiveCategory = 'all';
+let gallerySearchQuery = '';
+let gallerySortMode = (gallerySortSelect && gallerySortSelect.value) || 'date-desc';
 
 // Mirrors the EMPTY_STATE_SAVED_TEXT pattern used by the destinations filter:
 // the "photo not added yet" placeholder is generated dynamically in JS, so it
@@ -2880,14 +3025,99 @@ function refreshVisibleGalleryItems() {
   visibleItems = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.load-error)')];
 }
 
+/** Parse "July 2026" / "June 2026" into a sortable number (year*12+month). */
+function galleryDateSortKey(dateStr) {
+  const s = String(dateStr || '').trim();
+  const months = {
+    january: 1, february: 2, march: 3, april: 4, may: 5, june: 6,
+    july: 7, august: 8, september: 9, october: 10, november: 11, december: 12,
+    jan: 1, feb: 2, mar: 3, apr: 4, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12
+  };
+  const m = s.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if (m) {
+    const mon = months[m[1].toLowerCase()] || 0;
+    return parseInt(m[2], 10) * 12 + mon;
+  }
+  const iso = s.match(/^(\d{4})[-/](\d{1,2})/);
+  if (iso) return parseInt(iso[1], 10) * 12 + parseInt(iso[2], 10);
+  return 0;
+}
+
+function galleryItemSearchHaystack(item) {
+  const cap = item.querySelector('.gallery-caption');
+  return [
+    cap ? cap.textContent : '',
+    item.dataset.location || '',
+    item.dataset.city || '',
+    item.dataset.state || '',
+    item.dataset.date || '',
+    item.dataset.category || '',
+    (item.querySelector('img') || {}).alt || ''
+  ].join(' ').toLowerCase();
+}
+
+function galleryItemMatchesFilters(item) {
+  if (item.classList.contains('load-error')) return false;
+  const catOk = galleryActiveCategory === 'all' || item.dataset.category === galleryActiveCategory;
+  if (!catOk) return false;
+  if (!gallerySearchQuery) return true;
+  return galleryItemSearchHaystack(item).includes(gallerySearchQuery);
+}
+
+function sortGalleryItems() {
+  if (!galleryGrid) return;
+  const items = [...galleryGrid.querySelectorAll('.gallery-item')];
+  if (items.length < 2) return;
+  const mode = gallerySortMode || 'date-desc';
+  items.sort((a, b) => {
+    if (mode === 'date-desc' || mode === 'date-asc') {
+      const da = galleryDateSortKey(a.dataset.date);
+      const db = galleryDateSortKey(b.dataset.date);
+      if (da !== db) return mode === 'date-desc' ? db - da : da - db;
+      // Stable tie-break: location then caption
+      const la = (a.dataset.location || '').localeCompare(b.dataset.location || '', undefined, { sensitivity: 'base' });
+      if (la !== 0) return la;
+      const ca = (a.querySelector('.gallery-caption') || {}).textContent || '';
+      const cb = (b.querySelector('.gallery-caption') || {}).textContent || '';
+      return ca.localeCompare(cb, undefined, { sensitivity: 'base' });
+    }
+    if (mode === 'location') {
+      const ca = (a.dataset.city || a.dataset.location || '').localeCompare(
+        b.dataset.city || b.dataset.location || '', undefined, { sensitivity: 'base' }
+      );
+      if (ca !== 0) return ca;
+      return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
+    }
+    if (mode === 'state') {
+      const sa = (a.dataset.state || '').localeCompare(b.dataset.state || '', undefined, { sensitivity: 'base' });
+      if (sa !== 0) return sa;
+      const ca = (a.dataset.city || a.dataset.location || '').localeCompare(
+        b.dataset.city || b.dataset.location || '', undefined, { sensitivity: 'base' }
+      );
+      if (ca !== 0) return ca;
+      return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
+    }
+    if (mode === 'category') {
+      const cat = (a.dataset.category || '').localeCompare(b.dataset.category || '', undefined, { sensitivity: 'base' });
+      if (cat !== 0) return cat;
+      return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
+    }
+    return 0;
+  });
+  items.forEach(item => galleryGrid.appendChild(item));
+}
+
 function updateFilterCounts() {
   if (!filterBtns.length) return;
   const items = [...document.querySelectorAll('.gallery-item:not(.load-error)')];
+  // Counts respect search but not category (so each category shows its size under current search).
   filterBtns.forEach(btn => {
     const filter = btn.dataset.filter;
-    const count = filter === 'all'
-      ? items.length
-      : items.filter(i => i.dataset.category === filter).length;
+    const count = items.filter(i => {
+      if (filter !== 'all' && i.dataset.category !== filter) return false;
+      if (!gallerySearchQuery) return true;
+      return galleryItemSearchHaystack(i).includes(gallerySearchQuery);
+    }).length;
     let badge = btn.querySelector('.gallery-filter-count');
     if (!badge) {
       badge = document.createElement('span');
@@ -2907,11 +3137,43 @@ function updateFilterCounts() {
   });
 }
 
-// --- Filtering: items leaving shrink/fade out, THEN get display:none once
-// that transition finishes (so it actually animates instead of vanishing
-// instantly); items entering just drop their hidden state and re-run the
-// same rise-in animation.
+// --- Filtering + search: items leaving shrink/fade out, THEN get display:none once
+// that transition finishes; items entering drop .hidden and re-run rise-in.
 const FADE_MS = 300;
+function applyGalleryVisibility({ animate = true } = {}) {
+  let matchCount = 0;
+  document.querySelectorAll('.gallery-item').forEach((item, index) => {
+    const match = galleryItemMatchesFilters(item);
+    const pending = filterFadeTimers.get(item);
+    if (pending) { clearTimeout(pending); filterFadeTimers.delete(item); }
+
+    if (match) {
+      matchCount++;
+      item.classList.remove('fade-out', 'hidden');
+      if (animate) item.style.transitionDelay = `${(index % 6) * 40}ms`;
+      item.classList.add('is-revealed', 'in-view');
+    } else if (!item.classList.contains('hidden')) {
+      if (!animate) {
+        item.classList.add('hidden');
+        item.classList.remove('fade-out');
+      } else {
+        item.classList.add('fade-out');
+        const t = setTimeout(() => {
+          item.classList.add('hidden');
+          filterFadeTimers.delete(item);
+        }, FADE_MS);
+        filterFadeTimers.set(item, t);
+      }
+    } else {
+      item.classList.add('hidden');
+    }
+  });
+
+  if (galleryEmptyState) galleryEmptyState.classList.toggle('show', matchCount === 0);
+  const delay = animate ? FADE_MS + 20 : 0;
+  setTimeout(() => { refreshVisibleGalleryItems(); }, delay);
+}
+
 filterBtns.forEach(btn => {
   btn.setAttribute('type', 'button');
   btn.setAttribute('aria-pressed', btn.classList.contains('active') ? 'true' : 'false');
@@ -2922,40 +3184,37 @@ filterBtns.forEach(btn => {
     });
     btn.classList.add('active');
     btn.setAttribute('aria-pressed', 'true');
-    const filter = btn.dataset.filter;
-    let matchCount = 0;
-
-    document.querySelectorAll('.gallery-item').forEach((item, index) => {
-      const match = filter === 'all' || item.dataset.category === filter;
-      // Cancel any pending hide timer so rapid filter clicks don't leave
-      // matching tiles stuck with .hidden from a previous selection.
-      const pending = filterFadeTimers.get(item);
-      if (pending) { clearTimeout(pending); filterFadeTimers.delete(item); }
-
-      if (match) {
-        matchCount++;
-        item.classList.remove('fade-out', 'hidden');
-        item.style.transitionDelay = `${(index % 6) * 40}ms`;
-        // Keep already-visible tiles stable (re-toggling in-view caused flicker).
-        item.classList.add('is-revealed', 'in-view');
-      } else if (!item.classList.contains('hidden')) {
-        item.classList.add('fade-out');
-        const t = setTimeout(() => {
-          item.classList.add('hidden');
-          filterFadeTimers.delete(item);
-        }, FADE_MS);
-        filterFadeTimers.set(item, t);
-      }
-    });
-
-    if (galleryEmptyState) galleryEmptyState.classList.toggle('show', matchCount === 0);
-
-    setTimeout(() => {
-      refreshVisibleGalleryItems();
-    }, FADE_MS + 20);
+    galleryActiveCategory = btn.dataset.filter || 'all';
+    applyGalleryVisibility({ animate: true });
   });
 });
+
+if (gallerySearchInput) {
+  let searchTimer = 0;
+  gallerySearchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      gallerySearchQuery = (gallerySearchInput.value || '').trim().toLowerCase();
+      updateFilterCounts();
+      applyGalleryVisibility({ animate: true });
+    }, 120);
+  });
+}
+
+if (gallerySortSelect) {
+  gallerySortSelect.addEventListener('change', () => {
+    gallerySortMode = gallerySortSelect.value || 'date-desc';
+    sortGalleryItems();
+    applyGalleryVisibility({ animate: false });
+  });
+}
+
+// Default order: newest first (by data-date)
+if (galleryGrid) {
+  sortGalleryItems();
+}
 updateFilterCounts();
+applyGalleryVisibility({ animate: false });
 
 // --- Lightbox ---
 const lightbox = document.getElementById('lightbox');
@@ -2966,6 +3225,7 @@ const lightboxCounter = document.getElementById('lightboxCounter');
 const lightboxCloseBtn = document.getElementById('lightboxClose');
 const lightboxNextBtn = document.getElementById('lightboxNext');
 const lightboxPrevBtn = document.getElementById('lightboxPrev');
+const lightboxHdBtn = document.getElementById('lightboxHdBtn');
 
 function galleryFullSrc(img) {
   if (!img) return '';
@@ -2973,16 +3233,84 @@ function galleryFullSrc(img) {
 }
 function galleryThumbSrc(img) {
   if (!img) return '';
-  return img.currentSrc || img.src || '';
+  return img.getAttribute('data-thumb') || img.currentSrc || img.src || '';
+}
+function galleryMediumSrc(img) {
+  if (!img) return '';
+  return img.getAttribute('data-medium') || '';
+}
+
+/**
+ * Preferred lightbox asset for the current quality setting.
+ * Falls back: full → medium → thumb when a tier is missing.
+ */
+function galleryPreferredSrc(img, quality) {
+  const q = quality || galleryQuality || 'medium';
+  const full = galleryFullSrc(img);
+  const medium = galleryMediumSrc(img);
+  const thumb = galleryThumbSrc(img);
+  if (q === 'full') return full || medium || thumb;
+  if (q === 'thumb') return thumb || medium || full;
+  // medium (default)
+  return medium || full || thumb;
+}
+
+function galleryIsFullQualitySrc(src, img) {
+  if (!src || !img) return false;
+  const full = galleryFullSrc(img);
+  if (!full) return false;
+  try {
+    return new URL(src, window.location.href).pathname === new URL(full, window.location.href).pathname
+      || src === full
+      || (lightboxImg && lightboxImg.getAttribute('data-loaded-tier') === 'full');
+  } catch (e) {
+    return src === full || (lightboxImg && lightboxImg.getAttribute('data-loaded-tier') === 'full');
+  }
+}
+
+function lightboxHdLabel(key) {
+  const dict = (typeof I18N !== 'undefined' && I18N[currentLang]) || null;
+  const fallback = {
+    loadFull: 'Load full quality',
+    loadingFull: 'Loading original…',
+    showingFull: 'Full quality'
+  };
+  if (dict && dict['gallery.' + key]) return dict['gallery.' + key];
+  // English originals from button if present
+  if (key === 'loadFull' && lightboxHdBtn && !lightboxHdBtn.classList.contains('is-loading')) {
+    const orig = lightboxHdBtn.getAttribute('data-i18n') === 'gallery.loadFull'
+      ? (i18nOriginals.get(lightboxHdBtn) || fallback.loadFull)
+      : fallback.loadFull;
+    if (currentLang === 'en') return orig;
+  }
+  return fallback[key] || fallback.loadFull;
+}
+
+function updateLightboxHdButton(img, loadedTier) {
+  if (!lightboxHdBtn) return;
+  const full = galleryFullSrc(img);
+  const tier = loadedTier || (lightboxImg && lightboxImg.getAttribute('data-loaded-tier')) || '';
+  // Show upgrade button only when a higher-res full asset exists and we aren't already on it
+  const canUpgrade = !!(full && tier !== 'full' && galleryQuality !== 'full');
+  // Also allow upgrade when quality is full but we're mid-session on medium? If quality is full we auto-load full.
+  if (!canUpgrade) {
+    lightboxHdBtn.hidden = true;
+    lightboxHdBtn.classList.remove('is-loading');
+    return;
+  }
+  lightboxHdBtn.hidden = false;
+  lightboxHdBtn.disabled = false;
+  lightboxHdBtn.classList.remove('is-loading');
+  lightboxHdBtn.textContent = lightboxHdLabel('loadFull');
 }
 
 /*
-  Lightbox loading model (full quality, one photo at a time):
-  - Grid always uses thumbs.
-  - Viewer always displays the FULL asset for the photo currently on screen.
-  - On open/arrow: show the NEW photo's thumb immediately, then upgrade to full.
-  - Centered progress bar + % over the thumb while the single full download runs.
-  - Only one full download is in flight; navigating aborts the previous XHR.
+  Lightbox loading model (one photo at a time):
+  - Grid always uses thumbs (fast masonry).
+  - Viewer loads preferred quality: medium by default (settings: thumb/medium/full).
+  - "Load full quality" button upgrades to the original camera file when not already full.
+  - On open/arrow: show thumb immediately, then upgrade to preferred size.
+  - Only one download is in flight; navigating aborts the previous XHR.
 */
 let lightboxLoadToken = 0;
 let lightboxXhr = null;
@@ -3292,7 +3620,14 @@ function cancelLightboxLoad() {
     } catch (e) { /* ignore */ }
     lightboxDecodeImg = null;
   }
-  if (lightboxImg) lightboxImg.classList.remove('is-loading');
+  if (lightboxImg) {
+    lightboxImg.classList.remove('is-loading');
+    lightboxImg.removeAttribute('data-loaded-tier');
+  }
+  if (lightboxHdBtn) {
+    lightboxHdBtn.hidden = true;
+    lightboxHdBtn.classList.remove('is-loading');
+  }
   lbProgHide();
 }
 
@@ -3314,16 +3649,24 @@ function updateLightboxChrome(item, index) {
   if (lightboxPrevBtn) lightboxPrevBtn.hidden = !multi;
 }
 
-function applyLightboxFullSrc(displaySrc, fullKey, token) {
+function applyLightboxFullSrc(displaySrc, cacheKey, token, tier) {
   if (token !== lightboxLoadToken || !lightboxImg) return;
   lightboxImg.src = displaySrc;
-  if (fullKey) lightboxImg.setAttribute('data-full-src', fullKey);
+  if (cacheKey) lightboxImg.setAttribute('data-full-src', cacheKey);
   else lightboxImg.removeAttribute('data-full-src');
+  if (tier) lightboxImg.setAttribute('data-loaded-tier', tier);
   lightboxImg.classList.remove('is-loading');
   lbProgComplete();
+  // HD upgrade button after progress dismisses
+  setTimeout(() => {
+    if (token !== lightboxLoadToken) return;
+    const item = visibleItems[currentIndex];
+    const img = item && item.querySelector('img');
+    updateLightboxHdButton(img, tier);
+  }, 220);
 }
 
-function decodeThenApply(displaySrc, fullKey, token, onFail, estimatedBytes) {
+function decodeThenApply(displaySrc, cacheKey, token, onFail, estimatedBytes, tier) {
   // Network done → bar spends most of its life here (decode/render)
   lbProgBeginDecode(estimatedBytes || 0);
   const probe = new Image();
@@ -3336,7 +3679,7 @@ function decodeThenApply(displaySrc, fullKey, token, onFail, estimatedBytes) {
       if (typeof onFail === 'function') onFail();
       return;
     }
-    applyLightboxFullSrc(displaySrc, fullKey, token);
+    applyLightboxFullSrc(displaySrc, cacheKey, token, tier || 'medium');
   };
   probe.onload = () => {
     if (typeof probe.decode === 'function') {
@@ -3366,7 +3709,7 @@ function failLightboxLoad(token, thumbFallback) {
  * Fallback when XHR can't report progress (file://, blocked XHR, etc.).
  * Short synthetic network band, then full decode crawl.
  */
-function loadFullViaImageFallback(fullUrl, token, thumbFallback) {
+function loadFullViaImageFallback(assetUrl, token, thumbFallback, tier) {
   if (token !== lightboxLoadToken) return;
   if (lightboxImg) lightboxImg.classList.add('is-loading');
   if (!lbProgVisible) lbProgStart();
@@ -3392,8 +3735,8 @@ function loadFullViaImageFallback(fullUrl, token, thumbFallback) {
     if (lightboxDecodeImg === probe) lightboxDecodeImg = null;
     if (token !== lightboxLoadToken) return;
     if (ok) {
-      lightboxFullCache.set(fullUrl, fullUrl);
-      applyLightboxFullSrc(fullUrl, fullUrl, token);
+      lightboxFullCache.set(assetUrl, assetUrl);
+      applyLightboxFullSrc(assetUrl, assetUrl, token, tier || 'medium');
     } else {
       failLightboxLoad(token, thumbFallback);
     }
@@ -3409,35 +3752,37 @@ function loadFullViaImageFallback(fullUrl, token, thumbFallback) {
     }
   };
   probe.onerror = () => { clearInterval(tick); finish(false); };
-  probe.src = fullUrl;
+  probe.src = assetUrl;
 }
 
-function loadFullWithProgress(fullUrl, token, thumbFallback) {
-  if (!fullUrl) return;
+function loadFullWithProgress(assetUrl, token, thumbFallback, tier) {
+  if (!assetUrl) return;
+  const loadedTier = tier || 'medium';
 
-  let absoluteUrl = fullUrl;
+  let absoluteUrl = assetUrl;
   try {
-    absoluteUrl = new URL(fullUrl, window.location.href).href;
+    absoluteUrl = new URL(assetUrl, window.location.href).href;
   } catch (e) { /* keep relative */ }
 
   // Instant path: already downloaded this session — still need decode
-  if (lightboxFullCache.has(fullUrl) || lightboxFullCache.has(absoluteUrl)) {
-    const cached = lightboxFullCache.get(fullUrl) || lightboxFullCache.get(absoluteUrl);
+  if (lightboxFullCache.has(assetUrl) || lightboxFullCache.has(absoluteUrl)) {
+    const cached = lightboxFullCache.get(assetUrl) || lightboxFullCache.get(absoluteUrl);
     lbProgStart();
     lbProgSetTarget(LB_NET_CEIL, 'loading');
-    decodeThenApply(cached, fullUrl, token, () => {
-      lightboxFullCache.delete(fullUrl);
+    decodeThenApply(cached, assetUrl, token, () => {
+      lightboxFullCache.delete(assetUrl);
       lightboxFullCache.delete(absoluteUrl);
-      loadFullWithProgress(fullUrl, token, thumbFallback);
-    }, 0);
+      loadFullWithProgress(assetUrl, token, thumbFallback, loadedTier);
+    }, 0, loadedTier);
     return;
   }
 
   if (lightboxImg) lightboxImg.classList.add('is-loading');
   lbProgStart();
 
-  if (window.location.protocol === 'file:') {
-    loadFullViaImageFallback(fullUrl, token, thumbFallback);
+  // Thumbs are tiny — skip XHR progress overhead
+  if (loadedTier === 'thumb' || window.location.protocol === 'file:') {
+    loadFullViaImageFallback(assetUrl, token, thumbFallback, loadedTier);
     return;
   }
 
@@ -3452,7 +3797,7 @@ function loadFullWithProgress(fullUrl, token, thumbFallback) {
     xhr.responseType = 'blob';
   } catch (err) {
     lightboxXhr = null;
-    loadFullViaImageFallback(fullUrl, token, thumbFallback);
+    loadFullViaImageFallback(assetUrl, token, thumbFallback, loadedTier);
     return;
   }
 
@@ -3492,30 +3837,30 @@ function loadFullWithProgress(fullUrl, token, thumbFallback) {
       const byteSize = (body && typeof body.size === 'number') ? body.size : lastTotal;
       try {
         const objUrl = URL.createObjectURL(body);
-        lightboxFullCache.set(fullUrl, objUrl);
+        lightboxFullCache.set(assetUrl, objUrl);
         lightboxFullCache.set(absoluteUrl, objUrl);
         // Brief beat so the bar can reach the network ceiling, then decode crawl
         setTimeout(() => {
           if (token !== lightboxLoadToken) return;
-          decodeThenApply(objUrl, fullUrl, token, () => {
+          decodeThenApply(objUrl, assetUrl, token, () => {
             try { URL.revokeObjectURL(objUrl); } catch (e) { /* ignore */ }
-            lightboxFullCache.delete(fullUrl);
+            lightboxFullCache.delete(assetUrl);
             lightboxFullCache.delete(absoluteUrl);
-            loadFullViaImageFallback(fullUrl, token, thumbFallback);
-          }, byteSize);
+            loadFullViaImageFallback(assetUrl, token, thumbFallback, loadedTier);
+          }, byteSize, loadedTier);
         }, gotProgress ? 40 : 100);
       } catch (err) {
-        loadFullViaImageFallback(fullUrl, token, thumbFallback);
+        loadFullViaImageFallback(assetUrl, token, thumbFallback, loadedTier);
       }
     } else {
-      loadFullViaImageFallback(fullUrl, token, thumbFallback);
+      loadFullViaImageFallback(assetUrl, token, thumbFallback, loadedTier);
     }
   };
 
   xhr.onerror = () => {
     if (token !== lightboxLoadToken) return;
     lightboxXhr = null;
-    loadFullViaImageFallback(fullUrl, token, thumbFallback);
+    loadFullViaImageFallback(assetUrl, token, thumbFallback, loadedTier);
   };
 
   xhr.onabort = () => {
@@ -3526,11 +3871,11 @@ function loadFullWithProgress(fullUrl, token, thumbFallback) {
     xhr.send();
   } catch (err) {
     lightboxXhr = null;
-    loadFullViaImageFallback(fullUrl, token, thumbFallback);
+    loadFullViaImageFallback(assetUrl, token, thumbFallback, loadedTier);
   }
 }
 
-function showLightboxPhoto(index, { fromNav = false } = {}) {
+function showLightboxPhoto(index, { fromNav = false, force = false, forceTier = null } = {}) {
   if (!lightbox || !lightboxImg) return;
   const item = visibleItems[index];
   if (!item) return;
@@ -3542,34 +3887,63 @@ function showLightboxPhoto(index, { fromNav = false } = {}) {
   const token = lightboxLoadToken;
 
   updateLightboxChrome(item, index);
+  if (lightboxHdBtn) {
+    lightboxHdBtn.hidden = true;
+    lightboxHdBtn.classList.remove('is-loading');
+  }
 
-  const full = galleryFullSrc(img);
   const thumb = galleryThumbSrc(img);
-  if (!full && !thumb) return;
+  const preferredTier = forceTier || galleryQuality || 'medium';
+  const preferred = forceTier === 'full'
+    ? (galleryFullSrc(img) || galleryPreferredSrc(img, 'full'))
+    : galleryPreferredSrc(img, preferredTier);
+  if (!preferred && !thumb) return;
 
-  // Already showing this full asset — nothing to do.
-  if (full && lightboxImg.getAttribute('data-full-src') === full && lightboxImg.getAttribute('src')) {
+  // Already showing this asset — nothing to do (unless forced quality change).
+  if (!force && preferred && lightboxImg.getAttribute('data-full-src') === preferred && lightboxImg.getAttribute('src')) {
     lightboxImg.classList.remove('is-loading');
     setLightboxProgressUI({ visible: false });
+    updateLightboxHdButton(img, lightboxImg.getAttribute('data-loaded-tier'));
     return;
   }
 
   // Instant feedback: always paint the new photo's thumb first (open + arrows).
-  // Full-res then upgrades in place while the centered progress bar runs.
-  // Arrow nav especially: swap off the previous full so users see which photo
-  // they're on immediately, not a stalled previous frame.
   if (thumb) {
     lightboxImg.src = thumb;
     lightboxImg.removeAttribute('data-full-src');
+    lightboxImg.setAttribute('data-loaded-tier', 'thumb');
   }
 
-  if (!full) {
+  if (!preferred || preferred === thumb) {
     lightboxImg.classList.remove('is-loading');
     setLightboxProgressUI({ visible: false });
+    updateLightboxHdButton(img, 'thumb');
     return;
   }
 
-  loadFullWithProgress(full, token, thumb);
+  // Determine tier label for the asset we're about to load
+  let tier = preferredTier;
+  const full = galleryFullSrc(img);
+  const medium = galleryMediumSrc(img);
+  if (preferred === full) tier = 'full';
+  else if (preferred === medium) tier = 'medium';
+  else if (preferred === thumb) tier = 'thumb';
+
+  loadFullWithProgress(preferred, token, thumb, tier);
+}
+
+if (lightboxHdBtn) {
+  lightboxHdBtn.addEventListener('click', () => {
+    const item = visibleItems[currentIndex];
+    if (!item) return;
+    const img = item.querySelector('img');
+    if (!img) return;
+    const full = galleryFullSrc(img);
+    if (!full) return;
+    lightboxHdBtn.classList.add('is-loading');
+    lightboxHdBtn.textContent = lightboxHdLabel('loadingFull');
+    showLightboxPhoto(currentIndex, { fromNav: false, force: true, forceTier: 'full' });
+  });
 }
 
 function openLightbox(index) {
@@ -3593,8 +3967,13 @@ function closeLightbox() {
   if (lightboxImg) {
     lightboxImg.removeAttribute('src');
     lightboxImg.removeAttribute('data-full-src');
+    lightboxImg.removeAttribute('data-loaded-tier');
     lightboxImg.alt = '';
     lightboxImg.classList.remove('is-loading');
+  }
+  if (lightboxHdBtn) {
+    lightboxHdBtn.hidden = true;
+    lightboxHdBtn.classList.remove('is-loading');
   }
   unlockBodyScroll();
   if (lastFocusedThumb && typeof lastFocusedThumb.focus === 'function') {

@@ -20,6 +20,24 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Special+Elite&family=Noto+Serif+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('usa-travel-theme');
+    if (!t) {
+      t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
+        ? 'minimal' : 'default';
+    }
+    if (['default','minimal','elegant','luxury','glass','nature'].indexOf(t) < 0) t = 'default';
+    var osDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (osDark && (t === 'minimal' || t === 'elegant')) t = 'default';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.style.colorScheme = (t === 'minimal' || t === 'elegant') ? 'light' : 'dark';
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'default');
+  }
+})();
+</script>
 </head>
 <body class="page-gallery">
 
@@ -72,7 +90,25 @@
       <span class="section-eyebrow" data-i18n="gallery.eyebrow">Photo Gallery</span>
       <h2 id="galleryHeading" data-i18n-html="gallery.heading">Moments From<br><em>The Road</em></h2>
     </div>
-    <p data-i18n="gallery.pageIntro">Every stop from the road so far, sorted by category — new photos added as the trip continues.</p>
+    <p data-i18n="gallery.pageIntro">Every stop from the road so far — newest first by default. Search, sort by place or state, and filter by category.</p>
+  </div>
+
+  <div class="gallery-controls reveal reveal-delay-1">
+    <label class="gallery-search-wrap">
+      <span class="visually-hidden" data-i18n="gallery.searchLabel">Search photos</span>
+      <input type="search" id="gallerySearch" class="gallery-search" autocomplete="off" enterkeyhint="search"
+        placeholder="Search caption, city, state, date…" data-i18n-placeholder="gallery.searchPlaceholder">
+    </label>
+    <label class="gallery-sort-wrap">
+      <span class="gallery-sort-label" data-i18n="gallery.sortLabel">Sort</span>
+      <select id="gallerySort" class="gallery-sort">
+        <option value="date-desc" selected data-i18n="gallery.sortNewest">Newest first</option>
+        <option value="date-asc" data-i18n="gallery.sortOldest">Oldest first</option>
+        <option value="location" data-i18n="gallery.sortLocation">Location (city)</option>
+        <option value="state" data-i18n="gallery.sortState">State</option>
+        <option value="category" data-i18n="gallery.sortCategory">Category</option>
+      </select>
+    </label>
   </div>
 
   <div class="gallery-filters reveal reveal-delay-2" role="toolbar" aria-label="Filter photos by category">
@@ -114,53 +150,69 @@
          photo before the file itself is ready.
        ═══════════════════════════════════════════════════════════════════ -->
   <div class="gallery-grid" id="galleryGrid">
-    <div class="gallery-item" data-category="landmarks" data-location="San Francisco, California" data-date="June 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/SFgolden_gate_bridge.jpeg" data-full="images/gallery/SFgolden_gate_bridge.jpeg" width="900" height="506" alt="Golden Gate Bridge" loading="lazy" decoding="async">
+    <div class="gallery-item" data-category="landmarks" data-location="San Francisco, California" data-city="San Francisco" data-state="California" data-date="June 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/SFgolden_gate_bridge.jpeg" data-thumb="images/gallery/thumbs/SFgolden_gate_bridge.jpeg" data-medium="images/gallery/medium/SFgolden_gate_bridge.jpeg" data-full="images/gallery/SFgolden_gate_bridge.jpeg" width="900" height="506" alt="Golden Gate Bridge" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.sfgoldengate.caption">Golden Gate Bridge</div>
     </div>
-    <div class="gallery-item" data-category="landmarks" data-location="CA-1, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/bixby_bridge.jpeg" data-full="images/gallery/bixby_bridge.jpeg" width="900" height="675" alt="Bixby Bridge" loading="lazy" decoding="async">
+        <div class="gallery-item" data-category="landmarks" data-location="Monterey County, California" data-city="Monterey County" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/bixby_bridge.jpeg" data-thumb="images/gallery/thumbs/bixby_bridge.jpeg" data-medium="images/gallery/medium/bixby_bridge.jpeg" data-full="images/gallery/bixby_bridge.jpeg" width="900" height="675" alt="Bixby Bridge" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.bixby.caption">Bixby Bridge</div>
     </div>
-    <div class="gallery-item" data-category="coast" data-location="Carmel by the Sea, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/Carmel_by_the_Sea.jpeg" data-full="images/gallery/Carmel_by_the_Sea.jpeg" width="675" height="900" alt="Carmel by the Sea" loading="lazy" decoding="async">
+    <div class="gallery-item" data-category="coast" data-location="Carmel by the Sea, California" data-city="Carmel by the Sea" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Carmel_by_the_Sea.jpeg" data-thumb="images/gallery/thumbs/Carmel_by_the_Sea.jpeg" data-medium="images/gallery/medium/Carmel_by_the_Sea.jpeg" data-full="images/gallery/Carmel_by_the_Sea.jpeg" width="675" height="900" alt="Carmel by the Sea" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.carmel.caption">Carmel by the Sea</div>
     </div>
-    <div class="gallery-item" data-category="nature" data-location="Garrapata Beach, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/Garrapata_State_Beach_View.jpeg" data-full="images/gallery/Garrapata_State_Beach_View.jpeg" width="675" height="900" alt="Garrapata Beach Overlook" loading="lazy" decoding="async">
+    <div class="gallery-item" data-category="nature" data-location="Garrapata Beach, California" data-city="Garrapata Beach" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Garrapata_State_Beach_View.jpeg" data-thumb="images/gallery/thumbs/Garrapata_State_Beach_View.jpeg" data-medium="images/gallery/medium/Garrapata_State_Beach_View.jpeg" data-full="images/gallery/Garrapata_State_Beach_View.jpeg" width="675" height="900" alt="Garrapata Beach Overlook" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.garrapataview.caption">Garrapata Beach Overlook</div>
     </div>
-    <div class="gallery-item" data-category="coast" data-location="Garrapata Beach, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/Garrapata_State_Beach.jpeg" data-full="images/gallery/Garrapata_State_Beach.jpeg" width="675" height="900" alt="Garrapata Beach" loading="lazy" decoding="async">
+    <div class="gallery-item" data-category="coast" data-location="Garrapata Beach, California" data-city="Garrapata Beach" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Garrapata_State_Beach.jpeg" data-thumb="images/gallery/thumbs/Garrapata_State_Beach.jpeg" data-medium="images/gallery/medium/Garrapata_State_Beach.jpeg" data-full="images/gallery/Garrapata_State_Beach.jpeg" width="675" height="900" alt="Garrapata Beach" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.garrapata.caption">Garrapata Beach</div>
     </div>
-    <div class="gallery-item" data-category="roads" data-location="CA-1, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/Granite_Canyon_Bridge.jpeg" data-full="images/gallery/Granite_Canyon_Bridge.jpeg" width="900" height="675" alt="Granite Canyon Bridge" loading="lazy" decoding="async">
+    <div class="gallery-item" data-category="roads" data-location="CA-1, California" data-city="CA-1" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Granite_Canyon_Bridge.jpeg" data-thumb="images/gallery/thumbs/Granite_Canyon_Bridge.jpeg" data-medium="images/gallery/medium/Granite_Canyon_Bridge.jpeg" data-full="images/gallery/Granite_Canyon_Bridge.jpeg" width="900" height="675" alt="Granite Canyon Bridge" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.granitecanyon.caption">Granite Canyon Bridge</div>
     </div>
-        <div class="gallery-item" data-category="nature" data-location="Monterey County, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/Hurricane_Point_Landscape.jpeg" data-full="images/gallery/Hurricane_Point_Landscape.jpeg" width="900" height="600" alt="Hurricane Point Panorama" loading="lazy">
+        <div class="gallery-item" data-category="nature" data-location="Monterey County, California" data-city="Monterey County" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Hurricane_Point_Landscape.jpeg" data-thumb="images/gallery/thumbs/Hurricane_Point_Landscape.jpeg" data-medium="images/gallery/medium/Hurricane_Point_Landscape.jpeg" data-full="images/gallery/Hurricane_Point_Landscape.jpeg" width="900" height="600" alt="Hurricane Point Panorama" loading="lazy">
       <div class="gallery-caption" data-i18n="gallery.item.hurricanepoint.caption">Hurricane Point Panorama</div>
     </div>
-    <div class="gallery-item" data-category="coast" data-location="Richmond, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/Richmond_facing_bay_back.jpeg" data-full="images/gallery/Richmond_facing_bay_back.jpeg" width="675" height="900" alt="SF Bay from Richmond" loading="lazy" decoding="async">
+    <div class="gallery-item" data-category="coast" data-location="Richmond, California" data-city="Richmond" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Richmond_facing_bay_back.jpeg" data-thumb="images/gallery/thumbs/Richmond_facing_bay_back.jpeg" data-medium="images/gallery/medium/Richmond_facing_bay_back.jpeg" data-full="images/gallery/Richmond_facing_bay_back.jpeg" width="675" height="900" alt="SF Bay from Richmond" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.richmondbay.caption">SF Bay from Richmond</div>
     </div>
-    <div class="gallery-item" data-category="nature" data-location="Richmond, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/Richmond_Regional_Park_facing_mountain.jpeg" data-full="images/gallery/Richmond_Regional_Park_facing_mountain.jpeg" width="675" height="900" alt="Richmond Regional Park" loading="lazy" decoding="async">
+    <div class="gallery-item" data-category="nature" data-location="Richmond, California" data-city="Richmond" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Richmond_Regional_Park_facing_mountain.jpeg" data-thumb="images/gallery/thumbs/Richmond_Regional_Park_facing_mountain.jpeg" data-medium="images/gallery/medium/Richmond_Regional_Park_facing_mountain.jpeg" data-full="images/gallery/Richmond_Regional_Park_facing_mountain.jpeg" width="675" height="900" alt="Richmond Regional Park" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.richmondpark.caption">Richmond Regional Park</div>
     </div>
-    <div class="gallery-item" data-category="coast" data-location="Richmond, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/Richmond_SFbay_view.jpeg" data-full="images/gallery/Richmond_SFbay_view.jpeg" width="675" height="900" alt="SF Bay view from Richmond" loading="lazy" decoding="async">
+    <div class="gallery-item" data-category="coast" data-location="Richmond, California" data-city="Richmond" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Richmond_SFbay_view.jpeg" data-thumb="images/gallery/thumbs/Richmond_SFbay_view.jpeg" data-medium="images/gallery/medium/Richmond_SFbay_view.jpeg" data-full="images/gallery/Richmond_SFbay_view.jpeg" width="675" height="900" alt="SF Bay view from Richmond" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.richmondview.caption">SF Bay view from Richmond</div>
     </div>
-    <div class="gallery-item" data-category="cityscapes" data-location="San Francisco, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/Japantown_SF.jpeg" data-full="images/gallery/Japantown_SF.jpeg" width="900" height="675" alt="Japantown, San Francisco" loading="lazy" decoding="async">
+        <div class="gallery-item" data-category="cityscapes" data-location="San Francisco, California" data-city="San Francisco" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/Japantown_SF.jpeg" data-thumb="images/gallery/thumbs/Japantown_SF.jpeg" data-medium="images/gallery/medium/Japantown_SF.jpeg" data-full="images/gallery/Japantown_SF.jpeg" width="900" height="675" alt="Japantown" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.japantown.caption">Japantown</div>
     </div>
-    <div class="gallery-item" data-category="nature" data-location="CA-1, California" data-date="July 2026" tabindex="0" role="button">
-      <img src="images/gallery/thumbs/ca1facingpacific.jpeg" data-full="images/gallery/ca1facingpacific.jpeg" width="900" height="675" alt="CA-1 facing the Pacific" loading="lazy" decoding="async">
+    <div class="gallery-item" data-category="nature" data-location="CA-1, California" data-city="CA-1" data-state="California" data-date="July 2026" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/ca1facingpacific.jpeg" data-thumb="images/gallery/thumbs/ca1facingpacific.jpeg" data-medium="images/gallery/medium/ca1facingpacific.jpeg" data-full="images/gallery/ca1facingpacific.jpeg" width="900" height="675" alt="CA-1 facing the Pacific" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.ca1facingpacific.caption">CA-1 facing Pacific</div>
+    </div>
+        <div class="gallery-item" data-category="landmarks" data-location="Anaheim, California" data-city="Anaheim" data-state="California" data-date="January 2025" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/disneyland.jpeg" data-thumb="images/gallery/thumbs/disneyland.jpeg" data-medium="images/gallery/medium/disneyland.jpeg" data-full="images/gallery/disneyland.jpeg" width="900" height="506" alt="Disneyland" loading="lazy" decoding="async">
+      <div class="gallery-caption" data-i18n="gallery.item.disneyland.caption">Disneyland</div>
+    </div>
+        <div class="gallery-item" data-category="roads" data-location="Anaheim, California" data-city="Anaheim" data-state="California" data-date="January 2025" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/manchesterave.jpeg" data-thumb="images/gallery/thumbs/manchesterave.jpeg" data-medium="images/gallery/medium/manchesterave.jpeg" data-full="images/gallery/manchesterave.jpeg" width="675" height="900" alt="Manchester Ave" loading="lazy" decoding="async">
+      <div class="gallery-caption" data-i18n="gallery.item.manchesterave.caption">Manchester Ave</div>
+    </div>
+        <div class="gallery-item" data-category="roads" data-location="Anaheim, California" data-city="Anaheim" data-state="California" data-date="January 2025" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/harborboulevard.jpeg" data-thumb="images/gallery/thumbs/harborboulevard.jpeg" data-medium="images/gallery/medium/harborboulevard.jpeg" data-full="images/gallery/harborboulevard.jpeg" width="900" height="506" alt="Harbor Boulevard" loading="lazy" decoding="async">
+      <div class="gallery-caption" data-i18n="gallery.item.harborboulevard.caption">Harbor Boulevard</div>
+    </div>
+            <div class="gallery-item" data-category="cityscapes" data-location="Anaheim, California" data-city="Anaheim" data-state="California" data-date="January 2025" tabindex="0" role="button">
+      <img src="images/gallery/thumbs/motelearlymorning.jpeg" data-thumb="images/gallery/thumbs/motelearlymorning.jpeg" data-medium="images/gallery/medium/motelearlymorning.jpeg" data-full="images/gallery/motelearlymorning.jpeg" width="506" height="900" alt="Motel - early morning" loading="lazy" decoding="async">
+      <div class="gallery-caption" data-i18n="gallery.item.motelearlymorning.caption">Motel - early morning</div>
     </div>
     <!-- GALLERY_MANAGER_INSERT -->
   </div>
@@ -189,6 +241,7 @@
     <div class="lightbox-info">
       <div class="lightbox-caption" id="lightboxCaption"></div>
       <div class="lightbox-meta" id="lightboxMeta"></div>
+      <button type="button" class="lightbox-hd-btn" id="lightboxHdBtn" hidden data-i18n="gallery.loadFull">Load full quality</button>
     </div>
   </div>
   <button type="button" class="lightbox-next" id="lightboxNext" aria-label="Next photo">→</button>
@@ -227,7 +280,7 @@
           <div class="theme-swatch-name"><span data-i18n="settings.themeLuxury">Grand Tour</span><span class="theme-swatch-check">✓</span></div>
         </button>
         <button type="button" class="theme-swatch" data-theme-val="glass">
-          <div class="theme-swatch-preview"><span style="background:#0b1424;"></span><span style="background:#8eb6d4;"></span><span style="background:#d4a574;"></span></div>
+          <div class="theme-swatch-preview"><span style="background:#000000;"></span><span style="background:#0a84ff;"></span><span style="background:#f5f5f7;"></span></div>
           <div class="theme-swatch-name"><span data-i18n="settings.themeGlass">Twilight Glass</span><span class="theme-swatch-check">✓</span></div>
         </button>
         <button type="button" class="theme-swatch" data-theme-val="nature">
@@ -267,7 +320,17 @@
       </div>
     </div>
 
-    <div class="settings-group settings-group-wide reveal reveal-delay-3">
+    <div class="settings-group reveal reveal-delay-3">
+      <div class="settings-group-label">🖼️ <span data-i18n="settings.galleryQualityLabel">Gallery photo quality</span></div>
+      <div class="settings-group-sub" data-i18n="settings.galleryQualitySub">What loads when you open a photo. Medium is sharp and fast; Full is the original camera file (heavier).</div>
+      <div class="units-row" id="galleryQualityGroup">
+        <button type="button" class="pill-btn" data-gallery-quality="thumb"><span data-i18n="settings.qualityThumb">Thumbnail</span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn active" data-gallery-quality="medium"><span data-i18n="settings.qualityMedium">Medium</span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-gallery-quality="full"><span data-i18n="settings.qualityFull">Full</span><span class="pill-check">✓</span></button>
+      </div>
+    </div>
+
+    <div class="settings-group settings-group-wide reveal reveal-delay-4">
       <div class="settings-group-label">♿ <span data-i18n="settings.accessibilityLabel">Accessibility</span></div>
       <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Tone down animation or turn off the cursor trail — handy for motion sensitivity, older devices, or just a calmer feel.</div>
       <div class="settings-subgroup-row">
@@ -297,7 +360,10 @@
     <span data-i18n="gallery.backToGuide">Back to the Guide</span>
   </a>
   <p class="gallery-app-footer-copy" data-i18n-html="footer.copyright">© 2026 USA Travel Guide · Created by Tim G</p>
-  <a href="https://github.com/TGthms/usa-travel-guide" class="footer-github-link" target="_blank" rel="noopener">GitHub</a>
+  <div class="footer-social gallery-app-footer-links">
+    <a href="https://tgthms.github.io/about/" class="footer-about-link" target="_blank" rel="noopener" data-i18n="footer.aboutMe">About Me</a>
+    <a href="https://github.com/TGthms/usa-travel-guide" class="footer-github-link" target="_blank" rel="noopener">GitHub</a>
+  </div>
 </footer>
 
 <script src="assets/js/app.js" defer></script>
