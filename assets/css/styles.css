@@ -2458,6 +2458,175 @@ html[data-theme="glass"] .legal-section h2 {
   letter-spacing: -0.03em;
 }
 
+/* ═══ FUN FACTS (one-at-a-time) ═══ */
+#fun-facts {
+  padding: var(--section-y) var(--section-x);
+  background: var(--bg-base);
+  position: relative;
+  overflow: hidden;
+}
+#fun-facts::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 10% 20%, color-mix(in srgb, var(--accent-1) 12%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 90% 80%, color-mix(in srgb, var(--accent-1) 8%, transparent) 0%, transparent 50%);
+  opacity: 0.9;
+}
+.fun-facts-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.fun-facts-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.fun-facts-header h2 {
+  font-family: var(--ff-display);
+  font-size: clamp(2.2rem, 3.5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-top: 8px;
+  margin-bottom: 14px;
+}
+.fun-facts-header h2 em {
+  font-style: italic;
+  color: var(--accent-1);
+  font-weight: 400;
+}
+.fun-facts-header p {
+  font-size: 14.5px;
+  color: var(--text-dim);
+  line-height: 1.75;
+  max-width: 36em;
+  margin: 0 auto;
+}
+.fun-fact-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg, 14px);
+  padding: clamp(28px, 4vw, 40px);
+  box-shadow: var(--shadow-card);
+  transition: border-color .3s, box-shadow .3s;
+  /* Fixed footprint so short/long facts never resize the layout */
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+.fun-fact-card:hover {
+  border-color: var(--border-med);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.16);
+}
+.fun-fact-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+.fun-fact-badge {
+  font-family: var(--ff-serif);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-1);
+}
+/* Fixed text region: centers short facts, scrolls only if needed */
+.fun-fact-text-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+  /* Subtle edge fade when content is long */
+  mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 12px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 12px), transparent 100%);
+}
+.fun-fact-text {
+  font-family: var(--ff-display);
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--text-main);
+  margin: 0;
+  width: 100%;
+  letter-spacing: -0.01em;
+}
+.fun-fact-text.is-swapping {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .22s ease, transform .22s ease;
+}
+.fun-fact-text.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .28s ease, transform .28s ease;
+}
+.fun-fact-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+.fun-fact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid var(--border-med);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s, transform .2s;
+}
+.fun-fact-btn:hover {
+  border-color: var(--accent-1);
+  color: var(--accent-1);
+  transform: translateY(-1px);
+}
+.fun-fact-btn:focus-visible {
+  outline: 2px solid var(--accent-1);
+  outline-offset: 2px;
+}
+.fun-fact-btn-primary {
+  background: var(--accent-1);
+  border-color: var(--accent-1);
+  color: var(--text-inv);
+  min-width: min(100%, 220px);
+  width: 100%;
+  max-width: 280px;
+}
+.fun-fact-btn-primary:hover {
+  background: var(--accent-1-lt, var(--accent-1));
+  border-color: var(--accent-1-lt, var(--accent-1));
+  color: var(--text-inv);
+}
+@media (max-width: 540px) {
+  .fun-fact-card { height: 340px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fun-fact-text.is-swapping,
+  .fun-fact-text.is-visible {
+    transition: none;
+    transform: none;
+  }
+}
+
 /* ═══ FOOTER ═══ */
 footer {
   padding: clamp(64px, 9vw, 100px) var(--section-x) 40px; border-top: 1px solid var(--border-light); position: relative; background: var(--bg-base);

@@ -466,7 +466,13 @@ const I18N = {
     "footer.whenToVisit": "Cuándo viajar",
     "footer.visa": "Visado y entrada",
     "footer.copyright": "© 2026 Guía de viaje de EE. UU. &nbsp;·&nbsp; Hecho con pasión por la carretera abierta | Creado por Tim G · En colaboración con IA",
-    "footer.motto": "Tierra de libres, hogar de valientes 🇺🇸"
+    "footer.motto": "Tierra de libres, hogar de valientes 🇺🇸",
+
+    "funFacts.eyebrow": "¿Sabías que…?",
+    "funFacts.heading": "América<br><em>Datos curiosos</em>",
+    "funFacts.intro": "Una sorpresa de Estados Unidos cada vez: historia, naturaleza, cultura y rarezas que merecen saberse antes de viajar.",
+    "funFacts.badge": "Dato curioso",
+    "funFacts.next": "Otro dato →"
   },
 
   zh: {
@@ -834,7 +840,13 @@ const I18N = {
     "footer.whenToVisit": "最佳季节",
     "footer.visa": "签证与入境",
     "footer.copyright": "© 2026 美国旅行指南 &nbsp;·&nbsp; 心怀热爱，畅游在自由的公路上 | Tim G 制作",
-    "footer.motto": "自由的土地，勇者的家园 🇺🇸"
+    "footer.motto": "自由的土地，勇者的家园 🇺🇸",
+
+    "funFacts.eyebrow": "你知道吗？",
+    "funFacts.heading": "美国<br><em>趣味冷知识</em>",
+    "funFacts.intro": "一次一条关于美国的趣味事实——历史、自然、文化与小奇闻，出发前值得一读。",
+    "funFacts.badge": "趣味事实",
+    "funFacts.next": "下一条 →"
   },
 
   ja: {
@@ -1202,7 +1214,13 @@ const I18N = {
     "footer.whenToVisit": "ベストシーズン",
     "footer.visa": "ビザと入国",
     "footer.copyright": "© 2026 アメリカ旅行ガイド &nbsp;·&nbsp; 情熱を胸に、自由な道路を悠々と泳ぎます | Tim G が制作・ AI と協力して完成",
-    "footer.motto": "自由の地、勇者の故郷 🇺🇸"
+    "footer.motto": "自由の地、勇者の故郷 🇺🇸",
+
+    "funFacts.eyebrow": "知っていますか？",
+    "funFacts.heading": "アメリカ<br><em>おもしろ豆知識</em>",
+    "funFacts.intro": "一度にひとつ、アメリカの意外な一面——歴史・自然・文化・ちょっとしたトリビアを旅の前に。",
+    "funFacts.badge": "豆知識",
+    "funFacts.next": "次の事実 →"
   }
 };
 
@@ -1311,6 +1329,7 @@ function applyLanguage(lang) {
     if (typeof updateDriveCost === 'function') updateDriveCost();
     if (typeof updateSalesTax === 'function') updateSalesTax();
   }
+  if (typeof refreshFunFact === 'function') refreshFunFact();
 }
 
 /* ── UNIT CONVERSION ENGINE ──
@@ -3129,7 +3148,261 @@ if (legalLangSwitch) {
   });
 }
 
+/* ── FUN FACTS (one-at-a-time America trivia, before footer) ── */
+const FUN_FACTS = {
+  en: [
+    'Yellowstone became the world’s first national park in 1872 — the idea later inspired park systems around the globe.',
+    'Alaska is so large that if it were its own country, it would still rank among the largest nations on Earth by area.',
+    'The continental U.S. spans six main time zones when you include Alaska and Hawaii — so “what time is it?” is always a negotiation.',
+    'There are more than 400 National Park Service units (parks, monuments, historic sites, and more), not only the famous 63 national parks.',
+    'The Mississippi–Missouri river system is among the world’s longest; the Mississippi alone drains parts of 31 states and two Canadian provinces.',
+    'Death Valley holds one of the highest reliably recorded air temperatures on Earth: 134°F (56.7°C) at Furnace Creek in 1913.',
+    'The U.S. has no official national language at the federal level, even though English is by far the most widely used.',
+    'More than 350 languages are spoken in American homes — New York City alone has long been one of the most linguistically diverse places on Earth.',
+    'The Liberty Bell in Philadelphia is famous for its crack — and for the ideal of liberty it came to symbolize after the Revolutionary era.',
+    'Route 66 once ran about 2,400 miles from Chicago to Santa Monica, becoming a cultural icon of mid-century American road trips.',
+    'The Grand Canyon is up to about a mile (1.6 km) deep and roughly 277 miles (446 km) long along the Colorado River.',
+    'Hawaii is the only U.S. state made entirely of islands, and the only one in the tropics.',
+    'Mount Denali in Alaska rises about 20,310 feet (6,190 m) — the highest peak in North America.',
+    'The Library of Congress is the largest library in the world by collection size, with tens of millions of items.',
+    'The U.S. Interstate Highway System, launched in the 1950s, is one of the largest public-works projects in history.',
+    'Florida has more coastline than any state except Alaska — and more than any state in the contiguous U.S.',
+    'The Four Corners is the only place in the U.S. where four states meet: Arizona, New Mexico, Utah, and Colorado.',
+    'Central Park in New York is larger than the countries of Monaco and Vatican City combined.',
+    'The Smithsonian Institution includes 21 museums and the National Zoo — and most of the museums on the National Mall are free to enter.',
+    'America’s Great Lakes hold about one-fifth of the world’s surface freshwater.',
+    'The Hollywood Sign originally read “HOLLYWOODLAND” when it was erected in 1923 as a real-estate ad.',
+    'Jazz, blues, country, hip-hop, and rock & roll all have deep American roots that reshaped global popular music.',
+    'The U.S. has the world’s oldest continuously operating written national constitution still in use (ratified 1788, effective 1789).',
+    'Niagara Falls straddles the U.S.–Canada border; the American Falls and Bridal Veil Falls are on the U.S. side.',
+    'Maine is the easternmost state in the contiguous U.S. — and often greets the first sunrise of the day in the Lower 48.',
+    'California grows a huge share of U.S. fruits, nuts, and vegetables — including most of the country’s almonds.',
+    'The Appalachian Trail runs about 2,190 miles from Georgia to Maine through 14 states.',
+    'Las Vegas sits in the Mojave Desert yet draws tens of millions of visitors a year — a city that almost shouldn’t exist, and thrives anyway.',
+    'The Statue of Liberty was a gift from France, dedicated in 1886, and has welcomed generations of newcomers to New York Harbor.',
+    'Texas was an independent republic from 1836 to 1845 before joining the United States.',
+    'The U.S. is home to both tropical rainforests (in Hawaii and Puerto Rico) and Arctic tundra (in Alaska).',
+    'Silicon Valley’s name comes from the silicon used in computer chips — the region redefined the global tech industry.',
+    'The Empire State Building was the world’s tallest building for nearly 40 years after it opened in 1931.',
+    'More than half of the U.S. population lives within about 50 miles of a coast — Atlantic, Pacific, Gulf, or Great Lakes.',
+    'The National Mall in Washington, D.C. is lined with monuments and museums that form a kind of open-air national classroom.',
+    'Montana’s nickname, “Big Sky Country,” fits: some counties are larger than entire East Coast states.',
+    'The first powered, controlled airplane flight happened at Kitty Hawk, North Carolina, in 1903 — the Wright brothers’ Flyer.',
+    'New Orleans sits largely below sea level in places and is famous for jazz, Creole and Cajun food, and Mardi Gras.',
+    'The U.S. Postal Service delivers to every address in the country — one of the largest logistics networks on the planet.',
+    'Arches, Zion, Bryce Canyon, and Canyonlands pack some of Earth’s most dramatic red-rock scenery into southern Utah alone.',
+    'Baseball, basketball, and American football all became modern spectator sports in the United States before spreading worldwide.',
+    'The Continental Divide runs the length of the Rockies; rain on one side eventually flows to the Atlantic, on the other to the Pacific.',
+    'Puerto Rico, Guam, American Samoa, the U.S. Virgin Islands, and the Northern Mariana Islands are U.S. territories with unique cultures and landscapes.',
+    'The Golden Gate Bridge’s “International Orange” color was chosen partly so the span would stay visible in San Francisco fog.',
+    'The U.S. has more skyscrapers over 150 meters than almost any other country — a skyline story that began in Chicago and New York.'
+  ],
+  es: [
+    'Yellowstone se convirtió en 1872 en el primer parque nacional del mundo; la idea inspiró después sistemas de parques en todo el planeta.',
+    'Alaska es tan grande que, si fuera un país propio, seguiría entre las naciones más extensas de la Tierra.',
+    'Estados Unidos continental abarca seis husos horarios principales si incluyes Alaska y Hawái: “¿qué hora es?” siempre es un debate.',
+    'Hay más de 400 unidades del National Park Service (parques, monumentos, sitios históricos…), no solo los 63 parques nacionales famosos.',
+    'El sistema Misisipi–Misuri está entre los más largos del mundo; solo el Misisipi drena partes de 31 estados y dos provincias canadienses.',
+    'Death Valley registra una de las temperaturas del aire más altas del planeta: 134 °F (56,7 °C) en Furnace Creek en 1913.',
+    'EE. UU. no tiene un idioma nacional oficial a nivel federal, aunque el inglés es con mucho el más usado.',
+    'En los hogares estadounidenses se hablan más de 350 idiomas; Nueva York es desde hace tiempo uno de los lugares más diversos del mundo lingüísticamente.',
+    'La Campana de la Libertad en Filadelfia es famosa por su grieta y por el ideal de libertad que llegó a simbolizar.',
+    'La Ruta 66 recorrió unos 2.400 millas de Chicago a Santa Mónica y se volvió icono del road trip estadounidense de mediados de siglo.',
+    'El Gran Cañón tiene hasta unos 1,6 km de profundidad y unos 446 km de longitud a lo largo del río Colorado.',
+    'Hawái es el único estado formado solo por islas y el único en los trópicos.',
+    'El monte Denali en Alaska se eleva unos 6.190 m: el pico más alto de América del Norte.',
+    'La Biblioteca del Congreso es la mayor del mundo por tamaño de colección, con decenas de millones de piezas.',
+    'El sistema de carreteras interestatales, lanzado en los años 50, es una de las mayores obras públicas de la historia.',
+    'Florida tiene más costa que cualquier estado salvo Alaska — y más que cualquier estado del territorio contiguo.',
+    'Four Corners es el único lugar de EE. UU. donde se encuentran cuatro estados: Arizona, Nuevo México, Utah y Colorado.',
+    'Central Park en Nueva York es más grande que Mónaco y la Ciudad del Vaticano juntos.',
+    'La Smithsonian incluye 21 museos y el Zoo Nacional; la mayoría de los museos del National Mall son gratuitos.',
+    'Los Grandes Lagos guardan cerca de una quinta parte del agua dulce superficial del mundo.',
+    'El letrero de Hollywood decía originalmente “HOLLYWOODLAND” en 1923, como anuncio inmobiliario.',
+    'El jazz, el blues, el country, el hip-hop y el rock & roll tienen raíces profundas en EE. UU. y transformaron la música popular mundial.',
+    'EE. UU. tiene la constitución nacional escrita en uso continuo más antigua del mundo (ratificada en 1788, en vigor en 1789).',
+    'Las cataratas del Niágara cruzan la frontera EE. UU.–Canadá; las American Falls y Bridal Veil están del lado estadounidense.',
+    'Maine es el estado más oriental del territorio contiguo y a menudo recibe el primer amanecer del día en los Lower 48.',
+    'California produce una enorme parte de las frutas, frutos secos y verduras de EE. UU., incluidas casi todas las almendras del país.',
+    'El Appalachian Trail recorre unos 2.190 millas de Georgia a Maine a través de 14 estados.',
+    'Las Vegas se asienta en el desierto de Mojave y aún así recibe decenas de millones de visitantes al año.',
+    'La Estatua de la Libertad fue un regalo de Francia, dedicada en 1886, y ha dado la bienvenida a generaciones de recién llegados.',
+    'Texas fue una república independiente de 1836 a 1845 antes de unirse a Estados Unidos.',
+    'EE. UU. alberga tanto selvas tropicales (Hawái y Puerto Rico) como tundra ártica (Alaska).',
+    'El nombre de Silicon Valley viene del silicio de los chips; la región redefinió la industria tecnológica mundial.',
+    'El Empire State Building fue el edificio más alto del mundo durante casi 40 años tras abrirse en 1931.',
+    'Más de la mitad de la población de EE. UU. vive a unos 80 km de una costa: Atlántico, Pacífico, Golfo o Grandes Lagos.',
+    'El National Mall en Washington D. C. reúne monumentos y museos como un aula nacional al aire libre.',
+    'El apodo de Montana, “Big Sky Country”, encaja: algunos condados son más grandes que estados enteros de la Costa Este.',
+    'El primer vuelo controlado y propulsado de un avión fue en Kitty Hawk, Carolina del Norte, en 1903 — el Flyer de los hermanos Wright.',
+    'Nueva Orleans está en parte bajo el nivel del mar y es famosa por el jazz, la cocina criolla y cajún, y el Mardi Gras.',
+    'El Servicio Postal de EE. UU. entrega a cada dirección del país: una de las mayores redes logísticas del planeta.',
+    'Arches, Zion, Bryce Canyon y Canyonlands concentran algunos de los paisajes de roca roja más espectaculares de la Tierra en el sur de Utah.',
+    'El béisbol, el baloncesto y el fútbol americano se convirtieron en deportes de masas modernos en EE. UU. antes de expandirse al mundo.',
+    'La Divisoria Continental recorre las Rocosas; la lluvia de un lado fluye hacia el Atlántico y del otro hacia el Pacífico.',
+    'Puerto Rico, Guam, Samoa Americana, las Islas Vírgenes y las Marianas del Norte son territorios de EE. UU. con culturas y paisajes únicos.',
+    'El naranja “International Orange” del Golden Gate se eligió en parte para que el puente se viera en la niebla de San Francisco.',
+    'EE. UU. tiene más rascacielos de más de 150 m que casi cualquier otro país: una historia de skyline que empezó en Chicago y Nueva York.'
+  ],
+  zh: [
+    '黄石公园于 1872 年成为世界第一座国家公园，这一理念后来影响了全球的国家公园体系。',
+    '阿拉斯加州面积极大：若它是一个独立国家，仍会跻身全球面积最大的国家之列。',
+    '若计入阿拉斯加与夏威夷，美国主要跨六个时区——“现在几点”常常要先问清楚在哪里。',
+    '国家公园管理局管理的单位超过 400 个（公园、纪念地、历史遗址等），不只是著名的 63 座国家公园。',
+    '密西西比–密苏里河系位居世界最长之列；仅密西西比河就流经 31 个州与两个加拿大省份的部分地区。',
+    '死亡谷录得地球上最高的可靠气温之一：1913 年 Furnace Creek 达到 134°F（56.7°C）。',
+    '美国联邦层面没有法定的“国语”，尽管英语是使用最广泛的语言。',
+    '美国的家庭中使用超过 350 种语言；纽约长期是全球语言多样性最高的地方之一。',
+    '费城的自由钟以裂缝闻名，也成为革命时代之后“自由”理想的象征。',
+    '66 号公路曾从芝加哥延伸约 2400 英里到圣莫尼卡，成为上世纪中叶公路旅行的文化符号。',
+    '大峡谷最深处约 1.6 公里，沿科罗拉多河长约 446 公里。',
+    '夏威夷是唯一完全由岛屿组成、且位于热带的州。',
+    '阿拉斯加的德纳里峰海拔约 6190 米，为北美最高峰。',
+    '国会图书馆按馆藏规模是世界最大的图书馆，藏品数以千万计。',
+    '上世纪 50 年代启动的州际公路系统，是人类历史上最大的公共工程之一。',
+    '除阿拉斯加外，佛罗里达的海岸线最长——在美国本土各州中也居首。',
+    '“四角”是美国唯一四个州交界处：亚利桑那、新墨西哥、犹他与科罗拉多。',
+    '纽约中央公园比摩纳哥与梵蒂冈加起来还大。',
+    '史密森学会包括 21 座博物馆与国家动物园；国家广场一带的多数博物馆免费开放。',
+    '五大湖储存了全球约五分之一的地表淡水。',
+    '好莱坞标志最初写的是 “HOLLYWOODLAND”，1923 年竖起时是房地产广告。',
+    '爵士、蓝调、乡村、嘻哈与摇滚都深深植根于美国，并重塑了全球流行音乐。',
+    '美国拥有世界上仍在使用的、持续有效最久的成文国家宪法（1788 年批准，1789 年生效）。',
+    '尼亚加拉瀑布横跨美加边境；美利坚瀑布与新娘面纱瀑布在美国一侧。',
+    '缅因是美国本土最东的州，常在“下 48 州”中迎接一天中最早的日出。',
+    '加利福尼亚出产美国很大一部分水果、坚果与蔬菜——包括全国大部分杏仁。',
+    '阿巴拉契亚步道从佐治亚到缅因，途经 14 个州，全长约 2190 英里。',
+    '拉斯维加斯坐落在莫哈韦沙漠，却每年吸引数千万游客——一座“不该存在”却蓬勃发展的城市。',
+    '自由女神像是法国赠礼，1886 年揭幕，迎接一代代抵达纽约港的新移民。',
+    '得克萨斯在 1836–1845 年曾是独立共和国，之后才加入美国。',
+    '美国既有热带雨林（夏威夷、波多黎各），也有北极苔原（阿拉斯加）。',
+    '硅谷得名于芯片所用的硅，这一地区重新定义了全球科技产业。',
+    '帝国大厦 1931 年落成后，近 40 年里都是世界最高建筑。',
+    '超过一半的美国人居住在距海岸约 50 英里范围内——大西洋、太平洋、墨西哥湾或五大湖。',
+    '华盛顿特区的国家广场两侧排列着纪念碑与博物馆，像一座露天的“国家课堂”。',
+    '蒙大拿绰号“大天空之乡”名副其实：有些县比东海岸整州还大。',
+    '1903 年，莱特兄弟的飞行者号在北卡罗来纳的小鹰镇完成首次可控动力飞行。',
+    '新奥尔良部分地区低于海平面，以爵士乐、克里奥尔与卡津美食、狂欢节闻名。',
+    '美国邮政可投递到全国每一个地址，是地球上最大的物流网络之一。',
+    '拱门、锡安、布莱斯峡谷与峡谷地国家公园，把地球上最壮丽的部分红岩景观集中在犹他南部。',
+    '棒球、篮球与美式足球都在美国成为现代观赏性运动，再走向世界。',
+    '大陆分水岭贯穿落基山脉；一侧雨水最终流向大西洋，另一侧流向太平洋。',
+    '波多黎各、关岛、美属萨摩亚、美属维尔京群岛与北马里亚纳群岛是美国领土，各有独特文化与风光。',
+    '金门大桥的“国际橙”色，部分是为了在旧金山的雾中依然清晰可见。',
+    '美国 150 米以上的摩天楼数量几乎居全球前列——天际线的故事始于芝加哥与纽约。'
+  ],
+  ja: [
+    'イエローストーンは 1872 年、世界初の国立公園になりました。この発想は後に世界の公園制度に影響を与えました。',
+    'アラスカはあまりに広大で、もし独立国なら面積で世界有数の大国に並びます。',
+    'アラスカとハワイを含めると、米国は主に 6 つの時間帯にまたがります。「今何時？」はいつも確認が必要です。',
+    '国立公園局の管理単位は 400 を超え（公園、モニュメント、史跡など）、有名な 63 の国立公園だけではありません。',
+    'ミシシッピ–ミズーリ水系は世界最長級。ミシシッピだけで 31 州とカナダ 2 州の一部を流域に含みます。',
+    'デスバレーは地球上で最も高い気温のひとつを記録しています。1913 年 Furnace Creek で 134°F（56.7°C）。',
+    '連邦レベルでは公式の国語がなく、英語が最も広く使われています。',
+    '米国家庭では 350 以上の言語が話され、ニューヨークは長年、言語的に最も多様な場所のひとつです。',
+    'フィラデルフィアの自由の鐘はひび割れと、独立後の「自由」の象徴として有名です。',
+    'ルート 66 はシカゴからサンタモニカまで約 2,400 マイル。20 世紀半ばのロードトリップの象徴になりました。',
+    'グランドキャニオンは深さ最大約 1.6 km、コロラド川沿いの長さは約 446 km です。',
+    'ハワイはすべて島で構成され、熱帯にある唯一の州です。',
+    'アラスカのデナリは標高約 6,190 m で、北米最高峰です。',
+    '議会図書館は蔵書規模で世界最大級、数千万点を所蔵します。',
+    '1950 年代に始まった州間高速道路網は、史上最大級の公共事業のひとつです。',
+    'フロリダはアラスカを除けば最長の海岸線を持ち、本土 48 州でも最長です。',
+    'フォー・コーナーズは、アリゾナ・ニューメキシコ・ユタ・コロラドの 4 州が交わる米国唯一の地点です。',
+    'ニューヨークのセントラルパークは、モナコとバチカン市国を合わせたより広いです。',
+    'スミソニアンは 21 の博物館と国立動物園を含み、ナショナル・モール周辺の多くは入場無料です。',
+    '五大湖は世界の地表淡水の約 5 分の 1 を蓄えています。',
+    'ハリウッドの看板は 1923 年当初「HOLLYWOODLAND」で、不動産広告でした。',
+    'ジャズ、ブルース、カントリー、ヒップホップ、ロックは深いアメリカのルーツを持ち、世界のポップミュージックを変えました。',
+    '米国の成文憲法は、現在も使われているものとして世界で最も古い継続使用の国家憲法です（1788 批准、1789 施行）。',
+    'ナイアガラの滝は米加国境にまたがり、アメリカン滝とブライダルベール滝は米国側です。',
+    'メインは本土 48 州で最も東にあり、しばしばその日最初の日の出を迎えます。',
+    'カリフォルニアは米国の果物・ナッツ・野菜の大きな割合を生産し、アーモンドの大半もここです。',
+    'アパラチアン・トレイルはジョージアからメインまで 14 州を通る約 2,190 マイルの道です。',
+    'ラスベガスはモハベ砂漠にありながら年間数千万人を集めます——「あるはずのない」都市が栄えています。',
+    '自由の女神はフランスからの贈り物で 1886 年に除幕され、ニューヨーク港で新来者を迎えました。',
+    'テキサスは 1836–1845 年に独立共和国であり、その後アメリカ合衆国に加わりました。',
+    '米国には熱帯雨林（ハワイ、プエルトリコ）と北極ツンドラ（アラスカ）の両方があります。',
+    'シリコンバレーの名は半導体のシリコンに由来し、世界のテック産業を再定義しました。',
+    'エンパイア・ステート・ビルは 1931 年開業後、約 40 年間世界一高いビルでした。',
+    '米人口の半数以上が大西洋・太平洋・メキシコ湾・五大湖のいずれかの海岸から約 50 マイル以内に住んでいます。',
+    'ワシントン D.C. のナショナル・モールは、屋外の国家教室のような記念碑と博物館が並びます。',
+    'モンタナの愛称「Big Sky Country」は的確で、東海岸の州より広い郡もあります。',
+    '1903 年、ノースカロライナのキティホークでライト兄弟のフライヤーが初の動力制御飛行に成功しました。',
+    'ニューオーリンズは一部が海面下にあり、ジャズ、クレオール／ケイジャン料理、マルディグラで知られます。',
+    '米国郵便公社は国内のすべての住所に配達する、地球上最大級の物流網のひとつです。',
+    'アーチーズ、ザイオン、ブライスキャニオン、キャニオンランズは、ユタ南部だけで地球屈指の赤い岩の景観を集めています。',
+    '野球、バスケ、アメフトは米国で近代的な観客スポーツとなり、世界へ広がりました。',
+    '大陸分水嶺はロッキーを縦断し、一方の雨は大西洋、他方は太平洋へ向かいます。',
+    'プエルトリコ、グアム、米領サモア、米領ヴァージン諸島、北マリアナ諸島は、独自の文化と風景を持つ米領です。',
+    'ゴールデンゲート・ブリッジの「インターナショナル・オレンジ」は、サンフランシスコの霧の中でも見えるよう選ばれました。',
+    '米国は 150 m 超の超高層ビル数が世界有数——スカイラインの物語はシカゴとニューヨークから始まりました。'
+  ]
+};
+
+let funFactIndex = 0;
+let funFactAnimating = false;
+
+function getFunFactsList() {
+  const list = FUN_FACTS[currentLang] || FUN_FACTS.en;
+  return (list && list.length) ? list : FUN_FACTS.en;
+}
+
+/** Pick a random fact index, never the same as the current one when possible. */
+function pickShuffledFunFactIndex() {
+  const n = getFunFactsList().length;
+  if (n <= 1) return 0;
+  let next = Math.floor(Math.random() * n);
+  if (next === funFactIndex) next = (next + 1) % n;
+  return next;
+}
+
+function refreshFunFact(animate) {
+  const textEl = document.getElementById('funFactText');
+  if (!textEl) return;
+  const facts = getFunFactsList();
+  if (funFactIndex < 0 || funFactIndex >= facts.length) funFactIndex = 0;
+  const apply = () => {
+    textEl.textContent = facts[funFactIndex];
+    textEl.classList.remove('is-swapping');
+    textEl.classList.add('is-visible');
+    // Reset scroll so long→short transitions always start at the top of the fixed box
+    const wrap = textEl.closest('.fun-fact-text-wrap');
+    if (wrap) wrap.scrollTop = 0;
+    funFactAnimating = false;
+  };
+  if (animate && !ENV.reduceMotion) {
+    funFactAnimating = true;
+    textEl.classList.remove('is-visible');
+    textEl.classList.add('is-swapping');
+    setTimeout(apply, 200);
+  } else {
+    apply();
+  }
+}
+
+function shuffleFunFact(animate) {
+  funFactIndex = pickShuffledFunFactIndex();
+  refreshFunFact(!!animate);
+}
+
+function initFunFacts() {
+  const textEl = document.getElementById('funFactText');
+  if (!textEl) return;
+  const nextBtn = document.getElementById('funFactNext');
+  // Always start shuffled
+  funFactIndex = Math.floor(Math.random() * getFunFactsList().length);
+  refreshFunFact(false);
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (funFactAnimating) return;
+      shuffleFunFact(true);
+    });
+  }
+}
+
 /* ── APPLY SAVED PREFERENCES ON LOAD (must run after everything above is defined) ── */
+initFunFacts();
 applyLanguage(currentLang);
 applyUnits();
 // Legal body depends on LEGAL_I18N (loaded before app.js) — ensure first paint
