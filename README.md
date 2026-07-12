@@ -38,19 +38,6 @@
 
 ---
 
-## 🚀 Quick start
-
-Static site — open locally or host anywhere (e.g. GitHub Pages).
-
-```bash
-# Option A: open index.html in a browser
-open index.html
-
-# Option B: simple local server (recommended)
-python3 -m http.server 8080
-# then visit http://localhost:8080
-```
-
 Main pages: `index.html` · `gallery.html` · `tools.html` · `privacy.html` · `terms.html`
 
 ---
@@ -68,6 +55,5 @@ This is an interest-driven personal project — bug reports and suggestions are 
 - **Code:** MIT — see [LICENSE](LICENSE).
 - **Photos** in `/images`: © 2026 Tim G (TGthms), licensed under **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — free to use with credit.
 - **Fonts (web):** Loaded from Google Fonts — **Fraunces**, **Public Sans**, **Special Elite**, and **Noto Sans/Serif** (SC/JP). These are open-licensed (SIL OFL / Apache where applicable).
-- **Site policies:** [Privacy Policy](privacy.html) · [Terms of Use](terms.html)
 
 Suggested photo credit: *“Photo © Tim G (@TGthms), licensed under CC BY 4.0.”*
