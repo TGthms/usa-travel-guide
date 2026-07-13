@@ -671,7 +671,7 @@ window.LEGAL_I18N = {
         { id: 'photos', label: '照片与视觉内容' },
         { id: 'software', label: '网站软件与代码' },
         { id: 'travel', label: '旅行信息免责声明' },
-        { id: 'acceptable-use', label: '可接受的使用' },
+        { id: 'acceptable-use', label: '使用规范' },
         { id: 'third-party', label: '第三方链接与工具' },
         { id: 'privacy', label: '隐私' },
         { id: 'disclaimers', label: '免责声明' },
@@ -725,12 +725,12 @@ window.LEGAL_I18N = {
         },
         {
           id: 'acceptable-use',
-          title: '可接受的使用',
+          title: '使用规范',
           html: `<p>您同意不得：</p>
 <ul>
 <li>将本网站用于任何非法目的或违反本条款；</li>
 <li>试图未经授权访问与本网站相关的系统、账户或网络；</li>
-<li>以损害他人服务的方式探测、扫描或压力测试本网站；</li>
+<li>对本网站进行探测、扫描、渗透测试或其他可能影响网站正常运行的测试，或以任何方式干扰、损害他人使用本网站；</li>
 <li>以造成不合理负载或规避访问控制的方式抓取或批量下载本网站（robots 规则或开放许可允许的除外）；</li>
 <li>虚假声称与本网站或其作者有关联；或</li>
 <li>以侵犯他人知识产权或隐私权的方式使用内容。</li>
