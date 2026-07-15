@@ -1430,26 +1430,36 @@ function detectLanguage() {
   return 'en';
 }
 
-/* Themes that are bright on-screen — never force these at night (OS dark). */
 const LIGHT_THEMES = ['minimal', 'elegant'];
+
+/**
+ * When OS is dark, light preferences map to a dark twin that matches style —
+ * not always Midnight Atlas.
+ *   Gallery Daylight (minimal) → Twilight Glass (glass)  — modern
+ *   Heritage Paper (elegant)   → Grand Tour (luxury)     — classic
+ */
+const LIGHT_THEME_DARK_TWIN = {
+  minimal: 'glass',
+  elegant: 'luxury'
+};
 
 function detectTheme() {
   /* First visit only (no saved Settings choice):
      · OS light mode  → Gallery Daylight (`minimal`)
-     · OS dark mode / no preference → Midnight Atlas (`default`) — site default */
+     · OS dark mode / no preference → Midnight Atlas (`default`) */
   if (safeMatchMedia('(prefers-color-scheme: light)').matches) return 'minimal';
   return 'default';
 }
 
 /**
- * Preferred theme from Settings may be light (e.g. Gallery Daylight), but when
- * the OS is in dark mode we force Midnight Atlas so a bright page never stays
- * on at night. Dark preferences (Twilight Glass, etc.) are left alone.
+ * Resolve what actually paints on screen.
+ * Settings still store the user’s pick; OS dark never shows a light theme —
+ * it uses the style-matched dark twin instead.
  */
 function effectiveTheme(preferred) {
   const p = preferred || 'default';
   if (LIGHT_THEMES.includes(p) && safeMatchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'default';
+    return LIGHT_THEME_DARK_TWIN[p] || 'default';
   }
   return p;
 }
@@ -1535,7 +1545,6 @@ if (!['full', 'reduced', 'off'].includes(motionMode)) motionMode = 'full';
 /* Respects the Settings choice AND the OS-level preference. Checked live so
    OS flips mid-session still calm things down. Constrained devices force off. */
 const prefersReducedMotionMQ = safeMatchMedia('(prefers-reduced-motion: reduce)');
-const prefersColorSchemeDarkMQ = safeMatchMedia('(prefers-color-scheme: dark)');
 
 /**
  * Effective animation level after combining user + OS + device.
@@ -1583,7 +1592,7 @@ function scrollBehaviorPref() {
 
 /* ── THEME SWATCHES ──
    currentTheme = user's preferred choice (Settings / storage).
-   Effective paint may be Midnight Atlas when OS is dark and preference is light. */
+   OS dark may paint a dark twin while the swatch still shows their pick. */
 const themeSwatches = document.querySelectorAll('.theme-swatch');
 function updateThemeUI(theme) {
   themeSwatches.forEach(sw => sw.classList.toggle('active', sw.dataset.themeVal === theme));
@@ -1597,7 +1606,8 @@ const THEME_META_COLORS = {
   nature: '#141c18'
 };
 function applyThemeChrome(theme) {
-  const light = theme === 'minimal' || theme === 'elegant';
+  // Chrome follows what is painted (active), not the raw preference
+  const light = LIGHT_THEMES.includes(theme);
   document.documentElement.style.colorScheme = light ? 'light' : 'dark';
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', THEME_META_COLORS[theme] || THEME_META_COLORS.default);
@@ -1611,7 +1621,8 @@ function applyThemePreference(preferred, { persist = false } = {}) {
   const active = effectiveTheme(preferred);
   document.documentElement.setAttribute('data-theme', active);
   applyThemeChrome(active);
-  // Swatches show the user's choice; night override still paints Midnight Atlas
+  // Swatches reflect the user's saved preference (e.g. Daylight), even if
+  // OS dark currently paints Twilight Glass.
   updateThemeUI(preferred);
 }
 themeSwatches.forEach(sw => {
@@ -1620,7 +1631,8 @@ themeSwatches.forEach(sw => {
   });
 });
 applyThemePreference(currentTheme, { persist: false });
-// If the OS flips to dark overnight, force Midnight Atlas over a light Settings pick
+// Re-resolve light ↔ dark twin when OS light/dark flips mid-session
+const prefersColorSchemeDarkMQ = safeMatchMedia('(prefers-color-scheme: dark)');
 function onColorSchemeChange() {
   applyThemePreference(currentTheme, { persist: false });
 }
