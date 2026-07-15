@@ -1,0 +1,21 @@
+{
+  "name": "usa-travel-guide",
+  "version": "3.2.0",
+  "private": true,
+  "description": "America — A Travel Guide: static multi-page site for GitHub Pages",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "serve:node": "npx --yes serve -l 8000 ."
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "travel",
+    "usa",
+    "static-site",
+    "github-pages"
+  ],
+  "license": "MIT",
+  "author": "Tim G (TGthms)"
+}
