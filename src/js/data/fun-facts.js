@@ -251,6 +251,11 @@ window.FUN_FACTS = {
     'The blue whale — Earth’s largest animal — migrates along U.S. Pacific waters, a reminder of wild oceans still close to shore.',
     'The National Mall’s reflecting pool mirrors the Washington Monument — a classic postcard of civic America.',
     'Bunsen Peak, Badwater Basin, and Mirror Lake are names that sound like adventure — and they all sit on the American map.',
+    'The U.S. has more than 80,000 museums — from art giants to tiny roadside collections dedicated to almost anything imaginable.',
+    'Denali National Park is larger than some U.S. states — a wilderness of tundra, wildlife, and North America’s highest peak.',
+    'The first American Ferris wheel debuted at the 1893 World’s Fair in Chicago — a steel circle meant to rival the Eiffel Tower.',
+    'New Mexico’s official state question is “Red or green?” — asking which chile sauce you want on your plate.',
+    'The Pacific and Atlantic coasts are about 2,800 miles apart as the crow flies — one reason American road trips feel endless.',
   ],
   es: [
     'Yellowstone se convirtió en 1872 en el primer parque nacional del mundo; la idea inspiró después sistemas de parques en todo el planeta.',
@@ -498,6 +503,11 @@ window.FUN_FACTS = {
     'La ballena azul —el animal más grande de la Tierra— migra por aguas del Pacífico de EE. UU., recordatorio de océanos salvajes aún cerca de la costa.',
     'El Reflecting Pool del National Mall refleja el Monumento a Washington: una postal clásica de la América cívica.',
     'Bunsen Peak, Badwater Basin y Mirror Lake suenan a aventura… y todos están en el mapa de EE. UU.',
+    'EE. UU. tiene más de 80.000 museos: de grandes instituciones de arte a colecciones diminutas de carretera dedicadas a casi cualquier cosa imaginable.',
+    'El parque nacional Denali es más grande que algunos estados de EE. UU.: tundra, fauna y el pico más alto de Norteamérica.',
+    'La primera noria Ferris estadounidense debutó en la Expo de Chicago de 1893: un círculo de acero pensado para rivalizar con la Torre Eiffel.',
+    'La pregunta oficial del estado de Nuevo México es “¿Rojo o verde?”: qué salsa de chile quieres en el plato.',
+    'Las costas del Pacífico y del Atlántico distan unos 4.500 km en línea recta: una razón por la que los road trips estadounidenses parecen infinitos.',
   ],
   zh: [
     '黄石公园于 1872 年成为世界第一座国家公园，这一理念后来影响了全球的国家公园体系。',
@@ -745,6 +755,11 @@ window.FUN_FACTS = {
     '地球上最大的动物蓝鲸会沿美国太平洋水域迁徙——提醒我们狂野的海洋仍近在咫尺。',
     '国家广场倒影池映照华盛顿纪念碑——公民美国的经典明信片画面。',
     '本生峰、坏水盆地、镜湖——这些名字听起来像冒险，且都在美国地图上。',
+    '美国有超过 8 万座博物馆——从大型艺术馆到公路边几乎什么主题都有的小型收藏。',
+    '德纳利国家公园比一些美国州还大——苔原、野生动物，以及北美最高峰。',
+    '美国第一座费里斯转轮亮相于 1893 年芝加哥世博会——一座意在媲美埃菲尔铁塔的钢铁圆环。',
+    '新墨西哥州的官方“州问题”是“红酱还是绿酱？”——问你菜上要哪种辣椒酱。',
+    '太平洋与大西洋海岸直线距离约 2800 英里——这也是美国公路旅行总显得没完没了的原因之一。',
   ],
   ja: [
     'イエローストーンは 1872 年、世界初の国立公園になりました。この発想は後に世界の公園制度に影響を与えました。',
@@ -992,5 +1007,10 @@ window.FUN_FACTS = {
     '地球最大の動物シロナガスクジラは米国太平洋岸を回遊し、すぐそばに野生の海があることを思い出させます。',
     'ナショナルモールのリフレクティング・プールはワシントン記念塔を映す、市民アメリカの定番絵葉書です。',
     'バンゼン・ピーク、バッドウォーター、ミラーレイク。冒険の名が、みな米国の地図にあります。',
+    '米国には 8 万以上の博物館があり、巨大美術館から、思いつく限りのテーマの小さなロードサイド館まであります。',
+    'デナリ国立公園は一部の州より広く、ツンドラと野生動物、北米最高峰が広がる荒野です。',
+    '米国初の観覧車は 1893 年シカゴ万博で登場。エッフェル塔に対抗する鋼鉄の輪でした。',
+    'ニューメキシコの公式な「州の質問」は「赤？緑？」——皿にかけるチリソースの色を聞きます。',
+    '太平洋岸と大西洋岸は直線で約 2800 マイル。米国のロードトリップが果てしなく感じる理由のひとつです。',
   ]
 };
