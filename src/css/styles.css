@@ -1700,7 +1700,7 @@ body.page-tools #tools.tools-page {
 .scroll-text { font-size: 10px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: var(--text-mute); transition: color 0.3s; }
 .hero-scroll:hover .scroll-text { color: var(--accent-1); }
 @keyframes scrollPulse { 0%,100%{transform:scaleY(1);opacity:.6} 50%{transform:scaleY(1.3);opacity:1} }
-@keyframes slideUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
 @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
 
 /* ═══ INTRO ═══ */
@@ -1769,8 +1769,10 @@ body.page-tools #tools.tools-page {
 /* ═══ REGIONS ═══ */
 #regions { padding: var(--section-y) var(--section-x); }
 .section-header {
-  max-width: var(--content-max); margin: 0 auto 56px;
+  max-width: var(--content-max); margin: 0 auto clamp(2.75rem, 2.5rem + 1.5vw, 3.75rem);
   display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 32px;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-light);
 }
 .section-header h2 {
   font-family: var(--ff-display); font-size: var(--fs-display); font-weight: 700;
@@ -2162,8 +2164,8 @@ body.page-tools #tools.tools-page {
 .prac-card:hover, .prac-card:focus-visible { background: var(--bg-surface-2); }
 .prac-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--accent-1); transform: scaleX(0); transform-origin: left; transition: transform .5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .prac-card:hover::before, .prac-card:focus-visible::before { transform: scaleX(1); }
-.prac-icon { font-size: 2.5rem; margin-bottom: 24px; display: inline-flex; transition: transform .4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.prac-card:hover .prac-icon { transform: scale(1.2) rotate(-5deg); }
+.prac-icon { font-size: 2.5rem; margin-bottom: 24px; display: inline-flex; transition: transform .35s ease; }
+.prac-card:hover .prac-icon { transform: scale(1.06); }
 .prac-title { font-family: var(--ff-display); font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; line-height: 1.2; }
 .prac-body { font-size: 14px; color: var(--text-dim); line-height: 1.8; }
 .prac-body strong { color: var(--text-main); font-weight: 500; }
@@ -2193,16 +2195,16 @@ body.page-tools #tools.tools-page {
 .temp-val { font-size: 11px; color: var(--text-mute); width: 40px; text-align: right; font-weight: 600; }
 
 .seasons-right { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.season-card { padding: 32px 28px; border: 1px solid var(--border-light); border-radius: 8px; position: relative; overflow: hidden; transition: all .4s cubic-bezier(.22,1,.36,1); cursor: pointer; background: var(--bg-card); backdrop-filter: blur(8px); }
-.season-card:hover { transform: translateY(-6px); border-color: var(--accent-1); box-shadow: 0 20px 40px rgba(0,0,0,0.15); background: var(--bg-card-hov); }
+.season-card { padding: 32px 28px; border: 1px solid var(--border-light); border-radius: var(--radius-lg); position: relative; overflow: hidden; transition: border-color .35s ease, box-shadow .35s ease, background .35s ease, transform .35s ease; cursor: pointer; background: var(--bg-card); backdrop-filter: blur(8px); }
+.season-card:hover { transform: translateY(-3px); border-color: var(--border-med); box-shadow: var(--shadow-card); background: var(--bg-card-hov); }
 .season-card::before { content:''; position:absolute; inset:0; opacity:.06; transition:opacity .4s; pointer-events:none; }
 .season-card:hover::before { opacity:.18; }
 .sc-spring::before { background: radial-gradient(circle at 80% 15%, #80e060 0%, transparent 65%); }
 .sc-summer::before { background: radial-gradient(circle at 80% 15%, #ffb020 0%, transparent 65%); }
 .sc-fall::before   { background: radial-gradient(circle at 80% 15%, #e06020 0%, transparent 65%); }
 .sc-winter::before { background: radial-gradient(circle at 80% 15%, #60b0e0 0%, transparent 65%); }
-.season-emoji { font-size: 2.2rem; margin-bottom: 16px; display: inline-flex; transition: transform .4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.season-card:hover .season-emoji { transform: scale(1.25) rotate(-5deg); }
+.season-emoji { font-size: 2.2rem; margin-bottom: 16px; display: inline-flex; transition: transform .35s ease; }
+.season-card:hover .season-emoji { transform: scale(1.06); }
 .season-name { font-family: var(--ff-display); font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
 .season-months { font-size: 11px; font-weight: 600; letter-spacing: .14em; color: var(--accent-1); text-transform: uppercase; margin-bottom: 16px; }
 .season-desc { font-size: 13px; color: var(--text-dim); line-height: 1.8; margin-bottom: 18px; }
@@ -2217,15 +2219,16 @@ body.page-tools #tools.tools-page {
 .culture-intro h2 { font-family: var(--ff-display); font-size: var(--fs-display); font-weight: 700; line-height: 1.12; }
 .culture-intro h2 em { font-style: italic; color: var(--accent-1); font-weight: 400; }
 .culture-intro p { font-size: 14px; color: var(--text-dim); line-height: 1.8; }
-.culture-tiles { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-.culture-tile { padding: 32px 20px 28px; border: 1px solid var(--border-light); border-radius: 8px; transition: all .4s cubic-bezier(.22,1,.36,1); text-align: center; cursor: pointer; position: relative; overflow: hidden; background: var(--bg-card); }
-.culture-tile::before { content:''; position:absolute; inset:0; background: radial-gradient(circle at 50% 0%, var(--border-light) 0%, transparent 70%); opacity: 0; transition: opacity .4s; }
-.culture-tile:hover { border-color: var(--accent-1); transform: translateY(-8px); box-shadow: 0 16px 32px rgba(0,0,0,0.15); background: var(--bg-card-hov); z-index:2; }
-.culture-tile:hover::before { opacity: 1; }
-.culture-tile-icon { font-size: 2.4rem; margin-bottom: 16px; display: inline-flex; transition: transform .4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.culture-tile:hover .culture-tile-icon { transform: scale(1.3) translateY(-4px); }
-.culture-tile-name { font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
-.culture-tile-desc { font-size: 11px; color: var(--text-dim); line-height: 1.6; }
+/* Culture: denser “field notes” mosaic — less floaty card stack */
+.culture-tiles { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--border-light); border: 1px solid var(--border-light); border-radius: var(--radius-lg); overflow: hidden; }
+.culture-tile { padding: 28px 18px 24px; border: none; border-radius: 0; transition: background .3s ease; text-align: left; cursor: pointer; position: relative; overflow: hidden; background: var(--bg-surface); }
+.culture-tile::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background: var(--accent-1); transform: scaleY(0); transform-origin: top; transition: transform .35s ease; opacity: .9; }
+.culture-tile:hover { border-color: transparent; transform: none; box-shadow: none; background: var(--bg-surface-2); z-index:2; }
+.culture-tile:hover::before { transform: scaleY(1); opacity: 1; }
+.culture-tile-icon { font-size: 1.65rem; margin-bottom: 14px; display: inline-flex; transition: opacity .3s ease; opacity: .92; }
+.culture-tile:hover .culture-tile-icon { transform: none; opacity: 1; }
+.culture-tile-name { font-family: var(--ff-display); font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px; letter-spacing: -.01em; }
+.culture-tile-desc { font-size: 12px; color: var(--text-dim); line-height: 1.65; max-width: 28ch; }
 
 /* ═══ MARQUEE ═══ */
 .marquee-section { border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); overflow: hidden; background: var(--bg-card); position: relative; z-index: 10;}
@@ -2242,13 +2245,13 @@ body.page-tools #tools.tools-page {
 /* ═══ ROUTES ═══ */
 #routes { padding: var(--section-y) var(--section-x); }
 .routes-grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.route-card { border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; transition: all .4s cubic-bezier(.22,1,.36,1); cursor: pointer; background: var(--bg-card); backdrop-filter: blur(10px); }
-.route-card:hover { border-color: var(--accent-1); transform: translateY(-8px); box-shadow: 0 24px 50px rgba(0,0,0,0.2); background: var(--bg-card-hov); }
+.route-card { border: 1px solid var(--border-light); border-radius: var(--radius-lg); overflow: hidden; transition: border-color .35s ease, box-shadow .35s ease, background .35s ease, transform .35s ease; cursor: pointer; background: var(--bg-card); backdrop-filter: blur(10px); }
+.route-card:hover { border-color: var(--border-med); transform: translateY(-3px); box-shadow: var(--shadow-card); background: var(--bg-card-hov); }
 .route-header { padding: 32px 28px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; position: relative; }
 .route-header::after { content:''; position:absolute; bottom:-1px; left:0; height: 2px; background: var(--accent-1); width: 0; transition: width .6s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .route-card:hover .route-header::after { width: 100%; }
-.route-icon { font-size: 1.8rem; margin-bottom: 12px; display: inline-flex; transition: transform .4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.route-card:hover .route-icon { transform: scale(1.15) rotate(5deg); }
+.route-icon { font-size: 1.8rem; margin-bottom: 12px; display: inline-flex; transition: opacity .3s ease; }
+.route-card:hover .route-icon { transform: none; opacity: 1; }
 .route-name { font-family: var(--ff-display); font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; }
 .route-dist { font-size: 12px; color: var(--accent-1); letter-spacing: .08em; font-weight: 500; }
 .route-miles { font-size: 11px; color: var(--text-mute); margin-top: 3px; letter-spacing: .03em; }
@@ -2272,15 +2275,16 @@ body.page-tools #tools.tools-page {
 .tips-header p { max-width: var(--prose-max); font-size: var(--fs-small); line-height: 1.7; }
 .tips-header h2 em { font-style: italic; color: var(--accent-1); font-weight: 400; }
 .tips-header p { font-size: 14px; color: var(--text-dim); max-width: 580px; line-height: 1.8; }
-.tips-grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-.tip-row { padding: 28px 32px; border: 1px solid var(--border-light); border-radius: 8px; display: flex; gap: 24px; align-items: flex-start; transition: all .4s cubic-bezier(.22,1,.36,1); cursor: pointer; position: relative; overflow: hidden; background: var(--bg-card); }
-.tip-row::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background: var(--accent-1); transform: scaleY(0); transform-origin: bottom; transition: transform .5s cubic-bezier(.22,1,.36,1); }
-.tip-row:hover { border-color: var(--border-med); background: var(--bg-card-hov); transform: translateX(6px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+.tips-grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 24px; border-top: 1px solid var(--border-light); }
+/* Tips: dossier-style rows — horizontal emphasis instead of bouncing cards */
+.tip-row { padding: 26px 28px; border: 1px solid var(--border-light); border-radius: 0; display: flex; gap: 20px; align-items: flex-start; transition: background .3s ease, border-color .3s ease; cursor: pointer; position: relative; overflow: hidden; background: transparent; }
+.tip-row::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background: var(--accent-1); transform: scaleY(0); transform-origin: top; transition: transform .35s ease; }
+.tip-row:hover { border-color: var(--border-med); background: var(--bg-card); transform: none; box-shadow: none; }
 .tip-row:hover::before { transform: scaleY(1); }
-.tip-icon { font-size: 1.8rem; flex-shrink: 0; transition: transform .4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.tip-row:hover .tip-icon { transform: scale(1.2) rotate(-10deg); }
-.tip-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
-.tip-body { font-size: 13.5px; color: var(--text-dim); line-height: 1.7; }
+.tip-icon { font-size: 1.35rem; flex-shrink: 0; margin-top: 2px; opacity: .9; transition: opacity .3s ease; }
+.tip-row:hover .tip-icon { transform: none; opacity: 1; }
+.tip-title { font-family: var(--ff-display); font-size: 1.05rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px; letter-spacing: -.01em; }
+.tip-body { font-size: 0.9rem; color: var(--text-dim); line-height: 1.75; }
 .tip-body strong { color: var(--text-main); font-weight: 500; }
 
 /* ═══ MODAL OVERLAY ═══ */
@@ -2922,22 +2926,24 @@ footer.site-footer {
 .footer-bottom { max-width: var(--content-max); margin: 0 auto; }
 .footer-motto { font-size: 11px; font-weight: 500; letter-spacing: .08em; color: var(--text-dim); }
 
-/* ═══ SCROLL REVEAL ═══ */
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+/* ═══ SCROLL REVEAL ═══
+   Restrained editorial entrances — short travel, soft ease.
+   Avoids the large “template card cascade” slide that feels generic. */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity .55s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1); }
 .reveal.visible { opacity: 1; transform: translateY(0); }
-.reveal-left  { opacity: 0; transform: translateX(-28px); transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
-.reveal-right { opacity: 0; transform: translateX(28px);  transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+.reveal-left  { opacity: 0; transform: translateX(-14px); transition: opacity .55s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1); }
+.reveal-right { opacity: 0; transform: translateX(14px);  transition: opacity .55s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1); }
 .reveal-left.visible, .reveal-right.visible { opacity: 1; transform: translateX(0); }
-.reveal-delay-1  { transition-delay: .06s; }
-.reveal-delay-2  { transition-delay: .12s; }
-.reveal-delay-3  { transition-delay: .18s; }
-.reveal-delay-4  { transition-delay: .24s; }
-.reveal-delay-5  { transition-delay: .3s; }
+.reveal-delay-1  { transition-delay: .04s; }
+.reveal-delay-2  { transition-delay: .08s; }
+.reveal-delay-3  { transition-delay: .12s; }
+.reveal-delay-4  { transition-delay: .16s; }
+.reveal-delay-5  { transition-delay: .2s; }
 
 @media (max-width: 900px), (pointer: coarse) {
   /* Prefer snappier reveals over motion on touch devices */
   .reveal, .reveal-left, .reveal-right {
-    transition-duration: .4s;
+    transition-duration: .35s;
   }
   .reveal-delay-1, .reveal-delay-2, .reveal-delay-3, .reveal-delay-4, .reveal-delay-5 {
     transition-delay: 0s;
@@ -3345,16 +3351,23 @@ html[data-theme="minimal"] .fact-card,
 html[data-theme="elegant"] .fact-card,
 html[data-theme="minimal"] .season-card,
 html[data-theme="elegant"] .season-card,
-html[data-theme="minimal"] .culture-tile,
-html[data-theme="elegant"] .culture-tile,
 html[data-theme="minimal"] .route-card,
 html[data-theme="elegant"] .route-card,
-html[data-theme="minimal"] .tip-row,
-html[data-theme="elegant"] .tip-row,
 html[data-theme="minimal"] .settings-group,
 html[data-theme="elegant"] .settings-group,
 html[data-theme="minimal"] .tool-card,
 html[data-theme="elegant"] .tool-card {
+  box-shadow: 0 1px 0 rgba(0,0,0,.03), 0 10px 28px rgba(20, 20, 20, 0.05);
+}
+/* Culture mosaic + tip dossier rows: no floating shadows (shared hairlines only) */
+html[data-theme="minimal"] .culture-tile,
+html[data-theme="elegant"] .culture-tile,
+html[data-theme="minimal"] .tip-row,
+html[data-theme="elegant"] .tip-row {
+  box-shadow: none;
+}
+html[data-theme="minimal"] .culture-tiles,
+html[data-theme="elegant"] .culture-tiles {
   box-shadow: 0 1px 0 rgba(0,0,0,.03), 0 10px 28px rgba(20, 20, 20, 0.05);
 }
 html[data-theme="minimal"] .prac-card,

@@ -40,6 +40,26 @@
 
 Main pages: `index.html` · `gallery.html` · `tools.html` · `privacy.html` · `terms.html`
 
+### Project layout
+
+| Path | Role |
+|------|------|
+| `index.html` · `gallery.html` · `tools.html` · `privacy.html` · `terms.html` | Site pages (repo root — required for GitHub Pages subpath deploy) |
+| `src/css/styles.css` | Shared styles |
+| `src/js/app.js` | Shared client logic |
+| `src/js/legal-i18n.js` | Privacy / Terms copy (en · es · zh · ja) |
+| `src/js/data/` | Translation dictionary, fun facts, modal & destination link data |
+| `images/` | Photos (gallery tiers + site imagery) |
+| `docs/i18n/` | Translated READMEs |
+| `.github/workflows/static.yml` | Deploy to GitHub Pages on push to `main` |
+
+Local preview from the repo root:
+
+```bash
+npm run serve
+# → http://127.0.0.1:8000/
+```
+
 ---
 
 ## 💬 Feedback

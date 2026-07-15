@@ -745,7 +745,8 @@ window.addEventListener('scroll', () => {
   if (!ctx) return;
 
   const particles = [];
-  const MAX_PARTICLES = 48;
+  /* Toned-down editorial trail: fewer, smaller, shorter-lived sparks */
+  const MAX_PARTICLES = 22;
   let mx = -999, my = -999;
   let prevX = -999, prevY = -999;
   let isMouseIn = false;
@@ -824,18 +825,18 @@ window.addEventListener('scroll', () => {
 
     const themeAccent = getCssVar('--accent-1');
 
-    // Emit only while the pointer is moving — a trail, not a stationary blob.
+    // Emit only while the pointer is moving — a quiet ink-trail, not a fountain.
     if (isMouseIn && movedThisFrame) {
-      const burst = particles.length < MAX_PARTICLES / 2 ? 2 : 1;
+      const burst = particles.length < MAX_PARTICLES / 3 ? 1 : (Math.random() > 0.45 ? 1 : 0);
       for (let n = 0; n < burst; n++) {
         if (particles.length >= MAX_PARTICLES) break;
         particles.push({
-          x: mx + (Math.random() - 0.5) * 8,
-          y: my + (Math.random() - 0.5) * 8,
-          vx: (Math.random() - 0.5) * 0.7,
-          vy: -Math.random() * 1.1 - 0.25,
+          x: mx + (Math.random() - 0.5) * 4,
+          y: my + (Math.random() - 0.5) * 4,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: -Math.random() * 0.55 - 0.12,
           life: 1,
-          size: Math.random() * 2.8 + 1.2,
+          size: Math.random() * 1.6 + 0.7,
           color: themeAccent
         });
       }
@@ -846,12 +847,12 @@ window.addEventListener('scroll', () => {
       const p = particles[i];
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.01; // tiny drift so the trail feels airy
-      p.life -= 0.038;
+      p.vy += 0.006;
+      p.life -= 0.045;
       if (p.life <= 0) { particles.splice(i, 1); continue; }
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-      ctx.globalAlpha = p.life * 0.55;
+      ctx.globalAlpha = p.life * 0.32;
       ctx.fillStyle = p.color;
       ctx.fill();
     }
