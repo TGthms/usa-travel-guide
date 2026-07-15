@@ -24,7 +24,7 @@
 | | |
 |---|---|
 | 🌍<br>**全美<br>覆盖** | 全部 50 州，按东北、南部、中西部、西部、西南等大区组织。 |
-| 🏙️<br>**目的地<br>城市** | 十二座城市卡片、评分与详情。 |
+| 🏙️<br>**推荐<br>城市** | 十二座城市卡片、评分与详情。 |
 | 🔗<br>**实用<br>外链** | 官方旅游、公共交通、公园与博物馆链接。 |
 | 🖼️<br>**相册** | 可筛选的旅行相册：搜索、排序、画质（缩略图 / 中等 / 原图）*支持 HDR* |
 | 🧰<br>**旅行<br>工具** | 汇率、世界时钟、小费与销售税（50 州）、油车/电车费用、紧急电话。 |
@@ -41,7 +41,7 @@
 
 ## 💬 反馈
 
-个人兴趣项目 —— 欢迎提交问题与建议！
+此网站为个人项目 —— 欢迎提交反馈与建议！
 
 📧 **contact.timg@icloud.com**
 
@@ -52,6 +52,6 @@
 - **代码：** MIT — 见 [LICENSE](../../LICENSE)。
 - **`/images` 照片：** © 2026 Tim G (TGthms)，**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — 注明作者后可使用。
 - **网页字体：** 来自 Google Fonts — Fraunces、Public Sans、Special Elite、Noto Sans/Serif（中文/日语）。开放许可（SIL OFL / Apache 等）。
-- **站点政策：** [隐私政策](../../privacy.html) · [使用条款](../../terms.html)
+- **站点政策：** [隐私政策](https://tgthms.github.io/usa-travel-guide/privacy.html) · [使用条款](https://tgthms.github.io/usa-travel-guide/terms.html)
 
 建议署名：*“Photo © Tim G (@TGthms), licensed under CC BY 4.0.”*
