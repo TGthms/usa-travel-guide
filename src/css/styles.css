@@ -1145,12 +1145,30 @@ html[data-theme="elegant"] .gallery-teaser-cta { color: #fff; }
 }
 body.page-gallery #gallery,
 body.page-tools #tools.tools-page {
-  padding-top: calc(80px + env(safe-area-inset-top, 0px));
+  /* Clear the fixed mini-app bar (min-height 64px + vertical padding + shadow)
+     so the section eyebrow never sits under “Back to the Guide”. */
+  padding-top: calc(104px + env(safe-area-inset-top, 0px));
   padding-bottom: 72px;
 }
 body.page-gallery .gallery-app-header,
 body.page-tools .tools-app-header {
-  max-width: var(--content-max); margin-left: auto; margin-right: auto; margin-bottom: 28px;
+  max-width: var(--content-max);
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0.25rem;
+  margin-bottom: 28px;
+  /* Mini-app pages already have a title in the app bar; keep the in-page
+     eyebrow/heading band airy and free of the global section-header underline
+     crowding the chrome. */
+  border-bottom: none;
+  padding-bottom: 0;
+}
+/* Eyebrow sits in its own row with room to breathe under the fixed bar */
+body.page-gallery .gallery-app-header .section-eyebrow,
+body.page-tools .tools-app-header .section-eyebrow {
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 0;
 }
 /* Sticky filters sit just under the mini-app bar */
 body.page-gallery .gallery-filters {
