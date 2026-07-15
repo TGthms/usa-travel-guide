@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">English</a> ·
+  <a href="../../README.md">English</a> ·
   <a href="README.es.md">Español</a> ·
   <a href="README.zh.md">中文</a> ·
   <a href="README.ja.md">日本語</a>
@@ -34,7 +34,7 @@
 | ⚙️ **Personalización** | Temas, idioma, °F/°C y millas/km, calidad de galería — guardados en el dispositivo. |
 | ♿️ **Animaciones: Completas / Reducidas / Desactivadas** | Niveles de movimiento accesibles: efectos completos, fades suaves, o sin animación decorativa. El rastro del cursor se puede desactivar por separado. Respeta “prefers-reduced-motion” del sistema. |
 | 📱 **Listo para móvil** | Hero ligero, scroll instantáneo en táctil y optimizaciones de rendimiento. |
-| 🔒 **Privacidad y términos** | [Política de privacidad](privacy.html) y [Términos de uso](terms.html), con aviso de enlaces externos. |
+| 🔒 **Privacidad y términos** | [Política de privacidad](../../privacy.html) y [Términos de uso](../../terms.html), con aviso de enlaces externos. |
 
 ---
 
@@ -62,9 +62,9 @@ Proyecto personal impulsado por el interés — ¡reportes de errores y sugerenc
 
 ## 📄 Licencia y aspectos legales
 
-- **Código:** MIT — ver [LICENSE](LICENSE).
+- **Código:** MIT — ver [LICENSE](../../LICENSE).
 - **Fotos** en `/images`: © 2026 Tim G (TGthms), **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — uso libre con crédito.
 - **Fuentes web:** Google Fonts — Fraunces, Public Sans, Special Elite, Noto Sans/Serif (SC/JP). Licencias abiertas (SIL OFL / Apache según el caso).
-- **Políticas del sitio:** [Privacidad](privacy.html) · [Términos](terms.html)
+- **Políticas del sitio:** [Privacidad](../../privacy.html) · [Términos](../../terms.html)
 
 Crédito sugerido: *“Photo © Tim G (@TGthms), licensed under CC BY 4.0.”*

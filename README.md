@@ -4,9 +4,9 @@
 
 <p align="center">
   <a href="README.md">English</a> ·
-  <a href="README.es.md">Español</a> ·
-  <a href="README.zh.md">中文</a> ·
-  <a href="README.ja.md">日本語</a>
+  <a href="docs/i18n/README.es.md">Español</a> ·
+  <a href="docs/i18n/README.zh.md">中文</a> ·
+  <a href="docs/i18n/README.ja.md">日本語</a>
 </p>
 
 <p align="center">

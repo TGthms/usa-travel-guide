@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">English</a> ·
+  <a href="../../README.md">English</a> ·
   <a href="README.es.md">Español</a> ·
   <a href="README.zh.md">中文</a> ·
   <a href="README.ja.md">日本語</a>
@@ -34,7 +34,7 @@
 | ⚙️ **个性化** | 主题、语言、华氏/摄氏与英里/公里、相册画质——保存在本机。 |
 | ♿️ **动画：完整 / 减弱 / 关闭** | 三级动效：完整效果、平静的轻微淡入，或关闭装饰动画。光标拖尾可单独开关。遵循系统「减少动态效果」。 |
 | 📱 **移动端友好** | 轻量首屏、触控即时滚动与性能优化。 |
-| 🔒 **隐私与条款** | 站内[隐私政策](privacy.html)与[使用条款](terms.html)，含外链说明。 |
+| 🔒 **隐私与条款** | 站内[隐私政策](../../privacy.html)与[使用条款](../../terms.html)，含外链说明。 |
 
 ---
 
@@ -62,9 +62,9 @@ python3 -m http.server 8080
 
 ## 📄 版权声明
 
-- **代码：** MIT — 见 [LICENSE](LICENSE)。
+- **代码：** MIT — 见 [LICENSE](../../LICENSE)。
 - **`/images` 照片：** © 2026 Tim G (TGthms)，**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — 注明作者后可使用。
 - **网页字体：** 来自 Google Fonts — Fraunces、Public Sans、Special Elite、Noto Sans/Serif（简中/日文）。开放许可（SIL OFL / Apache 等）。
-- **站点政策：** [隐私政策](privacy.html) · [使用条款](terms.html)
+- **站点政策：** [隐私政策](../../privacy.html) · [使用条款](../../terms.html)
 
 建议署名：*“Photo © Tim G (@TGthms), licensed under CC BY 4.0.”*
