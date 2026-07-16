@@ -131,34 +131,9 @@
     <button type="button" class="gallery-filter" data-filter="roads" aria-pressed="false" data-i18n="gallery.filterRoads">Roads</button>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════════
-       PHOTO MANAGEMENT GUIDE — master gallery (gallery.html). Homepage only
-       links here via the teaser card; every photo block lives below.
-       ═══════════════════════════════════════════════════════════════════
-       To add a photo:
-         1. Save the image file into  images/gallery/
-         2. Copy one whole <div class="gallery-item">...</div> block below
-         3. Edit these 5 things in your copy:
-              data-category = cityscapes | landmarks | nature | coast | food-culture | roads
-              src           = images/gallery/your-file-name.jpg
-              alt           = plain description (screen readers + broken-image fallback)
-              data-location = shown under the photo when clicked, e.g. "Austin, TX"
-              data-date     = shown under the photo when clicked, e.g. "May 2026"
-         4. Change the <div class="gallery-caption"> text to a short label
-            (this is the only part visible on the grid itself, e.g. a city name)
-            — give it its own unique data-i18n key (e.g. gallery.item.yourkey.caption)
-            and add matching translations for it in the I18N dictionary in
-            src/js/app.js (search for "gallery.item." to find the other
-            entries — es/zh/ja each need the same key).
-         5. Optional: feature the same photo on the homepage teaser by
-            copying the block into the smaller preview grid in index.html
-            too (search for "PHOTO MANAGEMENT GUIDE" there).
-         No other JS or CSS edits needed — animations, filtering, and the
-         lightbox all pick up new items automatically. Photos not yet
-         uploaded show a "Photo not added yet" placeholder instead of a
-         broken-image icon, so it's safe to add the caption/metadata for a
-         photo before the file itself is ready.
-       ═══════════════════════════════════════════════════════════════════ -->
+  <!-- Photo grid: prefer local Gallery Manager (tools/gallery_manager.py)
+       to add/remove items. It writes full+medium+thumbs, this HTML block,
+       and caption keys in src/js/data/i18n.js (es/zh/ja). -->
   <div class="gallery-grid" id="galleryGrid">
     <div class="gallery-item" data-category="landmarks" data-location="San Francisco, California" data-city="San Francisco" data-state="California" data-date="June 2026" tabindex="0" role="button">
       <img src="images/gallery/thumbs/SFgolden_gate_bridge.jpeg" data-thumb="images/gallery/thumbs/SFgolden_gate_bridge.jpeg" data-medium="images/gallery/medium/SFgolden_gate_bridge.jpeg" data-full="images/gallery/SFgolden_gate_bridge.jpeg" width="900" height="506" alt="Golden Gate Bridge" loading="lazy" decoding="async">

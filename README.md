@@ -29,7 +29,7 @@
 | 🖼️ **Photo gallery** | Filterable travel photography with search, sort, quality tiers (thumbnail / medium / full), and lightbox. *HDR supported* |
 | 🧰 **Travel tools** | Currency conversion, world clock, tip & sales tax (all 50 states), gas/EV road-trip cost, and U.S. emergency numbers. |
 | 🌦️ **Seasons, culture & routes** | When to go, cultural highlights, and classic road-trip ideas. |
-| 🎲 **America Fun Facts** | One shuffled fact at a time in a fixed-height card — dozens of trivia items in every language. |
+| 🎲 **America Fun Facts** | One shuffled fact at a time — 250+ trivia items in every language. |
 | 🌐 **Multi-language** | English, Spanish, Chinese, and Japanese for the full guide (including legal pages). |
 | ⚙️ **Personalization** | Themes, language, °F/°C and mi/km units, gallery photo quality — saved on your device. |
 | ♿️ **Animations: Full / Reduced / Off** | Accessibility-first motion levels: full effects, calm minimal fades, or no decorative animation. Cursor trail can be toggled separately. Respects OS “prefers reduced motion.” |

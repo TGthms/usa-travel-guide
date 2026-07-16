@@ -24,17 +24,17 @@
 | | |
 |---|---|
 | 🌍 **Cobertura completa** | Los 50 estados, organizados por regiones (Noreste, Sur, Medio Oeste, Oeste, Suroeste). |
-| 🏙️ **Ciudades destino** | Doce ciudades con tarjetas en arte CSS (sin necesidad de foto), valoraciones y modales con detalle. |
-| 🔗 **Enlaces útiles** | Turismo oficial, transporte, parques y museos desde cada modal de ciudad. |
-| 🖼️ **Galería de fotos** | Galería filtrable con búsqueda, orden, calidad (miniatura / media / completa) y lightbox. *Compatible con HDR* |
-| 🧰 **Herramientas de viaje** | Divisas, reloj mundial, propina e impuestos (50 estados), coste de viaje (gasolina/EV) y emergencias. |
+| 🏙️ **Ciudades recomendadas** | Doce ciudades con tarjetas, valoraciones y detalle. |
+| 🔗 **Enlaces útiles** | Turismo oficial, transporte, parques y museos. |
+| 🖼️ **Galería de fotos** | Galería filtrable: búsqueda, orden, calidad (miniatura / media / original). *Compatible con HDR* |
+| 🧰 **Herramientas de viaje** | Divisas, reloj mundial, propina e impuestos (50 estados), gasolina/EV y emergencias. |
 | 🌦️ **Temporadas, cultura y rutas** | Cuándo viajar, cultura y road trips clásicos. |
-| 🎲 **Datos curiosos de América** | Un dato al azar cada vez, en una tarjeta de altura fija — decenas de datos en cada idioma. |
-| 🌐 **Multilingüe** | Inglés, español, chino y japonés (incluida la documentación legal). |
-| ⚙️ **Personalización** | Temas, idioma, °F/°C y millas/km, calidad de galería — guardados en el dispositivo. |
-| ♿️ **Animaciones: Completas / Reducidas / Desactivadas** | Niveles de movimiento accesibles: efectos completos, fades suaves, o sin animación decorativa. El rastro del cursor se puede desactivar por separado. Respeta “prefers-reduced-motion” del sistema. |
-| 📱 **Listo para móvil** | Hero ligero, scroll instantáneo en táctil y optimizaciones de rendimiento. |
-| 🔒 **Privacidad y términos** | [Política de privacidad](https://tgthms.github.io/usa-travel-guide/privacy.html) y [Términos de uso](https://tgthms.github.io/usa-travel-guide/terms.html), con aviso de enlaces externos. |
+| 🎲 **Datos curiosos de América** | Un dato al azar cada vez; multilingüe. |
+| 🌐 **Multilingüe** | EN / ES / ZH / JA (incluye páginas legales). |
+| ⚙️ **Personalización** | Temas, idioma, °F/°C y mi/km, calidad de galería — en el dispositivo. |
+| ♿️ **Accesibilidad** | Tres niveles de animación: completa, reducida u off. En escritorio, el rastro del cursor se controla aparte. |
+| 📱 **Móvil** | Inicio ligero, scroll táctil y optimización de rendimiento. |
+| 🔒 **Privacidad y términos** | [Política de privacidad](https://tgthms.github.io/usa-travel-guide/privacy.html) y [Términos de uso](https://tgthms.github.io/usa-travel-guide/terms.html), con aviso de enlaces externos. (Las traducciones legales son orientativas; prevalece la versión en inglés.) |
 
 ---
 
@@ -54,7 +54,7 @@ Páginas: `index.html` · `gallery.html` · `tools.html` · `privacy.html` · `t
 
 ## 💬 Comentarios
 
-Proyecto personal impulsado por el interés — ¡reportes de errores y sugerencias son bienvenidos!
+Este sitio es un proyecto personal — ¡feedback y sugerencias son bienvenidos!
 
 📧 **contact.timg@icloud.com**
 
