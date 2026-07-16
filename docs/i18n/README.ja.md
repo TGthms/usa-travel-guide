@@ -34,7 +34,7 @@
 | ⚙️ **パーソナライズ** | テーマ、言語、°F/°C と mi/km、ギャラリー画質を端末に保存。 |
 | ♿️ **アニメ：フル／控えめ／オフ** | 3段階の動き：通常演出、穏やかな短いフェード、装飾アニメなし。カーソル軌跡は個別切替。OS の「動きを減らす」に対応。 |
 | 📱 **モバイル向け** | 軽量ヒーロー、タッチでは即時スクロール、パフォーマンス最適化。 |
-| 🔒 **プライバシーと規約** | [プライバシーポリシー](../../privacy.html) と [利用規約](../../terms.html)（外部リンクの説明含む）。 |
+| 🔒 **プライバシーと規約** | [プライバシーポリシー](https://tgthms.github.io/usa-travel-guide/privacy.html) と [利用規約](https://tgthms.github.io/usa-travel-guide/terms.html)（外部リンクの説明含む）。 |
 
 ---
 
@@ -65,6 +65,6 @@ python3 -m http.server 8080
 - **コード:** MIT — [LICENSE](../../LICENSE) を参照。
 - **`/images` の写真:** © 2026 Tim G (TGthms)、**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — クレジット表記のうえ利用可。
 - **Web フォント:** Google Fonts — Fraunces、Public Sans、Special Elite、Noto Sans/Serif（SC/JP）。オープンライセンス（SIL OFL / Apache など）。
-- **サイト方針:** [プライバシー](../../privacy.html) · [利用規約](../../terms.html)
+- **サイト方針:** [プライバシー](https://tgthms.github.io/usa-travel-guide/privacy.html) · [利用規約](https://tgthms.github.io/usa-travel-guide/terms.html)
 
 推奨クレジット：*「Photo © Tim G (@TGthms), licensed under CC BY 4.0.」*
