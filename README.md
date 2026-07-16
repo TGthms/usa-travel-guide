@@ -60,6 +60,14 @@ npm run serve
 # → http://127.0.0.1:8000/
 ```
 
+Smoke tests (dev-only, Playwright):
+
+```bash
+npm ci
+npx playwright install chromium
+npm test
+```
+
 ---
 
 ## 💬 Feedback

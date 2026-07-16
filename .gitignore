@@ -12,6 +12,12 @@ npm-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Playwright (E2E smoke — local + CI artifacts)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # Internal photo workflow (not part of the published site)
 # Local Gallery Manager + launcher — never deploy to GitHub Pages
 tools/
