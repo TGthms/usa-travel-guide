@@ -31,10 +31,8 @@
         ? 'minimal' : 'default';
     }
     if (['default','minimal','elegant','luxury','glass','nature'].indexOf(t) < 0) t = 'default';
-    // Saved preference may be light; OS dark paints style-matched twin (not always Midnight Atlas)
-    var osDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (osDark && t === 'minimal') t = 'glass';   // Gallery Daylight → Twilight Glass
-    else if (osDark && t === 'elegant') t = 'luxury'; // Heritage Paper → Grand Tour
+    // Paint the saved/detected theme as chosen — no silent light→dark twin remap.
+    // (OS-dark twin switch happens in app.js only when the OS flips mid-session.)
     document.documentElement.setAttribute('data-theme', t);
     document.documentElement.style.colorScheme = (t === 'minimal' || t === 'elegant') ? 'light' : 'dark';
     // Early motion preference (avoids flash of full animation before app.js)

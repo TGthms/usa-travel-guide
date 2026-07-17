@@ -343,10 +343,12 @@ function detectLanguage() {
 const LIGHT_THEMES = ['minimal', 'elegant'];
 
 /**
- * When OS is dark, light preferences map to a dark twin that matches style —
- * not always Midnight Atlas.
- *   Gallery Daylight (minimal) → Twilight Glass (glass)  — modern
- *   Heritage Paper (elegant)   → Grand Tour (luxury)     — classic
+ * Style-matched dark twins used only when the OS *switches into* dark mode
+ * while a light theme is active — we change the user's selection to the twin
+ * (so Settings UI matches what is painted). We do NOT silently paint a light
+ * pick as its twin; choosing Gallery Daylight always paints Gallery Daylight.
+ *   Gallery Daylight (minimal) → Twilight Glass (glass)
+ *   Heritage Paper (elegant)   → Grand Tour (luxury)
  */
 const LIGHT_THEME_DARK_TWIN = {
   minimal: 'glass',
@@ -359,19 +361,6 @@ function detectTheme() {
      · OS dark mode / no preference → Midnight Atlas (`default`) */
   if (safeMatchMedia('(prefers-color-scheme: light)').matches) return 'minimal';
   return 'default';
-}
-
-/**
- * Resolve what actually paints on screen.
- * Settings still store the user’s pick; OS dark never shows a light theme —
- * it uses the style-matched dark twin instead.
- */
-function effectiveTheme(preferred) {
-  const p = preferred || 'default';
-  if (LIGHT_THEMES.includes(p) && safeMatchMedia('(prefers-color-scheme: dark)').matches) {
-    return LIGHT_THEME_DARK_TWIN[p] || 'default';
-  }
-  return p;
 }
 
 function detectUnits() {
@@ -501,8 +490,9 @@ function scrollBehaviorPref() {
 }
 
 /* ── THEME SWATCHES ──
-   currentTheme = user's preferred choice (Settings / storage).
-   OS dark may paint a dark twin while the swatch still shows their pick. */
+   currentTheme is always what paints AND what Settings highlights.
+   OS dark does not repaint a light pick as its twin; user choice is sacred
+   after an explicit swatch click. */
 const themeSwatches = document.querySelectorAll('.theme-swatch');
 function updateThemeUI(theme) {
   themeSwatches.forEach(sw => sw.classList.toggle('active', sw.dataset.themeVal === theme));
@@ -516,7 +506,6 @@ const THEME_META_COLORS = {
   nature: '#141c18'
 };
 function applyThemeChrome(theme) {
-  // Chrome follows what is painted (active), not the raw preference
   const light = LIGHT_THEMES.includes(theme);
   document.documentElement.style.colorScheme = light ? 'light' : 'dark';
   const meta = document.querySelector('meta[name="theme-color"]');
@@ -528,11 +517,9 @@ function applyThemePreference(preferred, { persist = false } = {}) {
   }
   currentTheme = preferred;
   if (persist) safeStorage.set('usa-travel-theme', preferred);
-  const active = effectiveTheme(preferred);
-  document.documentElement.setAttribute('data-theme', active);
-  applyThemeChrome(active);
-  // Swatches reflect the user's saved preference (e.g. Daylight), even if
-  // OS dark currently paints Twilight Glass.
+  // Paint exactly what the user chose — never silently substitute a twin.
+  document.documentElement.setAttribute('data-theme', preferred);
+  applyThemeChrome(preferred);
   updateThemeUI(preferred);
 }
 themeSwatches.forEach(sw => {
@@ -541,9 +528,16 @@ themeSwatches.forEach(sw => {
   });
 });
 applyThemePreference(currentTheme, { persist: false });
-// Re-resolve light ↔ dark twin when OS light/dark flips mid-session
+// When the OS flips into dark while a light theme is active, *switch selection*
+// to the style-matched twin (persist). User can still pick Daylight/Paper after.
 const prefersColorSchemeDarkMQ = safeMatchMedia('(prefers-color-scheme: dark)');
 function onColorSchemeChange() {
+  const osDark = !!prefersColorSchemeDarkMQ.matches;
+  if (osDark && LIGHT_THEMES.includes(currentTheme)) {
+    const twin = LIGHT_THEME_DARK_TWIN[currentTheme];
+    if (twin) applyThemePreference(twin, { persist: true });
+    return;
+  }
   applyThemePreference(currentTheme, { persist: false });
 }
 if (typeof prefersColorSchemeDarkMQ.addEventListener === 'function') {

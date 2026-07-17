@@ -48,18 +48,11 @@ test.describe('USA Travel Guide smoke', () => {
     await openSettings(page);
     for (const theme of THEMES) {
       await page.locator(`.theme-swatch[data-theme-val="${theme}"]`).click();
-      // Preference is always stored; painted data-theme may twin under OS dark
-      // (minimal→glass, elegant→luxury via effectiveTheme).
+      // Explicit pick always paints that theme (no silent OS-dark twin remap).
       const stored = await page.evaluate(() => localStorage.getItem('usa-travel-theme'));
       expect(stored).toBe(theme);
-      const painted = await page.locator('html').getAttribute('data-theme');
-      if (theme === 'minimal') {
-        expect(['minimal', 'glass']).toContain(painted);
-      } else if (theme === 'elegant') {
-        expect(['elegant', 'luxury']).toContain(painted);
-      } else {
-        expect(painted).toBe(theme);
-      }
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      await expect(page.locator(`.theme-swatch[data-theme-val="${theme}"]`)).toHaveClass(/active/);
     }
     await closeSettings(page);
   });
