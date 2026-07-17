@@ -244,14 +244,9 @@ function applyLanguage(lang) {
   }
   // Refresh live-generated tools text when language changes (tools page).
   if (document.body.classList.contains('page-tools') || document.getElementById('currencyAmount')) {
-    if (typeof populateCurrencySelects === 'function') populateCurrencySelects();
+    // refreshToolsLive is defined later in this file (function-hoisted).
     if (typeof populateStateSelect === 'function') populateStateSelect();
-    if (typeof updateWorldClock === 'function') updateWorldClock();
-    if (typeof updateTipEstimator === 'function') updateTipEstimator();
-    if (typeof updateCurrency === 'function') updateCurrency();
-    if (typeof updateDriveUnitLabels === 'function') updateDriveUnitLabels();
-    if (typeof updateDriveCost === 'function') updateDriveCost();
-    if (typeof updateSalesTax === 'function') updateSalesTax();
+    if (typeof refreshToolsLive === 'function') refreshToolsLive();
   }
   // Gallery chrome (placeholders / open lightbox) — function is declared later and hoisted.
   if (typeof refreshGalleryLanguageChrome === 'function') refreshGalleryLanguageChrome();
@@ -1268,16 +1263,14 @@ document.addEventListener('keydown', e => {
 
 
 /* ── TRAVEL TOOLS ──
-   Tools live on tools.html (mini-app). Nav icons are plain links.
-   Legacy open/close helpers remain as no-ops so older hooks never throw. */
-function openTools() { /* tools are a dedicated page now */ }
-function closeTools() { /* no-op */ }
+   Dedicated page (tools.html). Live widgets refresh on language/unit change. */
 function refreshToolsLive() {
   if (typeof updateWorldClock === 'function') updateWorldClock();
-  if (typeof updateTipEstimator === 'function') updateTipEstimator();
+  if (typeof populateCurrencySelects === 'function') populateCurrencySelects();
   if (typeof updateCurrency === 'function') updateCurrency();
+  if (typeof updateTipEstimator === 'function') updateTipEstimator();
+  if (typeof updateDriveUnitLabels === 'function') updateDriveUnitLabels();
   if (typeof updateDriveCost === 'function') updateDriveCost();
-  if (typeof updateSalesTax === 'function') updateSalesTax();
 }
 
 // Dynamic UI strings for the Tools panel (currency converter, tip estimator,
@@ -1598,9 +1591,6 @@ if (salesTaxState) {
 }
 [billAmount, taxRate, tipRate].forEach(el => { if (el) el.addEventListener('input', updateTipEstimator); });
 updateTipEstimator();
-// Keep a no-op alias so older openTools hooks don't throw if still referenced.
-function updateSalesTax() { updateTipEstimator(); }
-
 /* Road-trip cost: Gas (MPG / L/100km) or EV (mi/kWh / kWh/100km). */
 const driveToolCard = document.getElementById('driveToolCard');
 const driveDist = document.getElementById('driveDist');
@@ -2371,19 +2361,6 @@ function galleryPreferredSrc(img, quality) {
   return medium || full || thumb;
 }
 
-function galleryIsFullQualitySrc(src, img) {
-  if (!src || !img) return false;
-  const full = galleryFullSrc(img);
-  if (!full) return false;
-  try {
-    return new URL(src, window.location.href).pathname === new URL(full, window.location.href).pathname
-      || src === full
-      || (lightboxImg && lightboxImg.getAttribute('data-loaded-tier') === 'full');
-  } catch (e) {
-    return src === full || (lightboxImg && lightboxImg.getAttribute('data-loaded-tier') === 'full');
-  }
-}
-
 function lightboxHdLabel(key) {
   const dict = (typeof I18N !== 'undefined' && I18N[currentLang]) || null;
   const fallback = {
@@ -2735,10 +2712,6 @@ function setLightboxProgressUI({ visible, percent, indeterminate, message }) {
     : 'loading';
   if (msgKey === 'failed') { lbProgFail(); return; }
   lbProgSetTarget(percent || 0, msgKey);
-}
-
-function hideLightboxProgressSoon() {
-  lbProgComplete();
 }
 
 function cancelLightboxLoad() {
