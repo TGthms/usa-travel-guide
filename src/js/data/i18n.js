@@ -766,7 +766,7 @@ window.I18N = {
     "footer.parks": "国家公园",
     "footer.whenToVisit": "最佳季节",
     "footer.visa": "签证与入境",
-    "footer.copyright": "© 2026 美国旅行指南 &nbsp;·&nbsp; 心怀热爱，畅游在自由的公路上 | Tim G 制作",
+    "footer.copyright": "© 2026 美国旅行指南 &nbsp;·&nbsp; 心怀热爱，畅游在自由的公路上 | Tim G 制作 · 与 AI 协作完成",
     "footer.motto": "自由的土地，勇者的家园 🇺🇸",
 
     "funFacts.eyebrow": "你知道吗？",
@@ -1150,7 +1150,7 @@ window.I18N = {
     "footer.parks": "国立公園",
     "footer.whenToVisit": "ベストシーズン",
     "footer.visa": "ビザと入国",
-    "footer.copyright": "© 2026 アメリカ旅行ガイド &nbsp;·&nbsp; 情熱を胸に、自由な道路を悠々と泳ぎます | Tim G が制作・ AI と協力して完成",
+    "footer.copyright": "© 2026 アメリカ旅行ガイド &nbsp;·&nbsp; 情熱を胸に、自由な道を駆け巡ります | Tim G が制作・ AI と協力して完成",
     "footer.motto": "自由の地、勇者の故郷 🇺🇸",
 
     "funFacts.eyebrow": "知っていますか？",

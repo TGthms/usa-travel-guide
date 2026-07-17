@@ -48,9 +48,18 @@ test.describe('USA Travel Guide smoke', () => {
     await openSettings(page);
     for (const theme of THEMES) {
       await page.locator(`.theme-swatch[data-theme-val="${theme}"]`).click();
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      // Preference is always stored; painted data-theme may twin under OS dark
+      // (minimal→glass, elegant→luxury via effectiveTheme).
       const stored = await page.evaluate(() => localStorage.getItem('usa-travel-theme'));
       expect(stored).toBe(theme);
+      const painted = await page.locator('html').getAttribute('data-theme');
+      if (theme === 'minimal') {
+        expect(['minimal', 'glass']).toContain(painted);
+      } else if (theme === 'elegant') {
+        expect(['elegant', 'luxury']).toContain(painted);
+      } else {
+        expect(painted).toBe(theme);
+      }
     }
     await closeSettings(page);
   });
@@ -101,6 +110,18 @@ test.describe('USA Travel Guide smoke', () => {
     await page.goto('/tools.html');
     await expect(page.locator('#currencyAmount')).toBeVisible();
     await expect(page.locator('#currencyFrom')).toBeVisible();
+  });
+
+  test('tools state selector localizes on language change', async ({ page }) => {
+    await page.goto('/tools.html');
+    await page.waitForFunction(() => document.querySelectorAll('#salesTaxState option').length > 10);
+    await openSettings(page);
+    await page.locator('#langPillGroup .pill-btn[data-lang-val="zh"]').click();
+    await closeSettings(page);
+    const caLabel = await page.locator('#salesTaxState option[value="CA"]').textContent();
+    expect(caLabel).toMatch(/加利福尼亚|California/);
+    // Chinese build should show 加利福尼亚州
+    expect(caLabel).toContain('加利福尼亚');
   });
 
   test('legal pages load i18n packs', async ({ page }) => {

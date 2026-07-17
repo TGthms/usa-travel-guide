@@ -26,6 +26,8 @@ Add Photos.command
 *.py[cod]
 *.pyo
 .Python
+.geo_cache.json
+**/.geo_cache.json
 
 # Local temp / scratch from image workflows
 images/gallery/tmp*

@@ -1,6 +1,6 @@
 {
   "name": "usa-travel-guide",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "private": true,
   "description": "America — A Travel Guide: static multi-page site for GitHub Pages",
   "scripts": {

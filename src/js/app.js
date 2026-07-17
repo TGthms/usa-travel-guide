@@ -244,12 +244,15 @@ function applyLanguage(lang) {
   }
   // Refresh live-generated tools text when language changes (tools page).
   if (document.body.classList.contains('page-tools') || document.getElementById('currencyAmount')) {
+    if (typeof populateStateSelect === 'function') populateStateSelect();
     if (typeof updateWorldClock === 'function') updateWorldClock();
     if (typeof updateTipEstimator === 'function') updateTipEstimator();
     if (typeof updateCurrency === 'function') updateCurrency();
     if (typeof updateDriveCost === 'function') updateDriveCost();
     if (typeof updateSalesTax === 'function') updateSalesTax();
   }
+  // Gallery chrome (placeholders / open lightbox) — function is declared later and hoisted.
+  if (typeof refreshGalleryLanguageChrome === 'function') refreshGalleryLanguageChrome();
   if (typeof refreshFunFact === 'function') refreshFunFact();
 }
 
@@ -569,7 +572,11 @@ tempPills.forEach(p => p.addEventListener('click', () => {
   applyUnits();
 }));
 distPills.forEach(p => p.addEventListener('click', () => {
-  currentDistUnit = p.dataset.unitVal;
+  const next = p.dataset.unitVal;
+  if (next !== currentDistUnit && typeof convertDriveInputsForUnitChange === 'function') {
+    convertDriveInputsForUnitChange(currentDistUnit, next);
+  }
+  currentDistUnit = next;
   safeStorage.set('usa-travel-dist-unit', currentDistUnit);
   updateUnitUI();
   applyUnits();
@@ -806,7 +813,7 @@ window.addEventListener('scroll', () => {
   }
   function stopLoop() {
     running = false;
-    if (rafId) cancelAnimationFrame(rafId);
+    if (rafId) cancelRaf(rafId);
     rafId = 0;
     ctx.clearRect(0, 0, cssW, cssH);
   }
@@ -1039,7 +1046,9 @@ function applyDestFilter(filter) {
     if (filter === 'saved') {
       destEmptyState.setAttribute('data-i18n', 'dest.emptyStateSaved');
       const dict = I18N[currentLang];
-      destEmptyState.textContent = (dict && dict['dest.emptyStateSaved']) || EMPTY_STATE_SAVED_TEXT.en;
+      destEmptyState.textContent = (dict && dict['dest.emptyStateSaved'])
+        || EMPTY_STATE_SAVED_TEXT[currentLang]
+        || EMPTY_STATE_SAVED_TEXT.en;
     } else if (destEmptyStateDefaultKey) {
       destEmptyState.setAttribute('data-i18n', destEmptyStateDefaultKey);
       const dict = I18N[currentLang];
@@ -1313,19 +1322,26 @@ async function updateCurrency() {
     currencyMeta.textContent = t.sameCurrency;
     return;
   }
-  if (currencyAbort) currencyAbort.abort();
-  currencyAbort = new AbortController();
+  if (typeof fetch !== 'function') {
+    currencyResult.textContent = t.rateUnavailable;
+    currencyMeta.textContent = t.checkConnection;
+    return;
+  }
+  if (currencyAbort && typeof currencyAbort.abort === 'function') currencyAbort.abort();
+  const canAbort = typeof AbortController === 'function';
+  currencyAbort = canAbort ? new AbortController() : null;
   currencyResult.textContent = t.updating;
   currencyMeta.textContent = t.fetching;
   try {
-    const res = await fetch(`https://api.frankfurter.dev/v2/rate/${base}/${quote}`, { signal: currencyAbort.signal });
+    const fetchOpts = currencyAbort ? { signal: currencyAbort.signal } : {};
+    const res = await fetch(`https://api.frankfurter.dev/v2/rate/${base}/${quote}`, fetchOpts);
     if (!res.ok) throw new Error('Rate unavailable');
     const data = await res.json();
     const converted = amount * Number(data.rate);
     currencyResult.textContent = `${moneyFmt(amount, base)} = ${moneyFmt(converted, quote)}`;
     currencyMeta.textContent = `1 ${base} = ${Number(data.rate).toFixed(4)} ${quote}${data.date ? ` · ${data.date}` : ''}`;
   } catch (err) {
-    if (err.name === 'AbortError') return;
+    if (err && err.name === 'AbortError') return;
     currencyResult.textContent = t.rateUnavailable;
     currencyMeta.textContent = t.checkConnection;
   }
@@ -1356,7 +1372,7 @@ function updateWorldClock() {
   const cities = toolsText().cities;
   worldClockList.innerHTML = CLOCK_ZONES.map(([city, zone]) => {
     const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: currentLang === 'en', timeZone: zone }).format(new Date());
-    return `<div class="clock-row"><div><div class="clock-city">${cities[city] || city}</div><div class="clock-zone">${zone.replace('_', ' ')}</div></div><div class="clock-time">${time}</div></div>`;
+    return `<div class="clock-row"><div><div class="clock-city">${cities[city] || city}</div><div class="clock-zone">${zone.replace(/_/g, ' ')}</div></div><div class="clock-time">${time}</div></div>`;
   }).join('');
 }
 // World clock interval — started only when the tools page is active.
@@ -1373,19 +1389,70 @@ const SALES_TAX_RATES = {
   SC: 7.46, SD: 6.11, TN: 9.55, TX: 8.20, UT: 7.19, VT: 6.36, VA: 5.75, WA: 9.38,
   WV: 6.55, WI: 5.43, WY: 5.36
 };
+/* Localized U.S. state / DC names for the tip & sales-tax selector (en/es/zh/ja).
+   Option values stay as ISO-style codes so tax rates never depend on display language. */
 const US_STATE_NAMES = {
-  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
-  CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', DC: 'Washington, D.C.',
-  FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois',
-  IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana',
-  ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota',
-  MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada',
-  NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York',
-  NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon',
-  PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota',
-  TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia',
-  WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming'
+  en: {
+    AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+    CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', DC: 'Washington, D.C.',
+    FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois',
+    IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana',
+    ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota',
+    MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada',
+    NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York',
+    NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon',
+    PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota',
+    TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia',
+    WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming'
+  },
+  es: {
+    AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+    CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', DC: 'Washington D. C.',
+    FL: 'Florida', GA: 'Georgia', HI: 'Hawái', ID: 'Idaho', IL: 'Illinois',
+    IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Luisiana',
+    ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Míchigan', MN: 'Minnesota',
+    MS: 'Misisipi', MO: 'Misuri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada',
+    NH: 'Nuevo Hampshire', NJ: 'Nueva Jersey', NM: 'Nuevo México', NY: 'Nueva York',
+    NC: 'Carolina del Norte', ND: 'Dakota del Norte', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregón',
+    PA: 'Pensilvania', RI: 'Rhode Island', SC: 'Carolina del Sur', SD: 'Dakota del Sur',
+    TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia',
+    WA: 'Washington', WV: 'Virginia Occidental', WI: 'Wisconsin', WY: 'Wyoming'
+  },
+  zh: {
+    AL: '阿拉巴马州', AK: '阿拉斯加州', AZ: '亚利桑那州', AR: '阿肯色州', CA: '加利福尼亚州',
+    CO: '科罗拉多州', CT: '康涅狄格州', DE: '特拉华州', DC: '华盛顿哥伦比亚特区',
+    FL: '佛罗里达州', GA: '佐治亚州', HI: '夏威夷州', ID: '爱达荷州', IL: '伊利诺伊州',
+    IN: '印第安纳州', IA: '艾奥瓦州', KS: '堪萨斯州', KY: '肯塔基州', LA: '路易斯安那州',
+    ME: '缅因州', MD: '马里兰州', MA: '马萨诸塞州', MI: '密歇根州', MN: '明尼苏达州',
+    MS: '密西西比州', MO: '密苏里州', MT: '蒙大拿州', NE: '内布拉斯加州', NV: '内华达州',
+    NH: '新罕布什尔州', NJ: '新泽西州', NM: '新墨西哥州', NY: '纽约州',
+    NC: '北卡罗来纳州', ND: '北达科他州', OH: '俄亥俄州', OK: '俄克拉荷马州', OR: '俄勒冈州',
+    PA: '宾夕法尼亚州', RI: '罗得岛州', SC: '南卡罗来纳州', SD: '南达科他州',
+    TN: '田纳西州', TX: '得克萨斯州', UT: '犹他州', VT: '佛蒙特州', VA: '弗吉尼亚州',
+    WA: '华盛顿州', WV: '西弗吉尼亚州', WI: '威斯康星州', WY: '怀俄明州'
+  },
+  ja: {
+    AL: 'アラバマ州', AK: 'アラスカ州', AZ: 'アリゾナ州', AR: 'アーカンソー州', CA: 'カリフォルニア州',
+    CO: 'コロラド州', CT: 'コネチカット州', DE: 'デラウェア州', DC: 'ワシントンD.C.',
+    FL: 'フロリダ州', GA: 'ジョージア州', HI: 'ハワイ州', ID: 'アイダホ州', IL: 'イリノイ州',
+    IN: 'インディアナ州', IA: 'アイオワ州', KS: 'カンザス州', KY: 'ケンタッキー州', LA: 'ルイジアナ州',
+    ME: 'メイン州', MD: 'メリーランド州', MA: 'マサチューセッツ州', MI: 'ミシガン州', MN: 'ミネソタ州',
+    MS: 'ミシシッピ州', MO: 'ミズーリ州', MT: 'モンタナ州', NE: 'ネブラスカ州', NV: 'ネバダ州',
+    NH: 'ニューハンプシャー州', NJ: 'ニュージャージー州', NM: 'ニューメキシコ州', NY: 'ニューヨーク州',
+    NC: 'ノースカロライナ州', ND: 'ノースダコタ州', OH: 'オハイオ州', OK: 'オクラホマ州', OR: 'オレゴン州',
+    PA: 'ペンシルベニア州', RI: 'ロードアイランド州', SC: 'サウスカロライナ州', SD: 'サウスダコタ州',
+    TN: 'テネシー州', TX: 'テキサス州', UT: 'ユタ州', VT: 'バーモント州', VA: 'バージニア州',
+    WA: 'ワシントン州', WV: 'ウェストバージニア州', WI: 'ウィスコンシン州', WY: 'ワイオミング州'
+  }
 };
+
+function getStateNames() {
+  return US_STATE_NAMES[currentLang] || US_STATE_NAMES.en;
+}
+
+function stateNameLocale() {
+  return currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja' : currentLang === 'es' ? 'es' : 'en';
+}
 
 const billAmount = document.getElementById('billAmount');
 const taxRate = document.getElementById('taxRate');
@@ -1395,12 +1462,18 @@ const tipMeta = document.getElementById('tipMeta');
 const salesTaxState = document.getElementById('salesTaxState');
 
 function populateStateSelect() {
-  if (!salesTaxState || salesTaxState.options.length > 0) return;
-  const codes = Object.keys(US_STATE_NAMES).sort((a, b) => US_STATE_NAMES[a].localeCompare(US_STATE_NAMES[b]));
+  if (!salesTaxState) return;
+  const names = getStateNames();
+  const prev = salesTaxState.value || 'CA';
+  const locale = stateNameLocale();
+  const codes = Object.keys(names).sort((a, b) => names[a].localeCompare(names[b], locale));
   salesTaxState.innerHTML = codes.map(code => {
     const rate = SALES_TAX_RATES[code] ?? 0;
-    return `<option value="${code}"${code === 'CA' ? ' selected' : ''}>${US_STATE_NAMES[code]} (~${rate.toFixed(2)}%)</option>`;
+    return `<option value="${code}">${names[code]} (~${rate.toFixed(2)}%)</option>`;
   }).join('');
+  // Keep the user's state (and tax rate) when language changes; default CA on first fill.
+  salesTaxState.value = names[prev] ? prev : 'CA';
+  if (!salesTaxState.value) salesTaxState.value = 'CA';
 }
 
 function applyStateTaxRate() {
@@ -1421,8 +1494,12 @@ function updateTipEstimator() {
   const t = toolsText();
   tipResult.textContent = moneyFmt(total, 'USD');
   if (tipMeta) {
-    const state = salesTaxState ? (US_STATE_NAMES[salesTaxState.value] || salesTaxState.value) : '';
-    const taxNote = taxPct === 0
+    const names = getStateNames();
+    const code = salesTaxState ? salesTaxState.value : '';
+    const state = code ? (names[code] || code) : '';
+    const tableRate = code ? SALES_TAX_RATES[code] : null;
+    // Zero-tax message only for states with no statewide rate — not when the user manually zeros the field.
+    const taxNote = (tableRate === 0 && taxPct === 0)
       ? (t.salesTaxZero || 'No statewide sales tax (local may apply).')
       : `${t.tax || 'Tax'} ${moneyFmt(tax, 'USD')} (${taxPct.toFixed(2)}%)`;
     tipMeta.textContent = [state, taxNote, `${t.tip || 'Tip'} ${moneyFmt(tip, 'USD')}`].filter(Boolean).join(' · ');
@@ -1454,6 +1531,47 @@ const driveEvPrice = document.getElementById('driveEvPrice');
 const driveResult = document.getElementById('driveResult');
 const driveMeta = document.getElementById('driveMeta');
 let driveMode = 'gas'; // 'gas' | 'ev'
+// HTML field defaults are imperial (mi / MPG / mi/kWh / $/gal). Track last unit so toggles convert.
+let driveFieldsUnit = 'mi';
+
+function convertDriveInputsForUnitChange(fromUnit, toUnit) {
+  if (!driveDist || fromUnit === toUnit) return;
+  const toKm = toUnit === 'km';
+  const fromKm = fromUnit === 'km';
+  if (toKm === fromKm) return;
+  const miToKm = 1.60934;
+  const galToL = 3.78541;
+  const round = (n, d) => {
+    const f = Math.pow(10, d);
+    return (Math.round(n * f) / f).toFixed(d);
+  };
+  const num = (el) => Math.max(0, Number(el && el.value) || 0);
+
+  if (driveDist) {
+    const v = num(driveDist);
+    driveDist.value = toKm ? round(v * miToKm, 0) : round(v / miToKm, 0);
+  }
+  if (driveSpeed) {
+    const v = Math.max(1, num(driveSpeed));
+    driveSpeed.value = toKm ? round(v * miToKm, 0) : round(v / miToKm, 0);
+  }
+  // MPG ↔ L/100km  (L/100km = 235.215 / MPG)
+  if (driveMpg) {
+    const v = Math.max(0.1, num(driveMpg) || 0.1);
+    driveMpg.value = round(235.215 / v, 1);
+  }
+  // mi/kWh ↔ kWh/100km  (kWh/100km = 100 / (mi/kWh × 1.60934))
+  if (driveEvEcon) {
+    const v = Math.max(0.1, num(driveEvEcon) || 0.1);
+    driveEvEcon.value = round(100 / (v * miToKm), 1);
+  }
+  // $/gal ↔ $/L
+  if (driveFuel) {
+    const v = num(driveFuel);
+    driveFuel.value = toKm ? round(v / galToL, 2) : round(v * galToL, 2);
+  }
+  driveFieldsUnit = toUnit;
+}
 
 function setDriveMode(mode) {
   driveMode = mode === 'ev' ? 'ev' : 'gas';
@@ -1516,6 +1634,10 @@ document.querySelectorAll('[data-drive-type]').forEach(btn => {
   if (el) el.addEventListener('input', updateDriveCost);
 });
 if (driveToolCard) setDriveMode('gas');
+// If the user prefers metric (or OS default is km), convert imperial HTML defaults once.
+if (driveDist && currentDistUnit === 'km' && driveFieldsUnit === 'mi') {
+  convertDriveInputsForUnitChange('mi', 'km');
+}
 
 // Tools mini-app: start live widgets immediately (page is always "open").
 if (document.body.classList.contains('page-tools') || currencyAmount || worldClockList) {
@@ -1541,12 +1663,15 @@ let currentModalKey = null;
 
 function openModal(tag, title, body) {
   if (!overlay) return;
+  const alreadyOpen = overlay.classList.contains('open');
   if (modalTag) modalTag.textContent = tag;
   if (modalTitle) modalTitle.textContent = title;
   if (modalBody) modalBody.innerHTML = body;
-  overlay.classList.add('open');
-  overlay.setAttribute('aria-hidden', 'false');
-  lockBodyScroll();
+  if (!alreadyOpen) {
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    lockBodyScroll();
+  }
   applyUnits();
 }
 function closeModal() {
@@ -1780,6 +1905,10 @@ if (document.body.classList.contains('page-legal')) {
 // GALLERY — filtering, scroll-in animation, image loading state, lightbox
 // ═══════════════════════════════════════════════════════════════════════
 
+// Declared early (false) so mid-script applyLanguage can safely gate gallery chrome.
+// Flipped true after gallery event handlers and lightbox bindings are ready.
+var galleryUiReady = false;
+
 const galleryGrid = document.getElementById('galleryGrid');
 const filterBtns = document.querySelectorAll('.gallery-filter');
 const galleryEmptyState = document.getElementById('galleryEmptyState');
@@ -1931,6 +2060,29 @@ function galleryItemMatchesFilters(item) {
   return galleryItemSearchHaystack(item).includes(gallerySearchQuery);
 }
 
+/** Normalize "California" / "CA" / "Calif." style state tokens for sort/search. */
+const US_STATE_SORT_MAP = {
+  alabama: 'AL', alaska: 'AK', arizona: 'AZ', arkansas: 'AR', california: 'CA',
+  colorado: 'CO', connecticut: 'CT', delaware: 'DE', florida: 'FL', georgia: 'GA',
+  hawaii: 'HI', idaho: 'ID', illinois: 'IL', indiana: 'IN', iowa: 'IA', kansas: 'KS',
+  kentucky: 'KY', louisiana: 'LA', maine: 'ME', maryland: 'MD', massachusetts: 'MA',
+  michigan: 'MI', minnesota: 'MN', mississippi: 'MS', missouri: 'MO', montana: 'MT',
+  nebraska: 'NE', nevada: 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+  'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND',
+  ohio: 'OH', oklahoma: 'OK', oregon: 'OR', pennsylvania: 'PA', 'rhode island': 'RI',
+  'south carolina': 'SC', 'south dakota': 'SD', tennessee: 'TN', texas: 'TX', utah: 'UT',
+  vermont: 'VT', virginia: 'VA', washington: 'WA', 'west virginia': 'WV', wisconsin: 'WI',
+  wyoming: 'WY', 'district of columbia': 'DC', 'washington dc': 'DC', 'washington d c': 'DC'
+};
+
+function normalizeGalleryState(raw) {
+  const s = (raw || '').trim();
+  if (!s) return '';
+  if (s.length === 2) return s.toUpperCase();
+  const key = s.toLowerCase().replace(/\./g, '').replace(/\s+/g, ' ').trim();
+  return US_STATE_SORT_MAP[key] || s;
+}
+
 function sortGalleryItems() {
   if (!galleryGrid) return;
   const items = [...galleryGrid.querySelectorAll('.gallery-item')];
@@ -1956,7 +2108,9 @@ function sortGalleryItems() {
       return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
     }
     if (mode === 'state') {
-      const sa = (a.dataset.state || '').localeCompare(b.dataset.state || '', undefined, { sensitivity: 'base' });
+      const sa = normalizeGalleryState(a.dataset.state).localeCompare(
+        normalizeGalleryState(b.dataset.state), undefined, { sensitivity: 'base' }
+      );
       if (sa !== 0) return sa;
       const ca = (a.dataset.city || a.dataset.location || '').localeCompare(
         b.dataset.city || b.dataset.location || '', undefined, { sensitivity: 'base' }
@@ -2182,8 +2336,27 @@ function updateLightboxHdButton(img, loadedTier) {
 let lightboxLoadToken = 0;
 let lightboxXhr = null;
 let lightboxDecodeImg = null;
-// Session cache: full path → object URL (instant re-open / back-nav)
+// Session cache: full path → object URL (instant re-open / back-nav). Cap size to limit memory.
 const lightboxFullCache = new Map();
+const LIGHTBOX_CACHE_MAX = 10;
+function lightboxCacheSet(key, objectUrl) {
+  if (lightboxFullCache.has(key)) {
+    const old = lightboxFullCache.get(key);
+    if (old && old !== objectUrl && typeof old === 'string' && old.startsWith('blob:')) {
+      try { URL.revokeObjectURL(old); } catch (_) { /* ignore */ }
+    }
+    lightboxFullCache.delete(key);
+  }
+  while (lightboxFullCache.size >= LIGHTBOX_CACHE_MAX) {
+    const oldest = lightboxFullCache.keys().next().value;
+    const url = lightboxFullCache.get(oldest);
+    lightboxFullCache.delete(oldest);
+    if (url && typeof url === 'string' && url.startsWith('blob:')) {
+      try { URL.revokeObjectURL(url); } catch (_) { /* ignore */ }
+    }
+  }
+  lightboxFullCache.set(key, objectUrl);
+}
 
 const lightboxProgress = document.getElementById('lightboxProgress');
 const lightboxProgressFill = document.getElementById('lightboxProgressFill');
@@ -2602,7 +2775,7 @@ function loadFullViaImageFallback(assetUrl, token, thumbFallback, tier) {
     if (lightboxDecodeImg === probe) lightboxDecodeImg = null;
     if (token !== lightboxLoadToken) return;
     if (ok) {
-      lightboxFullCache.set(assetUrl, assetUrl);
+      lightboxCacheSet(assetUrl, assetUrl);
       applyLightboxFullSrc(assetUrl, assetUrl, token, tier || 'medium');
     } else {
       failLightboxLoad(token, thumbFallback);
@@ -2704,8 +2877,8 @@ function loadFullWithProgress(assetUrl, token, thumbFallback, tier) {
       const byteSize = (body && typeof body.size === 'number') ? body.size : lastTotal;
       try {
         const objUrl = URL.createObjectURL(body);
-        lightboxFullCache.set(assetUrl, objUrl);
-        lightboxFullCache.set(absoluteUrl, objUrl);
+        lightboxCacheSet(assetUrl, objUrl);
+        lightboxCacheSet(absoluteUrl, objUrl);
         // Brief beat so the bar can reach the network ceiling, then decode crawl
         setTimeout(() => {
           if (token !== lightboxLoadToken) return;
@@ -2890,9 +3063,10 @@ if (lightbox) {
     if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); }
     if (e.key === 'ArrowRight') { e.preventDefault(); showNext(); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); showPrev(); }
-    // Simple focus trap between close / prev / next.
+    // Focus trap: close / prev / next / optional HD upgrade.
     if (e.key === 'Tab') {
-      const focusables = [lightboxCloseBtn, lightboxPrevBtn, lightboxNextBtn].filter(el => el && !el.hidden);
+      const focusables = [lightboxCloseBtn, lightboxPrevBtn, lightboxNextBtn, lightboxHdBtn]
+        .filter(el => el && !el.hidden && !el.disabled);
       if (!focusables.length) return;
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
@@ -2918,20 +3092,31 @@ if (lightbox) {
   }, { passive: true });
 }
 
-// After language switch, refresh dynamic gallery chrome (placeholders + aria).
-document.querySelectorAll('#langPillGroup .pill-btn').forEach(p => {
-  p.addEventListener('click', () => {
-    // Defer until the primary language handler's applyLanguage has run.
-    queueMicrotask(() => {
-      document.querySelectorAll('.gallery-item-placeholder .ph-text').forEach(el => {
-        el.textContent = GALLERY_PLACEHOLDER_TEXT[currentLang] || GALLERY_PLACEHOLDER_TEXT.en;
-      });
-      document.querySelectorAll('.gallery-item').forEach(item => {
-        const cap = item.querySelector('.gallery-caption');
-        if (cap && !item.classList.contains('load-error')) {
-          item.setAttribute('aria-label', cap.textContent.trim());
-        }
-      });
+/** Refresh gallery placeholders, tile aria, and open lightbox after language change. */
+function refreshGalleryLanguageChrome() {
+  if (!document.body.classList.contains('page-gallery')) return;
+  // applyLanguage() also runs mid-script (before the gallery section initializes).
+  // Accessing const/let gallery bindings in that window throws TDZ — bail quietly.
+  if (typeof galleryUiReady === 'undefined' || !galleryUiReady) return;
+  try {
+    document.querySelectorAll('.gallery-item-placeholder .ph-text').forEach(el => {
+      el.textContent = GALLERY_PLACEHOLDER_TEXT[currentLang] || GALLERY_PLACEHOLDER_TEXT.en;
     });
-  });
-});
+    document.querySelectorAll('.gallery-item').forEach(item => {
+      const cap = item.querySelector('.gallery-caption');
+      if (cap && !item.classList.contains('load-error')) {
+        item.setAttribute('aria-label', cap.textContent.trim());
+      }
+    });
+    if (lightbox && lightbox.classList.contains('open') && visibleItems[currentIndex]) {
+      updateLightboxChrome(visibleItems[currentIndex], currentIndex);
+      const img = visibleItems[currentIndex].querySelector('img');
+      if (typeof updateLightboxHdButton === 'function') {
+        updateLightboxHdButton(img, lightboxImg && lightboxImg.getAttribute('data-loaded-tier'));
+      }
+    }
+  } catch (_) { /* gallery bindings not ready */ }
+}
+
+// Mark gallery UI ready last so language switches can safely refresh chrome.
+galleryUiReady = true;
