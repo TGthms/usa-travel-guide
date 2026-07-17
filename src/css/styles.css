@@ -1909,8 +1909,8 @@ body.page-tools #tools.tools-page {
 .img-card-tall { height: 400px; }
 .img-card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .img-card-sm { height: 220px; border-radius: 6px; overflow: hidden; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
-.img-scene { width: 100%; height: 100%; position: relative; overflow: hidden; transition: transform .8s cubic-bezier(.22,1,.36,1); }
-.img-card:hover .img-scene, .img-card-sm:hover .img-scene { transform: scale(1.08); }
+.img-scene { width: 100%; height: 100%; position: relative; overflow: hidden; }
+/* No hover zoom — keeps photo cards calm and avoids janky scale on the intro stack */
 .scene-label { position:absolute; bottom:16px; left:16px; font-family: var(--ff-serif); font-size:10px; font-weight: 400; letter-spacing:.14em; text-transform:uppercase; color: #fff; z-index:2; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 4px; }
 .scene-canyon {
   /* Two background-image layers: the real photo (once it's added — see the
