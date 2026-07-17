@@ -1180,18 +1180,36 @@ body.page-tools .loader-sub { letter-spacing: .18em; }
 body.page-gallery #progress-bar,
 body.page-tools #progress-bar { height: 2px; }
 
-/* Tools page — full scrollable layout (not a modal panel) */
+/* Tools page — full scrollable layout (not a modal panel).
+   Horizontal inset matches #gallery (var(--section-x)) so cards don’t hug the
+   viewport edges the way a zero-padded panel did. */
 body.page-tools #tools.tools-page {
   padding-left: var(--section-x);
   padding-right: var(--section-x);
   max-width: none;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 body.page-tools .tools-page .tools-grid {
   max-width: var(--content-max);
   margin: 0 auto;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+/* Mini-app pages: slightly roomier gutters on phones (matches gallery comfort) */
+@media (max-width: 860px) {
+  body.page-gallery #gallery,
+  body.page-tools #tools.tools-page {
+    padding-left: max(1.25rem, var(--section-x));
+    padding-right: max(1.25rem, var(--section-x));
+  }
+}
+@media (max-width: 540px) {
+  body.page-gallery #gallery,
+  body.page-tools #tools.tools-page {
+    padding-left: max(1.35rem, var(--section-x));
+    padding-right: max(1.35rem, var(--section-x));
+  }
 }
 /* Match gallery mini-app card language: softer radius, calm borders, subtle depth */
 body.page-tools .tools-page .tool-card {
@@ -1474,7 +1492,8 @@ body.page-tools .clock-time { font-size: 18px; font-family: var(--ff-display); }
   gap: 14px;
   align-items: stretch;
 }
-/* On the dedicated tools page, never clamp height like a dialog */
+/* On the dedicated tools page, never clamp height like a dialog.
+   Keep horizontal section-x inset (same rhythm as gallery) — do not zero sides. */
 body.page-tools .tools-panel,
 body.page-tools #tools.tools-page {
   max-height: none;
@@ -1485,8 +1504,6 @@ body.page-tools #tools.tools-page {
   box-shadow: none;
   border-radius: 0;
   transform: none;
-  padding-left: 0;
-  padding-right: 0;
 }
 .tool-card {
   padding: 22px 20px; border: 1px solid var(--border-light); border-radius: var(--radius);
@@ -3270,8 +3287,14 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .hero-cta .btn-primary, .hero-cta .btn-ghost {
     flex: 1 1 auto; justify-content: center; width: 100%; text-align: center;
   }
-  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, footer,
+  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, footer,
   .gallery-teaser-section { padding-left: 16px; padding-right: 16px; }
+  /* Mini-app pages keep the roomier gallery-style gutters (not the 16px guide squeeze) */
+  body.page-gallery #gallery,
+  body.page-tools #tools.tools-page {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
   #navbar { padding-left: 14px; padding-right: 14px; }
   .hero-content {
     padding-left: 16px;
