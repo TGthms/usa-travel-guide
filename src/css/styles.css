@@ -1926,10 +1926,21 @@ body.page-tools #tools.tools-page {
   background-size: cover, cover;
   background-position: center, center;
 }
-.scene-nyc { background: linear-gradient(180deg, #06090f 0%, #0d1025 50%, #1a1a2e 100%); }
-.scene-nyc::before { content:''; position:absolute; bottom:0; left:0; right:0; height:75%; background: repeating-linear-gradient(90deg, transparent 0px, transparent 10px, rgba(255,215,90,0.15) 10px, rgba(255,215,90,0.15) 12px, transparent 12px, transparent 34px, rgba(255,195,70,0.1) 34px, rgba(255,195,70,0.1) 36px, transparent 36px, transparent 50px, rgba(90,170,255,0.1) 50px, rgba(90,170,255,0.1) 52px ); }
-.scene-yellow { background: linear-gradient(160deg, #1a4a2a 0%, #0d2a14 40%, #0a1a0a 100%); }
-.scene-yellow::before { content:''; position:absolute; top:20%; left:35%; width:100px; height:180px; background: radial-gradient(ellipse 25% 100% at 50% 100%, rgba(210,235,255,0.85) 0%, rgba(190,215,255,0.35) 40%, transparent 100%); border-radius: 50%; }
+/* Real trip photos (fallbacks keep the card filled if a path fails) */
+.scene-nyc {
+  background-image:
+    url('../../images/harbor_blvd.jpg'),
+    linear-gradient(180deg, #1a3040 0%, #0d1820 100%);
+  background-size: cover, cover;
+  background-position: center, center;
+}
+.scene-yellow {
+  background-image:
+    url('../../images/mirage-apple.jpg'),
+    linear-gradient(160deg, #2a2a2e 0%, #121216 100%);
+  background-size: cover, cover;
+  background-position: center, center;
+}
 
 /* ═══ DIVIDER ═══ */
 .section-divider { max-width: var(--content-max); margin: 0 auto; height: 1px; background: linear-gradient(to right, transparent, var(--border-med), transparent); }

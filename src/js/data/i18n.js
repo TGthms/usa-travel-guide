@@ -47,8 +47,8 @@ window.I18N = {
     "intro.factGdp": "PIB",
     "intro.factTimezones": "Husos horarios",
     "intro.sceneCanyon": "San Francisco, California",
-    "intro.sceneNyc": "Ciudad de Nueva York",
-    "intro.sceneYellow": "Yellowstone",
+    "intro.sceneNyc": "Los Ángeles",
+    "intro.sceneYellow": "Cupertino",
 
     "regions.eyebrow": "Explora por región",
     "regions.heading": "Un país,<br><em>cinco caras distintas</em>",
@@ -435,8 +435,8 @@ window.I18N = {
     "intro.factGdp": "GDP",
     "intro.factTimezones": "时区",
     "intro.sceneCanyon": "旧金山，加利福尼亚州",
-    "intro.sceneNyc": "纽约市",
-    "intro.sceneYellow": "黄石公园",
+    "intro.sceneNyc": "洛杉矶",
+    "intro.sceneYellow": "库比蒂诺",
 
     "regions.eyebrow": "按地区探索",
     "regions.heading": "一个国家，<br><em>五种面貌</em>",
@@ -823,8 +823,8 @@ window.I18N = {
     "intro.factGdp": "GDP",
     "intro.factTimezones": "タイムゾーン",
     "intro.sceneCanyon": "サンフランシスコ市、カリフォルニア州",
-    "intro.sceneNyc": "ニューヨーク市",
-    "intro.sceneYellow": "イエローストーン",
+    "intro.sceneNyc": "ロサンゼルス",
+    "intro.sceneYellow": "クパチーノ",
 
     "regions.eyebrow": "地域で見るアメリカ",
     "regions.heading": "一つの国に宿る、<br><em>五つの表情</em>",
