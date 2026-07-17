@@ -129,4 +129,92 @@ test.describe('USA Travel Guide smoke', () => {
     await page.waitForFunction(() => window.LEGAL_I18N && window.LEGAL_I18N.privacy);
     await expect(page.locator('#legalDoc, .legal-doc, article').first()).toBeVisible({ timeout: 10_000 });
   });
+
+  test('modal opens for a destination and closes with Escape', async ({ page }) => {
+    const card = page.locator('.dest-card[data-dest="nyc"]').first();
+    await card.scrollIntoViewIfNeeded();
+    await card.click();
+    await expect(page.locator('#modal-overlay')).toHaveClass(/open/);
+    await expect(page.locator('#modal-title')).not.toBeEmpty();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#modal-overlay')).not.toHaveClass(/open/);
+  });
+
+  test('gallery lightbox opens and navigates', async ({ page }) => {
+    await page.goto('/gallery.html');
+    await page.waitForFunction(() =>
+      document.body.classList.contains('page-gallery') &&
+      document.querySelectorAll('#galleryGrid .gallery-item:not(.hidden)').length > 1
+    );
+    // Splash overlay intercepts clicks until it gets .gone (desktop ~400ms after load).
+    await page.locator('#loader').waitFor({ state: 'hidden' }).catch(async () => {
+      await page.waitForFunction(() => {
+        const l = document.getElementById('loader');
+        return !l || l.classList.contains('gone');
+      });
+    });
+    const first = page.locator('#galleryGrid .gallery-item').first();
+    await first.scrollIntoViewIfNeeded();
+    await first.click();
+    await expect(page.locator('#lightbox')).toHaveClass(/open/, { timeout: 10_000 });
+    await expect(page.locator('#lightboxImg')).toBeVisible();
+    const before = await page.locator('#lightboxCounter').textContent();
+    await page.locator('#lightboxNext').click();
+    await expect(page.locator('#lightboxCounter')).not.toHaveText(before || '', { timeout: 10_000 });
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#lightbox')).not.toHaveClass(/open/);
+  });
+
+  test('tools currency localizes names and swap works', async ({ page }) => {
+    await page.goto('/tools.html');
+    await page.waitForFunction(() => document.querySelectorAll('#currencyFrom option').length >= 5);
+    await expect(page.locator('#currencyFrom option[value="USD"]')).toContainText(/Dollar|USD/);
+    await openSettings(page);
+    await page.locator('#langPillGroup .pill-btn[data-lang-val="zh"]').click();
+    await closeSettings(page);
+    await expect(page.locator('#currencyFrom option[value="USD"]')).toContainText('美元');
+    // Swap preserves codes
+    const fromBefore = await page.locator('#currencyFrom').inputValue();
+    const toBefore = await page.locator('#currencyTo').inputValue();
+    await page.locator('#currencySwap').click();
+    await expect(page.locator('#currencyFrom')).toHaveValue(toBefore);
+    await expect(page.locator('#currencyTo')).toHaveValue(fromBefore);
+  });
+
+  test('tools drive fields convert when distance unit changes', async ({ page }) => {
+    await page.goto('/tools.html');
+    await expect(page.locator('#driveDist')).toBeVisible();
+    // Force imperial baseline
+    await openSettings(page);
+    await page.locator('#unitDistGroup .pill-btn[data-unit-val="mi"]').click();
+    await closeSettings(page);
+    await page.locator('#driveDist').fill('100');
+    await page.locator('#driveMpg').fill('25');
+    await openSettings(page);
+    await page.locator('#unitDistGroup .pill-btn[data-unit-val="km"]').click();
+    await closeSettings(page);
+    const distKm = Number(await page.locator('#driveDist').inputValue());
+    const mpgOrL = Number(await page.locator('#driveMpg').inputValue());
+    expect(distKm).toBeGreaterThan(150); // ~160.9 km
+    expect(distKm).toBeLessThan(170);
+    // 235.215/25 ≈ 9.4 L/100km
+    expect(mpgOrL).toBeGreaterThan(8);
+    expect(mpgOrL).toBeLessThan(11);
+    await expect(page.locator('#driveEconLabel')).toContainText(/L\/100|升/);
+  });
+
+  test('tools and gallery have comfortable side inset on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const path of ['/tools.html', '/gallery.html']) {
+      await page.goto(path);
+      const pad = await page.evaluate((isTools) => {
+        const el = isTools
+          ? document.querySelector('#tools.tools-page')
+          : document.querySelector('#gallery');
+        if (!el) return 0;
+        return parseFloat(getComputedStyle(el).paddingLeft) || 0;
+      }, path.includes('tools'));
+      expect(pad, `${path} left padding`).toBeGreaterThanOrEqual(18);
+    }
+  });
 });

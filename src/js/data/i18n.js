@@ -20,6 +20,10 @@ window.I18N = {
     "nav.tips": "Consejos",
     "nav.settings": "Ajustes",
     "nav.tools": "Herramientas",
+    "aria.closeSettings": "Cerrar ajustes",
+    "aria.closeModal": "Cerrar ventana",
+    "aria.closeLightbox": "Cerrar visor de fotos",
+    "aria.swapCurrencies": "Intercambiar monedas",
 
     "hero.eyebrow": "La guía de viaje definitiva",
     "hero.headline": "Tierra de<br><em>Maravillas&nbsp;Infinitas</em>",
@@ -404,6 +408,10 @@ window.I18N = {
     "nav.tips": "旅行贴士",
     "nav.settings": "设置",
     "nav.tools": "工具",
+    "aria.closeSettings": "关闭设置",
+    "aria.closeModal": "关闭窗口",
+    "aria.closeLightbox": "关闭照片查看器",
+    "aria.swapCurrencies": "交换货币",
 
     "hero.eyebrow": "终极旅行指南",
     "hero.headline": "无尽奇境<br><em>近在咫尺</em>",
@@ -788,6 +796,10 @@ window.I18N = {
     "nav.tips": "旅のヒント",
     "nav.settings": "設定",
     "nav.tools": "ツール",
+    "aria.closeSettings": "設定を閉じる",
+    "aria.closeModal": "モーダルを閉じる",
+    "aria.closeLightbox": "写真ビューアを閉じる",
+    "aria.swapCurrencies": "通貨を入れ替え",
 
     "hero.eyebrow": "究極の旅行ガイド",
     "hero.headline": "終わりなき<br><em>驚異の大地へ</em>",

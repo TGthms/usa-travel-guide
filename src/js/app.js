@@ -249,6 +249,7 @@ function applyLanguage(lang) {
     if (typeof updateWorldClock === 'function') updateWorldClock();
     if (typeof updateTipEstimator === 'function') updateTipEstimator();
     if (typeof updateCurrency === 'function') updateCurrency();
+    if (typeof updateDriveUnitLabels === 'function') updateDriveUnitLabels();
     if (typeof updateDriveCost === 'function') updateDriveCost();
     if (typeof updateSalesTax === 'function') updateSalesTax();
   }
@@ -262,7 +263,12 @@ function applyLanguage(lang) {
    + data-mi="<miles>" gets its displayed text regenerated here. Safe to call
    after any DOM change (language swap, modal open) since it always derives
    the label fresh from the stored raw value rather than parsing prior text. */
+function numberLocale() {
+  return currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : 'en-US';
+}
+
 function applyUnits() {
+  const loc = numberLocale();
   document.querySelectorAll('.unit-temp[data-f]').forEach(el => {
     const f = parseFloat(el.getAttribute('data-f'));
     if (currentTempUnit === 'c') {
@@ -276,14 +282,16 @@ function applyUnits() {
     const mi = parseFloat(el.getAttribute('data-mi'));
     const suffix = el.dataset.suffix || '';
     if (currentDistUnit === 'km') {
-      const km = Math.round(mi * 1.60934).toLocaleString('en-US');
-      el.textContent = km + (currentLang === 'zh' ? ' 公里' : currentLang === 'ja' ? ' km' : currentLang === 'es' ? ' km' : ' km') + suffix;
+      const km = Math.round(mi * 1.60934).toLocaleString(loc);
+      el.textContent = km + (currentLang === 'zh' ? ' 公里' : ' km') + suffix;
     } else {
-      const miFmt = Math.round(mi).toLocaleString('en-US');
-      el.textContent = miFmt + (currentLang === 'zh' ? ' 英里' : currentLang === 'ja' ? ' マイル' : currentLang === 'es' ? ' mi' : ' mi') + suffix;
+      const miFmt = Math.round(mi).toLocaleString(loc);
+      const unit = currentLang === 'zh' ? ' 英里' : currentLang === 'ja' ? ' マイル' : ' mi';
+      el.textContent = miFmt + unit + suffix;
     }
   });
-  // Road-trip tool math depends on mi vs km economy units.
+  // Road-trip tool: unit-aware labels + math.
+  if (typeof updateDriveUnitLabels === 'function') updateDriveUnitLabels();
   if (typeof updateDriveCost === 'function') updateDriveCost();
 }
 
@@ -1286,15 +1294,23 @@ function refreshToolsLive() {
 const TOOLS_TEXT = {
   en: { sameCurrency: 'Same currency selected.', updating: 'Updating...', fetching: 'Fetching latest available daily rate.', rateUnavailable: 'Rate unavailable', checkConnection: 'Check your connection and try again.', tax: 'Tax', tip: 'Tip',
     driveGal: 'gal', driveL: 'L', salesTaxZero: 'No statewide sales tax (local may apply).',
+    driveMpgMi: 'MPG', driveMpgKm: 'L/100 km', driveFuelGal: 'Fuel $/gal', driveFuelL: 'Fuel $/L',
+    driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100 km',
     cities: { 'Los Angeles': 'Los Angeles', 'New York': 'New York', 'London': 'London', 'Paris': 'Paris', 'Tokyo': 'Tokyo', 'Shanghai': 'Shanghai' } },
   es: { sameCurrency: 'Misma divisa seleccionada.', updating: 'Actualizando…', fetching: 'Obteniendo el último tipo de cambio diario disponible.', rateUnavailable: 'Tipo de cambio no disponible', checkConnection: 'Comprueba tu conexión e inténtalo de nuevo.', tax: 'Impuesto', tip: 'Propina',
     driveGal: 'gal', driveL: 'L', salesTaxZero: 'Sin impuesto estatal de ventas (puede haber impuestos locales).',
+    driveMpgMi: 'MPG', driveMpgKm: 'L/100 km', driveFuelGal: 'Combustible $/gal', driveFuelL: 'Combustible $/L',
+    driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100 km',
     cities: { 'Los Angeles': 'Los Ángeles', 'New York': 'Nueva York', 'London': 'Londres', 'Paris': 'París', 'Tokyo': 'Tokio', 'Shanghai': 'Shanghái' } },
   zh: { sameCurrency: '已选择相同货币。', updating: '更新中…', fetching: '正在获取最新每日汇率。', rateUnavailable: '汇率不可用', checkConnection: '请检查网络连接后重试。', tax: '税费', tip: '小费',
     driveGal: '加仑', driveL: '升', salesTaxZero: '该州无州销售税（可能仍有地方税）。',
+    driveMpgMi: 'MPG', driveMpgKm: '升/百公里', driveFuelGal: '油价 $/加仑', driveFuelL: '油价 $/升',
+    driveEvMi: '英里/度', driveEvKm: '度/百公里',
     cities: { 'Los Angeles': '洛杉矶', 'New York': '纽约', 'London': '伦敦', 'Paris': '巴黎', 'Tokyo': '东京', 'Shanghai': '上海' } },
   ja: { sameCurrency: '同じ通貨が選択されています。', updating: '更新中…', fetching: '最新の為替レートを取得しています。', rateUnavailable: 'レートを取得できません', checkConnection: '接続を確認して再度お試しください。', tax: '税金', tip: 'チップ',
     driveGal: 'ガロン', driveL: 'L', salesTaxZero: '州の売上税はありません（地方税がかかる場合あり）。',
+    driveMpgMi: 'MPG', driveMpgKm: 'L/100km', driveFuelGal: '燃料 $/gal', driveFuelL: '燃料 $/L',
+    driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100km',
     cities: { 'Los Angeles': 'ロサンゼルス', 'New York': 'ニューヨーク', 'London': 'ロンドン', 'Paris': 'パリ', 'Tokyo': '東京', 'Shanghai': '上海' } },
 };
 function toolsText() { return TOOLS_TEXT[currentLang] || TOOLS_TEXT.en; }
@@ -1366,12 +1382,23 @@ function moneyFmt(value, currency) {
 // Build localized currency options as soon as the selects exist.
 populateCurrencySelects();
 
+let currencyReqId = 0;
+
 async function updateCurrency() {
   if (!currencyAmount || !currencyFrom || !currencyTo || !currencyResult) return;
+  // Always cancel any in-flight request first (including same-currency / offline paths)
+  // so a late fetch cannot overwrite a newer UI state.
+  if (currencyAbort && typeof currencyAbort.abort === 'function') {
+    try { currencyAbort.abort(); } catch (_) { /* ignore */ }
+  }
+  currencyAbort = null;
+
   const amount = Math.max(0, Number(currencyAmount.value) || 0);
   const base = currencyFrom.value;
   const quote = currencyTo.value;
   const t = toolsText();
+  const reqId = ++currencyReqId;
+
   if (base === quote) {
     currencyResult.textContent = `${moneyFmt(amount, base)} = ${moneyFmt(amount, quote)}`;
     currencyMeta.textContent = t.sameCurrency;
@@ -1382,7 +1409,6 @@ async function updateCurrency() {
     currencyMeta.textContent = t.checkConnection;
     return;
   }
-  if (currencyAbort && typeof currencyAbort.abort === 'function') currencyAbort.abort();
   const canAbort = typeof AbortController === 'function';
   currencyAbort = canAbort ? new AbortController() : null;
   currencyResult.textContent = t.updating;
@@ -1390,13 +1416,19 @@ async function updateCurrency() {
   try {
     const fetchOpts = currencyAbort ? { signal: currencyAbort.signal } : {};
     const res = await fetch(`https://api.frankfurter.dev/v2/rate/${base}/${quote}`, fetchOpts);
+    if (reqId !== currencyReqId) return; // superseded
     if (!res.ok) throw new Error('Rate unavailable');
     const data = await res.json();
-    const converted = amount * Number(data.rate);
-    currencyResult.textContent = `${moneyFmt(amount, base)} = ${moneyFmt(converted, quote)}`;
+    if (reqId !== currencyReqId) return;
+    // Inputs may have changed while we waited (even if abort is unsupported).
+    if (currencyFrom.value !== base || currencyTo.value !== quote) return;
+    const stillAmount = Math.max(0, Number(currencyAmount.value) || 0);
+    const converted = stillAmount * Number(data.rate);
+    currencyResult.textContent = `${moneyFmt(stillAmount, base)} = ${moneyFmt(converted, quote)}`;
     currencyMeta.textContent = `1 ${base} = ${Number(data.rate).toFixed(4)} ${quote}${data.date ? ` · ${data.date}` : ''}`;
   } catch (err) {
     if (err && err.name === 'AbortError') return;
+    if (reqId !== currencyReqId) return;
     currencyResult.textContent = t.rateUnavailable;
     currencyMeta.textContent = t.checkConnection;
   }
@@ -1626,6 +1658,19 @@ function convertDriveInputsForUnitChange(fromUnit, toUnit) {
     driveFuel.value = toKm ? round(v / galToL, 2) : round(v * galToL, 2);
   }
   driveFieldsUnit = toUnit;
+  updateDriveUnitLabels();
+}
+
+/** Show only the active unit system on drive field labels (not dual “MPG / L/100km”). */
+function updateDriveUnitLabels() {
+  const t = toolsText();
+  const imperial = currentDistUnit !== 'km';
+  const mpgEl = document.getElementById('driveEconLabel');
+  const fuelEl = document.getElementById('drivePriceLabel');
+  const evEl = document.getElementById('driveEvEconLabel');
+  if (mpgEl) mpgEl.textContent = imperial ? (t.driveMpgMi || 'MPG') : (t.driveMpgKm || 'L/100 km');
+  if (fuelEl) fuelEl.textContent = imperial ? (t.driveFuelGal || 'Fuel $/gal') : (t.driveFuelL || 'Fuel $/L');
+  if (evEl) evEl.textContent = imperial ? (t.driveEvMi || 'mi/kWh') : (t.driveEvKm || 'kWh/100 km');
 }
 
 function setDriveMode(mode) {
@@ -1693,6 +1738,7 @@ if (driveToolCard) setDriveMode('gas');
 if (driveDist && currentDistUnit === 'km' && driveFieldsUnit === 'mi') {
   convertDriveInputsForUnitChange('mi', 'km');
 }
+updateDriveUnitLabels();
 
 // Tools mini-app: start live widgets immediately (page is always "open").
 if (document.body.classList.contains('page-tools') || currencyAmount || worldClockList) {
