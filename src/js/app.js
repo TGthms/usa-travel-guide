@@ -244,6 +244,7 @@ function applyLanguage(lang) {
   }
   // Refresh live-generated tools text when language changes (tools page).
   if (document.body.classList.contains('page-tools') || document.getElementById('currencyAmount')) {
+    if (typeof populateCurrencySelects === 'function') populateCurrencySelects();
     if (typeof populateStateSelect === 'function') populateStateSelect();
     if (typeof updateWorldClock === 'function') updateWorldClock();
     if (typeof updateTipEstimator === 'function') updateTipEstimator();
@@ -1298,6 +1299,57 @@ const TOOLS_TEXT = {
 };
 function toolsText() { return TOOLS_TEXT[currentLang] || TOOLS_TEXT.en; }
 
+/* Localized currency display names for the converter selects (codes stay ISO). */
+const CURRENCY_CODES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'HKD', 'CHF', 'MXN'];
+const CURRENCY_NAMES = {
+  en: {
+    USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', CAD: 'Canadian Dollar',
+    AUD: 'Australian Dollar', JPY: 'Japanese Yen', CNY: 'Chinese Yuan',
+    HKD: 'Hong Kong Dollar', CHF: 'Swiss Franc', MXN: 'Mexican Peso'
+  },
+  es: {
+    USD: 'Dólar estadounidense', EUR: 'Euro', GBP: 'Libra esterlina', CAD: 'Dólar canadiense',
+    AUD: 'Dólar australiano', JPY: 'Yen japonés', CNY: 'Yuan chino',
+    HKD: 'Dólar de Hong Kong', CHF: 'Franco suizo', MXN: 'Peso mexicano'
+  },
+  zh: {
+    USD: '美元', EUR: '欧元', GBP: '英镑', CAD: '加拿大元',
+    AUD: '澳大利亚元', JPY: '日元', CNY: '人民币',
+    HKD: '港元', CHF: '瑞士法郎', MXN: '墨西哥比索'
+  },
+  ja: {
+    USD: '米ドル', EUR: 'ユーロ', GBP: '英ポンド', CAD: 'カナダドル',
+    AUD: 'オーストラリアドル', JPY: '日本円', CNY: '中国元',
+    HKD: '香港ドル', CHF: 'スイスフラン', MXN: 'メキシコペソ'
+  }
+};
+
+function getCurrencyNames() {
+  return CURRENCY_NAMES[currentLang] || CURRENCY_NAMES.en;
+}
+
+function currencyOptionLabel(code) {
+  const names = getCurrencyNames();
+  const name = names[code] || code;
+  // CJK: name first is more natural; Latin: code then name
+  if (currentLang === 'zh' || currentLang === 'ja') return `${name} (${code})`;
+  return `${code} — ${name}`;
+}
+
+function populateCurrencySelects() {
+  if (!currencyFrom || !currencyTo) return;
+  const prevFrom = currencyFrom.value || 'USD';
+  const prevTo = currencyTo.value || 'EUR';
+  const mkOptions = (selected) => CURRENCY_CODES.map(code =>
+    `<option value="${code}"${code === selected ? ' selected' : ''}>${currencyOptionLabel(code)}</option>`
+  ).join('');
+  currencyFrom.innerHTML = mkOptions(CURRENCY_CODES.includes(prevFrom) ? prevFrom : 'USD');
+  currencyTo.innerHTML = mkOptions(CURRENCY_CODES.includes(prevTo) ? prevTo : 'EUR');
+  // Ensure selection stuck if browser ignored selected attributes
+  currencyFrom.value = CURRENCY_CODES.includes(prevFrom) ? prevFrom : 'USD';
+  currencyTo.value = CURRENCY_CODES.includes(prevTo) ? prevTo : 'EUR';
+}
+
 const currencyAmount = document.getElementById('currencyAmount');
 const currencyFrom = document.getElementById('currencyFrom');
 const currencyTo = document.getElementById('currencyTo');
@@ -1310,6 +1362,9 @@ function moneyFmt(value, currency) {
   try { return new Intl.NumberFormat(currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value); }
   catch (e) { return `${value.toFixed(2)} ${currency}`; }
 }
+
+// Build localized currency options as soon as the selects exist.
+populateCurrencySelects();
 
 async function updateCurrency() {
   if (!currencyAmount || !currencyFrom || !currencyTo || !currencyResult) return;

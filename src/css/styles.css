@@ -1191,12 +1191,26 @@ body.page-tools .tools-page .tools-grid {
   max-width: var(--content-max);
   margin: 0 auto;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
+/* Match gallery mini-app card language: softer radius, calm borders, subtle depth */
 body.page-tools .tools-page .tool-card {
   background: var(--bg-card);
   box-shadow: var(--shadow-card);
   min-height: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--border-med, var(--border-light));
+  padding: 24px 22px;
+}
+body.page-tools .tools-page .tool-card .settings-group-label {
+  letter-spacing: .14em;
+  margin-bottom: 8px;
+}
+body.page-tools .tools-page .tool-card .settings-group-sub {
+  margin-bottom: 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-dim);
 }
 body.page-tools .tools-page .tool-card-wide {
   grid-column: 1 / -1;
@@ -1204,9 +1218,108 @@ body.page-tools .tools-page .tool-card-wide {
 body.page-tools .tools-page .clock-list {
   max-height: min(320px, 50vh);
 }
+/* Tools inputs align with gallery search/sort chrome */
+body.page-tools .tool-field span {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .1em;
+  color: var(--text-dim);
+}
+body.page-tools .tool-field input,
+body.page-tools .tool-field select {
+  border-radius: 12px;
+  border: 1px solid var(--border-med, var(--border-light));
+  background: var(--bg-base);
+  min-height: 46px;
+  padding: 11px 14px;
+  font: 500 16px/1.3 var(--ff-body);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+body.page-tools .tool-field input:focus,
+body.page-tools .tool-field select:focus {
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 22%, transparent);
+}
+body.page-tools .tool-swap {
+  border-radius: 12px;
+  border: 1px solid var(--border-med, var(--border-light));
+  background: var(--bg-base);
+  color: var(--text-main);
+  min-height: 46px;
+  transition: border-color .15s ease, box-shadow .15s ease, color .15s ease, transform .2s ease;
+}
+body.page-tools .tool-swap:hover {
+  border-color: var(--accent-1);
+  color: var(--accent-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 16%, transparent);
+}
+body.page-tools .tool-result {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+}
+body.page-tools .tool-meta {
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+body.page-tools .tool-info-list li {
+  border-radius: 12px;
+  border: 1px solid var(--border-med, var(--border-light));
+  padding: 12px 14px;
+}
+body.page-tools .clock-row {
+  padding: 12px 0;
+}
+body.page-tools .clock-city { font-size: 14px; }
+body.page-tools .clock-time { font-size: 18px; font-family: var(--ff-display); }
 @media (max-width: 900px) {
   body.page-tools .tools-page .tools-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+/* Phone: compact currency row — From | ⇄ | To (no giant full-width swap bar) */
+@media (max-width: 720px) {
+  body.page-tools .tools-page .tool-card {
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+  body.page-tools .currency-tool {
+    grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+    grid-template-areas:
+      "amount amount amount"
+      "from   swap   to";
+    gap: 12px 10px;
+    align-items: end;
+  }
+  body.page-tools .currency-tool > .tool-field:nth-child(1) { grid-area: amount; }
+  body.page-tools .currency-tool > .tool-field:nth-child(2) { grid-area: from; }
+  body.page-tools .currency-tool > .tool-swap { grid-area: swap; }
+  body.page-tools .currency-tool > .tool-field:nth-child(4) { grid-area: to; }
+  body.page-tools .currency-tool .tool-swap {
+    width: 48px;
+    height: 46px;
+    min-height: 46px;
+    border-radius: 50%;
+    justify-self: center;
+    align-self: end;
+    margin-bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    padding: 0;
+  }
+  body.page-tools .tool-field select {
+    /* Long localized currency labels need a bit more room */
+    font-size: 14px;
+    padding-left: 12px;
+    padding-right: 28px;
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-mute) 50%),
+                      linear-gradient(135deg, var(--text-mute) 50%, transparent 50%);
+    background-position: calc(100% - 14px) calc(50% - 2px), calc(100% - 9px) calc(50% - 2px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
   }
 }
 @media (min-width: 1600px) {
@@ -1427,8 +1540,18 @@ body.page-tools #tools.tools-page {
 @media (max-width: 900px) {
   .tools-grid { grid-template-columns: 1fr; }
   .tool-card-wide { grid-column: auto; }
-  .currency-tool { grid-template-columns: 1fr 1fr; }
-  .currency-tool .tool-swap { grid-column: 1 / -1; width: 100%; }
+  /* From | swap | To on one row (amount still full width via page-tools rules) */
+  .currency-tool {
+    grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);
+    align-items: end;
+  }
+  .currency-tool .tool-field:first-child { grid-column: 1 / -1; }
+  .currency-tool .tool-swap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    justify-self: center;
+  }
 }
 /* Landscape phones / short viewports: denser multi-column, less vertical waste */
 @media (max-height: 520px) and (orientation: landscape) {
@@ -1608,9 +1731,19 @@ body.page-tools #tools.tools-page {
 }
 .hero-bg {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 30% 50%, var(--border-light) 0%, transparent 70%),
-              linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 40%, var(--bg-surface-2) 100%);
+  /* Layered depth: soft gold wash + deep navy falloff + bottom vignette for type */
+  background:
+    radial-gradient(ellipse 90% 70% at 18% 28%, color-mix(in srgb, var(--accent-1) 14%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 55% at 78% 72%, color-mix(in srgb, var(--border-light) 55%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 80% at 40% 100%, rgba(0, 0, 0, .35) 0%, transparent 55%),
+    linear-gradient(165deg, var(--bg-surface) 0%, var(--bg-base) 42%, var(--bg-surface-2) 100%);
   /* Static — continuous bg breathe + will-change was a free GPU tax on every visit */
+}
+.hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, color-mix(in srgb, var(--bg-base) 72%, transparent) 0%, transparent 42%);
 }
 /* Full-viewport overlay for the particle trail. Explicit width/height keep
    CSS pixels aligned with the JS DPR-scaled drawing buffer (without this,
@@ -3018,9 +3151,44 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .nav-links { display: none; }
   .nav-actions { margin-left: auto; gap: 8px; }
   .nav-hamburger { display: flex; }
+  /* Mobile hero: fill the screen with balanced vertical centering, less empty void */
+  #hero {
+    align-items: center;
+    min-height: 100dvh;
+    min-height: 100svh;
+  }
   #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, #fun-facts, .site-footer,
   .gallery-teaser-section { padding-left: 24px; padding-right: 24px; }
-  .hero-content { padding: 0 24px 80px; }
+  .hero-content {
+    padding: max(5.5rem, calc(4.5rem + env(safe-area-inset-top, 0px))) 24px max(5rem, calc(3.5rem + env(safe-area-inset-bottom, 0px)));
+    max-width: 36rem;
+  }
+  .hero-eyebrow {
+    margin-bottom: 16px;
+    letter-spacing: .18em;
+  }
+  .hero-h1 {
+    max-width: 12ch;
+    line-height: 0.98;
+    margin-bottom: 1.1rem;
+  }
+  .hero-desc {
+    font-size: clamp(0.98rem, 3.6vw, 1.08rem);
+    line-height: 1.62;
+    margin-bottom: 1.75rem;
+    max-width: 34em;
+  }
+  .hero-cta { gap: 10px; }
+  .hero-cta .btn-primary,
+  .hero-cta .btn-ghost {
+    border-radius: 10px;
+    letter-spacing: .1em;
+    min-height: 48px;
+  }
+  .hero-scroll {
+    bottom: max(18px, env(safe-area-inset-bottom, 0px));
+  }
+  .scroll-line { height: 44px; }
   .intro-grid { grid-template-columns: 1fr; }
   .intro-right { display: none; }
   .intro-facts { grid-template-columns: repeat(2,1fr); }
@@ -3071,8 +3239,17 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .theme-swatch-grid { grid-template-columns: repeat(2, 1fr); }
   .intro-facts { gap: 10px; }
   .fact-card { padding: 18px 14px; }
-  .currency-tool { grid-template-columns: 1fr; }
-  .currency-tool .tool-swap { grid-column: auto; width: 100%; }
+  /* Keep From | ⇄ | To — never stack swap as a full-width bar */
+  .currency-tool {
+    grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+  }
+  .currency-tool .tool-field:first-child { grid-column: 1 / -1; }
+  .currency-tool .tool-swap {
+    width: 48px;
+    height: 46px;
+    border-radius: 50%;
+    justify-self: center;
+  }
 }
 @media (max-width: 540px) {
   .tool-two-col { grid-template-columns: 1fr; }
@@ -3089,13 +3266,21 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   }
 }
 @media (max-width: 400px) {
-  .hero-cta { width: 100%; }
-  .hero-cta .btn-primary, .hero-cta .btn-ghost { flex: 1 1 auto; justify-content: center; }
+  .hero-cta { width: 100%; flex-direction: column; align-items: stretch; }
+  .hero-cta .btn-primary, .hero-cta .btn-ghost {
+    flex: 1 1 auto; justify-content: center; width: 100%; text-align: center;
+  }
   #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, footer,
-  .gallery-teaser-section { padding-left: 14px; padding-right: 14px; }
+  .gallery-teaser-section { padding-left: 16px; padding-right: 16px; }
   #navbar { padding-left: 14px; padding-right: 14px; }
-  .hero-content { padding-left: 14px; padding-right: 14px; }
-  .hero-h1 { font-size: clamp(2.4rem, 14vw, 3.5rem); }
+  .hero-content {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: max(5rem, calc(4rem + env(safe-area-inset-top, 0px)));
+    padding-bottom: max(4.25rem, calc(3rem + env(safe-area-inset-bottom, 0px)));
+  }
+  .hero-h1 { font-size: clamp(2.55rem, 12.5vw, 3.35rem); letter-spacing: -.035em; }
+  .hero-desc { font-size: 0.98rem; }
   .section-header h2, #practical h2, .tips-header h2 { font-size: clamp(1.7rem, 8vw, 2.2rem) !important; }
   .loader-bar { width: min(240px, 70vw); }
   .theme-swatch-grid { grid-template-columns: 1fr 1fr; }
