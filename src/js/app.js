@@ -167,6 +167,20 @@ i18nEls.forEach(el => {
   );
 });
 
+/** Calendar year for © notices — never hardcode the year in UI copy. */
+function copyrightYear() {
+  return String(new Date().getFullYear());
+}
+
+/** Expand `{year}` (and legacy `© 20xx`) so footers/legal stay current automatically. */
+function withCopyrightYear(text) {
+  if (text == null || text === '') return text;
+  const y = copyrightYear();
+  return String(text)
+    .replace(/\{year\}/g, y)
+    .replace(/©\s*20\d{2}\b/g, '© ' + y);
+}
+
 function applyLanguage(lang) {
   const dict = I18N[lang];
   i18nEls.forEach(el => {
@@ -179,16 +193,17 @@ function applyLanguage(lang) {
       : el.getAttribute('data-i18n');
     const translated = dict && dict[key];
     if (lang === 'en' || !translated) {
-      const orig = i18nOriginals.get(el);
+      const orig = withCopyrightYear(i18nOriginals.get(el));
       if (isAria) el.setAttribute('aria-label', orig);
       else if (isPh) el.setAttribute('placeholder', orig);
       else if (isHtml) el.innerHTML = orig;
       else el.textContent = orig;
     } else {
-      if (isAria) el.setAttribute('aria-label', translated);
-      else if (isPh) el.setAttribute('placeholder', translated);
-      else if (isHtml) el.innerHTML = translated;
-      else el.textContent = translated;
+      const t = withCopyrightYear(translated);
+      if (isAria) el.setAttribute('aria-label', t);
+      else if (isPh) el.setAttribute('placeholder', t);
+      else if (isHtml) el.innerHTML = t;
+      else el.textContent = t;
     }
   });
   document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : lang === 'es' ? 'es' : 'en');
@@ -1845,6 +1860,8 @@ function renderLegalPage(lang) {
   if (!pack) return;
   const data = pack[lang] || pack.en;
   if (!data) return;
+  // Stamp © years at render time so legal copy never needs a manual year edit.
+  const y = (s) => withCopyrightYear(s);
 
   const topTitle = document.getElementById('legalTopTitle');
   if (topTitle) topTitle.textContent = data.title;
@@ -1854,9 +1871,8 @@ function renderLegalPage(lang) {
   ).join('');
 
   const sectionsHtml = (data.sections || []).map((s) =>
-    `<section id="${s.id}" class="legal-section"><h2>${s.title}</h2>${s.html}</section>`
+    `<section id="${s.id}" class="legal-section"><h2>${s.title}</h2>${y(s.html)}</section>`
   ).join('');
-
   const otherPage = kind === 'privacy' ? 'terms.html' : 'privacy.html';
   const otherKey = kind === 'privacy' ? 'legal.termsLink' : 'legal.privacyLink';
   const otherLabel = (I18N[lang] && I18N[lang][otherKey])
@@ -1884,7 +1900,7 @@ function renderLegalPage(lang) {
         <span aria-hidden="true"> · </span>
         <a href="index.html">${backLabel}</a>
       </p>
-      <p class="legal-copy">${data.footerNote || ''}</p>
+      <p class="legal-copy">${y(data.footerNote || '')}</p>
     </footer>
   `;
 }
@@ -3116,7 +3132,12 @@ document.querySelectorAll('.gallery-item').forEach((item) => {
     if (item.classList.contains('load-error') || item.classList.contains('hidden')) return;
     lastFocusedThumb = item;
     refreshVisibleGalleryItems();
-    const idx = visibleItems.indexOf(item);
+    let idx = visibleItems.indexOf(item);
+    // If the tile is visible but missing from the cache (race after filter/sort), rebuild once.
+    if (idx < 0) {
+      visibleItems = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.load-error)')];
+      idx = visibleItems.indexOf(item);
+    }
     if (idx >= 0) openLightbox(idx);
   });
 });

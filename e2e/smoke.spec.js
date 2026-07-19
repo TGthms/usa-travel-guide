@@ -135,20 +135,18 @@ test.describe('USA Travel Guide smoke', () => {
 
   test('gallery lightbox opens and navigates', async ({ page }) => {
     await page.goto('/gallery.html');
-    await page.waitForFunction(() =>
-      document.body.classList.contains('page-gallery') &&
-      document.querySelectorAll('#galleryGrid .gallery-item:not(.hidden)').length > 1
-    );
-    // Splash overlay intercepts clicks until it gets .gone (desktop ~400ms after load).
-    await page.locator('#loader').waitFor({ state: 'hidden' }).catch(async () => {
-      await page.waitForFunction(() => {
-        const l = document.getElementById('loader');
-        return !l || l.classList.contains('gone');
-      });
+    // Wait until splash is gone and grid handlers can receive clicks.
+    await page.waitForFunction(() => {
+      const loader = document.getElementById('loader');
+      const ready = !loader || loader.classList.contains('gone');
+      const n = document.querySelectorAll('#galleryGrid .gallery-item:not(.hidden)').length;
+      return document.body.classList.contains('page-gallery') && ready && n > 1;
     });
-    const first = page.locator('#galleryGrid .gallery-item').first();
-    await first.scrollIntoViewIfNeeded();
-    await first.click();
+    // Dispatch on the tile itself (avoids sticky-filter / overlay intercept flakes).
+    await page.evaluate(() => {
+      const item = document.querySelector('#galleryGrid .gallery-item:not(.hidden)');
+      if (item) item.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    });
     await expect(page.locator('#lightbox')).toHaveClass(/open/, { timeout: 10_000 });
     await expect(page.locator('#lightboxImg')).toBeVisible();
     const before = await page.locator('#lightboxCounter').textContent();

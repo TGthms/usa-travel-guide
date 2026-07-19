@@ -386,7 +386,7 @@ window.I18N = {
     "footer.parks": "Parques nacionales",
     "footer.whenToVisit": "Cuándo viajar",
     "footer.visa": "Visado y entrada",
-    "footer.copyright": "© 2026 Guía de viaje de EE. UU. &nbsp;·&nbsp; Hecho con pasión por la carretera abierta | Creado por Tim G · En colaboración con IA",
+    "footer.copyright": "© {year} Guía de viaje de EE. UU. &nbsp;·&nbsp; Hecho con pasión por la carretera abierta | Creado por Tim G · En colaboración con IA",
     "footer.motto": "Tierra de libres, hogar de valientes 🇺🇸",
 
     "funFacts.eyebrow": "¿Sabías que…?",
@@ -774,7 +774,7 @@ window.I18N = {
     "footer.parks": "国家公园",
     "footer.whenToVisit": "最佳季节",
     "footer.visa": "签证与入境",
-    "footer.copyright": "© 2026 美国旅行指南 &nbsp;·&nbsp; 心怀热爱，畅游在自由的公路上 | Tim G 制作 · 与 AI 协作完成",
+    "footer.copyright": "© {year} 美国旅行指南 &nbsp;·&nbsp; 心怀热爱，畅游在自由的公路上 | Tim G 制作 · 与 AI 协作完成",
     "footer.motto": "自由的土地，勇者的家园 🇺🇸",
 
     "funFacts.eyebrow": "你知道吗？",
@@ -1162,7 +1162,7 @@ window.I18N = {
     "footer.parks": "国立公園",
     "footer.whenToVisit": "ベストシーズン",
     "footer.visa": "ビザと入国",
-    "footer.copyright": "© 2026 アメリカ旅行ガイド &nbsp;·&nbsp; 情熱を胸に、自由な道を駆け巡ります | Tim G が制作・ AI と協力して完成",
+    "footer.copyright": "© {year} アメリカ旅行ガイド &nbsp;·&nbsp; 情熱を胸に、自由な道を駆け巡ります | Tim G が制作・ AI と協力して完成",
     "footer.motto": "自由の地、勇者の故郷 🇺🇸",
 
     "funFacts.eyebrow": "知っていますか？",

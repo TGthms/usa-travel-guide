@@ -110,7 +110,7 @@ window.LEGAL_I18N = {
 <p class="legal-note">This policy is provided for transparency about a personal project website. It is not legal advice.</p>`
         }
       ],
-      footerNote: '© 2026 USA Travel Guide · Tim G (TGthms)'
+      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)'
     },
     es: {
       title: 'Política de privacidad',
@@ -211,7 +211,7 @@ window.LEGAL_I18N = {
 <p class="legal-note">Esta política se ofrece para dar transparencia sobre un sitio de proyecto personal. No constituye asesoramiento jurídico.</p>`
         }
       ],
-      footerNote: '© 2026 USA Travel Guide · Tim G (TGthms)'
+      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)'
     },
     zh: {
       title: '隐私政策',
@@ -312,7 +312,7 @@ window.LEGAL_I18N = {
 <p class="legal-note">本政策旨在提高个人项目网站的透明度，不构成法律意见。</p>`
         }
       ],
-      footerNote: '© 2026 USA Travel Guide · Tim G (TGthms)'
+      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)'
     },
     ja: {
       title: 'プライバシーポリシー',
@@ -413,7 +413,7 @@ window.LEGAL_I18N = {
 <p class="legal-note">本ポリシーは個人プロジェクトのウェブサイトの透明性のためのものであり、法的助言ではありません。</p>`
         }
       ],
-      footerNote: '© 2026 USA Travel Guide · Tim G (TGthms)'
+      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)'
     }
   },
 
@@ -455,7 +455,7 @@ window.LEGAL_I18N = {
         {
           id: 'photos',
           title: 'Photographs & visual content',
-          html: `<p>Photographs and related visual works in the gallery and elsewhere on the Site (including files under <code>images/</code>) are <strong>© 2026 Tim G (GitHub @TGthms)</strong> unless a different credit is shown for a specific work.</p>
+          html: `<p>Photographs and related visual works in the gallery and elsewhere on the Site (including files under <code>images/</code>) are <strong>© {year} Tim G (GitHub @TGthms)</strong> unless a different credit is shown for a specific work.</p>
 <p>Those photographs are made available under the <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons Attribution 4.0 International (CC BY 4.0)</a> license. In plain language, you may share and adapt the photos—including for commercial use—provided that you:</p>
 <ul>
 <li>Give appropriate credit to <strong>Tim G / @TGthms</strong>;</li>
@@ -539,7 +539,7 @@ window.LEGAL_I18N = {
 <p class="legal-note">These Terms are written for a personal travel-guide project and are not a substitute for legal advice.</p>`
         }
       ],
-      footerNote: '© 2026 USA Travel Guide · Tim G (TGthms). All rights reserved except where open licenses apply.'
+      footerNote: '© {year} USA Travel Guide · Tim G (TGthms). All rights reserved except where open licenses apply.'
     },
     es: {
       title: 'Términos de uso',
@@ -578,7 +578,7 @@ window.LEGAL_I18N = {
         {
           id: 'photos',
           title: 'Fotografías y contenido visual',
-          html: `<p>Las fotografías y obras visuales de la galería y del resto del Sitio (incluidos los archivos en <code>images/</code>) son <strong>© 2026 Tim G (GitHub @TGthms)</strong>, salvo que una obra concreta indique otro crédito.</p>
+          html: `<p>Las fotografías y obras visuales de la galería y del resto del Sitio (incluidos los archivos en <code>images/</code>) son <strong>© {year} Tim G (GitHub @TGthms)</strong>, salvo que una obra concreta indique otro crédito.</p>
 <p>Esas fotografías se ponen a disposición bajo la licencia <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons Atribución 4.0 Internacional (CC BY 4.0)</a>. En pocas palabras, puedes compartir y adaptar las fotos —también con fines comerciales— si:</p>
 <ul>
 <li>das el crédito adecuado a <strong>Tim G / @TGthms</strong>;</li>
@@ -662,7 +662,7 @@ window.LEGAL_I18N = {
 <p class="legal-note">Estos Términos se redactan para un proyecto personal de guía de viaje y no sustituyen el asesoramiento jurídico.</p>`
         }
       ],
-      footerNote: '© 2026 USA Travel Guide · Tim G (TGthms). Todos los derechos reservados, salvo donde se indiquen licencias abiertas.'
+      footerNote: '© {year} USA Travel Guide · Tim G (TGthms). Todos los derechos reservados, salvo donde se indiquen licencias abiertas.'
     },
     zh: {
       title: '使用条款',
@@ -701,7 +701,7 @@ window.LEGAL_I18N = {
         {
           id: 'photos',
           title: '照片与视觉内容',
-          html: `<p>相册及本网站其他位置的照片与相关视觉作品（包括 <code>images/</code> 目录下的文件）版权归 <strong>© 2026 Tim G（GitHub @TGthms）</strong>，除非某幅作品另有署名说明。</p>
+          html: `<p>相册及本网站其他位置的照片与相关视觉作品（包括 <code>images/</code> 目录下的文件）版权归 <strong>© {year} Tim G（GitHub @TGthms）</strong>，除非某幅作品另有署名说明。</p>
 <p>上述照片依据 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">知识共享“署名”4.0 国际许可协议（CC BY 4.0）</a> 提供。简要而言，你可以分享与修改这些照片（包括用于商业用途），但须：</p>
 <ul>
 <li>向 <strong>Tim G / @TGthms</strong> 给予适当署名；</li>
@@ -785,7 +785,7 @@ window.LEGAL_I18N = {
 <p class="legal-note">本条款为个人旅行指南项目而撰写，不能替代法律意见。</p>`
         }
       ],
-      footerNote: '© 2026 USA Travel Guide · Tim G (TGthms)。除适用开放许可的部分外，保留所有权利。'
+      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)。除适用开放许可的部分外，保留所有权利。'
     },
     ja: {
       title: '利用規約',
@@ -824,7 +824,7 @@ window.LEGAL_I18N = {
         {
           id: 'photos',
           title: '写真・ビジュアル',
-          html: `<p>ギャラリーその他本サイト上の写真および関連するビジュアル作品（<code>images/</code> 配下のファイルを含みます）は、個別に別のクレジットが示されていない限り、<strong>© 2026 Tim G（GitHub @TGthms）</strong> です。</p>
+          html: `<p>ギャラリーその他本サイト上の写真および関連するビジュアル作品（<code>images/</code> 配下のファイルを含みます）は、個別に別のクレジットが示されていない限り、<strong>© {year} Tim G（GitHub @TGthms）</strong> です。</p>
 <p>これらの写真は、<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">クリエイティブ・コモンズ 表示 4.0 国際（CC BY 4.0）</a> に基づき提供されます。分かりやすく言うと、次の条件を満たせば、写真の共有や翻案（商用利用を含む）が可能です。</p>
 <ul>
 <li><strong>Tim G / @TGthms</strong> に適切なクレジットを付すこと</li>
@@ -908,7 +908,7 @@ window.LEGAL_I18N = {
 <p class="legal-note">本規約は個人の旅行ガイドプロジェクト向けに作成されたものであり、法的助言に代わるものではありません。</p>`
         }
       ],
-      footerNote: '© 2026 USA Travel Guide · Tim G (TGthms)。オープンライセンスが適用される場合を除き、すべての権利を留保します。'
+      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)。オープンライセンスが適用される場合を除き、すべての権利を留保します。'
     }
   }
 };
