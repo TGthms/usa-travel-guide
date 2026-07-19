@@ -91,6 +91,26 @@ test.describe('USA Travel Guide smoke', () => {
     await expect(page.locator('.dest-card[data-dest="nyc"] .dest-fav-btn')).not.toHaveClass(/active/);
   });
 
+  test('saved filter empty state survives language round-trip to English', async ({ page }) => {
+    // With no favorites, Saved filter shows a dedicated empty message.
+    await page.locator('#destFilterBar [data-filter="saved"]').click();
+    await expect(page.locator('#destEmptyState')).toHaveClass(/show/);
+    await expect(page.locator('#destEmptyState')).toContainText(/haven't saved|saved any cities/i);
+
+    await openSettings(page);
+    await page.locator('#langPillGroup .pill-btn[data-lang-val="zh"]').click();
+    await closeSettings(page);
+    await expect(page.locator('#destEmptyState')).toContainText(/收藏/);
+
+    await openSettings(page);
+    await page.locator('#langPillGroup .pill-btn[data-lang-val="en"]').click();
+    await closeSettings(page);
+    // Must not snap back to the region-filter empty copy.
+    await expect(page.locator('#destEmptyState')).toContainText(/haven't saved|saved any cities/i);
+    await expect(page.locator('#destEmptyState')).not.toContainText(/match this region/i);
+    await expect(page.locator('#destEmptyState')).toHaveAttribute('data-i18n', 'dest.emptyStateSaved');
+  });
+
   test('gallery page filters and scripts load', async ({ page }) => {
     await page.goto('/gallery.html');
     await page.waitForFunction(() => typeof window.toggleFavorite === 'function' || document.body.classList.contains('page-gallery'));

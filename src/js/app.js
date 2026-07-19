@@ -266,6 +266,9 @@ function applyLanguage(lang) {
   // Gallery chrome (placeholders / open lightbox) — function is declared later and hoisted.
   if (typeof refreshGalleryLanguageChrome === 'function') refreshGalleryLanguageChrome();
   if (typeof refreshFunFact === 'function') refreshFunFact();
+  // Dest filter empty-state key can change at runtime (Saved vs region). Re-sync so
+  // English restore doesn't snap back to the original region empty message.
+  if (typeof window.syncDestFilterUi === 'function') window.syncDestFilterUi();
 }
 
 /* ── UNIT CONVERSION ENGINE ──
@@ -1069,6 +1072,12 @@ function applyDestFilter(filter) {
     }
   }
 }
+/** Re-apply the active dest filter after language changes (homepage only). */
+window.syncDestFilterUi = function syncDestFilterUi() {
+  if (!destFilterBar) return;
+  const active = destFilterBar.querySelector('.dest-filter-btn.active');
+  applyDestFilter((active && active.dataset.filter) || 'all');
+};
 if (destFilterBar) {
   destFilterBar.addEventListener('click', e => {
     const btn = e.target.closest('.dest-filter-btn');
@@ -1273,7 +1282,12 @@ if (mobileSettingsBtn) mobileSettingsBtn.addEventListener('click', () => openSet
 if (settingsCloseBtn) settingsCloseBtn.addEventListener('click', closeSettings);
 if (settingsOverlay) settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverlay) closeSettings(); });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && settingsOverlay && settingsOverlay.classList.contains('open')) closeSettings();
+  if (e.key === 'Escape' && settingsOverlay && settingsOverlay.classList.contains('open')) {
+    e.preventDefault();
+    closeSettings();
+    // Prevent the later modal / mobile-nav Escape handler from also firing.
+    e.stopImmediatePropagation();
+  }
 });
 
 
@@ -1687,8 +1701,10 @@ function updateDriveCost() {
   const speed = Math.max(1, Number(driveSpeed.value) || 1);
   const imperial = currentDistUnit !== 'km';
   const hours = dist / speed;
-  const h = Math.floor(hours);
-  const m = Math.round((hours - h) * 60);
+  let h = Math.floor(hours);
+  let m = Math.round((hours - h) * 60);
+  // Rounding can land on 60m (e.g. 0.999h → 0h 60m); roll into the next hour.
+  if (m >= 60) { h += 1; m = 0; }
   const t = toolsText();
   const timeStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
   const distUnit = imperial ? 'mi' : 'km';
@@ -1788,7 +1804,16 @@ if (overlay) {
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
+  if (e.key !== 'Escape') return;
+  // Higher layers own Escape first (settings / lightbox have their own handlers).
+  if (settingsOverlay && settingsOverlay.classList.contains('open')) return;
+  if (document.getElementById('lightbox')?.classList.contains('open')) return;
+  if (overlay && overlay.classList.contains('open')) {
+    closeModal();
+    return;
+  }
+  // No overlay open — dismiss the mobile nav drawer if it is.
+  closeMobileNav();
 });
 
 // Keyboard accessibility for interactive elements
@@ -3149,7 +3174,12 @@ if (lightbox) {
   lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
   document.addEventListener('keydown', e => {
     if (!lightbox.classList.contains('open')) return;
-    if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeLightbox();
+      e.stopImmediatePropagation();
+      return;
+    }
     if (e.key === 'ArrowRight') { e.preventDefault(); showNext(); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); showPrev(); }
     // Focus trap: close / prev / next / optional HD upgrade.
