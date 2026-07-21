@@ -2410,7 +2410,7 @@ function lightboxHdLabel(key) {
     showingFull: 'Full quality'
   };
   if (dict && dict['gallery.' + key]) return dict['gallery.' + key];
-  // English originals from button if present
+  // English originals from button if present, else fallback
   if (key === 'loadFull' && lightboxHdBtn && !lightboxHdBtn.classList.contains('is-loading')) {
     const orig = lightboxHdBtn.getAttribute('data-i18n') === 'gallery.loadFull'
       ? (i18nOriginals.get(lightboxHdBtn) || fallback.loadFull)
@@ -2424,9 +2424,8 @@ function updateLightboxHdButton(img, loadedTier) {
   if (!lightboxHdBtn) return;
   const full = galleryFullSrc(img);
   const tier = loadedTier || (lightboxImg && lightboxImg.getAttribute('data-loaded-tier')) || '';
-  // Show upgrade button only when a higher-res full asset exists and we aren't already on it
+  // Show upgrade button only when a higher-res full asset exist
   const canUpgrade = !!(full && tier !== 'full' && galleryQuality !== 'full');
-  // Also allow upgrade when quality is full but we're mid-session on medium? If quality is full we auto-load full.
   if (!canUpgrade) {
     lightboxHdBtn.hidden = true;
     lightboxHdBtn.classList.remove('is-loading');
