@@ -1194,26 +1194,21 @@ let lastSettingsTrigger = null;
 let scrollLockCount = 0;
 let lockedScrollY = 0;
 
-function lockBodyScroll() {
-  if (scrollLockCount === 0) {
-    lockedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${lockedScrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
-    document.body.style.overflow = 'hidden';
-    // Prevent iOS rubber-band from fighting the lock.
-    document.documentElement.style.overflow = 'hidden';
-  }
-  scrollLockCount++;
+/** True when any full-screen overlay that owns the scroll lock is open. */
+function isAnyScrollLockOverlayOpen() {
+  const lb = document.getElementById('lightbox');
+  if (lb && lb.classList.contains('open')) return true;
+  if (settingsOverlay && settingsOverlay.classList.contains('open')) return true;
+  const modal = document.getElementById('modal-overlay');
+  if (modal && modal.classList.contains('open')) return true;
+  const mobile = document.getElementById('navMobile');
+  if (mobile && mobile.classList.contains('open')) return true;
+  return false;
 }
 
-function unlockBodyScroll() {
-  scrollLockCount = Math.max(0, scrollLockCount - 1);
-  if (scrollLockCount > 0) return;
-  const y = lockedScrollY;
+function clearBodyScrollLockStyles() {
   const html = document.documentElement;
+  const y = lockedScrollY;
   // Force instant scroll BEFORE releasing body lock — otherwise CSS
   // `scroll-behavior: smooth` animates from the top to the saved offset.
   const prevInline = html.style.scrollBehavior;
@@ -1248,6 +1243,43 @@ function unlockBodyScroll() {
   });
 }
 
+function lockBodyScroll() {
+  if (scrollLockCount === 0) {
+    lockedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+    // Prevent iOS rubber-band from fighting the lock.
+    document.documentElement.style.overflow = 'hidden';
+  }
+  scrollLockCount++;
+}
+
+function unlockBodyScroll() {
+  scrollLockCount = Math.max(0, scrollLockCount - 1);
+  if (scrollLockCount > 0) return;
+  clearBodyScrollLockStyles();
+}
+
+/**
+ * Safety net: if no overlay is open but the body is still locked (e.g. Enter
+ * on role=button also synthesized a click and double-incremented the counter),
+ * force a full release so mouse wheel / trackpad scrolling works again.
+ */
+function ensureBodyScrollUnlocked() {
+  if (isAnyScrollLockOverlayOpen()) return;
+  if (scrollLockCount === 0
+      && !document.body.style.position
+      && !document.documentElement.style.overflow) {
+    return;
+  }
+  scrollLockCount = 0;
+  clearBodyScrollLockStyles();
+}
+
 function openSettings(trigger) {
   if (!settingsOverlay || settingsOverlay.classList.contains('open')) return;
   // Don't open settings over an open lightbox — close it first so scroll lock stays sane.
@@ -1269,6 +1301,7 @@ function closeSettings() {
   settingsOverlay.classList.remove('open');
   settingsOverlay.setAttribute('aria-hidden', 'true');
   unlockBodyScroll();
+  ensureBodyScrollUnlocked();
   if (lastSettingsTrigger && typeof lastSettingsTrigger.focus === 'function') {
     try { lastSettingsTrigger.focus({ preventScroll: true }); }
     catch (e) { lastSettingsTrigger.focus(); }
@@ -1795,6 +1828,7 @@ function closeModal() {
   overlay.classList.remove('open');
   overlay.setAttribute('aria-hidden', 'true');
   unlockBodyScroll();
+  ensureBodyScrollUnlocked();
   currentModalKey = null;
 }
 
@@ -2047,6 +2081,9 @@ let filterFadeTimers = new WeakMap();
 let galleryActiveCategory = 'all';
 let gallerySearchQuery = '';
 let gallerySortMode = (gallerySortSelect && gallerySortSelect.value) || 'date-desc';
+// Declared early: image load may call scheduleGalleryMasonryPack during init
+// (before the rest of the masonry helpers run further down this file).
+let galleryPackTimer = 0;
 
 // Mirrors the EMPTY_STATE_SAVED_TEXT pattern used by the destinations filter:
 // the "photo not added yet" placeholder is generated dynamically in JS, so it
@@ -2075,6 +2112,8 @@ function watchImageLoad(img) {
         item.classList.add('is-revealed', 'in-view');
       }
     }
+    // Real dimensions arrived — rebalance masonry without changing sort order.
+    if (typeof scheduleGalleryMasonryPack === 'function') scheduleGalleryMasonryPack();
   };
   if (img.complete && img.naturalWidth > 0) {
     onOk();
@@ -2143,11 +2182,25 @@ observeWhenVisible(galleryItems, (node) => {
   node.classList.add('is-revealed', 'in-view');
 }, { threshold: 0.08, rootMargin: '40px 0px 40px 0px' });
 
+/**
+ * Visible tiles for lightbox prev/next. Must follow the active sort mode
+ * (e.g. newest-first), not masonry column DOM order — otherwise arrow keys
+ * jump between columns and feel random.
+ */
 function refreshVisibleGalleryItems() {
-  visibleItems = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.load-error)')];
+  const items = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.load-error)')];
+  if (items.length >= 2 && typeof compareGalleryItems === 'function') {
+    items.sort(compareGalleryItems);
+  }
+  visibleItems = items;
 }
 
-/** Parse "July 2026" / "June 2026" into a sortable number (year*12+month). */
+/**
+ * Parse gallery dates into a sortable number (higher = newer).
+ * Uses YYYYMMDD integers so ordering is obvious and stable.
+ * Accepts: "July 4, 2026", "July 2026" (day 0 — before any day that month),
+ * ISO "2026-07-04" / "2026-07".
+ */
 function galleryDateSortKey(dateStr) {
   const s = String(dateStr || '').trim();
   const months = {
@@ -2155,13 +2208,32 @@ function galleryDateSortKey(dateStr) {
     july: 7, august: 8, september: 9, october: 10, november: 11, december: 12,
     jan: 1, feb: 2, mar: 3, apr: 4, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12
   };
-  const m = s.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  // "Month D, YYYY" (precise day)
+  let m = s.match(/^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/);
   if (m) {
     const mon = months[m[1].toLowerCase()] || 0;
-    return parseInt(m[2], 10) * 12 + mon;
+    const day = Math.min(31, Math.max(0, parseInt(m[2], 10) || 0));
+    const year = parseInt(m[3], 10) || 0;
+    if (!year || !mon) return 0;
+    return year * 10000 + mon * 100 + day;
   }
-  const iso = s.match(/^(\d{4})[-/](\d{1,2})/);
-  if (iso) return parseInt(iso[1], 10) * 12 + parseInt(iso[2], 10);
+  // "Month YYYY" (month-only — sorts before day 1 of that month)
+  m = s.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if (m) {
+    const mon = months[m[1].toLowerCase()] || 0;
+    const year = parseInt(m[2], 10) || 0;
+    if (!year || !mon) return 0;
+    return year * 10000 + mon * 100; // day = 0
+  }
+  // ISO YYYY-MM-DD or YYYY-MM
+  m = s.match(/^(\d{4})[-/](\d{1,2})(?:[-/](\d{1,2}))?/);
+  if (m) {
+    const year = parseInt(m[1], 10) || 0;
+    const mon = parseInt(m[2], 10) || 0;
+    const day = m[3] ? Math.min(31, Math.max(0, parseInt(m[3], 10) || 0)) : 0;
+    if (!year || !mon) return 0;
+    return year * 10000 + mon * 100 + day;
+  }
   return 0;
 }
 
@@ -2209,49 +2281,177 @@ function normalizeGalleryState(raw) {
   return US_STATE_SORT_MAP[key] || s;
 }
 
+/** Column count must match gallery CSS breakpoints. */
+function getGalleryColumnCount() {
+  const w = window.innerWidth || 1200;
+  if (w <= 360) return 1;
+  if (w <= 1024) return 2;
+  if (w >= 1600) return 4;
+  return 3;
+}
+
+function getGalleryColumnGap() {
+  const w = window.innerWidth || 1200;
+  if (w <= 360) return 12;
+  if (w <= 640) return 10;
+  if (w <= 1024) return 14;
+  if (w >= 1600) return 18;
+  return 16;
+}
+
+/** Estimate tile height for packing (uses width/height attrs or natural size). */
+function estimateGalleryItemHeight(item, colWidth) {
+  if (!item || item.classList.contains('hidden')) return 0;
+  const gapish = 0;
+  const img = item.querySelector('img');
+  let ratio = 0.75;
+  if (img) {
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      ratio = img.naturalHeight / img.naturalWidth;
+    } else {
+      const aw = parseFloat(img.getAttribute('width') || '') || 0;
+      const ah = parseFloat(img.getAttribute('height') || '') || 0;
+      if (aw > 0 && ah > 0) ratio = ah / aw;
+    }
+  }
+  // Caption overlay sits on the photo — no extra block height.
+  const minH = item.classList.contains('img-ready') ? 0 : 140;
+  return Math.max(minH, colWidth * ratio) + gapish;
+}
+
+/**
+ * Pack sorted items into N flex columns using shortest-column placement.
+ * Visible items drive column heights; hidden/error items are parked without
+ * affecting balance. Preserves sort order at the top of the page.
+ */
+function packGalleryMasonry(orderedItems) {
+  if (!galleryGrid) return;
+  const items = orderedItems || [...galleryGrid.querySelectorAll('.gallery-item')];
+  if (!items.length) return;
+
+  const n = Math.max(1, getGalleryColumnCount());
+  const gap = getGalleryColumnGap();
+
+  // Ensure exactly n column wrappers (live DOM only — static HTML stays flat).
+  let cols = [...galleryGrid.querySelectorAll(':scope > .gallery-col')];
+  // Orphan any non-column direct children (first load / after manager inserts).
+  [...galleryGrid.children].forEach((child) => {
+    if (!child.classList || !child.classList.contains('gallery-col')) {
+      // leave for now; items will be moved into cols
+    }
+  });
+  while (cols.length < n) {
+    const col = document.createElement('div');
+    col.className = 'gallery-col';
+    col.setAttribute('role', 'presentation');
+    galleryGrid.appendChild(col);
+    cols.push(col);
+  }
+  while (cols.length > n) {
+    const doomed = cols.pop();
+    while (doomed.firstChild) {
+      // park under grid temporarily
+      galleryGrid.appendChild(doomed.firstChild);
+    }
+    doomed.remove();
+  }
+  cols = [...galleryGrid.querySelectorAll(':scope > .gallery-col')];
+
+  const gridW = galleryGrid.clientWidth || galleryGrid.offsetWidth || 900;
+  const colWidth = Math.max(80, (gridW - gap * (n - 1)) / n);
+  const heights = new Array(n).fill(0);
+
+  const visible = [];
+  const parked = [];
+  items.forEach((item) => {
+    if (item.classList.contains('hidden') || item.classList.contains('load-error')) {
+      parked.push(item);
+    } else {
+      visible.push(item);
+    }
+  });
+
+  // Shortest-column: place next (sorted) photo into the shortest column.
+  visible.forEach((item) => {
+    let shortest = 0;
+    for (let i = 1; i < n; i++) {
+      if (heights[i] < heights[shortest]) shortest = i;
+    }
+    cols[shortest].appendChild(item);
+    const h = estimateGalleryItemHeight(item, colWidth);
+    heights[shortest] += h + gap;
+  });
+
+  // Hidden / error tiles stay in the DOM for filters but take no visual space.
+  parked.forEach((item, i) => {
+    cols[i % n].appendChild(item);
+  });
+
+  // Remove stray non-column nodes left in the grid root.
+  [...galleryGrid.children].forEach((child) => {
+    if (child.classList && child.classList.contains('gallery-col')) return;
+    if (child.classList && child.classList.contains('gallery-item')) {
+      cols[0].appendChild(child);
+      return;
+    }
+    // unknown node — leave it
+  });
+}
+
+function scheduleGalleryMasonryPack() {
+  if (!galleryGrid) return;
+  clearTimeout(galleryPackTimer);
+  galleryPackTimer = setTimeout(() => {
+    // Re-sort then pack so column tree-order never corrupts "newest first".
+    // Guard: sortGalleryItems is declared later but is a function declaration (hoisted).
+    if (typeof sortGalleryItems === 'function') sortGalleryItems();
+  }, 80);
+}
+
+function compareGalleryItems(a, b) {
+  const mode = gallerySortMode || 'date-desc';
+  if (mode === 'date-desc' || mode === 'date-asc') {
+    const da = galleryDateSortKey(a.dataset.date);
+    const db = galleryDateSortKey(b.dataset.date);
+    if (da !== db) return mode === 'date-desc' ? db - da : da - db;
+    const la = (a.dataset.location || '').localeCompare(b.dataset.location || '', undefined, { sensitivity: 'base' });
+    if (la !== 0) return la;
+    const ca = (a.querySelector('.gallery-caption') || {}).textContent || '';
+    const cb = (b.querySelector('.gallery-caption') || {}).textContent || '';
+    return ca.localeCompare(cb, undefined, { sensitivity: 'base' });
+  }
+  if (mode === 'location') {
+    const ca = (a.dataset.city || a.dataset.location || '').localeCompare(
+      b.dataset.city || b.dataset.location || '', undefined, { sensitivity: 'base' }
+    );
+    if (ca !== 0) return ca;
+    return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
+  }
+  if (mode === 'state') {
+    const sa = normalizeGalleryState(a.dataset.state).localeCompare(
+      normalizeGalleryState(b.dataset.state), undefined, { sensitivity: 'base' }
+    );
+    if (sa !== 0) return sa;
+    const ca = (a.dataset.city || a.dataset.location || '').localeCompare(
+      b.dataset.city || b.dataset.location || '', undefined, { sensitivity: 'base' }
+    );
+    if (ca !== 0) return ca;
+    return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
+  }
+  if (mode === 'category') {
+    const cat = (a.dataset.category || '').localeCompare(b.dataset.category || '', undefined, { sensitivity: 'base' });
+    if (cat !== 0) return cat;
+    return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
+  }
+  return 0;
+}
+
 function sortGalleryItems() {
   if (!galleryGrid) return;
   const items = [...galleryGrid.querySelectorAll('.gallery-item')];
-  if (items.length < 2) return;
-  const mode = gallerySortMode || 'date-desc';
-  items.sort((a, b) => {
-    if (mode === 'date-desc' || mode === 'date-asc') {
-      const da = galleryDateSortKey(a.dataset.date);
-      const db = galleryDateSortKey(b.dataset.date);
-      if (da !== db) return mode === 'date-desc' ? db - da : da - db;
-      // Stable tie-break: location then caption
-      const la = (a.dataset.location || '').localeCompare(b.dataset.location || '', undefined, { sensitivity: 'base' });
-      if (la !== 0) return la;
-      const ca = (a.querySelector('.gallery-caption') || {}).textContent || '';
-      const cb = (b.querySelector('.gallery-caption') || {}).textContent || '';
-      return ca.localeCompare(cb, undefined, { sensitivity: 'base' });
-    }
-    if (mode === 'location') {
-      const ca = (a.dataset.city || a.dataset.location || '').localeCompare(
-        b.dataset.city || b.dataset.location || '', undefined, { sensitivity: 'base' }
-      );
-      if (ca !== 0) return ca;
-      return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
-    }
-    if (mode === 'state') {
-      const sa = normalizeGalleryState(a.dataset.state).localeCompare(
-        normalizeGalleryState(b.dataset.state), undefined, { sensitivity: 'base' }
-      );
-      if (sa !== 0) return sa;
-      const ca = (a.dataset.city || a.dataset.location || '').localeCompare(
-        b.dataset.city || b.dataset.location || '', undefined, { sensitivity: 'base' }
-      );
-      if (ca !== 0) return ca;
-      return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
-    }
-    if (mode === 'category') {
-      const cat = (a.dataset.category || '').localeCompare(b.dataset.category || '', undefined, { sensitivity: 'base' });
-      if (cat !== 0) return cat;
-      return galleryDateSortKey(b.dataset.date) - galleryDateSortKey(a.dataset.date);
-    }
-    return 0;
-  });
-  items.forEach(item => galleryGrid.appendChild(item));
+  if (!items.length) return;
+  if (items.length >= 2) items.sort(compareGalleryItems);
+  packGalleryMasonry(items);
 }
 
 function updateFilterCounts() {
@@ -2318,7 +2518,11 @@ function applyGalleryVisibility({ animate = true } = {}) {
 
   if (galleryEmptyState) galleryEmptyState.classList.toggle('show', matchCount === 0);
   const delay = animate ? FADE_MS + 20 : 0;
-  setTimeout(() => { refreshVisibleGalleryItems(); }, delay);
+  setTimeout(() => {
+    refreshVisibleGalleryItems();
+    // Rebalance columns after .hidden changes so filtered-out tiles leave no holes.
+    if (typeof sortGalleryItems === 'function') sortGalleryItems();
+  }, delay);
 }
 
 filterBtns.forEach(btn => {
@@ -2356,9 +2560,25 @@ if (gallerySortSelect) {
   });
 }
 
-// Default order: newest first (by data-date)
+// Default order: newest first (by data-date), packed into masonry columns.
 if (galleryGrid) {
   sortGalleryItems();
+  // Re-pack when column count / widths change (responsive breakpoints).
+  let lastColCount = getGalleryColumnCount();
+  let lastGridW = galleryGrid.clientWidth || 0;
+  const onGalleryResize = () => {
+    const nextN = getGalleryColumnCount();
+    const nextW = galleryGrid.clientWidth || 0;
+    if (nextN !== lastColCount || Math.abs(nextW - lastGridW) > 24) {
+      lastColCount = nextN;
+      lastGridW = nextW;
+      sortGalleryItems();
+    }
+  };
+  window.addEventListener('resize', onGalleryResize, { passive: true });
+  window.addEventListener('orientationchange', () => {
+    setTimeout(onGalleryResize, 120);
+  }, { passive: true });
 }
 updateFilterCounts();
 applyGalleryVisibility({ animate: false });
@@ -3096,11 +3316,15 @@ if (lightboxHdBtn) {
 
 function openLightbox(index) {
   if (!lightbox || index < 0 || visibleItems.length === 0) return;
+  const alreadyOpen = lightbox.classList.contains('open');
   currentIndex = index;
   showLightboxPhoto(index, { fromNav: false });
   lightbox.classList.add('open');
   lightbox.setAttribute('aria-hidden', 'false');
-  lockBodyScroll();
+  // Only lock once per open. Enter/Space on role=button often also fires click,
+  // which would double-increment scrollLockCount and leave the page unscrollable
+  // after a single Escape.
+  if (!alreadyOpen) lockBodyScroll();
   if (lightboxCloseBtn) lightboxCloseBtn.focus();
 }
 function closeLightbox() {
@@ -3124,6 +3348,8 @@ function closeLightbox() {
     lightboxHdBtn.classList.remove('is-loading');
   }
   unlockBodyScroll();
+  // Hard recovery if a prior double-open left the lock counter high.
+  ensureBodyScrollUnlocked();
   if (lastFocusedThumb && typeof lastFocusedThumb.focus === 'function') {
     try { lastFocusedThumb.focus({ preventScroll: true }); }
     catch (e) { lastFocusedThumb.focus(); }
@@ -3151,18 +3377,30 @@ function navigate(step) {
 function showNext() { navigate(1); }
 function showPrev() { navigate(-1); }
 
-document.querySelectorAll('.gallery-item').forEach((item) => {
-  item.addEventListener('click', () => {
-    if (item.classList.contains('load-error') || item.classList.contains('hidden')) return;
-    lastFocusedThumb = item;
+function openGalleryItem(item) {
+  if (!item || item.classList.contains('load-error') || item.classList.contains('hidden')) return;
+  lastFocusedThumb = item;
+  refreshVisibleGalleryItems();
+  let idx = visibleItems.indexOf(item);
+  // If the tile is visible but missing from the cache (race after filter/sort), rebuild once.
+  if (idx < 0) {
     refreshVisibleGalleryItems();
-    let idx = visibleItems.indexOf(item);
-    // If the tile is visible but missing from the cache (race after filter/sort), rebuild once.
-    if (idx < 0) {
-      visibleItems = [...document.querySelectorAll('.gallery-item:not(.hidden):not(.load-error)')];
-      idx = visibleItems.indexOf(item);
+    idx = visibleItems.indexOf(item);
+  }
+  // openLightbox only locks scroll on the first open — safe if Enter also synthesizes click.
+  if (idx >= 0) openLightbox(idx);
+}
+
+document.querySelectorAll('.gallery-item').forEach((item) => {
+  item.addEventListener('click', () => openGalleryItem(item));
+  // role="button" tiles must open on Enter/Space (matches destination cards).
+  // preventDefault stops the browser from also synthesizing a click after Space.
+  item.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      openGalleryItem(item);
     }
-    if (idx >= 0) openLightbox(idx);
   });
 });
 
