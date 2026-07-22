@@ -176,6 +176,35 @@ test.describe('USA Travel Guide smoke', () => {
     await expect(page.locator('#lightbox')).not.toHaveClass(/open/);
   });
 
+  test('gallery masonry does not reparent tiles while scrolling', async ({ page }) => {
+    await page.goto('/gallery.html');
+    await page.waitForFunction(() => {
+      const loader = document.getElementById('loader');
+      const ready = !loader || loader.classList.contains('gone');
+      return document.body.classList.contains('page-gallery') && ready
+        && document.querySelectorAll('.gallery-item').length > 5;
+    });
+    // After first paint, no further column reparenting should happen on scroll/lazy-load.
+    const moves = await page.evaluate(async () => {
+      let count = 0;
+      const orig = Element.prototype.appendChild;
+      Element.prototype.appendChild = function appendChildInstrumented(child) {
+        if (this.classList && this.classList.contains('gallery-col')
+          && child && child.classList && child.classList.contains('gallery-item')) {
+          count += 1;
+        }
+        return orig.call(this, child);
+      };
+      for (let i = 0; i < 12; i++) {
+        window.scrollBy(0, 280);
+        await new Promise((r) => setTimeout(r, 90));
+      }
+      Element.prototype.appendChild = orig;
+      return count;
+    });
+    expect(moves).toBe(0);
+  });
+
   test('tools currency localizes names and swap works', async ({ page }) => {
     await page.goto('/tools.html');
     await page.waitForFunction(() => document.querySelectorAll('#currencyFrom option').length >= 5);

@@ -536,10 +536,10 @@ html[data-mobile-lite="true"] body::before { display: none; }
   -webkit-tap-highlight-color: transparent; user-select: none;
   min-height: 44px;
 }
-.gallery-filter:hover { background: var(--bg-card-hov); color: var(--text-main); transform: translateY(-2px); border-color: var(--border-med); }
+/* No translateY on hover — vertical motion on sticky filters feels like the grid jumped. */
+.gallery-filter:hover { background: var(--bg-card-hov); color: var(--text-main); border-color: var(--border-med); }
 .gallery-filter.active {
   background: var(--accent-1); color: var(--text-inv); border-color: var(--accent-1);
-  animation: filterPop .35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .gallery-filter-count {
   display: inline-flex; align-items: center; justify-content: center;
@@ -548,17 +548,16 @@ html[data-mobile-lite="true"] body::before { display: none; }
   background: rgba(0,0,0,.18); color: inherit; opacity: .85;
 }
 .gallery-filter.active .gallery-filter-count { background: rgba(0,0,0,.22); }
-@keyframes filterPop { 0% { transform: scale(1); } 45% { transform: scale(1.06); } 100% { transform: scale(1); } }
-
-/* Shortest-column masonry (JS packs .gallery-item into .gallery-col).
-   Keeps natural photo aspect ratios with no crop, dense packing (no grid holes),
-   and newest-first still lands at the top across columns. */
+/* Shortest-column masonry (JS packs .gallery-item into .gallery-col once per
+   sort/filter/breakpoint — NEVER on image load). overflow-anchor avoids the
+   browser compensating scroll position when nodes reparent. */
 .gallery-grid {
   display: flex;
   align-items: flex-start;
   gap: 16px;
   max-width: var(--content-max);
   margin: 0 auto;
+  overflow-anchor: none;
 }
 .gallery-col {
   flex: 1 1 0;
@@ -566,6 +565,7 @@ html[data-mobile-lite="true"] body::before { display: none; }
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-anchor: none;
 }
 .gallery-actions { max-width: var(--content-max); margin: 40px auto 0; display: flex; justify-content: center; }
 .gallery-expand-btn { background: var(--bg-card); }
@@ -599,8 +599,10 @@ html[data-mobile-lite="true"] body::before { display: none; }
   /* Visible as soon as it enters layout; no tile-level opacity animation */
   opacity: 1;
   transition: border-color .2s ease;
-  /* Skeleton height until the real photo dimensions are known */
-  min-height: 140px;
+  /* Height comes from img aspect-ratio (width/height attrs) — no min-height
+     skeleton that collapses when the thumb arrives (that caused scroll jumps). */
+  min-height: 0;
+  overflow-anchor: none;
   -webkit-tap-highlight-color: transparent;
 }
 .gallery-item.img-ready { min-height: 0; }
@@ -636,15 +638,14 @@ html[data-mobile-lite="true"] body::before { display: none; }
   height: auto;
   display: block;
   vertical-align: middle;
-  /* Natural aspect ratio — no crop in the grid */
+  /* Reserve layout box before decode using HTML width/height (or JS aspect-ratio). */
   object-fit: contain;
   object-position: center;
   /* Solid underpaint so any decode frame never shows black */
   background-color: var(--bg-surface-2);
-  /* Fade-in only the first time the thumb arrives — never on hover */
+  /* Soft fade only — must not change layout metrics */
   opacity: 0;
-  transition: opacity .35s ease;
-  /* Explicitly avoid GPU “layer tricks” that black-out wide-gamut JPEGs */
+  transition: opacity .28s ease;
   transform: none;
   filter: none;
   backface-visibility: visible;
@@ -653,6 +654,8 @@ html[data-mobile-lite="true"] body::before { display: none; }
   pointer-events: none; /* clicks hit the tile, not the img */
 }
 .gallery-item img.loaded { opacity: 1; }
+/* Aspect ratio: HTML width/height attrs + JS style.aspectRatio (see applyGalleryAspectRatio).
+   Do not use experimental CSS attr() here — it is poorly supported and can invalidate the rule. */
 
 /* No full-tile dark ::after overlay — that was a major black-flash source.
    Caption carries its own soft gradient background instead. */

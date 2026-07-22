@@ -181,8 +181,24 @@ function withCopyrightYear(text) {
     .replace(/©\s*20\d{2}\b/g, '© ' + y);
 }
 
+/**
+ * Safe lookup into window.I18N (es/zh/ja packs). English has no pack — returns null.
+ * Never throws if i18n.js failed to load (site still works in English from HTML).
+ */
+function getI18nDict(lang) {
+  let pack = null;
+  try {
+    if (typeof window !== 'undefined' && window.I18N) pack = window.I18N;
+    else if (typeof I18N !== 'undefined') pack = I18N;
+  } catch (_) {
+    pack = null;
+  }
+  if (!pack || !lang || lang === 'en') return null;
+  return pack[lang] || null;
+}
+
 function applyLanguage(lang) {
-  const dict = I18N[lang];
+  const dict = getI18nDict(lang);
   i18nEls.forEach(el => {
     const isHtml = el.hasAttribute('data-i18n-html');
     const isAria = el.hasAttribute('data-i18n-aria');
@@ -1061,13 +1077,13 @@ function applyDestFilter(filter) {
     destEmptyState.classList.toggle('show', visibleCount === 0);
     if (filter === 'saved') {
       destEmptyState.setAttribute('data-i18n', 'dest.emptyStateSaved');
-      const dict = I18N[currentLang];
+      const dict = getI18nDict(currentLang);
       destEmptyState.textContent = (dict && dict['dest.emptyStateSaved'])
         || EMPTY_STATE_SAVED_TEXT[currentLang]
         || EMPTY_STATE_SAVED_TEXT.en;
     } else if (destEmptyStateDefaultKey) {
       destEmptyState.setAttribute('data-i18n', destEmptyStateDefaultKey);
-      const dict = I18N[currentLang];
+      const dict = getI18nDict(currentLang);
       destEmptyState.textContent = (dict && dict[destEmptyStateDefaultKey]) || i18nOriginals.get(destEmptyState) || destEmptyState.textContent;
     }
   }
@@ -1870,8 +1886,10 @@ function buildDestLinksHtml(destId) {
 }
 
 function getModalData(key) {
-  const localized = MODAL_DATA_I18N[currentLang] && MODAL_DATA_I18N[currentLang][key];
-  const base = localized || MODAL_DATA[key];
+  // modal-content.js only loads on the main guide; other pages must not throw.
+  const i18nPack = (typeof MODAL_DATA_I18N !== 'undefined' && MODAL_DATA_I18N[currentLang]) || null;
+  const localized = i18nPack && i18nPack[key];
+  const base = localized || ((typeof MODAL_DATA !== 'undefined' && MODAL_DATA[key]) || null);
   if (!base) return null;
   // Attach city travel links when expanding a destination card
   if (key && key.indexOf('dest_') === 0) {
@@ -1934,11 +1952,12 @@ function renderLegalPage(lang) {
   ).join('');
   const otherPage = kind === 'privacy' ? 'terms.html' : 'privacy.html';
   const otherKey = kind === 'privacy' ? 'legal.termsLink' : 'legal.privacyLink';
-  const otherLabel = (I18N[lang] && I18N[lang][otherKey])
+  const uiDict = getI18nDict(lang);
+  const otherLabel = (uiDict && uiDict[otherKey])
     || (lang === 'en' ? (kind === 'privacy' ? 'Terms of Use' : 'Privacy Policy')
       : (window.LEGAL_I18N[kind === 'privacy' ? 'terms' : 'privacy'][lang] || {}).title)
     || (kind === 'privacy' ? 'Terms of Use' : 'Privacy Policy');
-  const backLabel = (I18N[lang] && I18N[lang]['gallery.backToGuide'])
+  const backLabel = (uiDict && uiDict['gallery.backToGuide'])
     || (lang === 'es' ? 'Volver a la guía' : lang === 'zh' ? '返回指南' : lang === 'ja' ? 'ガイドに戻る' : 'Back to the Guide');
 
   root.innerHTML = `
@@ -2081,8 +2100,7 @@ let filterFadeTimers = new WeakMap();
 let galleryActiveCategory = 'all';
 let gallerySearchQuery = '';
 let gallerySortMode = (gallerySortSelect && gallerySortSelect.value) || 'date-desc';
-// Declared early: image load may call scheduleGalleryMasonryPack during init
-// (before the rest of the masonry helpers run further down this file).
+// Legacy timer id (repack-on-load removed; kept so old call sites stay harmless).
 let galleryPackTimer = 0;
 
 // Mirrors the EMPTY_STATE_SAVED_TEXT pattern used by the destinations filter:
@@ -2097,23 +2115,37 @@ const GALLERY_PLACEHOLDER_TEXT = {
 
 // --- Reveal captions when tiles approach the viewport (safe without IO).
 
-// --- Image loading state: tile keeps a skeleton min-height until the thumb
-// loads, then sizes to the image's natural aspect ratio (masonry columns pack
-// without holes). Grid always uses thumbs — never full-res — for paint stability.
+// --- Image loading: grid always uses thumbs. Space is reserved from width/height
+// attributes (aspect-ratio) so lazy-load never reflows the masonry or moves
+// neighbors. We deliberately do NOT re-pack columns when a thumb finishes —
+// that was the "photos magically jump while scrolling" bug.
+function applyGalleryAspectRatio(img, item) {
+  if (!img) return;
+  const aw = parseFloat(img.getAttribute('width') || '') || 0;
+  const ah = parseFloat(img.getAttribute('height') || '') || 0;
+  if (aw > 0 && ah > 0) {
+    img.style.aspectRatio = `${aw} / ${ah}`;
+    if (item) item.style.aspectRatio = `${aw} / ${ah}`;
+  }
+}
+
 function watchImageLoad(img) {
   if (!img) return;
   const item = img.closest('.gallery-item');
+  applyGalleryAspectRatio(img, item);
   const onOk = () => {
     img.classList.add('loaded');
     if (item) {
       item.classList.add('img-ready');
-      // If already on-screen when the thumb finishes, show caption immediately.
+      // Prefer measured size only if attributes were missing (keeps layout stable).
+      if (!img.style.aspectRatio && img.naturalWidth > 0 && img.naturalHeight > 0) {
+        img.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
+        item.style.aspectRatio = img.style.aspectRatio;
+      }
       if (item.getBoundingClientRect().top < window.innerHeight + 80) {
         item.classList.add('is-revealed', 'in-view');
       }
     }
-    // Real dimensions arrived — rebalance masonry without changing sort order.
-    if (typeof scheduleGalleryMasonryPack === 'function') scheduleGalleryMasonryPack();
   };
   if (img.complete && img.naturalWidth > 0) {
     onOk();
@@ -2299,30 +2331,34 @@ function getGalleryColumnGap() {
   return 16;
 }
 
-/** Estimate tile height for packing (uses width/height attrs or natural size). */
+/**
+ * Height estimate for packing. Uses HTML width/height attributes ONLY —
+ * never naturalWidth (which arrives mid-scroll and used to reshuffle columns).
+ */
 function estimateGalleryItemHeight(item, colWidth) {
   if (!item || item.classList.contains('hidden')) return 0;
-  const gapish = 0;
   const img = item.querySelector('img');
   let ratio = 0.75;
   if (img) {
-    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-      ratio = img.naturalHeight / img.naturalWidth;
-    } else {
-      const aw = parseFloat(img.getAttribute('width') || '') || 0;
-      const ah = parseFloat(img.getAttribute('height') || '') || 0;
-      if (aw > 0 && ah > 0) ratio = ah / aw;
-    }
+    const aw = parseFloat(img.getAttribute('width') || '') || 0;
+    const ah = parseFloat(img.getAttribute('height') || '') || 0;
+    if (aw > 0 && ah > 0) ratio = ah / aw;
   }
-  // Caption overlay sits on the photo — no extra block height.
-  const minH = item.classList.contains('img-ready') ? 0 : 140;
-  return Math.max(minH, colWidth * ratio) + gapish;
+  return colWidth * ratio;
+}
+
+/** Last pack signature — skip DOM moves when nothing meaningful changed. */
+let galleryPackSignature = '';
+
+function galleryPackFingerprint(visible, n) {
+  // Identity + order of visible tiles and column count.
+  return n + '|' + visible.map((el) => el.querySelector('img')?.getAttribute('data-full') || el.dataset.date || '').join(',');
 }
 
 /**
- * Pack sorted items into N flex columns using shortest-column placement.
- * Visible items drive column heights; hidden/error items are parked without
- * affecting balance. Preserves sort order at the top of the page.
+ * Pack sorted items into N flex columns (shortest-column).
+ * Only mutates the DOM when the visible set/order or column count changes.
+ * Does not run on image load — that caused mid-scroll "teleporting" photos.
  */
 function packGalleryMasonry(orderedItems) {
   if (!galleryGrid) return;
@@ -2331,35 +2367,6 @@ function packGalleryMasonry(orderedItems) {
 
   const n = Math.max(1, getGalleryColumnCount());
   const gap = getGalleryColumnGap();
-
-  // Ensure exactly n column wrappers (live DOM only — static HTML stays flat).
-  let cols = [...galleryGrid.querySelectorAll(':scope > .gallery-col')];
-  // Orphan any non-column direct children (first load / after manager inserts).
-  [...galleryGrid.children].forEach((child) => {
-    if (!child.classList || !child.classList.contains('gallery-col')) {
-      // leave for now; items will be moved into cols
-    }
-  });
-  while (cols.length < n) {
-    const col = document.createElement('div');
-    col.className = 'gallery-col';
-    col.setAttribute('role', 'presentation');
-    galleryGrid.appendChild(col);
-    cols.push(col);
-  }
-  while (cols.length > n) {
-    const doomed = cols.pop();
-    while (doomed.firstChild) {
-      // park under grid temporarily
-      galleryGrid.appendChild(doomed.firstChild);
-    }
-    doomed.remove();
-  }
-  cols = [...galleryGrid.querySelectorAll(':scope > .gallery-col')];
-
-  const gridW = galleryGrid.clientWidth || galleryGrid.offsetWidth || 900;
-  const colWidth = Math.max(80, (gridW - gap * (n - 1)) / n);
-  const heights = new Array(n).fill(0);
 
   const visible = [];
   const parked = [];
@@ -2371,41 +2378,64 @@ function packGalleryMasonry(orderedItems) {
     }
   });
 
-  // Shortest-column: place next (sorted) photo into the shortest column.
+  const signature = galleryPackFingerprint(visible, n);
+  // Still ensure columns exist on first paint even if signature matches empty.
+  let cols = [...galleryGrid.querySelectorAll(':scope > .gallery-col')];
+  const needsStructure = cols.length !== n;
+  if (!needsStructure && signature && signature === galleryPackSignature) {
+    return; // no-op: avoids scroll jump from redundant appendChild
+  }
+  galleryPackSignature = signature;
+
+  while (cols.length < n) {
+    const col = document.createElement('div');
+    col.className = 'gallery-col';
+    col.setAttribute('role', 'presentation');
+    galleryGrid.appendChild(col);
+    cols.push(col);
+  }
+  while (cols.length > n) {
+    const doomed = cols.pop();
+    while (doomed.firstChild) galleryGrid.appendChild(doomed.firstChild);
+    doomed.remove();
+  }
+  cols = [...galleryGrid.querySelectorAll(':scope > .gallery-col')];
+
+  const gridW = galleryGrid.clientWidth || galleryGrid.offsetWidth || 900;
+  const colWidth = Math.max(80, (gridW - gap * (n - 1)) / n);
+  const heights = new Array(n).fill(0);
+
+  // Disable scroll anchoring while we reparent nodes (prevents browser jump).
+  const prevAnchor = galleryGrid.style.overflowAnchor;
+  galleryGrid.style.overflowAnchor = 'none';
+
   visible.forEach((item) => {
     let shortest = 0;
     for (let i = 1; i < n; i++) {
       if (heights[i] < heights[shortest]) shortest = i;
     }
     cols[shortest].appendChild(item);
-    const h = estimateGalleryItemHeight(item, colWidth);
-    heights[shortest] += h + gap;
+    heights[shortest] += estimateGalleryItemHeight(item, colWidth) + gap;
   });
 
-  // Hidden / error tiles stay in the DOM for filters but take no visual space.
   parked.forEach((item, i) => {
     cols[i % n].appendChild(item);
   });
 
-  // Remove stray non-column nodes left in the grid root.
   [...galleryGrid.children].forEach((child) => {
     if (child.classList && child.classList.contains('gallery-col')) return;
     if (child.classList && child.classList.contains('gallery-item')) {
       cols[0].appendChild(child);
-      return;
     }
-    // unknown node — leave it
   });
+
+  galleryGrid.style.overflowAnchor = prevAnchor;
 }
 
 function scheduleGalleryMasonryPack() {
+  // Kept as a named no-op hook for any legacy call sites. Layout is stable
+  // from attributes; only sort/filter/resize should repack (via sortGalleryItems).
   if (!galleryGrid) return;
-  clearTimeout(galleryPackTimer);
-  galleryPackTimer = setTimeout(() => {
-    // Re-sort then pack so column tree-order never corrupts "newest first".
-    // Guard: sortGalleryItems is declared later but is a function declaration (hoisted).
-    if (typeof sortGalleryItems === 'function') sortGalleryItems();
-  }, 80);
 }
 
 function compareGalleryItems(a, b) {
@@ -2623,7 +2653,7 @@ function galleryPreferredSrc(img, quality) {
 }
 
 function lightboxHdLabel(key) {
-  const dict = (typeof I18N !== 'undefined' && I18N[currentLang]) || null;
+  const dict = getI18nDict(currentLang);
   const fallback = {
     loadFull: 'Load full quality',
     loadingFull: 'Loading original…',
