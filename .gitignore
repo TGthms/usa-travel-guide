@@ -19,7 +19,7 @@ yarn-error.log*
 /playwright/.cache/
 
 # Internal photo workflow (not part of the published site)
-# Local Gallery Manager + launcher — never deploy to GitHub Pages
+# Local Gallery Manager
 tools/
 Add Photos.command
 **/__pycache__/
