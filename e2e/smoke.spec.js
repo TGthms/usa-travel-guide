@@ -40,6 +40,8 @@ test.describe('USA Travel Guide smoke', () => {
       const res = await page.goto(path);
       expect(res && res.ok(), `${path} should return OK`).toBeTruthy();
       await expect(page.locator('link[href="src/css/styles.css"]')).toHaveCount(1);
+      await expect(page.locator('script[src="src/js/core/env.js"]')).toHaveCount(1);
+      await expect(page.locator('script[src="src/js/core/runtime.js"]')).toHaveCount(1);
       await expect(page.locator('script[src="src/js/app.js"]')).toHaveCount(1);
     }
   });

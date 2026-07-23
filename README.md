@@ -46,8 +46,10 @@ Main pages: `index.html` · `gallery.html` · `tools.html` · `privacy.html` · 
 |------|------|
 | `index.html` · `gallery.html` · `tools.html` · `privacy.html` · `terms.html` | Site pages (repo root — required for GitHub Pages subpath deploy) |
 | `src/css/styles.css` | Shared styles |
-| `src/js/app.js` | Shared client logic |
-| `src/js/legal-i18n.js` | Privacy / Terms copy (en · es · zh · ja) |
+| `src/js/app.js` | Boot only (applies saved prefs after feature scripts load) |
+| `src/js/core/` | Shared shell: env, prefs, i18n, settings chrome |
+| `src/js/features/` | Page features: home, gallery, tools, legal |
+| `src/js/data/` | Content packs (i18n, modals, fun facts, legal copy, dest links) |
 | `src/js/data/` | Translation dictionary, fun facts, modal & destination link data |
 | `images/` | Photos (gallery tiers + site imagery) |
 | `docs/i18n/` | Translated READMEs |
