@@ -155,6 +155,22 @@ test.describe('USA Travel Guide smoke', () => {
     await expect(page.locator('#modal-overlay')).not.toHaveClass(/open/);
   });
 
+  test('gallery chrome is visible (not stuck at opacity 0)', async ({ page }) => {
+    await page.goto('/gallery.html');
+    await page.waitForFunction(() => {
+      const loader = document.getElementById('loader');
+      return !loader || loader.classList.contains('gone');
+    });
+    // Regression: after JS split, .reveal never got .visible on gallery-only pages.
+    await expect(page.locator('#galleryHeading')).toBeVisible();
+    await expect(page.locator('#gallerySearch')).toBeVisible();
+    await expect(page.locator('.gallery-filter.active')).toBeVisible();
+    await expect(page.locator('.gallery-app-header')).toHaveClass(/visible/);
+    await expect(page.locator('.gallery-app-header')).toHaveCSS('opacity', '1');
+    await expect(page.locator('.gallery-controls')).toHaveCSS('opacity', '1');
+    await expect(page.locator('.gallery-filters')).toHaveCSS('opacity', '1');
+  });
+
   test('gallery lightbox opens and navigates', async ({ page }) => {
     await page.goto('/gallery.html');
     // Wait until splash is gone and grid handlers can receive clicks.

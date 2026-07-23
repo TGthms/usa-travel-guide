@@ -179,12 +179,7 @@ if (destTrack && btnLeft && btnRight) {
 
 } // end homepage-only guard (if #hero present)
 
-/* ── SCROLL REVEAL ── */
-const allReveal = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-observeWhenVisible(allReveal, (el) => { el.classList.add('visible'); }, {
-  threshold: 0.05,
-  rootMargin: '0px 0px -40px 0px'
-});
+/* Scroll-reveal for .reveal is initialized in core/runtime.js (all pages). */
 
 /* ── TEMPERATURE BARS ── */
 const tb = document.getElementById('tempBars');

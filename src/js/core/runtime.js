@@ -1013,3 +1013,28 @@ document.addEventListener('keydown', e => {
   }
 });
 
+/* ── SCROLL REVEAL (all pages) ──
+   .reveal starts at opacity:0 until .visible is added. This used to live only
+   in features/home.js, so gallery/tools mini-apps never revealed their headers,
+   search, or filters — leaving a huge empty band above the content. */
+(function initScrollReveal() {
+  const els = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+  if (!els.length) return;
+  // Mini-apps are short pages; show chrome immediately (no scroll required).
+  const isMiniApp = document.body.classList.contains('page-gallery')
+    || document.body.classList.contains('page-tools')
+    || document.body.classList.contains('page-legal');
+  if (isMiniApp) {
+    els.forEach((el) => { el.classList.add('visible'); });
+    return;
+  }
+  if (typeof observeWhenVisible === 'function') {
+    observeWhenVisible(els, (el) => { el.classList.add('visible'); }, {
+      threshold: 0.05,
+      rootMargin: '0px 0px -40px 0px'
+    });
+  } else {
+    els.forEach((el) => { el.classList.add('visible'); });
+  }
+})();
+
