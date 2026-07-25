@@ -177,12 +177,15 @@ test.describe('USA Travel Guide smoke', () => {
     await page.waitForFunction(() => {
       const loader = document.getElementById('loader');
       const ready = !loader || loader.classList.contains('gone');
-      const n = document.querySelectorAll('#galleryGrid .gallery-item:not(.hidden)').length;
+      // Exclude .load-error tiles: openGalleryItem() intentionally no-ops on
+      // broken images, so a broken tile here would make the click below silently
+      // do nothing instead of opening the lightbox.
+      const n = document.querySelectorAll('#galleryGrid .gallery-item:not(.hidden):not(.load-error)').length;
       return document.body.classList.contains('page-gallery') && ready && n > 1;
     });
     // Dispatch on the tile itself (avoids sticky-filter / overlay intercept flakes).
     await page.evaluate(() => {
-      const item = document.querySelector('#galleryGrid .gallery-item:not(.hidden)');
+      const item = document.querySelector('#galleryGrid .gallery-item:not(.hidden):not(.load-error)');
       if (item) item.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     });
     await expect(page.locator('#lightbox')).toHaveClass(/open/, { timeout: 10_000 });
