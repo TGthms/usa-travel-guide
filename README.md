@@ -84,7 +84,7 @@ This is an interest-driven personal project — bug reports and suggestions are 
 
 - **Code:** MIT — see [LICENSE](LICENSE).
 - **Photos** in `/images`: © 2026 Tim G (TGthms), licensed under **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — free to use with credit.
-- **Fonts (web):** Loaded from Google Fonts — **Fraunces**, **Public Sans**, **Special Elite**, and **Noto Sans/Serif** (SC/JP). These are open-licensed (SIL OFL / Apache where applicable).
+- **Fonts (web):** Loaded from Google Fonts — **Fraunces**, **Public Sans**, **Special Elite**, and **Noto Sans/Serif** (ZH/JP). These are open-licensed (SIL OFL / Apache where applicable).
 - **Site policies:** [Privacy Policy](https://tgthms.github.io/usa-travel-guide/privacy.html) · [Terms of Use](https://tgthms.github.io/usa-travel-guide/terms.html)
 
 Suggested photo credit: *“Photo © Tim G (@TGthms), licensed under CC BY 4.0.”*
