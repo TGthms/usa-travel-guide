@@ -599,7 +599,7 @@ function updateLightboxHdButton(img, loadedTier) {
   const full = galleryFullSrc(img);
   const tier = loadedTier || (lightboxImg && lightboxImg.getAttribute('data-loaded-tier')) || '';
   // Show upgrade button only when a higher-res full asset exist
-  const canUpgrade = !!(full && tier !== 'full' && galleryQuality !== 'full');
+  const canUpgrade = !!(full && tier !== 'full' && galleryQuality !== 'full' && !ENV.constrained);
   if (!canUpgrade) {
     lightboxHdBtn.hidden = true;
     lightboxHdBtn.classList.remove('is-loading');

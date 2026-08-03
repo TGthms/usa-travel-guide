@@ -3409,10 +3409,11 @@ section[id], footer[id] { scroll-margin-top: 90px; }
 }
 /* Ultra-narrow / wearable webviews (~Apple Watch size and similar). */
 @media (max-width: 280px) {
-  #navbar { padding: 10px 8px; gap: 6px; }
-  .nav-logo { font-size: 16px; }
-  .nav-actions { gap: 4px; margin-left: 4px; }
-  .nav-settings-btn, .nav-tool-btn { width: 34px; height: 34px; font-size: 14px; }
+  #navbar { padding: 8px 6px; gap: 4px; }
+  .nav-logo { font-size: 18px; padding: 2px 4px; }
+  .nav-logo span { display: none; }   /* hide the "America" wordmark, keep the ✦ mark as a compact home link */
+  .nav-actions { gap: 3px; margin-left: 2px; }
+  .nav-settings-btn, .nav-tool-btn { width: 30px; height: 30px; }
   #hero { min-height: 280px; }
   .hero-content { padding: 0 8px 40px; }
   .hero-eyebrow { font-size: 10px; letter-spacing: .12em; }
@@ -3511,7 +3512,14 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   }
   .lightbox-progress-msg { font-size: 10px; }
   .lightbox-progress-pct { font-size: 11px; }
-
+  /* Move the close button to the bottom on wearable webviews — many of these
+     mini-browsers float their own address bar over the top of the page,
+     which hides/covers a top-positioned button. */
+  .lightbox-close {
+    top: auto;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    right: max(12px, env(safe-area-inset-right));
+  }
   .settings-panel,
   .tools-panel { max-height: none; }
   .tool-card { padding: 14px 12px; }
