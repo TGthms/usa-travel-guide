@@ -25,8 +25,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
       - name: Strip internal / non-public files
-        # Defense-in-depth: Gallery Manager and other local-only tooling must
-        # never ship to GitHub Pages even if accidentally force-added to git.
+        # Gallery Manager lives in the repo for maintainers, but must never ship
+        # on the public static site (GitHub Pages mirror). Cloudflare deploy
+        # should apply the same strip if it publishes from this tree.
         run: |
           rm -rf tools "Add Photos.command"
           find . -name '__pycache__' -type d -prune -exec rm -rf {} +

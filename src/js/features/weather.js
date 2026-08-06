@@ -2,11 +2,21 @@
 /* USA Travel Guide — features/weather.js
    Open-Meteo forecast + air quality. Apple-inspired multi-city weather.
    Load order: data/i18n → core/env → core/runtime → weather.js → app.js
+
+   Internal map (single IIFE — classic globals, not ES modules):
+     · Constants / MAJOR cities / WMO labels
+     · Prefs (units, favorites, my-location) + reverse geocode
+     · Icons, formatters, sky / rain ornaments
+     · Network fetch + cache + refresh generation (abort races)
+     · List UI (skeleton, rows, search)
+     · Detail UI (modules, sheets, charts)
+     · Boot + window.refreshWeatherUi / closeWeatherDetail
 */
 
 (function () {
   if (!document.getElementById('weatherList') && !document.querySelector('[data-tool="weather"]')) return;
 
+  // ── API + storage keys ──────────────────────────────────────────────
   const FORECAST = 'https://api.open-meteo.com/v1/forecast';
   const GEOCODE = 'https://geocoding-api.open-meteo.com/v1/search';
   const AIR = 'https://air-quality-api.open-meteo.com/v1/air-quality';

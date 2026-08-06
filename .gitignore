@@ -18,14 +18,15 @@ yarn-error.log*
 /blob-report/
 /playwright/.cache/
 
-# Internal photo workflow (not part of the published site)
-# Local Gallery Manager
-tools/
+# Gallery Manager source (tools/gallery_manager.py, tools/README.md) IS tracked.
+# Runtime junk and local-only helpers stay private / out of the public deploy.
 Add Photos.command
 **/__pycache__/
+tools/__pycache__/
 *.py[cod]
 *.pyo
 .Python
+tools/.geo_cache.json
 .geo_cache.json
 **/.geo_cache.json
 

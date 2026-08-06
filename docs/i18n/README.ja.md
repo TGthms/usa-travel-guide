@@ -10,11 +10,12 @@
 </p>
 
 <p align="center">
-  5つの地域、12の都市、ロードトリップ、絞り込み可能なギャラリー、旅行ツール、季節のアドバイス、文化、アメリカのおもしろ豆知識、実用的な旅行計画をまとめたアメリカ旅行ガイドです。
+  5つの地域、12の都市、ロードトリップ、絞り込み可能なギャラリー、旅行ツール（ライブ天気を含む）、季節のアドバイス、文化、アメリカのおもしろ豆知識、実用的な旅行計画をまとめたアメリカ旅行ガイドです。
 </p>
 
 <p align="center">
-  <a href="https://tgthms.github.io/usa-travel-guide/"><strong>🔗 サイトはこちら</strong></a>
+  <a href="https://travelusa.pages.dev/"><strong>🔗 サイトはこちら</strong></a><br>
+  <sub>ミラー（GitHub Pages）: <a href="https://tgthms.github.io/usa-travel-guide/">tgthms.github.io/usa-travel-guide</a></sub>
 </p>
 
 ---
@@ -27,28 +28,29 @@
 | 🏙️ **おすすめ都市** | 12都市のカード、評価、詳細。 |
 | 🔗 **役立つリンク** | 公式観光、交通、公園、博物館。 |
 | 🖼️ **フォトギャラリー** | 検索・並べ替え・画質（サムネ／中／原寸）。*HDR 対応* |
-| 🧰 **旅行ツール** | 為替、世界時計、チップ＆売上税（50州）、ガソリン/EV、緊急番号。 |
+| 🧰 **旅行ツール** | 為替、世界時計、チップ＆売上税（50州）、ガソリン/EV、緊急番号、**ライブ天気**。 |
 | 🌦️ **季節・文化・ルート** | ベストシーズン、文化、クラシックなロードトリップ。 |
 | 🎲 **アメリカ豆知識** | 1件ずつランダム表示。多言語対応。 |
 | 🌐 **多言語** | 英 / 西 / 中 / 日（リーガル含む）。 |
 | ⚙️ **パーソナライズ** | テーマ、言語、°F/°C と mi/km、ギャラリー画質を端末に保存。 |
 | ♿️ **アクセシビリティ** | アニメ3段階：フル／控えめ／オフ。デスクトップではカーソル軌跡を個別切替。 |
 | 📱 **モバイル向け** | 軽量な先頭画面、タッチスクロール、性能最適化。 |
-| 🔒 **プライバシーと規約** | [プライバシーポリシー](https://tgthms.github.io/usa-travel-guide/privacy.html) と [利用規約](https://tgthms.github.io/usa-travel-guide/terms.html)（外部リンクの説明含む）。（法的文書の翻訳は参考用で、英語版が優先されます。） |
+| 🔒 **プライバシーと規約** | [プライバシーポリシー](https://travelusa.pages.dev/privacy.html) と [利用規約](https://travelusa.pages.dev/terms.html)（外部リンクの説明含む）。（法的文書の翻訳は参考用で、英語版が優先されます。） |
 
 ---
 
 ## 🚀 クイックスタート
 
-静的サイト — ローカルで開くか GitHub Pages などで公開。
+静的サイト — ローカルで開くか Cloudflare Pages / GitHub Pages などで公開。
 
 ```bash
-open index.html
-# または
-python3 -m http.server 8080
+npm run serve
+# → http://127.0.0.1:8000/
 ```
 
-ページ：`index.html` · `gallery.html` · `tools.html` · `privacy.html` · `terms.html`
+**公開サイト:** [travelusa.pages.dev](https://travelusa.pages.dev/)（メイン） · [GitHub Pages ミラー](https://tgthms.github.io/usa-travel-guide/)
+
+ページ：`index.html` · `gallery.html` · `tools.html` · ツール mini-app · `privacy.html` · `terms.html`
 
 ---
 
@@ -65,6 +67,7 @@ python3 -m http.server 8080
 - **コード:** MIT — [LICENSE](../../LICENSE) を参照。
 - **`/images` の写真:** © 2026 Tim G (TGthms)、**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — クレジット表記のうえ利用可。
 - **Web フォント:** Google Fonts — Fraunces、Public Sans、Special Elite、Noto Sans/Serif（SC/JP）。オープンライセンス（SIL OFL / Apache など）。
-- **サイト方針:** [プライバシー](https://tgthms.github.io/usa-travel-guide/privacy.html) · [利用規約](https://tgthms.github.io/usa-travel-guide/terms.html)
+- **サイト方針:** [プライバシー](https://travelusa.pages.dev/privacy.html) · [利用規約](https://travelusa.pages.dev/terms.html)  
+  ミラー: [プライバシー](https://tgthms.github.io/usa-travel-guide/privacy.html) · [利用規約](https://tgthms.github.io/usa-travel-guide/terms.html)
 
 推奨クレジット：*「Photo © Tim G (@TGthms), licensed under CC BY 4.0.」*

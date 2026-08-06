@@ -2,10 +2,19 @@
 /* USA Travel Guide — features/tools.js
    Classic non-module script. Shared global scope with other src/js scripts.
    Canonical load order: see header of src/js/app.js
+
+   Sections:
+     1. Shared refresh + TOOLS_TEXT
+     2. Currency converter
+     3. World clock
+     4. Tip & sales tax
+     5. Drive cost (gas / EV)
+     6. Mini-app boot
 */
 
-/* ── TRAVEL TOOLS ──
-   Dedicated page (tools.html). Live widgets refresh on language/unit change. */
+// ═══════════════════════════════════════════════════════════════════════
+// SHARED — live refresh when language/units change
+// ═══════════════════════════════════════════════════════════════════════
 function refreshToolsLive() {
   if (typeof updateWorldClock === 'function') updateWorldClock();
   if (typeof populateCurrencySelects === 'function') populateCurrencySelects();
@@ -21,7 +30,7 @@ function refreshToolsLive() {
 // I18N dictionary — this keeps the Tools panel fully localized instead of
 // silently staying in English when another language is selected.
 const TOOLS_TEXT = {
-  en: { sameCurrency: 'Same currency selected.', updating: 'Updating...', fetching: 'Fetching latest available daily rate.', rateUnavailable: 'Rate unavailable', checkConnection: 'Check your connection and try again.', tax: 'Tax', tip: 'Tip',
+  en: { sameCurrency: 'Same currency selected.', updating: 'Updating...', fetching: 'Fetching latest available daily rate.', rateUnavailable: 'Rate unavailable', checkConnection: 'Check your connection and try again.', ratesDaily: 'Rates update daily.', updatedAsOf: 'Updated {date}', tax: 'Tax', tip: 'Tip',
     driveGal: 'gal', driveL: 'L', salesTaxZero: 'No statewide sales tax (local may apply).',
     driveMpgMi: 'MPG', driveMpgKm: 'L/100 km', driveFuelGal: 'Fuel $/gal', driveFuelL: 'Fuel $/L',
     driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100 km',
@@ -32,7 +41,7 @@ const TOOLS_TEXT = {
       'Dubai': 'Dubai', 'Mumbai': 'Mumbai', 'Singapore': 'Singapore', 'Hong Kong': 'Hong Kong',
       'Shanghai': 'Shanghai', 'Seoul': 'Seoul', 'Tokyo': 'Tokyo', 'Sydney': 'Sydney'
     } },
-  es: { sameCurrency: 'Misma divisa seleccionada.', updating: 'Actualizando…', fetching: 'Obteniendo el último tipo de cambio diario disponible.', rateUnavailable: 'Tipo de cambio no disponible', checkConnection: 'Comprueba tu conexión e inténtalo de nuevo.', tax: 'Impuesto', tip: 'Propina',
+  es: { sameCurrency: 'Misma divisa seleccionada.', updating: 'Actualizando…', fetching: 'Obteniendo el último tipo de cambio diario disponible.', rateUnavailable: 'Tipo de cambio no disponible', checkConnection: 'Comprueba tu conexión e inténtalo de nuevo.', ratesDaily: 'Los tipos se actualizan a diario.', updatedAsOf: 'Actualizado el {date}', tax: 'Impuesto', tip: 'Propina',
     driveGal: 'gal', driveL: 'L', salesTaxZero: 'Sin impuesto estatal de ventas (puede haber impuestos locales).',
     driveMpgMi: 'MPG', driveMpgKm: 'L/100 km', driveFuelGal: 'Combustible $/gal', driveFuelL: 'Combustible $/L',
     driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100 km',
@@ -43,7 +52,7 @@ const TOOLS_TEXT = {
       'Dubai': 'Dubái', 'Mumbai': 'Bombay', 'Singapore': 'Singapur', 'Hong Kong': 'Hong Kong',
       'Shanghai': 'Shanghái', 'Seoul': 'Seúl', 'Tokyo': 'Tokio', 'Sydney': 'Sídney'
     } },
-  zh: { sameCurrency: '已选择相同货币。', updating: '更新中…', fetching: '正在获取最新每日汇率。', rateUnavailable: '汇率不可用', checkConnection: '请检查网络连接后重试。', tax: '税费', tip: '小费',
+  zh: { sameCurrency: '已选择相同货币。', updating: '更新中…', fetching: '正在获取最新每日汇率。', rateUnavailable: '汇率不可用', checkConnection: '请检查网络连接后重试。', ratesDaily: '汇率每日更新。', updatedAsOf: '更新于 {date}', tax: '税费', tip: '小费',
     driveGal: '加仑', driveL: '升', salesTaxZero: '该州无州销售税（可能仍有地方税）。',
     driveMpgMi: 'MPG', driveMpgKm: '升/百公里', driveFuelGal: '油价 $/加仑', driveFuelL: '油价 $/升',
     driveEvMi: '英里/度', driveEvKm: '度/百公里',
@@ -54,7 +63,7 @@ const TOOLS_TEXT = {
       'Dubai': '迪拜', 'Mumbai': '孟买', 'Singapore': '新加坡', 'Hong Kong': '香港',
       'Shanghai': '上海', 'Seoul': '首尔', 'Tokyo': '东京', 'Sydney': '悉尼'
     } },
-  ja: { sameCurrency: '同じ通貨が選択されています。', updating: '更新中…', fetching: '最新の為替レートを取得しています。', rateUnavailable: 'レートを取得できません', checkConnection: '接続を確認して再度お試しください。', tax: '税金', tip: 'チップ',
+  ja: { sameCurrency: '同じ通貨が選択されています。', updating: '更新中…', fetching: '最新の為替レートを取得しています。', rateUnavailable: 'レートを取得できません', checkConnection: '接続を確認して再度お試しください。', ratesDaily: 'レートは毎日更新されます。', updatedAsOf: '{date} 更新', tax: '税金', tip: 'チップ',
     driveGal: 'ガロン', driveL: 'L', salesTaxZero: '州の売上税はありません（地方税がかかる場合あり）。',
     driveMpgMi: 'MPG', driveMpgKm: 'L/100km', driveFuelGal: '燃料 $/gal', driveFuelL: '燃料 $/L',
     driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100km',
@@ -68,6 +77,9 @@ const TOOLS_TEXT = {
 };
 function toolsText() { return TOOLS_TEXT[currentLang] || TOOLS_TEXT.en; }
 
+// ═══════════════════════════════════════════════════════════════════════
+// CURRENCY — Frankfurter daily rates + clear “last updated” stamp
+// ═══════════════════════════════════════════════════════════════════════
 /* Localized currency display names for the converter selects (codes stay ISO). */
 const CURRENCY_CODES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'HKD', 'CHF', 'MXN'];
 const CURRENCY_NAMES = {
@@ -132,6 +144,30 @@ function moneyFmt(value, currency) {
   catch (e) { return `${value.toFixed(2)} ${currency}`; }
 }
 
+/** Format ECB daily date (YYYY-MM-DD) for the active language (UTC calendar day). */
+function formatRateDate(isoDate) {
+  if (!isoDate || typeof isoDate !== 'string') return '';
+  const m = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return isoDate;
+  try {
+    const y = +m[1];
+    const mo = +m[2];
+    const d = +m[3];
+    const dt = new Date(Date.UTC(y, mo - 1, d));
+    const loc = currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : 'en-US';
+    return new Intl.DateTimeFormat(loc, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }).format(dt);
+  } catch (_) {
+    return isoDate;
+  }
+}
+
+function currencyUpdatedLabel(isoDate) {
+  const formatted = formatRateDate(isoDate);
+  if (!formatted) return '';
+  const tpl = (toolsText().updatedAsOf) || 'Updated {date}';
+  return tpl.replace('{date}', formatted);
+}
+
 // Build localized currency options as soon as the selects exist.
 populateCurrencySelects();
 
@@ -154,18 +190,18 @@ async function updateCurrency() {
 
   if (base === quote) {
     currencyResult.textContent = `${moneyFmt(amount, base)} = ${moneyFmt(amount, quote)}`;
-    currencyMeta.textContent = t.sameCurrency;
+    if (currencyMeta) currencyMeta.textContent = t.sameCurrency;
     return;
   }
   if (typeof fetch !== 'function') {
     currencyResult.textContent = t.rateUnavailable;
-    currencyMeta.textContent = t.checkConnection;
+    if (currencyMeta) currencyMeta.textContent = t.checkConnection;
     return;
   }
   const canAbort = typeof AbortController === 'function';
   currencyAbort = canAbort ? new AbortController() : null;
   currencyResult.textContent = t.updating;
-  currencyMeta.textContent = t.fetching;
+  if (currencyMeta) currencyMeta.textContent = t.fetching;
   try {
     const fetchOpts = currencyAbort ? { signal: currencyAbort.signal } : {};
     const res = await fetch(`https://api.frankfurter.dev/v2/rate/${base}/${quote}`, fetchOpts);
@@ -178,12 +214,17 @@ async function updateCurrency() {
     const stillAmount = Math.max(0, Number(currencyAmount.value) || 0);
     const converted = stillAmount * Number(data.rate);
     currencyResult.textContent = `${moneyFmt(stillAmount, base)} = ${moneyFmt(converted, quote)}`;
-    currencyMeta.textContent = `1 ${base} = ${Number(data.rate).toFixed(4)} ${quote}${data.date ? ` · ${data.date}` : ''}`;
+    if (currencyMeta) {
+      const pair = `1 ${base} = ${Number(data.rate).toFixed(4)} ${quote}`;
+      const stamp = data.date ? currencyUpdatedLabel(data.date) : '';
+      currencyMeta.textContent = stamp ? `${pair} · ${stamp}` : pair;
+    }
   } catch (err) {
     if (err && err.name === 'AbortError') return;
     if (reqId !== currencyReqId) return;
     currencyResult.textContent = t.rateUnavailable;
-    currencyMeta.textContent = t.checkConnection;
+    // Clear any previous “Updated …” stamp on failure
+    if (currencyMeta) currencyMeta.textContent = t.checkConnection;
   }
 }
 
@@ -202,6 +243,9 @@ if (currencySwap) {
   });
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// WORLD CLOCK — west→east zones + client-side search
+// ═══════════════════════════════════════════════════════════════════════
 const worldClockList = document.getElementById('worldClockList');
 const clockSearch = document.getElementById('clockSearch');
 /* West → east for travelers: U.S. + nearby Americas, then Europe/ME, then Asia/Oceania. */
@@ -255,6 +299,9 @@ if (clockSearch) {
 // World clock interval — started only when the tools page is active.
 let worldClockInterval = null;
 
+// ═══════════════════════════════════════════════════════════════════════
+// TIP & SALES TAX — 50 states + DC averages (user-overridable)
+// ═══════════════════════════════════════════════════════════════════════
 /* Approximate average combined state + local sales tax (%).
    Source-style public averages — local rates vary; user can override Tax %. */
 const SALES_TAX_RATES = {
@@ -394,7 +441,10 @@ if (salesTaxState) {
 }
 [billAmount, taxRate, tipRate].forEach(el => { if (el) el.addEventListener('input', updateTipEstimator); });
 updateTipEstimator();
-/* Road-trip cost: Gas (MPG / L/100km) or EV (mi/kWh / kWh/100km). */
+
+// ═══════════════════════════════════════════════════════════════════════
+// DRIVE COST — gas (MPG / L/100km) or EV (mi/kWh / kWh/100km)
+// ═══════════════════════════════════════════════════════════════════════
 const driveToolCard = document.getElementById('driveToolCard');
 const driveDist = document.getElementById('driveDist');
 const driveSpeed = document.getElementById('driveSpeed');
@@ -529,7 +579,9 @@ if (driveDist && currentDistUnit === 'km' && driveFieldsUnit === 'mi') {
 }
 updateDriveUnitLabels();
 
-// Tools mini-app: start live widgets immediately (page is always "open").
+// ═══════════════════════════════════════════════════════════════════════
+// MINI-APP BOOT — start live widgets when a tools page is open
+// ═══════════════════════════════════════════════════════════════════════
 if (document.body.classList.contains('page-tools') || currencyAmount || worldClockList) {
   refreshToolsLive();
   if (worldClockList) {

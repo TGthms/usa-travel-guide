@@ -17,14 +17,16 @@
    Runtime load order (classic deferred scripts, shared global scope):
    1. core/env.js
    2. core/runtime.js      prefs · i18n · chrome · settings
-   3. features/tools.js    (no-op off tools page)
-   4. features/home.js     (no-op off index)
-   5. features/legal.js    (no-op off legal pages)
-   6. features/gallery.js  (no-op off gallery / without #galleryGrid)
-   7. app.js               this file — apply saved prefs + final init
+   3. features/tools.js    (tools hub + currency/clock/tip/drive/emergency)
+   4. features/weather.js  (tools-weather only — registers refreshWeatherUi)
+   5. features/home.js     (index)
+   6. features/legal.js    (privacy / terms)
+   7. features/gallery.js  (gallery page)
+   8. app.js               this file — apply saved prefs + final init
 
-   Kept as non-module scripts so window.toggleFavorite and similar globals
-   remain available to any legacy handlers.
+   Not every page loads every feature script; each feature no-ops when its
+   root DOM is missing. Kept as non-module scripts so window.* hooks remain
+   available (e.g. toggleFavorite, closeWeatherDetail, refreshWeatherUi).
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Apply saved preferences once all feature scripts have registered. */

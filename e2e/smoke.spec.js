@@ -221,6 +221,35 @@ test.describe('USA Travel Guide smoke', () => {
     await expect(page.locator('#currencyTo')).toHaveValue(fromBefore);
   });
 
+  test('currency meta shows rate and last-updated stamp', async ({ page }) => {
+    await page.goto('/tools-currency.html');
+    await waitLoaderGone(page);
+    // Ensure different currencies so a network rate is fetched
+    await page.locator('#currencyFrom').selectOption('USD');
+    await page.locator('#currencyTo').selectOption('EUR');
+    await page.locator('#currencyAmount').fill('100');
+    await page.waitForFunction(() => {
+      const meta = document.getElementById('currencyMeta');
+      const text = (meta && meta.textContent) || '';
+      // Success: pair + updated label, or offline: connection message
+      return /1\s+USD\s*=/.test(text)
+        || /Updated|Actualizado|更新|check|connection|conexión|连接|接続/i.test(text);
+    }, null, { timeout: 25_000 });
+    const meta = await page.locator('#currencyMeta').textContent();
+    // When online, expect labeled last-updated (not bare ISO alone)
+    if (/1\s+USD\s*=/.test(meta || '')) {
+      expect(meta).toMatch(/Updated|Actualizado|更新/i);
+    }
+  });
+
+  test('motion Off sets data-motion-effective', async ({ page }) => {
+    await openSettings(page);
+    await page.locator('#motionPillGroup .pill-btn[data-motion-val="off"]').click();
+    await closeSettings(page);
+    await expect(page.locator('html')).toHaveAttribute('data-motion-effective', 'off');
+    await expect(page.locator('html')).toHaveAttribute('data-motion', 'off');
+  });
+
   test('tip-tax state selector localizes on language change', async ({ page }) => {
     await page.goto('/tools-tip-tax.html');
     await page.waitForFunction(() => document.querySelectorAll('#salesTaxState option').length > 10);
