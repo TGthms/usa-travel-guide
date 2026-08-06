@@ -15,7 +15,7 @@ window.LEGAL_I18N = {
       title: 'Privacy Policy',
       eyebrow: 'Legal',
       updatedLabel: 'Updated',
-      updatedDate: 'July 11, 2026',
+      updatedDate: 'August 6, 2026',
       onThisPage: 'On this page',
       lead: 'This Privacy Policy describes how <strong>America — A Travel Guide</strong> (the “Site,” “we,” “us”) handles information when you visit or use this website, including the guide, photo gallery, and tools. We designed the Site to work well with as little personal data as possible.',
       toc: [
@@ -72,7 +72,7 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>Fonts.</strong> Web fonts may be loaded from Google Fonts so text displays correctly across languages. That request may include technical data such as your IP address, subject to Google’s policies.</li>
 <li><strong>Exchange rates (Tools).</strong> The currency converter may request rates from a public API (for example Frankfurter). Only the currency codes needed for the conversion are sent for that request.</li>
-<li><strong>Weather &amp; air quality (Tools).</strong> The Weather tool may request forecast and air-quality data from Open-Meteo (or a compatible provider). Requests typically include the coordinates or place name you selected. If you use “Use my location,” coordinates are rounded on your device to about <strong>1 km</strong> before the forecast request and before any local storage of that place. Optional browser geolocation is sent only if you allow it. Weather data is for general travel guidance only—not for emergencies or life-safety decisions.</li>
+<li><strong>Weather, alerts &amp; air quality (Tools).</strong> The Weather tool may request U.S. forecast data and active severe-weather alerts (watches, warnings, and advisories) from the National Weather Service (api.weather.gov), and world forecasts, gap-fill fields, geocoding, and air quality from Open-Meteo (or a compatible provider). Requests typically include the coordinates or place name you selected. If you use “Use my location,” coordinates are rounded on your device to about <strong>1 km</strong> before the forecast or alerts request and before any local storage of that place. Optional browser geolocation is sent only if you allow it. Weather and alert data are for general travel guidance only—not for emergencies or life-safety decisions. Always follow official emergency authorities when severe weather threatens.</li>
 <li><strong>Gallery media.</strong> Photos and videos in the Gallery are static files hosted with the Site. Playing a video loads that file in your browser; no separate analytics SDK is required for playback.</li>
 <li><strong>External / outbound links.</strong> For convenience, the Site includes links to third-party websites—including official city tourism bureaus, public-transit agencies, National Park Service pages, museums, GitHub, About Me, and similar resources (for example “Helpful links” on destination cards). Clicking such a link leaves the Site and takes you to a service we do not operate. Those operators may collect information under their own privacy policies; this policy does not cover them. We do not receive your activity on those external sites by virtue of the link alone, and a link does not mean we endorse or control that third party.</li>
 </ul>`
@@ -120,7 +120,7 @@ window.LEGAL_I18N = {
       title: 'Política de privacidad',
       eyebrow: 'Legal',
       updatedLabel: 'Actualización',
-      updatedDate: '11 de julio de 2026',
+      updatedDate: '6 de agosto de 2026',
       onThisPage: 'En esta página',
       lead: 'Tu privacidad es importante. Esta Política de privacidad explica con claridad cómo <strong>América — Una Guía de Viaje</strong> (el “Sitio”, “nosotros”) recopila, usa, revela, transmite y guarda la información cuando visitas o usas este sitio web —incluida la guía, la galería de fotos y las herramientas—. Diseñamos el Sitio para funcionar bien con la menor cantidad posible de datos personales.',
       toc: [
@@ -176,7 +176,7 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>Fuentes tipográficas.</strong> Pueden cargarse fuentes web desde Google Fonts para mostrar correctamente el texto en varios idiomas. Esa solicitud puede incluir datos técnicos como tu dirección IP, sujetos a las políticas de Google.</li>
 <li><strong>Tipos de cambio (Herramientas).</strong> El conversor de divisas puede solicitar cotizaciones a una API pública (por ejemplo, Frankfurter). Solo se envían los códigos de moneda necesarios para la conversión.</li>
-<li><strong>Tiempo y calidad del aire (Herramientas).</strong> La herramienta de tiempo puede solicitar previsiones y calidad del aire a Open-Meteo (o un proveedor compatible). Las solicitudes suelen incluir las coordenadas o el lugar que elijas. Si usas “Usar mi ubicación”, las coordenadas se redondean en tu dispositivo a unos <strong>1 km</strong> de precisión antes de pedirse la previsión o guardarse en el almacenamiento local del navegador. La geolocalización del navegador solo se usa si la permites. Los datos son orientativos, no para emergencias.</li>
+<li><strong>Tiempo, avisos y calidad del aire (Herramientas).</strong> La herramienta de tiempo puede solicitar previsiones de EE. UU. y avisos meteorológicos activos (vigilances, advertencias y avisos) al National Weather Service (api.weather.gov), y previsiones mundiales, campos complementarios, geocodificación y calidad del aire a Open-Meteo (o un proveedor compatible). Las solicitudes suelen incluir las coordenadas o el lugar que elijas. Si usas “Usar mi ubicación”, las coordenadas se redondean en tu dispositivo a unos <strong>1 km</strong> de precisión antes de pedirse la previsión o los avisos, o de guardarse en el almacenamiento local del navegador. La geolocalización del navegador solo se usa si la permites. Los datos son orientativos, no para emergencias; ante tiempo severo, sigue siempre a las autoridades oficiales.</li>
 <li><strong>Medios de la galería.</strong> Fotos y vídeos se sirven como archivos estáticos del Sitio. Reproducir un vídeo descarga ese archivo en tu navegador.</li>
 <li><strong>Enlaces a sitios externos.</strong> Para tu comodidad, el Sitio incluye enlaces a sitios de terceros —oficinas oficiales de turismo, agencias de transporte, páginas del National Park Service, museos, GitHub, “Sobre mí” y recursos similares (por ejemplo, “Enlaces útiles” en las tarjetas de destinos). Al seguir un enlace de ese tipo, abandonas el Sitio y pasas a un servicio que no operamos. Esos operadores pueden recopilar información conforme a sus propias políticas de privacidad; esta política no los cubre. El simple hecho de que exista un enlace no nos da acceso a tu actividad en esos sitios, ni implica que respaldemos o controlemos a ese tercero.</li>
 </ul>`
@@ -223,7 +223,7 @@ window.LEGAL_I18N = {
       title: '隐私政策',
       eyebrow: '法律信息',
       updatedLabel: '更新日期',
-      updatedDate: '2026年7月11日',
+      updatedDate: '2026年8月6日',
       onThisPage: '本页内容',
       lead: '我们重视你的隐私。本《隐私政策》清楚说明<strong>美国 — 旅行指南</strong>（以下简称“本网站”“我们”）在你访问或使用本网站（包括指南、相册与工具）时，如何收集、使用、披露、传输与保存相关信息。我们尽量在少处理个人数据的前提下，让本网站顺畅可用。',
       toc: [
@@ -279,7 +279,7 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>字体。</strong>为正确显示多语言文字，可能从 Google Fonts 加载网络字体。相关请求可能包含 IP 地址等技术数据，并受 Google 相关政策约束。</li>
 <li><strong>汇率（工具页）。</strong>货币换算器可能向公开接口（例如 Frankfurter）请求汇率，且仅发送完成换算所需的货币代码。</li>
-<li><strong>天气与空气质量（工具页）。</strong>天气工具可能向 Open-Meteo（或兼容服务）请求预报与空气质量。请求通常包含你选择的坐标或地点。若使用“使用我的位置”，会在你的设备上将坐标<strong>约化到约 1 公里</strong>精度后再请求预报，并可能保存在浏览器本地存储中。仅在你授权时才会使用浏览器定位。天气数据仅供出行参考，不适用于紧急情况。</li>
+<li><strong>天气、预警与空气质量（工具页）。</strong>天气工具可能向美国国家气象局 National Weather Service（api.weather.gov）请求美国预报及现行严重天气预警（观察、警告与咨询），并向 Open-Meteo（或兼容服务）请求全球预报、补充字段、地理编码与空气质量。请求通常包含你选择的坐标或地点。若使用“使用我的位置”，会在你的设备上将坐标<strong>约化到约 1 公里</strong>精度后再请求预报或预警，并可能保存在浏览器本地存储中。仅在你授权时才会使用浏览器定位。天气与预警数据仅供出行参考，不适用于紧急情况；遇恶劣天气请遵循官方应急指示。</li>
 <li><strong>相册媒体。</strong>相册中的照片与视频作为本站静态文件提供。播放视频会在浏览器中加载该文件。</li>
 <li><strong>站外链接。</strong>为方便规划行程，本网站会提供指向第三方网站的链接，例如城市官方旅游网站、公共交通机构、美国国家公园管理局页面、博物馆、GitHub、“关于我”，以及目的地卡片中的“实用链接”等。点击此类链接即离开本网站，进入我们不运营的服务。那些运营方可能按其自身隐私政策处理信息；本政策不适用于它们。链接本身并不会让我们获知你在外部网站上的活动，也不表示我们认可或控制该第三方。</li>
 </ul>`
@@ -326,7 +326,7 @@ window.LEGAL_I18N = {
       title: 'プライバシーポリシー',
       eyebrow: 'リーガル',
       updatedLabel: '更新日',
-      updatedDate: '2026年7月11日',
+      updatedDate: '2026年8月6日',
       onThisPage: 'このページの内容',
       lead: 'お客様のプライバシーを大切にしています。本プライバシーポリシーでは、<strong>アメリカ — 旅行ガイド</strong>（以下「本サイト」）が、ガイド・フォトギャラリー・ツールを含む本ウェブサイトのご利用時に、情報をどのように収集、利用、開示、移転、保存するかを明確にご説明します。本サイトは、できるだけ少ない個人データで快適にご利用いただけるよう設計されています。',
       toc: [
@@ -382,7 +382,7 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>フォント。</strong>多言語を正しく表示するため、Google Fonts からウェブフォントを読み込むことがあります。その際、IP アドレス等の技術データが含まれる場合があり、Google の方針が適用されます。</li>
 <li><strong>為替（ツール）。</strong>通貨換算は、公開 API（例：Frankfurter）にレートを問い合わせることがあります。換算に必要な通貨コードのみを送信します。</li>
-<li><strong>天気と大気質（ツール）。</strong>天気ツールは Open-Meteo（または互換サービス）に予報・大気質を問い合わせることがあります。リクエストには選択した座標や地名が含まれます。「現在地を使う」では、端末上で座標を約 <strong>1 km</strong> 精度に丸めてから予報を取得し、ブラウザのローカル保存に残す場合があります。ブラウザの位置情報は許可した場合のみ使用します。データは旅行の参考用であり、緊急判断には使えません。</li>
+<li><strong>天気・警報と大気質（ツール）。</strong>天気ツールは、米国の予報および有効な悪天候警報（注意報・警報・勧告）を National Weather Service（api.weather.gov）へ、世界の予報・不足項目の補完・ジオコーディング・大気質を Open-Meteo（または互換サービス）へ問い合わせることがあります。リクエストには選択した座標や地名が含まれます。「現在地を使う」では、端末上で座標を約 <strong>1 km</strong> 精度に丸めてから予報または警報を取得し、ブラウザのローカル保存に残す場合があります。ブラウザの位置情報は許可した場合のみ使用します。データは旅行の参考用であり、緊急判断には使えません。悪天候時は公式機関の指示に従ってください。</li>
 <li><strong>ギャラリーのメディア。</strong>写真と動画はサイトの静的ファイルとして配信されます。動画再生時はブラウザがそのファイルを読み込みます。</li>
 <li><strong>外部サイトへのリンク。</strong>便宜のため、本サイトは第三者ウェブサイトへのリンクを含みます（都市の公式観光サイト、公共交通機関、National Park Service のページ、博物館、GitHub、About Me、目的地カードの「役立つリンク」など）。そのようなリンクをクリックすると本サイトを離れ、当方が運営していないサービスへ移動します。各運営者は独自のプライバシーポリシーに基づき情報を取り扱う場合があり、本ポリシーの対象外です。リンクがあること自体により、外部サイト上でのお客様の行動を当方が受け取ることはなく、リンクは当該第三者の推奨や管理を意味しません。</li>
 </ul>`
@@ -432,7 +432,7 @@ window.LEGAL_I18N = {
       title: 'Terms of Use',
       eyebrow: 'Legal',
       updatedLabel: 'Updated',
-      updatedDate: 'July 11, 2026',
+      updatedDate: 'August 6, 2026',
       onThisPage: 'On this page',
       lead: 'These Terms of Use (“Terms”) govern your access to and use of <strong>America — A Travel Guide</strong> (the “Site”), including the main guide, photo gallery, tools, and related pages operated by <strong>Tim G</strong> (GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>). By using the Site, you agree to these Terms. If you do not agree, please do not use the Site.',
       toc: [
@@ -512,7 +512,7 @@ window.LEGAL_I18N = {
           html: `<p>The Site may link to third-party websites or call third-party APIs (for example exchange rates, weather data, or font delivery). Those services are not under our control.</p>
 <ul>
 <li><strong>Destination and travel links.</strong> City and destination cards may include “Helpful links” to official tourism sites, transit agencies, National Park Service pages, museums, and similar external resources. These links are provided solely for convenience and planning reference. They do <strong>not</strong> create a partnership, sponsorship, agency, or endorsement relationship with any linked organization unless we expressly say so in writing.</li>
-<li><strong>Tools APIs.</strong> Currency rates and weather/air-quality forecasts may come from third-party public APIs. Values can be delayed, incomplete, or wrong. Weather is not for emergencies.</li>
+<li><strong>Tools APIs.</strong> Currency rates may come from third-party public APIs. U.S. weather forecasts and severe-weather alerts may come from the National Weather Service (api.weather.gov); world forecasts, enrichment fields, geocoding, and air quality may come from Open-Meteo (or a compatible provider). Values can be delayed, incomplete, or wrong. Weather and alerts are not substitutes for official emergency guidance.</li>
 <li><strong>No control or warranty.</strong> We do not operate, monitor, or guarantee the accuracy, safety, availability, or privacy practices of third-party sites or APIs. Content, URLs, branding, and policies on those sites may change or break without notice.</li>
 <li><strong>Your responsibility.</strong> When you leave the Site via an external link, you do so at your own risk and become subject to that third party’s terms and privacy policy. Verify critical travel, booking, or payment details directly with the official source.</li>
 </ul>
@@ -556,7 +556,7 @@ window.LEGAL_I18N = {
       title: 'Términos de uso',
       eyebrow: 'Legal',
       updatedLabel: 'Actualización',
-      updatedDate: '11 de julio de 2026',
+      updatedDate: '6 de agosto de 2026',
       onThisPage: 'En esta página',
       lead: 'Estos Términos de uso (“Términos”) regulan el acceso y el uso de <strong>América — Una Guía de Viaje</strong> (el “Sitio”), incluida la guía principal, la galería de fotos, las herramientas y las páginas relacionadas, operados por <strong>Tim G</strong> (GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>). Al utilizar el Sitio, aceptas estos Términos. Si no estás de acuerdo, te pedimos que no lo uses.',
       toc: [
@@ -636,6 +636,7 @@ window.LEGAL_I18N = {
           html: `<p>El Sitio puede enlazar a sitios de terceros o invocar API de terceros (por ejemplo, tipos de cambio o entrega de fuentes). Esos servicios no están bajo nuestro control.</p>
 <ul>
 <li><strong>Enlaces de destinos y viaje.</strong> Las fichas de ciudades y destinos pueden incluir “Enlaces útiles” a sitios oficiales de turismo, transporte, páginas del National Park Service, museos y recursos similares. Se ofrecen solo por comodidad y como referencia de planificación. <strong>No</strong> crean por sí solos una relación de asociación, patrocinio, agencia o respaldo con la organización enlazada, salvo que lo indiquemos por escrito.</li>
+<li><strong>API de herramientas.</strong> Los tipos de cambio pueden provenir de API públicas de terceros. Las previsiones y avisos meteorológicos severos de EE. UU. pueden provenir del National Weather Service (api.weather.gov); las previsiones mundiales, campos complementarios, geocodificación y calidad del aire pueden provenir de Open-Meteo (o un proveedor compatible). Los valores pueden retrasarse, estar incompletos o ser incorrectos. El tiempo y los avisos no sustituyen la guía oficial de emergencias.</li>
 <li><strong>Sin control ni garantía.</strong> No operamos, supervisamos ni garantizamos la exactitud, seguridad, disponibilidad o prácticas de privacidad de sitios o API de terceros. Su contenido, URL, marca y políticas pueden cambiar o dejar de funcionar sin previo aviso.</li>
 <li><strong>Tu responsabilidad.</strong> Cuando abandonas el Sitio por un enlace externo, lo haces bajo tu propio riesgo y quedan aplicables los términos y la política de privacidad de ese tercero. Verifica los datos críticos de viaje, reservas o pagos directamente en la fuente oficial.</li>
 </ul>
@@ -679,7 +680,7 @@ window.LEGAL_I18N = {
       title: '使用条款',
       eyebrow: '法律信息',
       updatedLabel: '更新日期',
-      updatedDate: '2026年7月11日',
+      updatedDate: '2026年8月6日',
       onThisPage: '本页内容',
       lead: '本《使用条款》（以下简称“本条款”）规范你对<strong>美国 — 旅行指南</strong>（以下简称“本网站”）的访问与使用，包括主指南、相册、工具及相关页面。本网站由 <strong>Tim G</strong>（GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>）运营。使用本网站，即表示你同意本条款。若不同意，请勿使用本网站。',
       toc: [
@@ -759,6 +760,7 @@ window.LEGAL_I18N = {
           html: `<p>本网站可能链接第三方网站，或调用第三方接口（例如汇率查询、字体加载）。这些服务不在我们的控制范围内。</p>
 <ul>
 <li><strong>目的地与旅行相关链接。</strong>城市与目的地卡片可能提供指向官方旅游网站、公共交通机构、国家公园管理局页面、博物馆等的“实用链接”。其目的仅为便利与规划参考。除非我们另有书面说明，此类链接<strong>并不</strong>表示我们与被链接机构存在合伙、赞助、代理或背书关系。</li>
+<li><strong>工具相关接口。</strong>汇率可能来自第三方公开 API。美国天气预报与严重天气预警可能来自国家气象局 National Weather Service（api.weather.gov）；全球预报、补充字段、地理编码与空气质量可能来自 Open-Meteo（或兼容服务）。数据可能延迟、不完整或不准确。天气与预警不能替代官方应急指引。</li>
 <li><strong>无控制与无保证。</strong>我们不运营、不监控，也不保证第三方网站或接口的准确性、安全性、可用性或其隐私实践。其内容、链接地址、品牌与政策可能不经通知而变更或失效。</li>
 <li><strong>你的责任。</strong>通过外链离开本网站时，风险由你自行承担，并适用该第三方的条款与隐私政策。请直接向官方来源核实关键旅行、预订或支付信息。</li>
 </ul>
@@ -802,7 +804,7 @@ window.LEGAL_I18N = {
       title: '利用規約',
       eyebrow: 'リーガル',
       updatedLabel: '更新日',
-      updatedDate: '2026年7月11日',
+      updatedDate: '2026年8月6日',
       onThisPage: 'このページの内容',
       lead: '本利用規約（以下「本規約」）は、<strong>アメリカ — 旅行ガイド</strong>（以下「本サイト」）へのアクセスおよびご利用（メインガイド、フォトギャラリー、ツールおよび関連ページを含みます）について定めるものです。本サイトは <strong>Tim G</strong>（GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>）が運営しています。本サイトをご利用いただくことにより、本規約に同意したものとみなします。同意いただけない場合は、ご利用をお控えください。',
       toc: [
@@ -882,6 +884,7 @@ window.LEGAL_I18N = {
           html: `<p>本サイトは、第三者のウェブサイトへリンクしたり、第三者 API（為替やフォント配信など）を呼び出したりする場合があります。これらは当方の管理下にありません。</p>
 <ul>
 <li><strong>目的地・旅行関連リンク。</strong>都市・目的地カードには、公式観光サイト、公共交通機関、National Park Service のページ、博物館などへの「役立つリンク」が含まれる場合があります。便宜および計画の参考のためにのみ提供され、書面で明示しない限り、リンク先組織との提携・スポンサーシップ・代理・推奨関係を<strong>意味しません</strong>。</li>
+<li><strong>ツール用 API。</strong>為替レートは第三者の公開 API から取得する場合があります。米国の天気予報および悪天候警報は National Weather Service（api.weather.gov）から、世界の予報・補完項目・ジオコーディング・大気質は Open-Meteo（または互換サービス）から取得する場合があります。値は遅延・不完全・誤りがあり得ます。天気と警報は公式の緊急案内の代わりにはなりません。</li>
 <li><strong>管理・保証なし。</strong>第三者サイトや API の正確性・安全性・可用性・プライバシー慣行について、当方は運営・監視・保証いたしません。内容、URL、ブランド、方針は、予告なく変更または無効になる場合があります。</li>
 <li><strong>お客様の責任。</strong>外部リンクにより本サイトを離れる場合は自己責任であり、当該第三者の利用規約およびプライバシーポリシーが適用されます。重要な旅行・予約・お支払いに関する情報は、公式の情報源で直接ご確認ください。</li>
 </ul>

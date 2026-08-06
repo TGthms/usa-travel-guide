@@ -287,8 +287,14 @@ function getModalData(key) {
   return base;
 }
 
+// Tool / external links inside tip & practical cards must not open the modal
+document.querySelectorAll('.guide-tool-link').forEach((link) => {
+  link.addEventListener('click', (e) => { e.stopPropagation(); });
+});
+
 document.querySelectorAll('[data-modal]').forEach(el => {
-  el.addEventListener('click', () => {
+  el.addEventListener('click', (e) => {
+    if (e.target && e.target.closest && e.target.closest('.guide-tool-link')) return;
     const type = el.dataset.modal;
     let key = '';
     if (type === 'region')  key = `region_${el.dataset.region}`;

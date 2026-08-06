@@ -216,6 +216,11 @@ function applyLanguage(lang) {
   // Dest filter empty-state key can change at runtime (Saved vs region). Re-sync so
   // English restore doesn't snap back to the original region empty message.
   if (typeof window.syncDestFilterUi === 'function') window.syncDestFilterUi();
+  // Contextual Back label/href is rewritten by nav-return; EN snapshot restore
+  // would wipe it unless we re-apply after language paint.
+  if (window.__usaTravelNavReturn && typeof window.__usaTravelNavReturn.apply === 'function') {
+    window.__usaTravelNavReturn.apply();
+  }
 }
 
 /* ── UNIT CONVERSION ENGINE ──

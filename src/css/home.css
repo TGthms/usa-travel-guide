@@ -746,7 +746,147 @@
 .prac-card:hover, .prac-card:focus-visible { background: var(--bg-surface-2); }
 .prac-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--accent-1); transform: scaleX(0); transform-origin: left; transition: transform .5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .prac-card:hover::before, .prac-card:focus-visible::before { transform: scaleX(1); }
-/* Decorative prac/season/culture/route/tip icons removed (Phase 2 — editorial restraint) */
+/* Quiet CTAs into tools mini-apps (journey UX) */
+.guide-tool-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-1);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+.guide-tool-link:hover {
+  text-decoration: underline;
+}
+.guide-tool-link:focus-visible {
+  outline: 2px solid var(--accent-1);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.seasons-left .guide-tool-link {
+  margin-top: 18px;
+}
+.tip-content .guide-tool-link {
+  margin-top: 10px;
+}
+.prac-card .guide-tool-link {
+  margin-top: 14px;
+  position: relative;
+  z-index: 2;
+}
+.prac-card .guide-tool-link + .guide-tool-link {
+  margin-top: 6px;
+  margin-left: 0;
+  display: inline-flex;
+}
+.prac-card .guide-tool-link + .guide-tool-link::before {
+  content: none;
+}
+
+/* Featured seasons → weather CTA (more magnetic than plain text link) */
+.seasons-weather-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+  padding: 12px 18px 12px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  color: var(--bg-surface, #0b1020);
+  text-decoration: none;
+  background: linear-gradient(135deg, var(--accent-1), color-mix(in srgb, var(--accent-1) 72%, #fff 28%));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.28) inset,
+    0 10px 28px color-mix(in srgb, var(--accent-1) 35%, transparent),
+    0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease, filter 0.2s ease;
+  max-width: 100%;
+}
+.seasons-weather-cta:hover {
+  text-decoration: none;
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.34) inset,
+    0 14px 34px color-mix(in srgb, var(--accent-1) 42%, transparent),
+    0 4px 12px rgba(0, 0, 0, 0.14);
+}
+.seasons-weather-cta:active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+.seasons-weather-cta:focus-visible {
+  outline: 2px solid var(--accent-1);
+  outline-offset: 3px;
+}
+.seasons-weather-cta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  color: inherit;
+  flex-shrink: 0;
+}
+.seasons-weather-cta-icon svg {
+  display: block;
+}
+.seasons-weather-cta-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.seasons-weather-cta-arrow {
+  opacity: 0.85;
+  font-weight: 500;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.seasons-weather-cta:hover .seasons-weather-cta-arrow {
+  transform: translateX(3px);
+}
+html[data-motion-effective="reduced"] .seasons-weather-cta,
+html[data-motion-effective="off"] .seasons-weather-cta {
+  transition: none;
+}
+html[data-motion-effective="reduced"] .seasons-weather-cta:hover,
+html[data-motion-effective="off"] .seasons-weather-cta:hover {
+  transform: none;
+}
+@media (max-width: 520px) {
+  .seasons-weather-cta {
+    width: 100%;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+}
+
+/* Practical essentials: 4 SF-style monochrome icons only (Phase 4 keepers) */
+.prac-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-bottom: 20px;
+  color: var(--accent-1);
+  line-height: 1;
+}
+.prac-icon .sf-icon--prac {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: block;
+}
+.prac-card:hover .prac-icon {
+  opacity: 0.95;
+}
 .prac-title { font-family: var(--ff-display); font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; line-height: 1.2; }
 .prac-body { font-size: 14px; color: var(--text-dim); line-height: 1.8; }
 .prac-body strong { color: var(--text-main); font-weight: 500; }
@@ -889,8 +1029,35 @@
   font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.4rem);
   font-weight: 700; line-height: 1.15;
 }
-.modal-close { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--text-dim); cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .3s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.modal-close:hover { border-color: var(--accent-1); color: var(--text-inv); transform: rotate(90deg) scale(1.1); background: var(--accent-1); }
+.modal-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color .2s ease, color .2s ease, background .2s ease;
+}
+.modal-close:hover {
+  border-color: var(--accent-1);
+  color: var(--accent-1);
+  background: var(--bg-card-hov);
+  transform: none;
+}
+.modal-close:focus-visible {
+  outline: 2px solid var(--accent-1);
+  outline-offset: 2px;
+}
+.modal-close .sf-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
 .modal-body { padding: 32px 40px 40px; }
 .modal-body p {
   font-size: var(--fs-body); color: var(--text-dim); line-height: var(--body-leading);

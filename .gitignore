@@ -35,3 +35,8 @@ images/gallery/tmp*
 images/gallery/thumbs/tmp*
 *.tmp
 .cache/
+
+# Local Cloudflare secrets
+.dev.vars
+.env
+.env.*

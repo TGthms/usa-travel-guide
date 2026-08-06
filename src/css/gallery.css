@@ -522,7 +522,7 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
   opacity: 1; background: rgba(0,0,0,.55); border-color: rgba(255,255,255,.35);
 }
 /* Keep base translateY(-50%) on prev/next when hovering so buttons don't jump */
-.lightbox-close:hover, .lightbox-close:focus-visible { transform: rotate(90deg); }
+.lightbox-close:hover, .lightbox-close:focus-visible { transform: none; }
 .lightbox-prev:hover, .lightbox-prev:focus-visible { transform: translateY(-50%) translateX(-2px); }
 .lightbox-next:hover, .lightbox-next:focus-visible { transform: translateY(-50%) translateX(2px); }
 .lightbox-close { top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }

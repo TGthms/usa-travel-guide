@@ -42,6 +42,20 @@ async function waitLoaderGone(page) {
   }, null, { timeout: 20_000 }).catch(() => {});
 }
 
+/**
+ * Block live weather/geocode/AQ APIs so e2e never drains NWS / Open-Meteo quotas.
+ * Product still works with live APIs in the browser; tests only exercise chrome + fail-closed paths.
+ */
+async function blockLiveWeatherApis(page) {
+  await page.route(/api\.weather\.gov|api\.open-meteo\.com|air-quality-api\.open-meteo\.com|geocoding-api\.open-meteo\.com/, (route) => {
+    route.fulfill({
+      status: 429,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: true, reason: 'e2e blocked — do not drain live weather APIs' }),
+    });
+  });
+}
+
 test.describe('USA Travel Guide smoke', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/index.html');
@@ -53,6 +67,8 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('loads main + tool pages without console page errors', async ({ page }) => {
+    // Block live weather fan-out when tools-weather is visited in this loop
+    await blockLiveWeatherApis(page);
     const paths = [
       '/index.html',
       '/gallery.html',
@@ -294,95 +310,131 @@ test.describe('USA Travel Guide smoke', () => {
     await expect(page.locator('#tools')).toContainText('911');
   });
 
-  test('weather page loads city list from Open-Meteo', async ({ page }) => {
+  test('weather page chrome works without live weather APIs', async ({ page }) => {
+    // Never hit NWS / Open-Meteo in CI — protects rate limits. Real browser use still hits live APIs.
+    await blockLiveWeatherApis(page);
     await page.goto('/tools-weather.html');
     await waitLoaderGone(page);
     await expect(page.locator('#weatherSearch')).toBeVisible();
-    // Wait for network list (or graceful error)
+    await expect(page.locator('#weatherUnitsBtn')).toBeVisible();
+
+    // Fail-closed: skeleton must clear even when every forecast request is 429
     await page.waitForFunction(() => {
       const list = document.getElementById('weatherList');
       const err = document.getElementById('weatherError');
       const loading = document.getElementById('weatherLoading');
-      const hasRows = list && !list.hidden && list.querySelectorAll('.weather-row').length > 0;
+      const hasRows = list && list.querySelectorAll('.weather-row').length > 0;
       const hasErr = err && !err.hidden && (err.textContent || '').trim().length > 0;
       const stillLoading = loading && !loading.hidden;
-      return hasRows || hasErr || !stillLoading;
+      const skel = list && list.querySelectorAll('.weather-skeleton-row').length > 0;
+      return (hasRows || hasErr) && !stillLoading && !skel;
     }, null, { timeout: 45_000 });
-    const rowCount = await page.locator('#weatherList .weather-row').count();
-    if (rowCount > 0) {
-      await expect(page.locator('#weatherList .weather-row').first()).toBeVisible();
-      // Prefer a row that already has live data (temp not dash)
-      await page.evaluate(() => {
-        const rows = [...document.querySelectorAll('#weatherList .weather-row')];
-        const ready = rows.find((r) => {
-          const t = r.querySelector('.weather-row-temp');
-          return t && t.textContent && t.textContent.trim() !== '—';
-        }) || rows[0];
-        if (ready) ready.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-      });
-      await expect(page.locator('#weatherDetail')).toHaveClass(/open/, { timeout: 15_000 });
-      await expect(page.locator('#weatherDetailHero')).not.toBeEmpty();
-      await expect(page.locator('#weatherDetailUpdated, .weather-detail-updated')).toContainText(/Updated|Actualizado|更新|更新/i);
-      // Daily bars should have non-zero width style when data present
-      const barStyled = await page.locator('.weather-daily-bar[style*="width"]').count();
-      expect(barStyled).toBeGreaterThan(0);
 
-      // Module sheet opens above detail and can be dismissed
-      const mod = page.locator('#weatherModules [data-sheet]').first();
-      if (await mod.count()) {
-        await mod.click();
-        await expect(page.locator('#weatherSheet')).toHaveClass(/open/, { timeout: 5_000 });
-        await page.keyboard.press('Escape');
-        await expect(page.locator('#weatherSheet')).not.toHaveClass(/open/);
-        const sheetPe = await page.locator('#weatherSheet').evaluate((el) => getComputedStyle(el).pointerEvents);
-        expect(sheetPe).toBe('none');
-      }
+    await expect(page.locator('#weatherList .weather-skeleton-row')).toHaveCount(0);
+    await expect(page.locator('#weatherSearch')).toBeVisible();
 
-      // Scroll must not persist across close → open another city
-      await page.evaluate(() => {
-        const sc = document.getElementById('weatherDetailScroll');
-        if (sc) sc.scrollTop = 320;
-      });
-      await page.locator('#weatherDetailBack').click({ force: true });
-      await page.evaluate(() => {
-        if (document.getElementById('weatherDetail')?.classList.contains('open')
-          && typeof window.closeWeatherDetail === 'function') {
-          window.closeWeatherDetail();
-        }
-      });
-      await expect(page.locator('#weatherDetail')).not.toHaveClass(/open/);
-
-      // Units sheet must not trap the list (presentSheet + Escape)
-      await page.locator('#weatherUnitsBtn').click();
-      await expect(page.locator('#weatherSheet')).toHaveClass(/open/, { timeout: 5_000 });
-      await page.keyboard.press('Escape');
-      await expect(page.locator('#weatherSheet')).not.toHaveClass(/open/);
-
-      const rows = page.locator('#weatherList .weather-row');
-      if (await rows.count() > 1) {
-        await rows.nth(1).click();
-        await expect(page.locator('#weatherDetail')).toHaveClass(/open/, { timeout: 15_000 });
-        const scrollTop = await page.evaluate(() => {
-          const sc = document.getElementById('weatherDetailScroll');
-          return sc ? sc.scrollTop : -1;
-        });
-        expect(scrollTop).toBe(0);
-        await page.locator('#weatherDetailBack').click({ force: true });
-        await expect(page.locator('#weatherDetail')).not.toHaveClass(/open/);
-      }
-    } else {
-      // Offline / API blocked — still require chrome
-      await expect(page.locator('#weatherSearch')).toBeVisible();
+    const attrib = page.locator('.weather-attribution');
+    if (await attrib.count()) {
+      await expect(attrib.first()).toContainText(/NWS|Open-Meteo|open-meteo|Weather|Datos|数据|データ/i);
     }
+
+    // Units sheet must not trap the page when data is unavailable
+    await page.locator('#weatherUnitsBtn').click();
+    await expect(page.locator('#weatherSheet')).toHaveClass(/open/, { timeout: 5_000 });
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#weatherSheet')).not.toHaveClass(/open/);
+    const sheetPe = await page.locator('#weatherSheet').evaluate((el) => getComputedStyle(el).pointerEvents);
+    expect(sheetPe).toBe('none');
   });
 
   test('legal pages load i18n packs', async ({ page }) => {
     await page.goto('/privacy.html');
     await page.waitForFunction(() => window.LEGAL_I18N && window.LEGAL_I18N.privacy);
     await expect(page.locator('#legalDoc, .legal-doc, article').first()).toBeVisible({ timeout: 10_000 });
-    // Weather / Open-Meteo should appear in privacy (en)
+    // Weather / NWS / Open-Meteo should appear in privacy (en)
     const body = await page.locator('main, #legalDoc, .legal-doc').first().innerText();
-    expect(body.toLowerCase()).toMatch(/open-meteo|weather|tiempo|天气|天気|frankfurter/);
+    expect(body.toLowerCase()).toMatch(/open-meteo|weather\.gov|national weather|weather|tiempo|天气|天気|frankfurter/);
+  });
+
+  test.describe('nav-return chrome', () => {
+    async function backChrome(page) {
+      const back = page.locator('a.gallery-app-back').first();
+      await expect(back).toBeVisible();
+      const href = await back.getAttribute('href');
+      const label = ((await back.innerText()) || '').replace(/\s+/g, ' ').trim();
+      return { href, label };
+    }
+
+    test('tools hub always says Back to the Guide', async ({ page }) => {
+      // Poison session with a leftover mini-app "tools" stamp (previous bug)
+      await page.goto('/tools.html');
+      await page.evaluate(() => {
+        sessionStorage.setItem('usa-travel-return-v1', JSON.stringify({
+          from: '/tools.html',
+          href: 'tools.html',
+          scrollY: 0,
+          label: 'tools',
+          ts: Date.now(),
+          to: '/tools-currency.html',
+        }));
+      });
+      await page.reload();
+      await waitLoaderGone(page);
+      await waitAppReady(page);
+      const { href, label } = await backChrome(page);
+      expect(href).toMatch(/index\.html/i);
+      expect(label).toMatch(/guide|guía|指南|ガイド/i);
+      expect(label).not.toMatch(/tools|herramientas|工具|ツール/i);
+    });
+
+    test('guide deep-link → mini-app Back to Guide', async ({ page }) => {
+      await page.goto('/index.html');
+      await waitLoaderGone(page);
+      await waitAppReady(page);
+      const link = page.locator('a.guide-tool-link[href="tools-currency.html"]').first();
+      await link.scrollIntoViewIfNeeded();
+      await link.click();
+      await page.waitForURL(/tools-currency\.html/);
+      await waitLoaderGone(page);
+      const { href, label } = await backChrome(page);
+      expect(href).toMatch(/index\.html/i);
+      expect(label).toMatch(/guide|guía|指南|ガイド/i);
+    });
+
+    test('tools hub → mini-app Back to Tools', async ({ page }) => {
+      await page.goto('/tools.html');
+      await waitLoaderGone(page);
+      await waitAppReady(page);
+      // Hub itself must be Guide first
+      let chrome = await backChrome(page);
+      expect(chrome.href).toMatch(/index\.html/i);
+      await page.locator('a[href="tools-currency.html"]').first().click();
+      await page.waitForURL(/tools-currency\.html/);
+      await waitLoaderGone(page);
+      chrome = await backChrome(page);
+      expect(chrome.href).toMatch(/tools\.html/i);
+      expect(chrome.label).toMatch(/tools|herramientas|工具|ツール/i);
+      // Return to hub — still Guide, not Tools
+      await page.locator('a.gallery-app-back').first().click();
+      await page.waitForURL(/tools\.html/);
+      await waitLoaderGone(page);
+      chrome = await backChrome(page);
+      expect(chrome.href).toMatch(/index\.html/i);
+      expect(chrome.label).toMatch(/guide|guía|指南|ガイド/i);
+      expect(chrome.label).not.toMatch(/back to tools/i);
+    });
+
+    test('guide → tools hub → Back to Guide', async ({ page }) => {
+      await page.goto('/index.html');
+      await waitLoaderGone(page);
+      await waitAppReady(page);
+      await page.locator('a[href="tools.html"]').first().click();
+      await page.waitForURL(/tools\.html/);
+      await waitLoaderGone(page);
+      const { href, label } = await backChrome(page);
+      expect(href).toMatch(/index\.html/i);
+      expect(label).toMatch(/guide|guía|指南|ガイド/i);
+    });
   });
 
   test('modal opens for a destination and closes with Escape', async ({ page }) => {
@@ -411,6 +463,8 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('tool splash words are meaningful', async ({ page }) => {
+    // Weather page would otherwise fire live forecast fan-out on load
+    await blockLiveWeatherApis(page);
     const checks = [
       ['/tools-currency.html', 'Currency'],
       ['/tools-clock.html', 'Clock'],
@@ -425,22 +479,21 @@ test.describe('USA Travel Guide smoke', () => {
     }
   });
 
-  test('weather search uses dropdown without clearing majors', async ({ page }) => {
+  test('weather search keeps majors without live geocode', async ({ page }) => {
+    await blockLiveWeatherApis(page);
     await page.goto('/tools-weather.html');
+    await waitLoaderGone(page);
     await page.waitForFunction(() => {
       const list = document.getElementById('weatherList');
       return list && list.querySelectorAll('.weather-row').length > 3;
     }, null, { timeout: 45_000 }).catch(() => {});
     const before = await page.locator('#weatherList .weather-row').count();
     await page.locator('#weatherSearch').fill('Paris');
-    await page.waitForTimeout(500);
-    // majors should still be present while suggestions open
+    await page.waitForTimeout(400);
+    // majors list must not be wiped while typing (geocode is blocked)
     const after = await page.locator('#weatherList .weather-row').count();
     if (before > 0) expect(after).toBe(before);
-    // suggest panel may open with network
-    const suggestOpen = await page.locator('#weatherSuggest.open, #weatherSuggest:not([hidden])').count();
-    // soft: either suggest appears or network blocked
-    expect(suggestOpen >= 0).toBeTruthy();
+    await expect(page.locator('#weatherSearch')).toHaveValue('Paris');
   });
 
   test('sitemap references new tool pages', async ({ page }) => {

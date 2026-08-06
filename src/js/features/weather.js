@@ -1,6 +1,8 @@
 'use strict';
 /* USA Travel Guide — features/weather.js
-   Open-Meteo forecast + air quality. Apple-inspired multi-city weather.
+   Hybrid weather:
+     · NWS primary for US forecasts + severe alerts
+     · Open-Meteo for non-US, geocode, AQ, detail enrich, and NWS fallback
    Load order: data/i18n → core/env → core/runtime → weather.js → app.js
 
    Overlay contract (stability):
@@ -804,88 +806,652 @@
     }
   }
 
-  async function loadCity(c, signal) {
-    const key = cityKey(c);
-    const hit = cache.get(key);
-    if (hit && hit.weather && Date.now() - hit.fetchedAt < REFRESH_MS - 5000) return hit;
+  // ── Hybrid providers: NWS (US primary) + Open-Meteo (global / enrich / fallback) ──
+  const NWS_BASE = 'https://api.weather.gov';
+  const NWS_POINTS_LS = 'usa-travel-nws-points-v1';
+  const NWS_POINTS_TTL = 7 * 24 * 60 * 60 * 1000;
+  const nwsPointsMem = new Map();
 
-    const wUrl = `${FORECAST}?latitude=${c.lat}&longitude=${c.lon}`
-      + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,precipitation`
-      + `&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,precipitation,wind_speed_10m,wind_direction_10m,relative_humidity_2m,surface_pressure,uv_index`
-      + `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum`
-      + `&temperature_unit=celsius&wind_speed_unit=ms&timezone=auto&forecast_days=10`;
-    const aUrl = `${AIR}?latitude=${c.lat}&longitude=${c.lon}&current=us_aqi,pm2_5,pm10,european_aqi&timezone=auto`;
+  function roundCoord(n) {
+    return Math.round(Number(n) * 10000) / 10000;
+  }
 
-    async function once() {
-      const [weather, air] = await Promise.all([
-        fetchJson(wUrl, signal),
-        fetchJson(aUrl, signal).catch(function () { return null; })
-      ]);
-      return { weather: weather, air: air, fetchedAt: Date.now(), city: c };
+  function isLikelyUs(c) {
+    if (!c || c.lat == null || c.lon == null) return false;
+    if (c.country && /united states|^usa$|^us$|u\.s\./i.test(String(c.country))) return true;
+    try {
+      if (MAJOR.some(function (m) { return sameCity(m, c); })) return true;
+    } catch (e) {}
+    const lat = Number(c.lat);
+    const lon = Number(c.lon);
+    if (!(lat === lat) || !(lon === lon)) return false;
+    // Contiguous US
+    if (lat >= 24.4 && lat <= 49.5 && lon >= -125.0 && lon <= -66.8) return true;
+    // Alaska
+    if (lat >= 51 && lat <= 72 && lon >= -170 && lon <= -129) return true;
+    // Hawaii
+    if (lat >= 18.8 && lat <= 22.4 && lon >= -160.5 && lon <= -154.7) return true;
+    // Puerto Rico / USVI (rough)
+    if (lat >= 17.6 && lat <= 18.6 && lon >= -67.5 && lon <= -64.5) return true;
+    return false;
+  }
+
+  function getCachedNwsPoints(lat, lon) {
+    const k = roundCoord(lat) + ',' + roundCoord(lon);
+    if (nwsPointsMem.has(k)) return nwsPointsMem.get(k);
+    try {
+      const raw = localStorage.getItem(NWS_POINTS_LS);
+      const all = raw ? JSON.parse(raw) : {};
+      const hit = all[k];
+      if (hit && hit.data && Date.now() - (hit.ts || 0) < NWS_POINTS_TTL) {
+        nwsPointsMem.set(k, hit.data);
+        return hit.data;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function setCachedNwsPoints(lat, lon, data) {
+    const k = roundCoord(lat) + ',' + roundCoord(lon);
+    nwsPointsMem.set(k, data);
+    try {
+      const raw = localStorage.getItem(NWS_POINTS_LS);
+      const all = raw ? JSON.parse(raw) : {};
+      all[k] = { ts: Date.now(), data: data };
+      const keys = Object.keys(all);
+      if (keys.length > 100) {
+        keys.sort(function (a, b) { return (all[a].ts || 0) - (all[b].ts || 0); });
+        keys.slice(0, keys.length - 70).forEach(function (x) { delete all[x]; });
+      }
+      localStorage.setItem(NWS_POINTS_LS, JSON.stringify(all));
+    } catch (e) {}
+  }
+
+  function clearCachedNwsPoints(lat, lon) {
+    const k = roundCoord(lat) + ',' + roundCoord(lon);
+    nwsPointsMem.delete(k);
+    try {
+      const raw = localStorage.getItem(NWS_POINTS_LS);
+      const all = raw ? JSON.parse(raw) : {};
+      delete all[k];
+      localStorage.setItem(NWS_POINTS_LS, JSON.stringify(all));
+    } catch (e) {}
+  }
+
+  /** Full clear — used by Refresh so NWS grid points are re-fetched too */
+  function clearAllNwsPointsCache() {
+    nwsPointsMem.clear();
+    try { localStorage.removeItem(NWS_POINTS_LS); } catch (e) {}
+  }
+
+  function shortForecastToCode(text, isNight) {
+    const s = String(text || '').toLowerCase();
+    if (/thunder|t-?storm|lightning/.test(s)) return 95;
+    if (/blizzard|heavy snow|snow shower|flurries|snow|wintry/.test(s)) return 73;
+    if (/sleet|ice pellet|freezing rain|freezing drizzle/.test(s)) return 66;
+    if (/heavy rain|torrential/.test(s)) return 65;
+    if (/rain shower|showers|rain|drizzle/.test(s)) return 63;
+    if (/fog|mist|haze/.test(s)) return 45;
+    if (/overcast/.test(s)) return 3;
+    if (/mostly cloudy|partly cloudy|partly sunny|mostly sunny|partly clear/.test(s)) return 2;
+    if (/cloud/.test(s)) return 3;
+    if (/clear|sunny|fair|hot|cold/.test(s)) return 0;
+    return isNight ? 1 : 2;
+  }
+
+  function parseWindMphToMs(str) {
+    if (str == null) return null;
+    if (typeof str === 'number' && Number.isFinite(str)) return str * 0.44704;
+    const m = String(str).match(/(\d+)(?:\s*to\s*(\d+))?/i);
+    if (!m) return null;
+    const a = Number(m[1]);
+    const b = m[2] != null ? Number(m[2]) : a;
+    return ((a + b) / 2) * 0.44704;
+  }
+
+  function parseWindDir(str) {
+    if (str == null) return null;
+    if (typeof str === 'number' && Number.isFinite(str)) return str;
+    const dirs = {
+      N: 0, NNE: 22, NE: 45, ENE: 67, E: 90, ESE: 112, SE: 135, SSE: 157,
+      S: 180, SSW: 202, SW: 225, WSW: 247, W: 270, WNW: 292, NW: 315, NNW: 337
+    };
+    const s = String(str).trim().toUpperCase();
+    if (dirs[s] != null) return dirs[s];
+    const n = parseInt(s, 10);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function nwsTempToC(temp, unit) {
+    if (temp == null || !Number.isFinite(Number(temp))) return null;
+    const u = String(unit || 'F').toUpperCase();
+    const t = Number(temp);
+    return u === 'C' ? t : (t - 32) * 5 / 9;
+  }
+
+  function normalizeNws(city, points, forecast, hourlyDoc) {
+    const periods = (forecast && forecast.properties && forecast.properties.periods) || [];
+    const hPeriods = (hourlyDoc && hourlyDoc.properties && hourlyDoc.properties.periods) || [];
+    const now = Date.now();
+    let curP = null;
+    for (let i = 0; i < hPeriods.length; i++) {
+      const t0 = new Date(hPeriods[i].startTime).getTime();
+      const t1 = hPeriods[i].endTime ? new Date(hPeriods[i].endTime).getTime() : t0 + 3600000;
+      if (now >= t0 - 600000 && now < t1 + 600000) { curP = hPeriods[i]; break; }
+      if (t0 > now) { curP = hPeriods[Math.max(0, i - 1)] || hPeriods[i]; break; }
+    }
+    if (!curP) curP = hPeriods[0] || periods[0] || null;
+    const isNight = !!(curP && curP.isDaytime === false);
+    const code = shortForecastToCode(curP && curP.shortForecast, isNight);
+    const tempC = curP ? nwsTempToC(curP.temperature, curP.temperatureUnit) : null;
+
+    const current = {
+      time: curP && curP.startTime,
+      temperature_2m: tempC,
+      weather_code: code,
+      wind_speed_10m: parseWindMphToMs(curP && curP.windSpeed),
+      wind_direction_10m: parseWindDir(curP && curP.windDirection)
+    };
+
+    const hTime = [];
+    const hTemp = [];
+    const hCode = [];
+    const hPop = [];
+    const hWind = [];
+    const hDir = [];
+    hPeriods.slice(0, 72).forEach(function (p) {
+      hTime.push(p.startTime);
+      hTemp.push(nwsTempToC(p.temperature, p.temperatureUnit));
+      hCode.push(shortForecastToCode(p.shortForecast, p.isDaytime === false));
+      const pop = p.probabilityOfPrecipitation && p.probabilityOfPrecipitation.value;
+      hPop.push(pop != null ? pop : null);
+      hWind.push(parseWindMphToMs(p.windSpeed));
+      hDir.push(parseWindDir(p.windDirection));
+    });
+
+    const byDay = {};
+    periods.forEach(function (p) {
+      const day = String(p.startTime || '').slice(0, 10);
+      if (!day) return;
+      if (!byDay[day]) byDay[day] = { max: -Infinity, min: Infinity, code: 2 };
+      const c = nwsTempToC(p.temperature, p.temperatureUnit);
+      if (c != null) {
+        byDay[day].max = Math.max(byDay[day].max, c);
+        byDay[day].min = Math.min(byDay[day].min, c);
+      }
+      if (p.isDaytime) byDay[day].code = shortForecastToCode(p.shortForecast, false);
+    });
+    const days = Object.keys(byDay).sort().slice(0, 10);
+    const daily = {
+      time: days,
+      temperature_2m_max: days.map(function (d) {
+        return Number.isFinite(byDay[d].max) ? byDay[d].max : null;
+      }),
+      temperature_2m_min: days.map(function (d) {
+        return Number.isFinite(byDay[d].min) && byDay[d].min !== Infinity ? byDay[d].min : null;
+      }),
+      weather_code: days.map(function (d) { return byDay[d].code; })
+    };
+
+    const tz = points && points.properties && points.properties.timeZone;
+    const weather = {
+      timezone: tz,
+      current: current,
+      hourly: {
+        time: hTime,
+        temperature_2m: hTemp,
+        weather_code: hCode,
+        precipitation_probability: hPop,
+        wind_speed_10m: hWind,
+        wind_direction_10m: hDir
+      },
+      daily: daily
+    };
+
+    return {
+      city: city,
+      weather: weather,
+      air: null,
+      fetchedAt: Date.now(),
+      source: 'nws',
+      needsEnrich: true,
+      nwsGrid: points && points.properties ? {
+        office: points.properties.gridId,
+        gridX: points.properties.gridX,
+        gridY: points.properties.gridY,
+        forecast: points.properties.forecast,
+        forecastHourly: points.properties.forecastHourly
+      } : null
+    };
+  }
+
+  async function nwsFetchJson(url, signal) {
+    const wrap = withTimeoutSignal(signal, FETCH_MS);
+    try {
+      const res = await fetch(url, {
+        signal: wrap.signal,
+        headers: { 'Accept': 'application/geo+json' }
+      });
+      if (res.status === 403) {
+        const err = new Error('NWS 403');
+        err.name = 'NwsForbidden';
+        throw err;
+      }
+      if (res.status === 404) {
+        const err = new Error('NWS 404');
+        err.name = 'NwsNotFound';
+        throw err;
+      }
+      if (!res.ok) throw new Error('NWS HTTP ' + res.status);
+      return await res.json();
+    } finally {
+      wrap.cancel();
+    }
+  }
+
+  async function loadNwsCity(c, signal) {
+    const lat = roundCoord(c.lat);
+    const lon = roundCoord(c.lon);
+    let points = getCachedNwsPoints(lat, lon);
+    if (!points) {
+      points = await nwsFetchJson(NWS_BASE + '/points/' + lat + ',' + lon, signal);
+      setCachedNwsPoints(lat, lon, points);
+    }
+    const props = points.properties || {};
+    if (!props.forecast) throw new Error('NWS missing forecast URL');
+
+    async function loadForecasts(pt) {
+      const p = pt.properties || {};
+      const forecast = await nwsFetchJson(p.forecast, signal);
+      const hourly = p.forecastHourly
+        ? await nwsFetchJson(p.forecastHourly, signal).catch(function () { return null; })
+        : null;
+      return { forecast: forecast, hourly: hourly, points: pt };
     }
 
+    let result;
     try {
-      let packed;
-      try {
-        packed = await once();
-      } catch (e) {
-        // One short retry after rate-limit / flaky edge — keeps the list from staying empty.
-        if (e && (e.name === 'RateLimitError' || (e.message && e.message.indexOf('HTTP 429') >= 0))) {
-          await new Promise(function (r) { window.setTimeout(r, 650); });
-          if (signal && signal.aborted) throw e;
-          packed = await once();
-        } else {
-          throw e;
+      result = await loadForecasts(points);
+    } catch (e) {
+      if (e && e.name === 'NwsNotFound') {
+        clearCachedNwsPoints(lat, lon);
+        points = await nwsFetchJson(NWS_BASE + '/points/' + lat + ',' + lon, signal);
+        setCachedNwsPoints(lat, lon, points);
+        result = await loadForecasts(points);
+      } else {
+        throw e;
+      }
+    }
+    // Alerts loaded on detail open (not list) to avoid N× alert requests.
+    const pack = normalizeNws(c, result.points, result.forecast, result.hourly);
+    pack.alerts = null; // pending — filled by ensureNwsAlerts
+    return pack;
+  }
+
+  const SEVERITY_RANK = { extreme: 0, severe: 1, moderate: 2, minor: 3, unknown: 4 };
+
+  function severityRank(s) {
+    const k = String(s || 'unknown').toLowerCase();
+    return SEVERITY_RANK[k] != null ? SEVERITY_RANK[k] : 4;
+  }
+
+  /**
+   * NWS product text often has fixed-width hard wraps, and sometimes
+   * pathological one-character-per-line blobs. Normalize for readable UI.
+   */
+  function normalizeNwsText(raw) {
+    if (!raw) return '';
+    var t = String(raw).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    var lines = t.split('\n');
+    var nonEmpty = lines.filter(function (l) { return l.trim().length > 0; });
+    var shortCount = 0;
+    for (var i = 0; i < nonEmpty.length; i++) {
+      if (nonEmpty[i].trim().length <= 2) shortCount++;
+    }
+    // Character-per-line garbage → rejoin into words
+    if (nonEmpty.length >= 6 && shortCount >= nonEmpty.length * 0.5) {
+      var allSingle = nonEmpty.every(function (l) { return l.trim().length === 1; });
+      t = nonEmpty.map(function (l) { return l.trim(); }).join(allSingle ? '' : ' ');
+      t = t.replace(/([.!?])([A-Z*])/g, '$1 $2');
+      return t.replace(/  +/g, ' ').trim();
+    }
+    // Fixed-width wrap: single newlines → space; keep blank lines as paragraphs
+    t = lines.map(function (l) { return l.replace(/[ \t]+$/g, ''); }).join('\n');
+    t = t.replace(/\n{3,}/g, '\n\n');
+    t = t.replace(/([^\n])\n(?!\n)/g, '$1 ');
+    t = t.replace(/[ \t]{2,}/g, ' ');
+    // Soft-wrap artifacts: space before punctuation
+    t = t.replace(/ ([.,;:!?])/g, '$1');
+    return t.trim();
+  }
+
+  function dedupeAlerts(list) {
+    if (!list || !list.length) return [];
+    var out = [];
+    var seenId = new Set();
+    var seenSoft = new Set();
+    for (var i = 0; i < list.length; i++) {
+      var a = list[i];
+      if (!a) continue;
+      var id = a.id ? String(a.id) : '';
+      // Same event + end time = same product (NWS often duplicates multi-geometry)
+      var soft = String(a.event || '').toLowerCase() + '|' + String(a.ends || '');
+      if (id && seenId.has(id)) continue;
+      if (seenSoft.has(soft)) continue;
+      if (id) seenId.add(id);
+      seenSoft.add(soft);
+      out.push(a);
+    }
+    out.sort(function (a, b) {
+      return severityRank(a.severity) - severityRank(b.severity);
+    });
+    return out;
+  }
+
+  /** Active NWS watches/warnings/advisories for a lat/lon (US only). Best-effort. */
+  async function loadNwsAlerts(lat, lon, signal) {
+    const url = NWS_BASE + '/alerts/active?point=' + lat + ',' + lon;
+    const doc = await nwsFetchJson(url, signal);
+    const features = (doc && doc.features) || [];
+    const out = [];
+    for (let i = 0; i < features.length; i++) {
+      const f = features[i];
+      const p = (f && f.properties) || {};
+      if (!p.event && !p.headline) continue;
+      const mt = String(p.messageType || '').toLowerCase();
+      if (mt === 'cancel') continue;
+      const status = String(p.status || '').toLowerCase();
+      if (status === 'test' || status === 'draft' || status === 'exercise') continue;
+      out.push({
+        id: p.id || (f && f.id) || ('alert-' + i),
+        event: p.event || 'Alert',
+        severity: p.severity || 'Unknown',
+        urgency: p.urgency || '',
+        certainty: p.certainty || '',
+        headline: normalizeNwsText(p.headline || p.event || ''),
+        description: normalizeNwsText(p.description || ''),
+        instruction: normalizeNwsText(p.instruction || ''),
+        ends: p.ends || p.expires || null,
+        senderName: p.senderName || 'NWS',
+        areaDesc: normalizeNwsText(p.areaDesc || '')
+      });
+    }
+    return dedupeAlerts(out).slice(0, 5);
+  }
+
+  function topAlert(pack) {
+    if (!pack || !Array.isArray(pack.alerts) || !pack.alerts.length) return null;
+    return pack.alerts[0];
+  }
+
+  function applyAlertsToPack(pack, alerts) {
+    if (!pack) return;
+    pack.alerts = Array.isArray(alerts) ? alerts : [];
+    pack._alertsLoading = false;
+    const key = pack.city ? cityKey(pack.city) : null;
+    if (key) {
+      const cached = cache.get(key);
+      if (cached && cached.city && pack.city && sameCity(cached.city, pack.city)) {
+        cached.alerts = pack.alerts;
+        cached._alertsLoading = false;
+      }
+    }
+  }
+
+  /**
+   * While true, city lists must not re-render. Initial load shows only the
+   * progress bar, then one reveal after forecasts + alerts finish.
+   */
+  var listPaintLocked = false;
+  var listPaintTimer = 0;
+  var listPaintQueued = false;
+  function cancelPendingListPaints() {
+    listPaintQueued = false;
+    if (listPaintTimer) {
+      window.clearTimeout(listPaintTimer);
+      listPaintTimer = 0;
+    }
+  }
+  /** Only used after unlock for incidental single-city alert updates. */
+  function scheduleListPaintFromAlerts() {
+    if (listPaintLocked) return;
+    listPaintQueued = true;
+    if (listPaintTimer) return;
+    listPaintTimer = window.setTimeout(function () {
+      listPaintTimer = 0;
+      if (!listPaintQueued || listPaintLocked) return;
+      listPaintQueued = false;
+      refreshListsFromCache({ skipAmbient: true });
+    }, 500);
+  }
+
+  function captureOpenAlertTitles() {
+    if (!detailMods) return [];
+    var titles = [];
+    detailMods.querySelectorAll('details.weather-alert[open]').forEach(function (d) {
+      var tEl = d.querySelector('.weather-alert-title');
+      var name = tEl ? String(tEl.textContent || '').trim() : '';
+      if (name) titles.push(name);
+    });
+    return titles;
+  }
+
+  function restoreOpenAlertTitles(titles) {
+    if (!detailMods || !titles || !titles.length) return;
+    var want = {};
+    for (var i = 0; i < titles.length; i++) want[titles[i]] = true;
+    detailMods.querySelectorAll('details.weather-alert').forEach(function (d) {
+      var tEl = d.querySelector('.weather-alert-title');
+      var name = tEl ? String(tEl.textContent || '').trim() : '';
+      if (name && want[name]) d.open = true;
+    });
+  }
+
+  /**
+   * Update only the alerts block in an open detail — never rebuild the whole
+   * detail (that was collapsing expanded <details> mid-read).
+   */
+  function patchDetailAlerts(pack) {
+    if (!pack || !pack.city || !detailMods || !isDetailVisible()) return;
+    if (!openCity || !openCity.city || !sameCity(openCity.city, pack.city)) return;
+    openCity.alerts = pack.alerts;
+    var openTitles = captureOpenAlertTitles();
+    var existing = detailMods.querySelector('.weather-alerts');
+    var html = alertsBlockHtml(pack.alerts);
+    if (!html) {
+      if (existing) existing.remove();
+      return;
+    }
+    var wrap = document.createElement('div');
+    wrap.innerHTML = html;
+    var node = wrap.firstElementChild;
+    if (!node) return;
+    if (existing) existing.replaceWith(node);
+    else detailMods.insertAdjacentElement('afterbegin', node);
+    restoreOpenAlertTitles(openTitles);
+  }
+
+  function ensureNwsAlerts(pack) {
+    if (!pack || !pack.city || pack.error) return;
+    if (!isLikelyUs(pack.city)) {
+      if (pack.alerts == null) pack.alerts = [];
+      return;
+    }
+    if (Array.isArray(pack.alerts)) return;
+    if (pack._alertsLoading) return;
+    pack._alertsLoading = true;
+    const city = pack.city;
+    const lat = roundCoord(city.lat);
+    const lon = roundCoord(city.lon);
+    loadNwsAlerts(lat, lon, null).then(function (alerts) {
+      applyAlertsToPack(pack, alerts || []);
+      // Surgical DOM update only — full openDetail() was wiping open <details>
+      patchDetailAlerts(pack);
+      scheduleListPaintFromAlerts();
+    }).catch(function () {
+      applyAlertsToPack(pack, []);
+      patchDetailAlerts(pack);
+      scheduleListPaintFromAlerts();
+    });
+  }
+
+  /**
+   * Prefetch NWS alerts into cache. Returns a Promise — does NOT paint the list.
+   * Caller paints once after this resolves (with forecasts).
+   */
+  var alertsPrefetchGen = 0;
+  function prefetchAlertsForCache(onProgress) {
+    const gen = ++alertsPrefetchGen;
+    const pending = [];
+    cache.forEach(function (pack) {
+      if (!pack || !pack.city || pack.error || !pack.weather) return;
+      if (!isLikelyUs(pack.city)) return;
+      if (Array.isArray(pack.alerts) || pack._alertsLoading) return;
+      pending.push(pack);
+    });
+    if (!pending.length) return Promise.resolve(0);
+
+    let idx = 0;
+    let finished = 0;
+    const total = pending.length;
+    const workers = Math.min(2, pending.length);
+
+    return new Promise(function (resolve) {
+      function oneDone() {
+        finished += 1;
+        if (typeof onProgress === 'function') {
+          try { onProgress(finished, total); } catch (e) {}
+        }
+        if (finished >= total) resolve(total);
+      }
+
+      async function worker() {
+        while (idx < pending.length && gen === alertsPrefetchGen) {
+          const pack = pending[idx++];
+          if (!pack || Array.isArray(pack.alerts) || pack._alertsLoading) {
+            oneDone();
+            continue;
+          }
+          pack._alertsLoading = true;
+          try {
+            const lat = roundCoord(pack.city.lat);
+            const lon = roundCoord(pack.city.lon);
+            const alerts = await loadNwsAlerts(lat, lon, null);
+            if (gen !== alertsPrefetchGen) {
+              resolve(finished);
+              return;
+            }
+            applyAlertsToPack(pack, alerts || []);
+          } catch (e) {
+            if (gen !== alertsPrefetchGen) {
+              resolve(finished);
+              return;
+            }
+            applyAlertsToPack(pack, []);
+          }
+          oneDone();
         }
       }
-      cache.set(key, packed);
-      return packed;
-    } catch (e) {
-      if (e && e.name === 'AbortError') throw e;
-      const fail = { error: true, city: c, fetchedAt: Date.now() };
-      cache.set(key, fail);
-      return fail;
-    }
+      for (let w = 0; w < workers; w++) worker();
+    });
   }
 
-  function setLoadProgress(done, total) {
-    const fill = document.getElementById('weatherLoadFill');
-    const pctEl = document.getElementById('weatherLoadPct');
-    const label = document.getElementById('weatherLoadLabel');
-    const t0 = Math.max(1, total || 1);
-    const d = Math.max(0, Math.min(done, t0));
-    const pct = Math.round((d / t0) * 100);
-    if (fill) fill.style.width = pct + '%';
-    if (pctEl) pctEl.textContent = pct + '%';
-    if (label) {
-      label.textContent = t('weather.loadingForecasts', 'Loading forecasts…')
-        + ' (' + d + '/' + t0 + ')';
+  /**
+   * Turn NWS * WHAT... / * WHERE... blocks into scannable full-width sections.
+   */
+  function formatAlertDescHtml(raw) {
+    var text = normalizeNwsText(raw || '');
+    if (!text) return '';
+    // Prefer NWS bullet sections
+    var parts = text.split(/\s*\*\s+(?=(?:WHAT|WHERE|WHEN|IMPACTS|ADDITIONAL DETAILS)\.\.\.)/i);
+    if (parts.length > 1) {
+      var html = '<div class="weather-alert-sections">';
+      for (var i = 0; i < parts.length; i++) {
+        var chunk = parts[i].trim();
+        if (!chunk) continue;
+        var m = chunk.match(/^(WHAT|WHERE|WHEN|IMPACTS|ADDITIONAL DETAILS)\.\.\.\s*([\s\S]*)$/i);
+        if (m) {
+          var label = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+          if (label === 'Additional details') label = 'Details';
+          var body = (m[2] || '').trim();
+          if (body.length > 320) body = body.slice(0, 320).replace(/\s+\S*$/, '') + '…';
+          html += '<div class="weather-alert-section">' +
+            '<div class="weather-alert-section-label">' + escapeHtml(label) + '</div>' +
+            '<p class="weather-alert-section-body">' + escapeHtml(body) + '</p>' +
+            '</div>';
+        } else {
+          var free = chunk;
+          if (free.length > 280) free = free.slice(0, 280).replace(/\s+\S*$/, '') + '…';
+          html += '<p class="weather-alert-section-body">' + escapeHtml(free) + '</p>';
+        }
+      }
+      html += '</div>';
+      return html;
     }
+    if (text.length > 520) text = text.slice(0, 520).replace(/\s+\S*$/, '') + '…';
+    return '<p class="weather-alert-desc">' + escapeHtml(text) + '</p>';
   }
 
-  function showWeatherLoadingUI(total) {
-    if (loadingEl) {
-      loadingEl.hidden = false;
-      loadingEl.className = 'weather-load-panel';
-      loadingEl.innerHTML =
-        '<div class="weather-load-status">' +
-          '<span id="weatherLoadLabel">' + escapeHtml(t('weather.loadingForecasts', 'Loading forecasts…')) + '</span>' +
-          '<span class="weather-load-pct" id="weatherLoadPct">0%</span>' +
-        '</div>' +
-        '<div class="weather-load-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="weatherLoadBar">' +
-          '<div class="weather-load-fill" id="weatherLoadFill"></div>' +
-        '</div>';
-      setLoadProgress(0, total);
-    }
-    // Skeleton placeholders under majors so the page never feels empty
-    if (listEl) {
-      listEl.hidden = false;
-      let skel = '';
-      for (let s = 0; s < 6; s++) skel += '<li class="weather-skeleton-row" aria-hidden="true"></li>';
-      listEl.innerHTML = skel;
-      listEl.classList.add('weather-skeleton-list');
-    }
-    if (majorsBlock) majorsBlock.hidden = false;
+  function alertsBlockHtml(alerts) {
+    if (!alerts || !alerts.length) return '';
+    const title = t('weather.alerts', 'Weather Alerts');
+    const cards = alerts.map(function (a) {
+      const sev = String(a.severity || 'Unknown').toLowerCase();
+      const sevClass = sev === 'extreme' || sev === 'severe'
+        ? 'weather-alert--severe'
+        : (sev === 'moderate' ? 'weather-alert--moderate' : 'weather-alert--minor');
+      const until = a.ends
+        ? t('weather.alertUntil', 'Until {time}').replace('{time}', formatClock(a.ends) || String(a.ends).slice(0, 16))
+        : '';
+      const head = a.event || t('weather.alert', 'Alert');
+      const bodyParts = [];
+      // Compact headline only if it adds info beyond the event name
+      if (a.headline && a.headline !== a.event && a.headline.indexOf(a.event) !== 0) {
+        bodyParts.push('<p class="weather-alert-headline">' + escapeHtml(a.headline) + '</p>');
+      }
+      if (a.description) {
+        bodyParts.push(formatAlertDescHtml(a.description));
+      }
+      if (a.instruction) {
+        var inst = a.instruction;
+        if (inst.length > 420) inst = inst.slice(0, 420).replace(/\s+\S*$/, '') + '…';
+        bodyParts.push(
+          '<div class="weather-alert-action">' +
+            '<div class="weather-alert-action-label">' +
+              escapeHtml(lang() === 'zh' ? '应对建议' : lang() === 'ja' ? '対応' : lang() === 'es' ? 'Instrucciones' : 'What to do') +
+            '</div>' +
+            '<p class="weather-alert-instruction">' + escapeHtml(inst) + '</p>' +
+          '</div>'
+        );
+      }
+      if (a.areaDesc) {
+        var area = a.areaDesc;
+        if (area.length > 140) area = area.slice(0, 140).replace(/\s+\S*$/, '') + '…';
+        bodyParts.push('<p class="weather-alert-area">' + escapeHtml(area) + '</p>');
+      }
+      bodyParts.push('<p class="weather-alert-source">' +
+        escapeHtml(t('weather.alertSource', 'National Weather Service')) +
+        (a.senderName ? ' · ' + escapeHtml(a.senderName) : '') +
+        '</p>');
+      return (
+        // Collapsed by default — summary is the scannable Apple-style chip
+        '<details class="weather-alert ' + sevClass + '">' +
+          '<summary class="weather-alert-summary">' +
+            '<span class="weather-alert-badge" aria-hidden="true">!</span>' +
+            '<span class="weather-alert-title">' + escapeHtml(head) + '</span>' +
+            (until ? '<span class="weather-alert-until">' + escapeHtml(until) + '</span>' : '') +
+            '<span class="weather-alert-chevron" aria-hidden="true"></span>' +
+          '</summary>' +
+          '<div class="weather-alert-body">' + bodyParts.join('') + '</div>' +
+        '</details>'
+      );
+    }).join('');
+    return (
+      '<div class="weather-alerts" role="region" aria-label="' + escapeHtml(title) + '">' +
+        '<div class="weather-alerts-label">' + escapeHtml(title) + '</div>' +
+        cards +
+      '</div>'
+    );
   }
 
   const FORECAST_Q =
@@ -894,8 +1460,231 @@
     + '&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum'
     + '&temperature_unit=celsius&wind_speed_unit=ms&timezone=auto&forecast_days=10';
 
-  /** One Open-Meteo multi-location request (array or single object). */
-  async function loadCityBatch(cities, signal) {
+  async function loadOpenMeteoCity(c, signal) {
+    const wUrl = FORECAST + '?latitude=' + c.lat + '&longitude=' + c.lon + '&' + FORECAST_Q;
+    const aUrl = AIR + '?latitude=' + c.lat + '&longitude=' + c.lon + '&current=us_aqi,pm2_5,pm10,european_aqi&timezone=auto';
+
+    async function once() {
+      const pair = await Promise.all([
+        fetchJson(wUrl, signal),
+        fetchJson(aUrl, signal).catch(function () { return null; })
+      ]);
+      return {
+        weather: pair[0],
+        air: pair[1],
+        fetchedAt: Date.now(),
+        city: c,
+        source: 'open-meteo',
+        needsEnrich: false
+      };
+    }
+
+    try {
+      let packed;
+      try {
+        packed = await once();
+      } catch (e) {
+        if (e && (e.name === 'RateLimitError' || (e.message && e.message.indexOf('429') >= 0))) {
+          await new Promise(function (r) { window.setTimeout(r, 650); });
+          if (signal && signal.aborted) throw e;
+          packed = await once();
+        } else {
+          throw e;
+        }
+      }
+      if (!packed.weather || !packed.weather.current) {
+        return { error: true, city: c, fetchedAt: Date.now() };
+      }
+      return packed;
+    } catch (e) {
+      if (e && e.name === 'AbortError') throw e;
+      return { error: true, city: c, fetchedAt: Date.now() };
+    }
+  }
+
+  async function enrichWithOpenMeteo(pack, signal) {
+    if (!pack || !pack.weather || !pack.city || pack.error) return pack;
+    try {
+      const om = await loadOpenMeteoCity(pack.city, signal);
+      if (!om || !om.weather || !om.weather.current) {
+        pack.needsEnrich = false;
+        return pack;
+      }
+      const cur = pack.weather.current || {};
+      const ocur = om.weather.current || {};
+      ['relative_humidity_2m', 'apparent_temperature', 'surface_pressure', 'visibility', 'precipitation'].forEach(function (k) {
+        if (cur[k] == null && ocur[k] != null) cur[k] = ocur[k];
+      });
+      pack.weather.current = cur;
+
+      const d = pack.weather.daily || {};
+      const od = om.weather.daily || {};
+      if (!d.sunrise && od.sunrise) d.sunrise = od.sunrise;
+      if (!d.sunset && od.sunset) d.sunset = od.sunset;
+      if (!d.uv_index_max && od.uv_index_max) d.uv_index_max = od.uv_index_max;
+      if (!d.precipitation_sum && od.precipitation_sum) d.precipitation_sum = od.precipitation_sum;
+      pack.weather.daily = d;
+
+      const h = pack.weather.hourly || {};
+      const oh = om.weather.hourly || {};
+      ['relative_humidity_2m', 'apparent_temperature', 'surface_pressure', 'uv_index', 'precipitation', 'precipitation_probability'].forEach(function (k) {
+        if ((h[k] == null || !h[k].length) && oh[k] && oh[k].length) h[k] = oh[k];
+      });
+      // Align enrich series times if NWS hourly empty for those keys but OM has full set
+      if ((!h.time || !h.time.length) && oh.time) {
+        h.time = oh.time;
+        if (oh.temperature_2m) h.temperature_2m = oh.temperature_2m;
+        if (oh.weather_code) h.weather_code = oh.weather_code;
+      }
+      pack.weather.hourly = h;
+
+      if (!pack.air && om.air) pack.air = om.air;
+      pack.source = pack.source === 'nws' || pack.source === 'nws+om' ? 'nws+om' : pack.source;
+      pack.needsEnrich = false;
+      pack.enrichedAt = Date.now();
+    } catch (e) {
+      pack.needsEnrich = false;
+    }
+    return pack;
+  }
+
+  /**
+   * Load one city.
+   * US: NWS → Open-Meteo fallback
+   * Non-US: Open-Meteo only
+   * opts.enrich: Open-Meteo gap-fill after NWS (detail open only)
+   */
+  async function loadCity(c, signal, opts) {
+    opts = opts || {};
+    const key = cityKey(c);
+    const hit = cache.get(key);
+    if (hit && hit.weather && Date.now() - hit.fetchedAt < REFRESH_MS - 5000) {
+      if (opts.enrich && hit.needsEnrich) {
+        const en = await enrichWithOpenMeteo(hit, signal);
+        cache.set(key, en);
+        return en;
+      }
+      return hit;
+    }
+
+    let pack = null;
+    if (isLikelyUs(c)) {
+      try {
+        pack = await loadNwsCity(c, signal);
+      } catch (e) {
+        if (e && e.name === 'AbortError') throw e;
+        pack = null;
+      }
+    }
+
+    if (!pack || pack.error || !pack.weather) {
+      pack = await loadOpenMeteoCity(c, signal);
+    }
+
+    if (pack && pack.weather && opts.enrich && pack.needsEnrich) {
+      pack = await enrichWithOpenMeteo(pack, signal);
+    }
+
+    if (pack) cache.set(key, pack);
+    return pack || { error: true, city: c, fetchedAt: Date.now() };
+  }
+
+  // Smooth progress: never jump straight to ~85% — always ease from low values
+  var progDisplay = 0;
+  var progTarget = 0;
+  var progRaf = 0;
+  var progLabel = '';
+
+  function paintProgressNow() {
+    const fill = document.getElementById('weatherLoadFill');
+    const pctEl = document.getElementById('weatherLoadPct');
+    const label = document.getElementById('weatherLoadLabel');
+    const bar = document.getElementById('weatherLoadBar');
+    const p = Math.max(0, Math.min(100, Math.round(progDisplay)));
+    if (fill) fill.style.width = p + '%';
+    if (pctEl) pctEl.textContent = p + '%';
+    if (bar) bar.setAttribute('aria-valuenow', String(p));
+    if (label && progLabel) label.textContent = progLabel;
+  }
+
+  function tickProgressAnim() {
+    progRaf = 0;
+    const diff = progTarget - progDisplay;
+    if (Math.abs(diff) < 0.4) {
+      progDisplay = progTarget;
+      paintProgressNow();
+      return;
+    }
+    // Ease toward target (readable climb from 0, no instant 85%)
+    const step = Math.max(0.55, Math.abs(diff) * 0.13);
+    progDisplay += diff > 0 ? step : -step;
+    if ((diff > 0 && progDisplay > progTarget) || (diff < 0 && progDisplay < progTarget)) {
+      progDisplay = progTarget;
+    }
+    paintProgressNow();
+    progRaf = window.requestAnimationFrame(tickProgressAnim);
+  }
+
+  function setLoadProgress(pct, labelText) {
+    progTarget = Math.max(0, Math.min(100, Number(pct) || 0));
+    if (labelText) progLabel = labelText;
+    if (!progRaf) progRaf = window.requestAnimationFrame(tickProgressAnim);
+    // Also update label immediately for snappy copy
+    const label = document.getElementById('weatherLoadLabel');
+    if (label && progLabel) label.textContent = progLabel;
+  }
+
+  function resetLoadProgress() {
+    if (progRaf) {
+      try { window.cancelAnimationFrame(progRaf); } catch (e) {}
+      progRaf = 0;
+    }
+    progDisplay = 0;
+    progTarget = 0;
+    progLabel = t('weather.loadingForecasts', 'Loading forecasts…');
+    paintProgressNow();
+  }
+
+  function showWeatherLoadingUI() {
+    listPaintLocked = true;
+    cancelPendingListPaints();
+    if (loadingEl) {
+      loadingEl.hidden = false;
+      loadingEl.className = 'weather-load-panel weather-load-panel--hero';
+      loadingEl.innerHTML =
+        '<div class="weather-load-card">' +
+          '<div class="weather-load-orb" aria-hidden="true"></div>' +
+          '<div class="weather-load-status">' +
+            '<span id="weatherLoadLabel">' + escapeHtml(t('weather.loadingForecasts', 'Loading forecasts…')) + '</span>' +
+            '<span class="weather-load-pct" id="weatherLoadPct">0%</span>' +
+          '</div>' +
+          '<div class="weather-load-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="weatherLoadBar" aria-label="Loading">' +
+            '<div class="weather-load-fill" id="weatherLoadFill"></div>' +
+          '</div>' +
+          '<p class="weather-load-hint" id="weatherLoadHint">' +
+            escapeHtml(t('weather.loadingHint', 'Fetching cities & alerts…')) +
+          '</p>' +
+        '</div>';
+      resetLoadProgress();
+      // Start gently at a few percent so the bar is visibly "alive"
+      setLoadProgress(3, t('weather.loadingForecasts', 'Loading forecasts…'));
+    }
+    // Hide lists entirely until the single final paint — no skeleton thrash
+    if (listEl) {
+      listEl.innerHTML = '';
+      listEl.hidden = true;
+      listEl.classList.remove('weather-skeleton-list');
+    }
+    if (favListEl) { favListEl.innerHTML = ''; }
+    if (myLocListEl) { myLocListEl.innerHTML = ''; }
+    if (favBlock) favBlock.hidden = true;
+    if (myLocBlock) myLocBlock.hidden = true;
+    if (majorsBlock) majorsBlock.hidden = false;
+    if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
+  }
+
+  /** Open-Meteo multi-location batch (non-US / fallback groups). */
+  async function loadCityBatchOm(cities, signal) {
     if (!cities.length) return [];
     const lats = cities.map(function (c) { return c.lat; }).join(',');
     const lons = cities.map(function (c) { return c.lon; }).join(',');
@@ -915,7 +1704,9 @@
         weather: weather,
         air: airList[i] || null,
         fetchedAt: now,
-        city: c
+        city: c,
+        source: 'open-meteo',
+        needsEnrich: false
       };
     });
   }
@@ -927,75 +1718,102 @@
     const signal = abortCtl ? abortCtl.signal : undefined;
     const total = cities.length;
     const out = new Array(total);
-    setLoadProgress(0, total);
+    setLoadProgress(5, t('weather.loadingForecasts', 'Loading forecasts…'));
 
-    // Prefer batch API: ~2–4 requests for all majors instead of ~80 (avoids 429 freezes).
-    const CHUNK = 20;
+    const usIdx = [];
+    const omIdx = [];
+    for (let i = 0; i < cities.length; i++) {
+      if (isLikelyUs(cities[i])) usIdx.push(i);
+      else omIdx.push(i);
+    }
+
     let done = 0;
-    let batchComplete = false;
-    try {
-      for (let start = 0; start < cities.length; start += CHUNK) {
-        if (signal && signal.aborted) break;
-        const slice = cities.slice(start, start + CHUNK);
-        let packs = null;
+    function bump() {
+      done++;
+      if (signal && signal.aborted) return;
+      // Forecasts: 5% → 62% (alerts continue 62% → 96%; never park at ~85% as the "start")
+      const pct = 5 + Math.round((done / Math.max(1, total)) * 57);
+      setLoadProgress(Math.min(62, pct), t('weather.loadingForecasts', 'Loading forecasts…')
+        + ' (' + Math.min(done, total) + '/' + total + ')');
+    }
+
+    // US: NWS with limited concurrency (no OM enrich on list)
+    async function nwsWorker(queue) {
+      while (queue.length) {
+        if (signal && signal.aborted) return;
+        const idx = queue.shift();
         try {
-          packs = await loadCityBatch(slice, signal);
+          out[idx] = await loadCity(cities[idx], signal, { enrich: false });
         } catch (e) {
-          if (e && e.name === 'AbortError') throw e;
-          // One retry after brief pause on rate limit — never fall into N×timeout storm
-          if (e && e.name === 'RateLimitError') {
-            await new Promise(function (r) { window.setTimeout(r, 900); });
-            if (signal && signal.aborted) throw e;
-            packs = await loadCityBatch(slice, signal);
-          } else {
-            throw e;
-          }
+          if (e && e.name === 'AbortError') return;
+          out[idx] = { error: true, city: cities[idx], fetchedAt: Date.now() };
         }
-        for (let j = 0; j < packs.length; j++) {
-          const pack = packs[j];
-          const idx = start + j;
-          out[idx] = pack;
-          cache.set(cityKey(slice[j]), pack);
-        }
-        done += slice.length;
-        if (!(signal && signal.aborted)) setLoadProgress(done, total);
+        cache.set(cityKey(cities[idx]), out[idx]);
+        bump();
       }
-      batchComplete = true;
-    } catch (e) {
-      if (e && e.name === 'AbortError') throw e;
-      // Rate-limit / daily cap: fail closed with cached/error rows — do NOT N-way sequential hammer.
-      if (e && e.name === 'RateLimitError') {
-        for (let i = 0; i < cities.length; i++) {
-          if (!out[i]) {
-            const fail = cache.get(cityKey(cities[i])) || { error: true, city: cities[i], fetchedAt: Date.now() };
-            out[i] = fail;
-            cache.set(cityKey(cities[i]), fail);
-          }
-        }
-        batchComplete = true;
-      } else {
-        // Other batch failure: short sequential fallback (capped concurrency already in loadCity)
-        for (let i = 0; i < cities.length; i++) {
+    }
+
+    const usQueue = usIdx.slice();
+    await Promise.all([nwsWorker(usQueue), nwsWorker(usQueue), nwsWorker(usQueue)]);
+
+    // Non-US (and any holes): Open-Meteo batch
+    const needOm = [];
+    for (let i = 0; i < cities.length; i++) {
+      if (!out[i] || out[i].error || !out[i].weather) needOm.push(i);
+    }
+    // Prefer batch for pure non-US indices first
+    const omCities = needOm.map(function (i) { return cities[i]; });
+    if (omCities.length && !(signal && signal.aborted)) {
+      const CHUNK = 20;
+      try {
+        for (let start = 0; start < omCities.length; start += CHUNK) {
           if (signal && signal.aborted) break;
-          if (out[i]) continue;
-          out[i] = await loadCity(cities[i], signal);
-          done++;
-          if (!(signal && signal.aborted)) setLoadProgress(Math.min(total, done), total);
+          const slice = omCities.slice(start, start + CHUNK);
+          const sliceIdx = needOm.slice(start, start + CHUNK);
+          let packs;
+          try {
+            packs = await loadCityBatchOm(slice, signal);
+          } catch (e) {
+            if (e && e.name === 'AbortError') throw e;
+            if (e && e.name === 'RateLimitError') {
+              await new Promise(function (r) { window.setTimeout(r, 900); });
+              packs = await loadCityBatchOm(slice, signal);
+            } else {
+              // sequential OM fallback for this chunk
+              packs = [];
+              for (let j = 0; j < slice.length; j++) {
+                packs.push(await loadOpenMeteoCity(slice[j], signal));
+              }
+            }
+          }
+          for (let j = 0; j < packs.length; j++) {
+            const idx = sliceIdx[j];
+            // Don't overwrite a good NWS pack
+            if (out[idx] && out[idx].weather && !out[idx].error) continue;
+            out[idx] = packs[j];
+            cache.set(cityKey(cities[idx]), packs[j]);
+            bump();
+          }
         }
-        batchComplete = true;
+      } catch (e) {
+        if (e && e.name === 'AbortError') throw e;
+        for (let k = 0; k < needOm.length; k++) {
+          const idx = needOm[k];
+          if (out[idx] && out[idx].weather) continue;
+          out[idx] = { error: true, city: cities[idx], fetchedAt: Date.now() };
+          cache.set(cityKey(cities[idx]), out[idx]);
+          bump();
+        }
       }
     }
 
-    if (!batchComplete) {
-      for (let i = 0; i < cities.length; i++) {
-        if (!out[i]) {
-          out[i] = { error: true, city: cities[i], fetchedAt: Date.now() };
-          cache.set(cityKey(cities[i]), out[i]);
-        }
+    for (let i = 0; i < total; i++) {
+      if (!out[i]) {
+        out[i] = { error: true, city: cities[i], fetchedAt: Date.now() };
+        cache.set(cityKey(cities[i]), out[i]);
       }
     }
 
-    // Superseded by a newer loadMany — do not treat sparse results as final
     if (signal && signal.aborted) {
       const err = new Error('Aborted');
       err.name = 'AbortError';
@@ -1013,6 +1831,7 @@
     if (loadingEl) {
       loadingEl.hidden = true;
       loadingEl.className = 'weather-load-panel';
+      loadingEl.innerHTML = '';
     }
     if (listEl) {
       listEl.hidden = false;
@@ -1087,12 +1906,22 @@
       windDeg: cur.wind_direction_10m
     });
 
+    const alert = topAlert(pack);
+    const alertSev = alert ? String(alert.severity || '').toLowerCase() : '';
+    const alertTone = alertSev === 'extreme' || alertSev === 'severe'
+      ? 'weather-row-alert--severe'
+      : (alertSev === 'moderate' ? 'weather-row-alert--moderate' : 'weather-row-alert--minor');
+    // Apple-style list: when an alert is active, surface it as the primary status line
+    const statusLine = alert
+      ? `<div class="weather-row-alert ${alertTone}"><span class="weather-row-alert-ico" aria-hidden="true">!</span><span>${escapeHtml(alert.event || t('weather.alert', 'Alert'))}</span></div>`
+      : `<div class="weather-row-cond">${condIcon(code, night)}<span>${escapeHtml(condLabel(code))}</span></div>`;
+
     const main = document.createElement('div');
     main.className = 'weather-row-main';
     main.innerHTML = `
         <div class="weather-row-city">${escapeHtml(displayCityName(c))}</div>
         <div class="weather-row-meta">${escapeHtml(localTime)}${c.admin1 ? ' · ' + escapeHtml(c.admin1) : ''}</div>
-        <div class="weather-row-cond">${condIcon(code, night)}<span>${escapeHtml(condLabel(code))}</span></div>`;
+        ${statusLine}`;
 
     const temps = document.createElement('div');
     temps.className = 'weather-row-temps';
@@ -1145,7 +1974,11 @@
     packs.forEach((pack) => ul.appendChild(buildRowButton(pack)));
   }
 
-  function refreshListsFromCache() {
+  function refreshListsFromCache(opts) {
+    opts = opts || {};
+    // Block mid-load repaints (this was the multi-refresh flicker)
+    if (listPaintLocked && !opts.force) return;
+
     if (!myLocationCity) myLocationCity = loadMyLocation();
     const favs = loadFavorites();
     const favKeys = new Set(favs.map(cityKey));
@@ -1166,25 +1999,32 @@
     if (favBlock) favBlock.hidden = favPacks.length === 0;
     renderCityList(myLocListEl, myPacks);
     renderCityList(favListEl, favPacks);
+    if (listEl) listEl.hidden = false;
     renderCityList(listEl, majorPacks);
     if (loadingEl) {
       loadingEl.hidden = true;
-      loadingEl.className = 'weather-empty';
-    }
-    if (listEl) {
-      listEl.hidden = false;
-      listEl.classList.remove('weather-skeleton-list');
+      loadingEl.className = 'weather-load-panel';
+      loadingEl.innerHTML = '';
     }
 
     let latest = 0;
     [...myPacks, ...favPacks, ...majorPacks].forEach((p) => { latest = Math.max(latest, p.fetchedAt || 0); });
     if (latest) setUpdated(latest);
-    applyAmbientPageSky();
+    if (!opts.skipAmbient) applyAmbientPageSky();
   }
 
   async function refresh(force) {
     const gen = ++refreshGen;
-    if (force) cache.clear();
+    // Refresh button / forced reload: wipe ALL weather data layers so NWS + OM re-fetch
+    if (force) {
+      cache.clear();
+      clearAllNwsPointsCache();
+      alertsPrefetchGen++; // cancel any in-flight alert prefetch
+      if (abortCtl) {
+        try { abortCtl.abort(); } catch (e) {}
+        abortCtl = null;
+      }
+    }
     showError('');
     if (favBlock) favBlock.hidden = true;
     if (myLocBlock) myLocBlock.hidden = true;
@@ -1200,21 +2040,49 @@
     const seen = new Set(cities.map(cityKey));
     MAJOR.forEach((c) => { if (!seen.has(cityKey(c))) cities.push(c); });
 
-    showWeatherLoadingUI(cities.length);
+    // Single progress surface until forecasts + alerts complete — then one list paint
+    showWeatherLoadingUI();
 
     const run = (async () => {
       try {
+        // Let the browser paint 0–3% before network work (avoids "starts at 85%")
+        await new Promise(function (r) {
+          window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(r);
+          });
+        });
+        if (gen !== refreshGen) return;
+
         await loadMany(cities);
-        // Another refresh superseded us — do not paint stale/empty lists
         if (gen !== refreshGen) return;
         lastListFetch = Date.now();
+
+        // Phase 2: alerts (still locked — no list paint). Range 64% → 96%.
+        setLoadProgress(64, t('weather.loadingAlerts', 'Checking weather alerts…'));
+        await prefetchAlertsForCache(function (done, total) {
+          if (gen !== refreshGen) return;
+          const pct = 64 + Math.round((done / Math.max(1, total)) * 32);
+          setLoadProgress(Math.min(96, pct), t('weather.loadingAlerts', 'Checking weather alerts…')
+            + ' (' + done + '/' + total + ')');
+        });
+        if (gen !== refreshGen) return;
+
+        setLoadProgress(100, t('weather.loadingDone', 'Ready'));
+        // Brief beat so the bar can ease to 100% before the list appears
+        await new Promise(function (r) { window.setTimeout(r, 180); });
+        if (gen !== refreshGen) return;
+
+        // ONE reveal
+        listPaintLocked = false;
+        cancelPendingListPaints();
         clearWeatherSkeleton();
-        refreshListsFromCache();
+        refreshListsFromCache({ force: true });
+
         let ok = 0;
         cache.forEach(function (p) { if (p && p.weather && !p.error) ok++; });
         if (ok) showError('');
         else showError(t('weather.error', 'Could not load weather data. Pull to refresh or try again shortly.'));
-        // Keep open city detail in sync after full refresh (drop sheet so body isn't stale)
+
         if (isDetailVisible() && openCity && openCity.city) {
           forceCloseSheet();
           const fresh = cache.get(cityKey(openCity.city));
@@ -1222,25 +2090,28 @@
         }
       } catch (e) {
         if (e && e.name === 'AbortError') {
-          // Only leave skeleton if a newer refresh owns the UI
           if (gen === refreshGen) {
+            listPaintLocked = false;
             clearWeatherSkeleton();
-            if (cache.size) refreshListsFromCache();
+            if (cache.size) refreshListsFromCache({ force: true });
             else showError(t('weather.error', 'Could not load weather data.'));
           }
           return;
         }
         if (gen !== refreshGen) return;
+        listPaintLocked = false;
         showError(t('weather.error', 'Could not load weather data.'));
         clearWeatherSkeleton();
-        // Unstick UI: show whatever is in cache rather than a blank page
-        if (cache.size) refreshListsFromCache();
+        if (cache.size) refreshListsFromCache({ force: true });
         else if (listEl) {
           listEl.innerHTML = '';
           listEl.hidden = false;
         }
       } finally {
-        if (gen === refreshGen && refreshBtn) refreshBtn.disabled = false;
+        if (gen === refreshGen) {
+          listPaintLocked = false;
+          if (refreshBtn) refreshBtn.disabled = false;
+        }
       }
     })();
     refreshInflight = run;
@@ -1351,6 +2222,12 @@
     if (!detailEl || !pack || !pack.weather) return;
     const prevCity = openCity && openCity.city;
     const cityChanged = !!(prevCity && pack.city && !sameCity(prevCity, pack.city));
+    // Preserve expanded warnings across enrich / unit / language re-renders
+    const keepAlertOpen = !cityChanged && isDetailVisible() ? captureOpenAlertTitles() : [];
+    // Preserve alerts already loaded when enrich replaces the pack object
+    if (!cityChanged && openCity && Array.isArray(openCity.alerts) && pack.alerts == null) {
+      pack.alerts = openCity.alerts;
+    }
     openCity = pack;
     const c = pack.city;
     const cur = pack.weather.current;
@@ -1398,8 +2275,15 @@
     setUpdated(pack.fetchedAt, $('weatherDetailUpdated'));
     syncDetailFav(c);
 
+    // NWS severe weather / disaster alerts (Apple Weather–style banner stack)
+    ensureNwsAlerts(pack);
+
     const aqi = pack.air && pack.air.current && pack.air.current.us_aqi;
     const mods = [];
+    {
+      const alertHtml = alertsBlockHtml(pack.alerts);
+      if (alertHtml) mods.push(alertHtml);
+    }
     mods.push(modHtml(
       'aqi', t('weather.aqi', 'Air Quality'),
       aqi != null ? String(Math.round(aqi)) : '—',
@@ -1532,6 +2416,8 @@
     mods.push(`<p class="weather-detail-attrib">${escapeHtml(forLine)}</p>`);
 
     detailMods.innerHTML = mods.join('');
+    // Restore any expanded alerts the user had open before this re-render
+    if (keepAlertOpen && keepAlertOpen.length) restoreOpenAlertTitles(keepAlertOpen);
     // Clicks use delegated handler on detailMods (bound once) — survives re-renders
 
     const isClosing = detailEl.classList.contains('is-closing');
@@ -1596,6 +2482,37 @@
 
     if (!wasOpen && detailBack && typeof detailBack.focus === 'function') {
       try { detailBack.focus({ preventScroll: true }); } catch (e2) { detailBack.focus(); }
+    }
+
+    // Open-Meteo gap-fill after NWS list paint (humidity, UV, sunrise, AQI, …)
+    if (pack.needsEnrich && pack.city && !pack._enriching) {
+      pack._enriching = true;
+      const enrichKey = cityKey(pack.city);
+      // Snapshot expanded alerts so enrich re-render can restore them
+      const openTitlesBeforeEnrich = captureOpenAlertTitles();
+      loadCity(pack.city, null, { enrich: true }).then(function (fresh) {
+        if (!fresh || !fresh.weather) return;
+        fresh._enriching = false;
+        // Keep alerts from pre-enrich pack (enrich path does not re-fetch them)
+        if (Array.isArray(pack.alerts)) fresh.alerts = pack.alerts;
+        else if (openCity && Array.isArray(openCity.alerts)) fresh.alerts = openCity.alerts;
+        cache.set(enrichKey, fresh);
+        if (openCity && openCity.city && sameCity(openCity.city, pack.city) && isDetailVisible()) {
+          // Stash titles for openDetail restore (also captured at openDetail entry)
+          if (openTitlesBeforeEnrich.length && detailMods) {
+            // openDetail will capture empty if we already rebuilt — set on pack for restore
+            fresh._restoreAlertOpen = openTitlesBeforeEnrich;
+          }
+          openDetail(fresh);
+          if (fresh._restoreAlertOpen) {
+            restoreOpenAlertTitles(fresh._restoreAlertOpen);
+            delete fresh._restoreAlertOpen;
+          }
+        }
+      }).catch(function () {
+        pack._enriching = false;
+        pack.needsEnrich = false;
+      });
     }
   }
 
@@ -1681,8 +2598,8 @@
         nameCache.forEach((v, k) => { if (k.startsWith(L + ':')) obj[k] = v; });
         sessionStorage.setItem('usa-travel-wx-names-' + L, JSON.stringify(obj));
       } catch (e) {}
-      // Only re-render if we already have weather data (don't flash empty list mid-load)
-      if (cache.size) refreshListsFromCache();
+      // Never re-paint during locked bootstrap; names apply on next unlock paint
+      if (cache.size && !listPaintLocked) refreshListsFromCache({ skipAmbient: true });
     } finally {
       namesFetching = false;
     }
@@ -3039,22 +3956,23 @@
 
   window.refreshWeatherUi = function refreshWeatherUi() {
     applyAmbientPageSky();
-    // Critical: app.js applyLanguage() runs right after weather.js boot and used to
-    // call refresh() again while the first loadMany was in flight — aborting it and
-    // painting an empty/error list. Never start a second network refresh while one
-    // is already running; only re-render when we already have cache.
+    // Never interrupt bootstrap list-lock / inflight load with extra paints
+    if (listPaintLocked || refreshInflight) {
+      clearTimeout(nameFetchTimer);
+      nameFetchTimer = setTimeout(function () { ensureLocalizedMajorNames(); }, 400);
+      return;
+    }
     if (cache.size) {
       refreshListsFromCache();
-    } else if (!refreshInflight) {
+    } else {
       refresh(false);
     }
-    // Re-render open detail for unit/language changes only when still visible
     if (isDetailVisible() && openCity && openCity.weather) {
       const fresh = (openCity.city && cache.get(cityKey(openCity.city))) || openCity;
       openDetail(fresh);
     }
     clearTimeout(nameFetchTimer);
-    nameFetchTimer = setTimeout(() => { ensureLocalizedMajorNames(); }, 200);
+    nameFetchTimer = setTimeout(function () { ensureLocalizedMajorNames(); }, 200);
   };
 
   // Kick off

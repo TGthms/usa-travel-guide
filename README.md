@@ -28,7 +28,7 @@
 | 🏙️ **Destination cities** | Twelve featured cities with unique CSS card art (no photo required), ratings, and expandable detail modals. |
 | 🔗 **Helpful city links** | Official tourism sites, transit, parks, and museums open from each city modal. |
 | 🖼️ **Photo gallery** | Filterable travel photography with search, sort, quality tiers (thumbnail / medium / full), lightbox, and optional video. *HDR supported* |
-| 🧰 **Travel tools** | Hub plus mini-apps: currency, world clock, tip & sales tax (all 50 states), gas/EV road-trip cost, U.S. emergency numbers, and **live weather** (Open-Meteo). |
+| 🧰 **Travel tools** | Hub plus mini-apps: currency, world clock, tip & sales tax (all 50 states), gas/EV road-trip cost, U.S. emergency numbers, and **live weather** (NWS for U.S. + Open-Meteo for world/enrich). |
 | 🌦️ **Seasons, culture & routes** | When to go, cultural highlights, and classic road-trip ideas. |
 | 🎲 **America Fun Facts** | One shuffled fact at a time — 250+ trivia items in every language. |
 | 🌐 **Multi-language** | English, Spanish, Chinese, and Japanese for the full guide (including legal pages). |

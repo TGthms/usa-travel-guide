@@ -32,12 +32,13 @@ usa-travel-guide/
 │       │   └── dest-links.js
 │       ├── core/          # Shared shell
 │       │   ├── env.js     # ENV, raf, loader, observers
+│       │   ├── nav-return.js # sessionStorage stamp, contextual Back, guide scroll restore
 │       │   └── runtime.js # prefs, i18n engine, settings, nav chrome
 │       ├── features/      # Page behavior (safe no-op if DOM missing)
 │       │   ├── home.js
 │       │   ├── gallery.js
 │       │   ├── tools.js   # currency, clock, tip/tax, drive, emergency
-│       │   ├── weather.js # Open-Meteo weather mini-app
+│       │   ├── weather.js # Hybrid NWS (US) + Open-Meteo (world / enrich / fallback)
 │       │   └── legal.js
 │       └── app.js         # Boot: applyLanguage / applyUnits / legal first paint
 ├── images/gallery/        # full + medium/ + thumbs/ + videos/
@@ -60,9 +61,11 @@ usa-travel-guide/
 
 Classic `defer` scripts share one global lexical environment (not ES modules), so `let currentLang` from `runtime.js` is visible to `features/*`.
 
+Core load order on every page: `env.js` → **`nav-return.js`** → `runtime.js`.
+
 | Page | Scripts |
 |------|---------|
-| **index** | data (i18n, fun-facts, modal, dest-links) → core → features (tools, home, legal, gallery) → app |
+| **index** | data (i18n, fun-facts, modal, dest-links) → core (env, nav-return, runtime) → features (tools, home, legal, gallery) → app |
 | **gallery** | i18n → core → gallery → app |
 | **tools.html** (hub) | i18n → core → tools → app |
 | **tools-currency / clock / tip-tax / drive / emergency** | i18n → core → tools → app |
@@ -70,6 +73,23 @@ Classic `defer` scripts share one global lexical environment (not ES modules), s
 | **privacy / terms** | legal-i18n (sync) → i18n → core → legal → app |
 
 `app.js` runs last so feature functions (`initFunFacts`, `renderLegalPage`, gallery chrome, weather hooks) already exist.
+
+### Weather hybrid (summary)
+
+- **US majors / my-location in US:** National Weather Service `api.weather.gov` (points → forecast + forecastHourly). List paint does **not** enrich.
+- **Detail open:** Open-Meteo gap-fill for humidity, UV, sunrise/set, AQ, etc. (`source: nws+om`).
+- **Non-US / NWS fail / geocode:** Open-Meteo full pack.
+- **Points cache:** `localStorage` `usa-travel-nws-points-v1` (~7d).
+
+### Guide → tool deep links + return chrome
+
+- Quiet `.guide-tool-link` CTAs on seasons / tips / practical (and matching modal CTAs).
+- `nav-return.js` stamps `sessionStorage` `usa-travel-return-v1` from guide or tools hub; rewrites header `a.gallery-app-back` **and** footer `a.gallery-app-footer-home`; restores guide `scrollY` on return.
+- **Tools hub (`tools.html`) always “Back to the Guide”** — never “Back to Tools” (hub is not a mini-app).
+- Tool mini-apps: stamp `guide` → Back to Guide; stamp `tools` → Back to Tools; no stamp → markup default (Tools).
+- `tools.html` is **not** a mini-app path (`tools-*.html` only); leftover tools stamps must not rewrite the hub.
+- `applyLanguage` re-calls `__usaTravelNavReturn.apply()` so language switches do not wipe contextual Back.
+- Covered by Playwright `nav-return chrome` tests in `e2e/smoke.spec.js`.
 
 ### New tool mini-page checklist
 
