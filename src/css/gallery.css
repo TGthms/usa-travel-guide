@@ -562,7 +562,7 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
   .lightbox-info { margin-top: 8px; }
   .lightbox-prev, .lightbox-next { min-width: 40px; min-height: 40px; font-size: 16px; }
   .gallery-filters { position: static; }
-  /* Short landscape: keep brand mark only so ✦/America never stacks beside icons */
+  /* Short landscape: keep brand mark only so mark/America never stacks beside icons */
   .nav-logo { white-space: nowrap; }
   .nav-logo span { display: none; }
 }

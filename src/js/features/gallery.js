@@ -98,7 +98,7 @@ function showLoadError(item) {
     const ph = document.createElement('div');
     ph.className = 'gallery-item-placeholder';
     const text = GALLERY_PLACEHOLDER_TEXT[currentLang] || GALLERY_PLACEHOLDER_TEXT.en;
-    ph.innerHTML = `<span class="ph-icon" aria-hidden="true">🖼️</span><span class="ph-text">${text}</span>`;
+    ph.innerHTML = `<span class="ph-icon" aria-hidden="true"><svg class="sf-icon" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="14" height="12" rx="1.5"/><path d="M8 18h11a1.5 1.5 0 0 0 1.5-1.5V9"/><circle cx="9.2" cy="10.5" r="1.1"/><path d="m4.5 15.5 3.2-3 2.6 2.4 2.2-2 3.5 3.2"/></svg></span><span class="ph-text">${text}</span>`;
     item.appendChild(ph);
   }
   refreshVisibleGalleryItems();

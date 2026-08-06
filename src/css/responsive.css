@@ -56,7 +56,7 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .nav-links { display: none; }
   .nav-actions { margin-left: auto; gap: 8px; flex-shrink: 0; }
   .nav-hamburger { display: flex; flex-shrink: 0; }
-  /* Phone + hamburger: icon-only logo — prevents ✦ / America stacking beside action icons */
+  /* Phone + hamburger: icon-only logo — prevents mark / America stacking beside action icons */
   .nav-logo span { display: none; }
   .nav-logo { font-size: 22px; padding: 4px 2px; }
 

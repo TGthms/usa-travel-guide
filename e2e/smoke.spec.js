@@ -326,6 +326,23 @@ test.describe('USA Travel Guide smoke', () => {
       // Daily bars should have non-zero width style when data present
       const barStyled = await page.locator('.weather-daily-bar[style*="width"]').count();
       expect(barStyled).toBeGreaterThan(0);
+
+      // Module sheet opens above detail and can be dismissed
+      const mod = page.locator('#weatherModules [data-sheet]').first();
+      if (await mod.count()) {
+        await mod.click();
+        await expect(page.locator('#weatherSheet')).toHaveClass(/open/, { timeout: 5_000 });
+        await page.keyboard.press('Escape');
+        await expect(page.locator('#weatherSheet')).not.toHaveClass(/open/);
+        const sheetPe = await page.locator('#weatherSheet').evaluate((el) => getComputedStyle(el).pointerEvents);
+        expect(sheetPe).toBe('none');
+      }
+
+      // Scroll must not persist across close → open another city
+      await page.evaluate(() => {
+        const sc = document.getElementById('weatherDetailScroll');
+        if (sc) sc.scrollTop = 320;
+      });
       await page.locator('#weatherDetailBack').click({ force: true });
       await page.evaluate(() => {
         if (document.getElementById('weatherDetail')?.classList.contains('open')
@@ -334,6 +351,25 @@ test.describe('USA Travel Guide smoke', () => {
         }
       });
       await expect(page.locator('#weatherDetail')).not.toHaveClass(/open/);
+
+      // Units sheet must not trap the list (presentSheet + Escape)
+      await page.locator('#weatherUnitsBtn').click();
+      await expect(page.locator('#weatherSheet')).toHaveClass(/open/, { timeout: 5_000 });
+      await page.keyboard.press('Escape');
+      await expect(page.locator('#weatherSheet')).not.toHaveClass(/open/);
+
+      const rows = page.locator('#weatherList .weather-row');
+      if (await rows.count() > 1) {
+        await rows.nth(1).click();
+        await expect(page.locator('#weatherDetail')).toHaveClass(/open/, { timeout: 15_000 });
+        const scrollTop = await page.evaluate(() => {
+          const sc = document.getElementById('weatherDetailScroll');
+          return sc ? sc.scrollTop : -1;
+        });
+        expect(scrollTop).toBe(0);
+        await page.locator('#weatherDetailBack').click({ force: true });
+        await expect(page.locator('#weatherDetail')).not.toHaveClass(/open/);
+      }
     } else {
       // Offline / API blocked — still require chrome
       await expect(page.locator('#weatherSearch')).toBeVisible();

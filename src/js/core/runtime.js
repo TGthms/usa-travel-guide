@@ -102,13 +102,70 @@ function applyLanguage(lang) {
   });
   document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : lang === 'es' ? 'es' : 'en');
   document.documentElement.setAttribute('data-lang', lang);
-  // Keep page-specific titles (gallery / tools / legal vs main guide).
+  // Keep page-specific titles (gallery / tools mini-apps / legal vs main guide).
   const onGallery = document.body.classList.contains('page-gallery');
   const onTools = document.body.classList.contains('page-tools');
   const onLegal = document.body.classList.contains('page-legal');
+  const toolKind = (function () {
+    const el = document.querySelector('[data-tool]');
+    if (el) return el.getAttribute('data-tool') || '';
+    const path = (location.pathname || '') + (location.href || '');
+    if (/tools-weather/i.test(path)) return 'weather';
+    if (/tools-currency/i.test(path)) return 'currency';
+    if (/tools-clock/i.test(path)) return 'clock';
+    if (/tools-tip|tip-tax/i.test(path)) return 'tip';
+    if (/tools-drive/i.test(path)) return 'drive';
+    if (/tools-emergency/i.test(path)) return 'emergency';
+    if (/tools\.html/i.test(path)) return 'hub';
+    return '';
+  })();
   const legalKind = onLegal
     ? (location.pathname.indexOf('terms') >= 0 || /terms\.html$/i.test(location.href) ? 'terms' : 'privacy')
     : null;
+  const toolTitles = {
+    weather: {
+      en: 'Weather — America, A Travel Guide',
+      es: 'Clima — América, Una Guía de Viaje',
+      zh: '天气 — 美国旅行指南',
+      ja: '天気 — アメリカ旅行ガイド'
+    },
+    currency: {
+      en: 'Currency — America, A Travel Guide',
+      es: 'Divisas — América, Una Guía de Viaje',
+      zh: '汇率 — 美国旅行指南',
+      ja: '通貨 — アメリカ旅行ガイド'
+    },
+    clock: {
+      en: 'World Clock — America, A Travel Guide',
+      es: 'Reloj mundial — América, Una Guía de Viaje',
+      zh: '世界时钟 — 美国旅行指南',
+      ja: '世界時計 — アメリカ旅行ガイド'
+    },
+    tip: {
+      en: 'Tip & Sales Tax — America, A Travel Guide',
+      es: 'Propina e impuestos — América, Una Guía de Viaje',
+      zh: '小费与税 — 美国旅行指南',
+      ja: 'チップと税 — アメリカ旅行ガイド'
+    },
+    drive: {
+      en: 'Road Trip Cost — America, A Travel Guide',
+      es: 'Coste de viaje — América, Una Guía de Viaje',
+      zh: '自驾费用 — 美国旅行指南',
+      ja: 'ロードトリップ費用 — アメリカ旅行ガイド'
+    },
+    emergency: {
+      en: 'Useful Numbers — America, A Travel Guide',
+      es: 'Números útiles — América, Una Guía de Viaje',
+      zh: '常用电话 — 美国旅行指南',
+      ja: '緊急連絡先 — アメリカ旅行ガイド'
+    },
+    hub: {
+      en: 'Travel Tools — America, A Travel Guide',
+      es: 'Herramientas — América, Una Guía de Viaje',
+      zh: '旅行工具 — 美国旅行指南',
+      ja: '旅行ツール — アメリカ旅行ガイド'
+    }
+  };
   const titles = onGallery
     ? {
         en: 'Photo Gallery — America, A Travel Guide',
@@ -116,13 +173,8 @@ function applyLanguage(lang) {
         zh: '相册 — 美国旅行指南',
         ja: 'ギャラリー — アメリカ旅行ガイド'
       }
-    : onTools
-    ? {
-        en: 'Travel Tools — America, A Travel Guide',
-        es: 'Herramientas — América, Una Guía de Viaje',
-        zh: '旅行工具 — 美国旅行指南',
-        ja: '旅行ツール — アメリカ旅行ガイド'
-      }
+    : (onTools && toolTitles[toolKind || 'hub'])
+    ? toolTitles[toolKind || 'hub']
     : legalKind === 'terms'
     ? {
         en: 'Terms of Use — America, A Travel Guide',
@@ -226,22 +278,31 @@ const safeStorage = {
 
 /* ── FIRST-VISIT PREFERENCE DETECTION ──
    Only used when a key has never been saved — once the visitor picks something
-   in Settings, that choice always wins. Safe, progressive, no network calls. */
+   in Settings, that choice always wins (and is written to localStorage).
+   Sources: navigator.languages / language, Intl.Locale region, prefers-color-scheme,
+   prefers-reduced-motion, hover/pointer (cursor). No network. */
 const SUPPORTED_LANGS = ['en', 'es', 'zh', 'ja'];
 
 function detectLanguage() {
   const candidates = [];
-  if (Array.isArray(navigator.languages)) candidates.push(...navigator.languages);
-  if (navigator.language) candidates.push(navigator.language);
+  try {
+    if (Array.isArray(navigator.languages)) candidates.push(...navigator.languages);
+    if (navigator.language) candidates.push(navigator.language);
+  } catch (_) { /* ignore */ }
+  // Also try resolved locale from Intl when browser omits a useful languages list
+  try {
+    const resolved = Intl.DateTimeFormat().resolvedOptions().locale;
+    if (resolved) candidates.push(resolved);
+  } catch (_) { /* ignore */ }
+
   for (const raw of candidates) {
-    const tag = String(raw || '').toLowerCase().replace('_', '-');
+    const tag = String(raw || '').toLowerCase().replace(/_/g, '-');
     if (!tag) continue;
     // Chinese: zh, zh-CN, zh-TW, zh-Hans, etc.
     if (tag === 'zh' || tag.startsWith('zh-')) return 'zh';
     if (tag === 'ja' || tag.startsWith('ja-')) return 'ja';
     if (tag === 'es' || tag.startsWith('es-')) return 'es';
     if (tag === 'en' || tag.startsWith('en-')) return 'en';
-    // Primary subtag only (e.g. "pt-BR" → no match → keep scanning)
     const primary = tag.split('-')[0];
     if (SUPPORTED_LANGS.includes(primary)) return primary;
   }
@@ -274,18 +335,46 @@ function detectTheme() {
 function detectUnits() {
   // Prefer full locale region when available (en-GB → metric, en-US → imperial).
   const locales = [];
-  if (Array.isArray(navigator.languages)) locales.push(...navigator.languages);
-  if (navigator.language) locales.push(navigator.language);
+  try {
+    if (Array.isArray(navigator.languages)) locales.push(...navigator.languages);
+    if (navigator.language) locales.push(navigator.language);
+    const resolved = Intl.DateTimeFormat().resolvedOptions().locale;
+    if (resolved) locales.push(resolved);
+  } catch (_) { /* ignore */ }
+
   let region = '';
   for (const loc of locales) {
-    const parts = String(loc || '').replace('_', '-').split('-');
-    if (parts.length >= 2 && parts[1].length === 2) {
-      region = parts[1].toUpperCase();
-      break;
+    const raw = String(loc || '').replace(/_/g, '-');
+    if (!raw) continue;
+    // Intl.Locale is the most reliable way to extract region (handles zh-Hans-CN, etc.)
+    try {
+      if (typeof Intl !== 'undefined' && typeof Intl.Locale === 'function') {
+        const L = new Intl.Locale(raw);
+        const maxed = typeof L.maximize === 'function' ? L.maximize() : L;
+        const r = maxed.region || L.region;
+        if (r && String(r).length === 2) {
+          region = String(r).toUpperCase();
+          break;
+        }
+      }
+    } catch (_) { /* fall through */ }
+    // en-US, en-GB, zh-CN
+    const m = raw.match(/(?:^|-)([a-z]{2})$/i) || raw.match(/-([A-Z]{2})\b/);
+    if (m && m[1] && m[1].length === 2) {
+      const cand = m[1].toUpperCase();
+      // Skip common script codes mistaken as region
+      if (cand !== 'HA' && cand !== 'HI' && cand !== 'LA') {
+        region = cand;
+        break;
+      }
     }
   }
-  // Countries that primarily use US customary units for everyday distance/temp.
-  const imperialRegions = new Set(['US', 'LR', 'MM']);
+
+  // Everyday °F / miles. Most of the world is metric (°C / km).
+  const imperialRegions = new Set([
+    'US', 'LR', 'MM',
+    'BS', 'BZ', 'KY', 'PW', 'FM', 'MH', 'GU', 'AS', 'MP', 'VI', 'PR'
+  ]);
   const imperial = imperialRegions.has(region);
   return { temp: imperial ? 'f' : 'c', dist: imperial ? 'mi' : 'km' };
 }

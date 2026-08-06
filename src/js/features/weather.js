@@ -3,14 +3,14 @@
    Open-Meteo forecast + air quality. Apple-inspired multi-city weather.
    Load order: data/i18n → core/env → core/runtime → weather.js → app.js
 
-   Internal map (single IIFE — classic globals, not ES modules):
-     · Constants / MAJOR cities / WMO labels
-     · Prefs (units, favorites, my-location) + reverse geocode
-     · Icons, formatters, sky / rain ornaments
-     · Network fetch + cache + refresh generation (abort races)
-     · List UI (skeleton, rows, search)
-     · Detail UI (modules, sheets, charts)
-     · Boot + window.refreshWeatherUi / closeWeatherDetail
+   Overlay contract (stability):
+     · hoistOverlays() once → detail + sheet on <body>, sheet after detail
+     · Sheet closed ⇒ pointer-events:none + aria-hidden (never trap list taps)
+     · openUnitsSheet / openSheet always go through presentSheet()
+     · Escape: suggest → sheet → detail
+     · Detail enter: CSS opacity transition; exit: unlock list first, short fade
+     · Scroll reset only on open/switch city (not unit re-render)
+     · refreshGen / detailMotionGen / sheetGen / searchGen cancel races
 */
 
 (function () {
@@ -113,6 +113,7 @@
   const detailEl = $('weatherDetail');
   const detailHero = $('weatherDetailHero');
   const detailMods = $('weatherModules');
+  const detailScroll = $('weatherDetailScroll');
   const detailBack = $('weatherDetailBack');
   const detailRefresh = $('weatherDetailRefresh');
   const detailFavBtn = $('weatherDetailFav');
@@ -130,6 +131,13 @@
   let myLocationCity = null;
   let refreshGen = 0;       // supersede stale refresh() completions
   let refreshInflight = null; // Promise of current refresh, if any
+  /** Detail open/close motion — generation counters cancel stale rAF/timeouts. */
+  let detailMotionGen = 0;
+  let detailMotionTimer = 0;
+  let detailEnterTimer = 0;
+  let detailCloseListener = null;
+  let searchGen = 0;
+  let overlaysHoisted = false;
 
   function lang() {
     return (typeof currentLang === 'string' && currentLang) || 'en';
@@ -384,6 +392,18 @@
     try { return new Date(iso).toLocaleTimeString(localeTag(), { hour: 'numeric', minute: '2-digit' }); }
     catch (e) { return '—'; }
   }
+  /** Sparse chart axis labels — Apple Weather style (00 / 06 / 12 / 18), not full “9:00 AM”. */
+  function formatChartAxisHour(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      const h = d.getHours();
+      return String(h).padStart(2, '0');
+    } catch (e) {
+      return '';
+    }
+  }
   function degToCompass(d) {
     if (d == null) return '';
     const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -414,13 +434,11 @@
   function aqiBarHtml(v, compact) {
     const pct = aqiPct(v);
     const col = aqiColor(v);
-    const lab = aqiLabel(v);
     if (compact) {
       return `<div class="wx-aqi-bar wx-aqi-bar--compact" aria-hidden="true">
         <span class="wx-aqi-track"><span class="wx-aqi-fill" style="width:${pct.toFixed(1)}%;background:${col}"></span></span>
         <span class="wx-aqi-dot" style="left:${pct.toFixed(1)}%;background:${col}"></span>
-      </div>
-      <div class="weather-mod-sub">${escapeHtml(lab)}</div>`;
+      </div>`;
     }
     return `<div class="wx-aqi-scale" aria-hidden="true">
       <div class="wx-aqi-scale-track">
@@ -433,8 +451,7 @@
       </div>
       <span class="wx-aqi-marker" style="left:${pct.toFixed(1)}%"></span>
     </div>
-    <div class="wx-aqi-labels"><span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300</span></div>
-    <div class="weather-mod-sub" style="margin-top:8px">${escapeHtml(lab)}</div>`;
+    <div class="wx-aqi-labels"><span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300</span></div>`;
   }
   function humidityBarHtml(pct) {
     const p = pct == null ? 0 : Math.max(0, Math.min(100, pct));
@@ -442,13 +459,7 @@
   }
   function uvBarHtml(v) {
     const pct = v == null ? 0 : Math.max(0, Math.min(100, (v / 12) * 100));
-    let lab = 'Low';
-    if (v >= 11) lab = 'Extreme';
-    else if (v >= 8) lab = 'Very High';
-    else if (v >= 6) lab = 'High';
-    else if (v >= 3) lab = 'Moderate';
-    return `<div class="weather-mod-viz"><span class="weather-mod-viz-bar"></span><span class="weather-mod-viz-dot" style="left:${pct.toFixed(1)}%"></span></div>
-      <div class="weather-mod-sub">${escapeHtml(lab)}</div>`;
+    return `<div class="weather-mod-viz"><span class="weather-mod-viz-bar"></span><span class="weather-mod-viz-dot" style="left:${pct.toFixed(1)}%"></span></div>`;
   }
   function escapeHtml(s) {
     return String(s || '').replace(/[&<>"']/g, (ch) => ({
@@ -742,16 +753,61 @@
     applyAmbientPageSky();
   }
 
+  const FETCH_MS = 14000;
+
+  /** Merge caller signal with a timeout so hung Open-Meteo requests cannot freeze the list forever. */
+  function withTimeoutSignal(outer, ms) {
+    if (typeof AbortController !== 'function') return { signal: outer, cancel: function () {} };
+    const ctl = new AbortController();
+    let timer = 0;
+    const abortFromOuter = function () {
+      try { ctl.abort(); } catch (e) {}
+    };
+    if (outer) {
+      if (outer.aborted) abortFromOuter();
+      else outer.addEventListener('abort', abortFromOuter, { once: true });
+    }
+    timer = window.setTimeout(abortFromOuter, ms || FETCH_MS);
+    return {
+      signal: ctl.signal,
+      cancel: function () {
+        if (timer) window.clearTimeout(timer);
+        timer = 0;
+        if (outer) {
+          try { outer.removeEventListener('abort', abortFromOuter); } catch (e) {}
+        }
+      }
+    };
+  }
+
   async function fetchJson(url, signal) {
-    const res = await fetch(url, { signal });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.json();
+    const wrap = withTimeoutSignal(signal, FETCH_MS);
+    try {
+      const res = await fetch(url, { signal: wrap.signal });
+      if (res.status === 429) {
+        const err = new Error('HTTP 429');
+        err.name = 'RateLimitError';
+        throw err;
+      }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      // Open-Meteo sometimes returns 200 + { error: true, reason: "..." }
+      if (data && data.error) {
+        const reason = String(data.reason || data.error || 'API error');
+        const err = new Error(reason);
+        err.name = /limit|429|rate/i.test(reason) ? 'RateLimitError' : 'ApiError';
+        throw err;
+      }
+      return data;
+    } finally {
+      wrap.cancel();
+    }
   }
 
   async function loadCity(c, signal) {
     const key = cityKey(c);
     const hit = cache.get(key);
-    if (hit && Date.now() - hit.fetchedAt < REFRESH_MS - 5000) return hit;
+    if (hit && hit.weather && Date.now() - hit.fetchedAt < REFRESH_MS - 5000) return hit;
 
     const wUrl = `${FORECAST}?latitude=${c.lat}&longitude=${c.lon}`
       + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,precipitation`
@@ -760,13 +816,36 @@
       + `&temperature_unit=celsius&wind_speed_unit=ms&timezone=auto&forecast_days=10`;
     const aUrl = `${AIR}?latitude=${c.lat}&longitude=${c.lon}&current=us_aqi,pm2_5,pm10,european_aqi&timezone=auto`;
 
-    const [weather, air] = await Promise.all([
-      fetchJson(wUrl, signal),
-      fetchJson(aUrl, signal).catch(() => null)
-    ]);
-    const packed = { weather, air, fetchedAt: Date.now(), city: c };
-    cache.set(key, packed);
-    return packed;
+    async function once() {
+      const [weather, air] = await Promise.all([
+        fetchJson(wUrl, signal),
+        fetchJson(aUrl, signal).catch(function () { return null; })
+      ]);
+      return { weather: weather, air: air, fetchedAt: Date.now(), city: c };
+    }
+
+    try {
+      let packed;
+      try {
+        packed = await once();
+      } catch (e) {
+        // One short retry after rate-limit / flaky edge — keeps the list from staying empty.
+        if (e && (e.name === 'RateLimitError' || (e.message && e.message.indexOf('HTTP 429') >= 0))) {
+          await new Promise(function (r) { window.setTimeout(r, 650); });
+          if (signal && signal.aborted) throw e;
+          packed = await once();
+        } else {
+          throw e;
+        }
+      }
+      cache.set(key, packed);
+      return packed;
+    } catch (e) {
+      if (e && e.name === 'AbortError') throw e;
+      const fail = { error: true, city: c, fetchedAt: Date.now() };
+      cache.set(key, fail);
+      return fail;
+    }
   }
 
   function setLoadProgress(done, total) {
@@ -809,30 +888,113 @@
     if (majorsBlock) majorsBlock.hidden = false;
   }
 
+  const FORECAST_Q =
+    'current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,precipitation'
+    + '&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,precipitation,wind_speed_10m,wind_direction_10m,relative_humidity_2m,surface_pressure,uv_index'
+    + '&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum'
+    + '&temperature_unit=celsius&wind_speed_unit=ms&timezone=auto&forecast_days=10';
+
+  /** One Open-Meteo multi-location request (array or single object). */
+  async function loadCityBatch(cities, signal) {
+    if (!cities.length) return [];
+    const lats = cities.map(function (c) { return c.lat; }).join(',');
+    const lons = cities.map(function (c) { return c.lon; }).join(',');
+    const wUrl = FORECAST + '?latitude=' + lats + '&longitude=' + lons + '&' + FORECAST_Q;
+    const aUrl = AIR + '?latitude=' + lats + '&longitude=' + lons + '&current=us_aqi,pm2_5,pm10,european_aqi&timezone=auto';
+    const weatherRaw = await fetchJson(wUrl, signal);
+    const airRaw = await fetchJson(aUrl, signal).catch(function () { return null; });
+    const weatherList = Array.isArray(weatherRaw) ? weatherRaw : [weatherRaw];
+    const airList = airRaw == null ? [] : (Array.isArray(airRaw) ? airRaw : [airRaw]);
+    const now = Date.now();
+    return cities.map(function (c, i) {
+      const weather = weatherList[i];
+      if (!weather || !weather.current) {
+        return { error: true, city: c, fetchedAt: now };
+      }
+      return {
+        weather: weather,
+        air: airList[i] || null,
+        fetchedAt: now,
+        city: c
+      };
+    });
+  }
+
   async function loadMany(cities) {
     if (abortCtl) try { abortCtl.abort(); } catch (e) {}
     abortCtl = typeof AbortController === 'function' ? new AbortController() : null;
     const myCtl = abortCtl;
     const signal = abortCtl ? abortCtl.signal : undefined;
-    const out = [];
-    let i = 0;
-    let done = 0;
     const total = cities.length;
-    async function worker() {
-      while (i < cities.length) {
-        if (signal && signal.aborted) return;
-        const idx = i++;
+    const out = new Array(total);
+    setLoadProgress(0, total);
+
+    // Prefer batch API: ~2–4 requests for all majors instead of ~80 (avoids 429 freezes).
+    const CHUNK = 20;
+    let done = 0;
+    let batchComplete = false;
+    try {
+      for (let start = 0; start < cities.length; start += CHUNK) {
+        if (signal && signal.aborted) break;
+        const slice = cities.slice(start, start + CHUNK);
+        let packs = null;
         try {
-          out[idx] = await loadCity(cities[idx], signal);
+          packs = await loadCityBatch(slice, signal);
         } catch (e) {
-          if (e && e.name === 'AbortError') return;
-          out[idx] = { error: true, city: cities[idx], fetchedAt: Date.now() };
+          if (e && e.name === 'AbortError') throw e;
+          // One retry after brief pause on rate limit — never fall into N×timeout storm
+          if (e && e.name === 'RateLimitError') {
+            await new Promise(function (r) { window.setTimeout(r, 900); });
+            if (signal && signal.aborted) throw e;
+            packs = await loadCityBatch(slice, signal);
+          } else {
+            throw e;
+          }
         }
-        done++;
+        for (let j = 0; j < packs.length; j++) {
+          const pack = packs[j];
+          const idx = start + j;
+          out[idx] = pack;
+          cache.set(cityKey(slice[j]), pack);
+        }
+        done += slice.length;
         if (!(signal && signal.aborted)) setLoadProgress(done, total);
       }
+      batchComplete = true;
+    } catch (e) {
+      if (e && e.name === 'AbortError') throw e;
+      // Rate-limit / daily cap: fail closed with cached/error rows — do NOT N-way sequential hammer.
+      if (e && e.name === 'RateLimitError') {
+        for (let i = 0; i < cities.length; i++) {
+          if (!out[i]) {
+            const fail = cache.get(cityKey(cities[i])) || { error: true, city: cities[i], fetchedAt: Date.now() };
+            out[i] = fail;
+            cache.set(cityKey(cities[i]), fail);
+          }
+        }
+        batchComplete = true;
+      } else {
+        // Other batch failure: short sequential fallback (capped concurrency already in loadCity)
+        for (let i = 0; i < cities.length; i++) {
+          if (signal && signal.aborted) break;
+          if (out[i]) continue;
+          out[i] = await loadCity(cities[i], signal);
+          done++;
+          if (!(signal && signal.aborted)) setLoadProgress(Math.min(total, done), total);
+        }
+        batchComplete = true;
+      }
     }
-    await Promise.all([worker(), worker(), worker(), worker()]);
+
+    if (!batchComplete) {
+      for (let i = 0; i < cities.length; i++) {
+        if (!out[i]) {
+          out[i] = { error: true, city: cities[i], fetchedAt: Date.now() };
+          cache.set(cityKey(cities[i]), out[i]);
+        }
+      }
+    }
+
     // Superseded by a newer loadMany — do not treat sparse results as final
     if (signal && signal.aborted) {
       const err = new Error('Aborted');
@@ -845,6 +1007,17 @@
       throw err;
     }
     return out;
+  }
+
+  function clearWeatherSkeleton() {
+    if (loadingEl) {
+      loadingEl.hidden = true;
+      loadingEl.className = 'weather-load-panel';
+    }
+    if (listEl) {
+      listEl.hidden = false;
+      listEl.classList.remove('weather-skeleton-list');
+    }
   }
 
   function setUpdated(ts, el) {
@@ -1035,18 +1208,37 @@
         // Another refresh superseded us — do not paint stale/empty lists
         if (gen !== refreshGen) return;
         lastListFetch = Date.now();
+        clearWeatherSkeleton();
         refreshListsFromCache();
+        let ok = 0;
+        cache.forEach(function (p) { if (p && p.weather && !p.error) ok++; });
+        if (ok) showError('');
+        else showError(t('weather.error', 'Could not load weather data. Pull to refresh or try again shortly.'));
+        // Keep open city detail in sync after full refresh (drop sheet so body isn't stale)
+        if (isDetailVisible() && openCity && openCity.city) {
+          forceCloseSheet();
+          const fresh = cache.get(cityKey(openCity.city));
+          if (fresh && fresh.weather) openDetail(fresh);
+        }
       } catch (e) {
-        if (e && e.name === 'AbortError') return; // expected when superseded
+        if (e && e.name === 'AbortError') {
+          // Only leave skeleton if a newer refresh owns the UI
+          if (gen === refreshGen) {
+            clearWeatherSkeleton();
+            if (cache.size) refreshListsFromCache();
+            else showError(t('weather.error', 'Could not load weather data.'));
+          }
+          return;
+        }
         if (gen !== refreshGen) return;
         showError(t('weather.error', 'Could not load weather data.'));
-        if (loadingEl) loadingEl.hidden = true;
+        clearWeatherSkeleton();
         // Unstick UI: show whatever is in cache rather than a blank page
-        if (listEl) {
-          listEl.hidden = false;
-          listEl.classList.remove('weather-skeleton-list');
-        }
         if (cache.size) refreshListsFromCache();
+        else if (listEl) {
+          listEl.innerHTML = '';
+          listEl.hidden = false;
+        }
       } finally {
         if (gen === refreshGen && refreshBtn) refreshBtn.disabled = false;
       }
@@ -1107,9 +1299,59 @@
     return html;
   }
 
+  /** Hoist fixed overlays to <body> once so viewport stacking is reliable. */
+  function hoistOverlays() {
+    if (overlaysHoisted) return;
+    try {
+      if (detailEl && detailEl.parentElement !== document.body) {
+        document.body.appendChild(detailEl);
+      }
+      if (sheetEl && sheetEl.parentElement !== document.body) {
+        document.body.appendChild(sheetEl);
+      }
+      // Sheet must paint after detail in DOM order
+      if (detailEl && sheetEl && detailEl.parentElement === document.body) {
+        document.body.appendChild(sheetEl);
+      }
+      overlaysHoisted = true;
+    } catch (e) { /* keep in place */ }
+  }
+
+  function cancelDetailMotion() {
+    detailMotionGen += 1;
+    if (detailMotionTimer) {
+      window.clearTimeout(detailMotionTimer);
+      detailMotionTimer = 0;
+    }
+    if (detailEnterTimer) {
+      window.clearTimeout(detailEnterTimer);
+      detailEnterTimer = 0;
+    }
+    if (detailCloseListener && detailEl) {
+      try { detailEl.removeEventListener('transitionend', detailCloseListener); } catch (e) {}
+      detailCloseListener = null;
+    }
+    return detailMotionGen;
+  }
+
+  function lockDetailPage() {
+    try {
+      document.body.classList.add('weather-detail-open');
+      document.documentElement.classList.add('weather-detail-open');
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    } catch (e) {}
+  }
+
+  function isDetailVisible() {
+    return !!(detailEl && detailEl.classList.contains('open') && !detailEl.classList.contains('is-closing'));
+  }
+
   function openDetail(pack) {
+    if (!detailEl || !pack || !pack.weather) return;
+    const prevCity = openCity && openCity.city;
+    const cityChanged = !!(prevCity && pack.city && !sameCity(prevCity, pack.city));
     openCity = pack;
-    if (!detailEl || !pack.weather) return;
     const c = pack.city;
     const cur = pack.weather.current;
     const daily = pack.weather.daily || {};
@@ -1158,7 +1400,12 @@
 
     const aqi = pack.air && pack.air.current && pack.air.current.us_aqi;
     const mods = [];
-    mods.push(modHtml('aqi', t('weather.aqi', 'Air Quality'), aqi != null ? String(Math.round(aqi)) : '—', aqiBarHtml(aqi, true), true, true));
+    mods.push(modHtml(
+      'aqi', t('weather.aqi', 'Air Quality'),
+      aqi != null ? String(Math.round(aqi)) : '—',
+      aqiLabel(aqi) || '',
+      true, false, aqiBarHtml(aqi, true)
+    ));
     {
       const feels = cur.apparent_temperature;
       const delta = feels != null && cur.temperature_2m != null ? feels - cur.temperature_2m : null;
@@ -1173,17 +1420,40 @@
     }
     {
       const rh = cur.relative_humidity_2m;
-      mods.push(modHtml('humidity', t('weather.humidity', 'Humidity'), Math.round(rh) + '%', humidityBarHtml(rh), true, true));
+      mods.push(modHtml(
+        'humidity', t('weather.humidity', 'Humidity'),
+        rh != null && Number.isFinite(rh) ? Math.round(rh) + '%' : '—',
+        '',
+        true, false, humidityBarHtml(rh)
+      ));
     }
     {
       const deg = cur.wind_direction_10m;
-      const viz = `<div class="weather-mod-sub">${escapeHtml(degToCompass(deg))}${deg != null ? ' · ' + Math.round(deg) + '°' : ''}</div>
-        <div class="weather-mod-compass-mini" aria-hidden="true"><i style="transform:rotate(${deg == null ? 0 : deg}deg)"></i></div>`;
-      mods.push(modHtml('wind', t('weather.wind', 'Wind'), fmtWind(cur.wind_speed_10m), viz, true, true));
+      const dirLab = degToCompass(deg) + (deg != null ? ' · ' + Math.round(deg) + '°' : '');
+      mods.push(modHtml(
+        'wind', t('weather.wind', 'Wind'),
+        fmtWind(cur.wind_speed_10m),
+        dirLab,
+        true, false,
+        windCompassMarkup(deg, 'mini')
+      ));
     }
     {
       const uvv = daily.uv_index_max ? daily.uv_index_max[0] : null;
-      mods.push(modHtml('uv', t('weather.uv', 'UV Index'), uvv != null ? String(Math.round(uvv * 10) / 10) : '—', uvBarHtml(uvv), true, true));
+      let uvLab = '';
+      if (uvv != null) {
+        if (uvv >= 11) uvLab = lang() === 'zh' ? '极高' : lang() === 'ja' ? '極端' : lang() === 'es' ? 'Extremo' : 'Extreme';
+        else if (uvv >= 8) uvLab = lang() === 'zh' ? '很高' : lang() === 'ja' ? '非常に高い' : lang() === 'es' ? 'Muy alto' : 'Very High';
+        else if (uvv >= 6) uvLab = lang() === 'zh' ? '高' : lang() === 'ja' ? '高い' : lang() === 'es' ? 'Alto' : 'High';
+        else if (uvv >= 3) uvLab = lang() === 'zh' ? '中等' : lang() === 'ja' ? '中' : lang() === 'es' ? 'Moderado' : 'Moderate';
+        else uvLab = lang() === 'zh' ? '低' : lang() === 'ja' ? '低い' : lang() === 'es' ? 'Bajo' : 'Low';
+      }
+      mods.push(modHtml(
+        'uv', t('weather.uv', 'UV Index'),
+        uvv != null ? String(Math.round(uvv * 10) / 10) : '—',
+        uvLab,
+        true, false, uvBarHtml(uvv)
+      ));
     }
     {
       const visSub = cur.visibility != null && cur.visibility < 5000
@@ -1262,37 +1532,93 @@
     mods.push(`<p class="weather-detail-attrib">${escapeHtml(forLine)}</p>`);
 
     detailMods.innerHTML = mods.join('');
-    detailMods.querySelectorAll('[data-sheet]').forEach((el) => {
-      el.addEventListener('click', () => openSheet(el.getAttribute('data-sheet'), pack));
-    });
+    // Clicks use delegated handler on detailMods (bound once) — survives re-renders
 
-    const wasOpen = detailEl.classList.contains('open');
-    detailEl.classList.add('open');
-    detailEl.setAttribute('aria-hidden', 'false');
-    try { document.body.classList.add('weather-detail-open'); } catch (e) {}
-    // Only play enter motion on first open — never flash on unit re-render
-    if (wasOpen) {
-      detailEl.style.animation = 'none';
-    } else {
-      detailEl.style.animation = '';
+    const isClosing = detailEl.classList.contains('is-closing');
+    const wasOpen = detailEl.classList.contains('open') && !isClosing;
+
+    hoistOverlays();
+
+    // Opening a city (or switching cities) must never leave a units/info sheet
+    // trapping the full-screen pointer layer over the list or detail.
+    if (!wasOpen || cityChanged) {
+      forceCloseSheet();
+    } else if (sheetEl && !sheetEl.classList.contains('open')) {
+      inertSheet();
     }
-    if (typeof lockBodyScroll === 'function' && !wasOpen) lockBodyScroll();
-    // Focus Done for a11y / confirm control is in the tree
+
+    detailEl.setAttribute('aria-hidden', 'false');
+    detailEl.style.transform = 'none';
+    detailEl.style.animation = '';
+    lockDetailPage();
+
+    // Scroll reset only when opening/switching cities — not on unit re-render
+    if ((!wasOpen || cityChanged) && detailScroll) {
+      detailScroll.scrollTop = 0;
+      try { detailScroll.scrollTo(0, 0); } catch (e) {}
+    }
+
+    const motionGen = cancelDetailMotion();
+    detailEl.classList.remove('is-closing');
+
+    // Enter motion only when coming from closed (or reversing a close).
+    // Unit/refresh re-renders while already open skip enter to avoid flicker.
+    if (!wasOpen) {
+      const reversing = isClosing;
+      if (!reversing) {
+        detailEl.classList.remove('open', 'wx-detail-enter');
+        detailEl.style.transition = 'none';
+        detailEl.style.opacity = '0';
+        void detailEl.offsetWidth;
+        detailEl.style.transition = '';
+        detailEl.style.opacity = '';
+      } else {
+        detailEl.classList.remove('wx-detail-enter');
+      }
+
+      window.requestAnimationFrame(function () {
+        if (motionGen !== detailMotionGen) return;
+        window.requestAnimationFrame(function () {
+          if (motionGen !== detailMotionGen) return;
+          detailEl.classList.add('open', 'wx-detail-enter');
+          if (detailEnterTimer) window.clearTimeout(detailEnterTimer);
+          detailEnterTimer = window.setTimeout(function () {
+            if (motionGen !== detailMotionGen) return;
+            try { detailEl.classList.remove('wx-detail-enter'); } catch (e) {}
+            detailEnterTimer = 0;
+          }, 450);
+        });
+      });
+    } else {
+      detailEl.classList.add('open');
+      detailEl.classList.remove('wx-detail-enter');
+    }
+
     if (!wasOpen && detailBack && typeof detailBack.focus === 'function') {
       try { detailBack.focus({ preventScroll: true }); } catch (e2) { detailBack.focus(); }
     }
   }
 
-  function modHtml(key, label, value, sub, tappable, subIsHtml) {
+  /**
+   * Apple Weather-style module tile:
+   * label (icon + title) → large value → subtitle → optional foot viz (bar / compass).
+   * footHtml is always raw HTML (bars, compass), kept separate from sub text.
+   */
+  function modHtml(key, label, value, sub, tappable, subIsHtml, footHtml) {
     const tag = tappable ? 'button' : 'div';
     const type = tappable ? ' type="button"' : '';
     const ds = tappable ? ` data-sheet="${key}"` : '';
     const icon = modLabelIcon(key);
-    const subBlock = !sub ? '' : (subIsHtml ? sub : `<div class="weather-mod-sub">${escapeHtml(sub)}</div>`);
+    const subBlock = !sub
+      ? ''
+      : (subIsHtml ? sub : `<div class="weather-mod-sub">${escapeHtml(sub)}</div>`);
     const valBlock = (value === '' || value == null)
       ? ''
       : `<div class="weather-mod-value">${escapeHtml(value)}</div>`;
-    return `<${tag}${type} class="weather-mod${tappable ? ' is-tappable' : ''}"${ds}><div class="weather-mod-label">${icon}<span>${escapeHtml(label)}</span></div>${valBlock}${subBlock}</${tag}>`;
+    const foot = footHtml
+      ? `<div class="weather-mod-foot" aria-hidden="true">${footHtml}</div>`
+      : '';
+    return `<${tag}${type} class="weather-mod${tappable ? ' is-tappable' : ''}"${ds}><div class="weather-mod-label">${icon}<span>${escapeHtml(label)}</span></div>${valBlock}${subBlock}${foot}</${tag}>`;
   }
 
   function countryLabelUS() {
@@ -1385,6 +1711,39 @@
     return { start, end, times };
   }
 
+  /**
+   * Smooth open cubic path through points (Catmull–Rom → Bezier).
+   * Avoids the jagged “connect the dots” look on hourly charts.
+   */
+  function smoothLinePath(pts) {
+    if (!pts || pts.length < 2) return '';
+    if (pts.length === 2) {
+      return 'M' + pts[0].x.toFixed(1) + ',' + pts[0].y.toFixed(1)
+        + ' L' + pts[1].x.toFixed(1) + ',' + pts[1].y.toFixed(1);
+    }
+    let d = 'M' + pts[0].x.toFixed(1) + ',' + pts[0].y.toFixed(1);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i === 0 ? 0 : i - 1];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[i + 2] || p2;
+      // Gentle tension (÷6) — smooth without overshooting too hard on weather series
+      let c1x = p1.x + (p2.x - p0.x) / 6;
+      let c1y = p1.y + (p2.y - p0.y) / 6;
+      let c2x = p2.x - (p3.x - p1.x) / 6;
+      let c2y = p2.y - (p3.y - p1.y) / 6;
+      // Soft-clamp Y so curves don’t spike wildly past local min/max
+      const yLo = Math.min(p1.y, p2.y) - 12;
+      const yHi = Math.max(p1.y, p2.y) + 12;
+      c1y = Math.max(yLo, Math.min(yHi, c1y));
+      c2y = Math.max(yLo, Math.min(yHi, c2y));
+      d += ' C' + c1x.toFixed(1) + ',' + c1y.toFixed(1)
+        + ' ' + c2x.toFixed(1) + ',' + c2y.toFixed(1)
+        + ' ' + p2.x.toFixed(1) + ',' + p2.y.toFixed(1);
+    }
+    return d;
+  }
+
   /** Apple-style scrub chart used by Wind, Hourly, Humidity, etc. */
   function buildTempChart(hourly, key, unitFmt) {
     const { start, end, times } = hourlyWindow(hourly, 24);
@@ -1401,15 +1760,20 @@
     min -= padAmt;
     max += padAmt;
     const span = (max - min) || 1;
-    const W = 360, H = 176, padL = 6, padR = 6, padT = 12, padB = 26;
+    const W = 360, H = 176, padL = 10, padR = 10, padT = 14, padB = 28;
     const plotW = W - padL - padR, plotH = H - padT - padB;
     const pts = vals.map((d, idx) => {
       const x = padL + (idx / (vals.length - 1)) * plotW;
       const y = padT + (1 - (d.v - min) / span) * plotH;
       return { x, y, ...d };
     });
-    const line = pts.map((p, i) => (i ? 'L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
-    const area = line + ` L${pts[pts.length - 1].x.toFixed(1)},${H - padB} L${pts[0].x.toFixed(1)},${H - padB} Z`;
+    const line = smoothLinePath(pts);
+    const last = pts[pts.length - 1];
+    const first = pts[0];
+    const area = line
+      + ' L' + last.x.toFixed(1) + ',' + (H - padB).toFixed(1)
+      + ' L' + first.x.toFixed(1) + ',' + (H - padB).toFixed(1)
+      + ' Z';
     const id = 'wxChart' + Math.random().toString(36).slice(2, 8);
     // Default scrub position near “now” (first third) like Apple
     const mid = pts[Math.min(pts.length - 1, Math.max(0, Math.floor(pts.length * 0.22)))];
@@ -1420,18 +1784,19 @@
       const gy = padT + (g / 3) * plotH;
       grids += `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}" stroke="rgba(255,255,255,.1)" stroke-width="1"/>`;
     }
-    // Hour labels ~every 3–4 samples (Apple-style density)
-    const step = Math.max(1, Math.floor(pts.length / 7));
+    // Apple-style axis: only ~4 short hour marks (00 / 06 / 12 / 18), never dense “9:00 AM”
+    const axisCount = Math.min(4, pts.length);
     let labels = '';
-    for (let i = 0; i < pts.length; i += step) {
+    for (let k = 0; k < axisCount; k++) {
+      const i = axisCount === 1
+        ? 0
+        : Math.round((k / (axisCount - 1)) * (pts.length - 1));
       const p = pts[i];
-      const anchor = i === 0 ? 'start' : (i + step >= pts.length ? 'end' : 'middle');
-      labels += `<text x="${p.x.toFixed(1)}" y="${H - 6}" fill="rgba(255,255,255,.42)" font-size="9.5" text-anchor="${anchor}" font-family="system-ui,-apple-system,sans-serif">${escapeHtml(formatClock(p.t))}</text>`;
-    }
-    // Ensure last label
-    const last = pts[pts.length - 1];
-    if ((pts.length - 1) % step !== 0) {
-      labels += `<text x="${last.x.toFixed(1)}" y="${H - 6}" fill="rgba(255,255,255,.42)" font-size="9.5" text-anchor="end" font-family="system-ui,-apple-system,sans-serif">${escapeHtml(formatClock(last.t))}</text>`;
+      if (!p) continue;
+      const lab = formatChartAxisHour(p.t);
+      if (!lab) continue;
+      const anchor = k === 0 ? 'start' : (k === axisCount - 1 ? 'end' : 'middle');
+      labels += `<text class="wx-chart-axis" x="${p.x.toFixed(1)}" y="${H - 8}" fill="rgba(255,255,255,.48)" font-size="11" font-weight="500" letter-spacing="0.02em" text-anchor="${anchor}" font-family="system-ui,-apple-system,BlinkMacSystemFont,sans-serif" font-variant-numeric="tabular-nums">${escapeHtml(lab)}</text>`;
     }
     return `<div class="weather-chart-wrap weather-chart-card" data-chart="${id}" data-pts='${JSON.stringify(payload).replace(/'/g, '&#39;')}' data-kind="${key}" data-vw="${W}" data-vh="${H}" data-padt="${padT}" data-padb="${padB}">
       <div class="weather-chart-readout" data-readout>${escapeHtml(unitFmt(mid.v))}</div>
@@ -1649,7 +2014,7 @@
       const y = padT + (1 - (elev + 0.2) / 1.2) * plotH;
       pts.push({ x, y, tms, elev });
     }
-    const line = pts.map((p, i) => (i ? 'L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+    const line = smoothLinePath(pts);
     // Horizon y at elev=0
     const horizonY = padT + (1 - (0 + 0.2) / 1.2) * plotH;
     // Current sun position
@@ -1717,12 +2082,32 @@
     return html;
   }
 
+  /**
+   * Apple Weather-inspired wind compass (not a clock hand).
+   * Arrow points where the wind is going TO (meteorological FROM + 180°).
+   * size: 'mini' | 'full'
+   */
+  function windCompassMarkup(deg, size) {
+    const from = deg == null ? 0 : Number(deg);
+    const to = (from + 180) % 360;
+    const cls = size === 'mini' ? 'weather-compass weather-compass--mini' : 'weather-compass weather-compass--full';
+    return `<div class="${cls}" style="--wx-wind-from:${from}deg;--wx-wind-to:${to}deg" aria-hidden="true">
+      <span class="wx-compass-tick wx-compass-tick--n">N</span>
+      <span class="wx-compass-tick wx-compass-tick--e">E</span>
+      <span class="wx-compass-tick wx-compass-tick--s">S</span>
+      <span class="wx-compass-tick wx-compass-tick--w">W</span>
+      <div class="wx-compass-ring"></div>
+      <div class="wx-compass-arrow">
+        <span class="wx-compass-arrow-head"></span>
+        <span class="wx-compass-arrow-shaft"></span>
+      </div>
+      <div class="wx-compass-hub"></div>
+    </div>`;
+  }
+
   function windCompass(deg) {
-    const rot = deg == null ? 0 : deg;
-    return `<div class="weather-compass" aria-hidden="true">
-      <div class="weather-compass-needle" style="transform:rotate(${rot}deg)"></div>
-    </div>
-    <div class="weather-chart-sub" style="text-align:center">${escapeHtml(degToCompass(deg))} · ${deg != null ? Math.round(deg) + '°' : '—'}</div>`;
+    return `${windCompassMarkup(deg, 'full')}
+      <div class="weather-chart-sub weather-compass-caption">${escapeHtml(degToCompass(deg))} · ${deg != null ? Math.round(deg) + '°' : '—'}</div>`;
   }
 
   function openSheet(kind, pack) {
@@ -1808,10 +2193,13 @@
     };
 
     const aboutTitle = lang() === 'zh' ? '说明' : lang() === 'ja' ? '説明' : lang() === 'es' ? 'Acerca de' : 'About';
-    let body = `<div class="wx-sheet-head">
-      <div class="wx-sheet-icon">${modLabelIcon(kind === 'conditions' ? 'conditions' : kind)}</div>
-      <h3 class="wx-sheet-title">${escapeHtml(titleMap[kind] || t('weather.about', 'About'))}</h3>
-    </div>`;
+    // Title row is rendered into the drag zone (grabber + icon + title) like about hub Preferences
+    const sheetTitleHtml = `
+      <div class="wx-sheet-head" data-sheet-title>
+        <div class="wx-sheet-icon">${modLabelIcon(kind === 'conditions' ? 'conditions' : kind)}</div>
+        <h3 class="wx-sheet-title">${escapeHtml(titleMap[kind] || t('weather.about', 'About'))}</h3>
+      </div>`;
+    let body = '';
 
     // Chart sheets: Apple pattern = title → large live value lives in chart readout → scrub chart → about
     if (kind === 'conditions') {
@@ -1895,6 +2283,7 @@
     }
 
     sheetBody.innerHTML = body;
+    setSheetTitle(sheetTitleHtml);
     bindCharts(sheetBody);
 
     const bind = (id, setter) => {
@@ -1903,8 +2292,13 @@
       row.querySelectorAll('button').forEach((b) => {
         b.addEventListener('click', () => {
           setter(b.getAttribute('data-u'));
-          if (openCity) openDetail(openCity);
-          openSheet(kind, openCity);
+          const pack = openCity && openCity.city
+            ? (cache.get(cityKey(openCity.city)) || openCity)
+            : openCity;
+          if (pack && pack.weather) {
+            openDetail(pack);
+            openSheet(kind, pack);
+          }
         });
       });
     };
@@ -1912,15 +2306,338 @@
     bind('wxPrecipUnits', setPrecipUnit);
     bind('wxPressUnits', setPressUnit);
 
-    sheetEl.classList.add('open');
+    presentSheet();
+  }
+
+  /* ── Bottom sheet presentation (iOS-style pop + drag dismiss) ──
+     Pattern adapted from the about hub Preferences sheet. */
+  const sheetPanel = $('weatherSheetPanel') || (sheetEl && sheetEl.querySelector('.weather-sheet-panel'));
+  let sheetY = 0;
+  let sheetGen = 0;
+  let sheetSpringRaf = 0;
+  let sheetOpen = false;
+
+  function sheetReduceMotion() {
+    return motionLevel() === 'off' || motionLevel() === 'reduced'
+      || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  function sheetHeight() {
+    return (sheetPanel && sheetPanel.getBoundingClientRect().height) || 420;
+  }
+
+  function cancelSheetSpring() {
+    if (sheetSpringRaf) {
+      window.cancelAnimationFrame(sheetSpringRaf);
+      sheetSpringRaf = 0;
+    }
+  }
+
+  function applySheetY(y) {
+    if (!sheetPanel) return;
+    if (Math.abs(y) < 0.15) y = 0;
+    sheetY = y;
+    if (y === 0) sheetPanel.style.transform = '';
+    else sheetPanel.style.transform = 'translate3d(0,' + y + 'px,0)';
+  }
+
+  function resetSheetInline() {
+    cancelSheetSpring();
+    sheetY = 0;
+    if (!sheetPanel) return;
+    sheetPanel.style.transform = '';
+    sheetPanel.style.transition = '';
+    sheetPanel.classList.remove('is-dragging');
+    if (sheetEl) sheetEl.style.opacity = '';
+  }
+
+  /** Instantly inert sheet — no animation. Use when opening detail or recovering stuck UI. */
+  function inertSheet() {
+    if (!sheetEl) return;
+    sheetEl.classList.remove('open', 'is-raised');
+    sheetEl.setAttribute('aria-hidden', 'true');
+    sheetEl.style.pointerEvents = 'none';
+    sheetEl.style.opacity = '';
+    resetSheetInline();
+  }
+
+  function forceCloseSheet() {
+    sheetGen += 1;
+    sheetOpen = false;
+    inertSheet();
+  }
+
+  function isSheetOpen() {
+    return !!(sheetEl && (sheetOpen || sheetEl.classList.contains('open')));
+  }
+
+  function setSheetTitle(html) {
+    if (!sheetPanel) return;
+    const dragZone = sheetPanel.querySelector('[data-sheet-grab]');
+    if (!dragZone) return;
+    let titleHost = dragZone.querySelector('[data-sheet-title-host]');
+    if (!titleHost) {
+      titleHost = document.createElement('div');
+      titleHost.setAttribute('data-sheet-title-host', '');
+      titleHost.className = 'wx-sheet-title-host';
+      dragZone.appendChild(titleHost);
+    }
+    titleHost.innerHTML = html || '';
+  }
+
+  function presentSheet() {
+    if (!sheetEl || !sheetPanel) return;
+    hoistOverlays();
+    sheetGen += 1;
+    const gen = sheetGen;
+    sheetOpen = true;
+    resetSheetInline();
+    sheetEl.classList.remove('open', 'is-raised');
     sheetEl.setAttribute('aria-hidden', 'false');
+    sheetEl.style.pointerEvents = 'auto';
+    // Force start below, then pop up next frames (snappy open)
+    sheetPanel.style.transition = 'none';
+    sheetPanel.style.transform = 'translate3d(0,100%,0)';
+    sheetEl.classList.add('open');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        if (gen !== sheetGen) return;
+        const reduce = sheetReduceMotion();
+        if (reduce) {
+          sheetPanel.style.transition = '';
+          sheetPanel.style.transform = '';
+          sheetEl.classList.add('is-raised');
+          return;
+        }
+        sheetPanel.style.transition = 'transform .38s cubic-bezier(0.32, 0.72, 0, 1)';
+        sheetPanel.style.transform = 'translate3d(0,0,0)';
+        sheetEl.classList.add('is-raised');
+        window.setTimeout(function () {
+          if (gen !== sheetGen) return;
+          sheetPanel.style.transition = '';
+          sheetPanel.style.transform = '';
+        }, 400);
+      });
+    });
   }
 
   function closeSheet() {
-    if (!sheetEl) return;
-    sheetEl.classList.remove('open');
-    sheetEl.setAttribute('aria-hidden', 'true');
+    if (!sheetEl || !sheetPanel) return;
+    if (!isSheetOpen()) {
+      inertSheet();
+      sheetOpen = false;
+      return;
+    }
+    sheetGen += 1;
+    const gen = sheetGen;
+    sheetOpen = false;
+    sheetPanel.classList.remove('is-dragging');
+    const reduce = sheetReduceMotion();
+    const closeMs = reduce ? 0 : 280;
+
+    if (!reduce) {
+      sheetPanel.style.transition = 'transform ' + closeMs + 'ms cubic-bezier(0.32, 0.72, 0, 1)';
+      sheetPanel.style.transform = 'translate3d(0,100%,0)';
+    }
+    sheetEl.classList.remove('is-raised');
+    // Drop backdrop immediately so modules/list stay tappable even if
+    // the panel slide-out is still finishing.
+    sheetEl.style.pointerEvents = 'none';
+    window.setTimeout(function () {
+      if (gen !== sheetGen) return;
+      inertSheet();
+    }, closeMs);
   }
+
+  function finishDragClose() {
+    forceCloseSheet();
+  }
+
+  function initSheetDrag() {
+    if (!sheetEl || !sheetPanel) return;
+    const grab = sheetPanel.querySelector('[data-sheet-grab]');
+    if (!grab) return;
+
+    const drag = { active: false, fingerStart: 0, yAtGrab: 0, samples: [] };
+
+    function clientY(e) {
+      if (e.touches && e.touches[0]) return e.touches[0].clientY;
+      if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].clientY;
+      return e.clientY;
+    }
+    function rubberband(overshoot, dimension, constant) {
+      const c = constant == null ? 0.55 : constant;
+      const d = Math.max(1, dimension);
+      return (overshoot * d * c) / (d + c * Math.abs(overshoot));
+    }
+    function mapDragY(desired, reduce) {
+      if (desired >= 0) return desired;
+      if (reduce) return 0;
+      const h = sheetHeight();
+      return -rubberband(-desired, Math.max(120, h * 0.45), 0.55);
+    }
+    function recordSample(y) {
+      const t = performance.now();
+      drag.samples.push({ t: t, y: y });
+      if (drag.samples.length > 6) drag.samples.shift();
+    }
+    function sampleVelocity() {
+      if (drag.samples.length < 2) return 0;
+      const a = drag.samples[0];
+      const b = drag.samples[drag.samples.length - 1];
+      const dt = b.t - a.t;
+      if (dt < 8) return 0;
+      return (b.y - a.y) / dt;
+    }
+    function updateBackdropForY(y) {
+      if (!sheetEl) return;
+      if (y <= 0) {
+        sheetEl.style.opacity = '';
+        return;
+      }
+      /* keep sheet chrome visible; dim backdrop via CSS variable */
+      const o = Math.max(0.2, 1 - y / 320);
+      sheetEl.style.setProperty('--wx-sheet-backdrop', String(o));
+    }
+    function springSheetTo(target, velocityPxMs, opts) {
+      opts = opts || {};
+      cancelSheetSpring();
+      sheetPanel.style.transition = 'none';
+      sheetPanel.classList.remove('is-dragging');
+      const reduce = sheetReduceMotion();
+      const gen = sheetGen;
+      let pos = sheetY;
+      let vel = velocityPxMs || 0;
+      let lastT = performance.now();
+      const response = reduce ? 0.22 : (opts.response != null ? opts.response : 0.32);
+      const dampingRatio = reduce ? 1 : (opts.dampingRatio != null ? opts.dampingRatio : 0.86);
+      const omega = (2 * Math.PI) / Math.max(0.12, response);
+      const maxMs = opts.maxMs || 900;
+      const startT = lastT;
+      if (reduce) {
+        applySheetY(target);
+        updateBackdropForY(target);
+        return;
+      }
+      function frame(now) {
+        if (gen !== sheetGen) { sheetSpringRaf = 0; return; }
+        const dt = Math.min(0.032, Math.max(0.001, (now - lastT) / 1000));
+        lastT = now;
+        const x = pos - target;
+        const accel = -omega * omega * x - 2 * dampingRatio * omega * vel;
+        vel += accel * dt;
+        pos += vel * dt;
+        applySheetY(pos);
+        updateBackdropForY(pos);
+        if (Math.abs(pos - target) < 0.4 && Math.abs(vel) < 0.05) {
+          sheetSpringRaf = 0;
+          applySheetY(target);
+          updateBackdropForY(target);
+          sheetPanel.style.transition = '';
+          sheetEl.style.removeProperty('--wx-sheet-backdrop');
+          return;
+        }
+        if (now - startT > maxMs) {
+          sheetSpringRaf = 0;
+          applySheetY(target);
+          updateBackdropForY(target);
+          sheetPanel.style.transition = '';
+          return;
+        }
+        sheetSpringRaf = window.requestAnimationFrame(frame);
+      }
+      sheetSpringRaf = window.requestAnimationFrame(frame);
+    }
+
+    function onDragStart(e) {
+      if (!sheetOpen || !sheetEl.classList.contains('open')) return;
+      cancelSheetSpring();
+      sheetPanel.style.transition = 'none';
+      sheetPanel.classList.add('is-dragging');
+      drag.active = true;
+      drag.fingerStart = clientY(e);
+      drag.yAtGrab = sheetY;
+      drag.samples = [];
+      recordSample(sheetY);
+      if (e.pointerId != null && grab.setPointerCapture) {
+        try { grab.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+      if (e.cancelable) e.preventDefault();
+    }
+    function onDragMove(e) {
+      if (!drag.active) return;
+      const reduce = sheetReduceMotion();
+      const raw = clientY(e) - drag.fingerStart;
+      const y = mapDragY(drag.yAtGrab + raw, reduce);
+      applySheetY(y);
+      recordSample(y);
+      updateBackdropForY(y);
+      if (e.cancelable) e.preventDefault();
+    }
+    function onDragEnd() {
+      if (!drag.active) return;
+      drag.active = false;
+      sheetPanel.classList.remove('is-dragging');
+      const y = sheetY;
+      const v = sampleVelocity();
+      const h = sheetHeight();
+      const reduce = sheetReduceMotion();
+      const vPxS = v * 1000;
+      const projected = y + (vPxS / 1000) * (0.998 / (1 - 0.998));
+      const shouldClose =
+        y > Math.min(120, h * 0.28)
+        || (y > 40 && v > 0.45)
+        || projected > Math.min(160, h * 0.38);
+
+      if (shouldClose && y > 8) {
+        cancelSheetSpring();
+        sheetPanel.classList.remove('is-dragging');
+        sheetPanel.style.transition = 'none';
+        const gen = sheetGen;
+        let pos = y;
+        let vel = Math.max(v, reduce ? 1.2 : 0.55);
+        let lastT = performance.now();
+        const startT = lastT;
+        function dismissFrame(now) {
+          if (gen !== sheetGen) { sheetSpringRaf = 0; return; }
+          const dt = Math.min(32, Math.max(1, now - lastT));
+          lastT = now;
+          if (!reduce) vel += 0.0028 * dt;
+          pos += vel * dt;
+          applySheetY(pos);
+          updateBackdropForY(pos);
+          if (pos >= h || now - startT > 700) {
+            sheetSpringRaf = 0;
+            finishDragClose();
+            return;
+          }
+          sheetSpringRaf = window.requestAnimationFrame(dismissFrame);
+        }
+        sheetSpringRaf = window.requestAnimationFrame(dismissFrame);
+      } else {
+        const hasMomentum = Math.abs(v) > 0.12 || y < -6;
+        springSheetTo(0, v, {
+          dampingRatio: reduce ? 1 : hasMomentum ? 0.78 : 0.9,
+          response: reduce ? 0.2 : hasMomentum ? 0.28 : 0.34,
+          maxMs: 900
+        });
+      }
+      drag.samples = [];
+    }
+
+    if (window.PointerEvent) {
+      grab.addEventListener('pointerdown', onDragStart);
+      grab.addEventListener('pointermove', onDragMove);
+      grab.addEventListener('pointerup', onDragEnd);
+      grab.addEventListener('pointercancel', onDragEnd);
+    } else {
+      grab.addEventListener('touchstart', onDragStart, { passive: false });
+      grab.addEventListener('touchmove', onDragMove, { passive: false });
+      grab.addEventListener('touchend', onDragEnd);
+      grab.addEventListener('touchcancel', onDragEnd);
+    }
+  }
+  initSheetDrag();
   function ensureOrnaments(host) {
     if (!host) return null;
     let box = host.querySelector('.wx-ornaments');
@@ -1977,19 +2694,72 @@
     if (opts.isRow) host.classList.add('wx-sky--row');
     else host.classList.remove('wx-sky--row');
   }
+  function unlockDetailPage() {
+    try {
+      document.body.classList.remove('weather-detail-open');
+      document.documentElement.classList.remove('weather-detail-open');
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    } catch (e) {}
+    if (typeof ensureBodyScrollUnlocked === 'function') ensureBodyScrollUnlocked();
+  }
+
+  function finishDetailClose() {
+    if (!detailEl) return;
+    detailEl.classList.remove('open', 'wx-detail-enter', 'is-closing');
+    detailEl.setAttribute('aria-hidden', 'true');
+    detailEl.style.transform = 'none';
+    detailEl.style.animation = '';
+    detailEl.style.opacity = '';
+    detailEl.style.transition = '';
+    unlockDetailPage();
+    openCity = null;
+    forceCloseSheet();
+  }
+
   function closeDetail() {
     if (!detailEl) return;
-    detailEl.classList.remove('open');
-    detailEl.setAttribute('aria-hidden', 'true');
-    try { document.body.classList.remove('weather-detail-open'); } catch (e) {}
-    // Kill enter animation fill that can leave a stuck painted frame on some engines
-    detailEl.style.animation = 'none';
-    void detailEl.offsetWidth;
+    const motionGen = cancelDetailMotion();
+    const isOpen = detailEl.classList.contains('open') || detailEl.classList.contains('is-closing');
+
+    detailEl.classList.remove('wx-detail-enter');
     detailEl.style.animation = '';
+    detailEl.style.transform = 'none';
+    detailEl.setAttribute('aria-hidden', 'true');
     openCity = null;
-    closeSheet();
-    if (typeof unlockBodyScroll === 'function') unlockBodyScroll();
-    if (typeof ensureBodyScrollUnlocked === 'function') ensureBodyScrollUnlocked();
+    forceCloseSheet();
+
+    // Restore city list immediately — no solid-sky void under the fade.
+    unlockDetailPage();
+
+    if (!isOpen) {
+      finishDetailClose();
+      return;
+    }
+
+    detailEl.classList.add('is-closing');
+    detailEl.classList.remove('open');
+
+    const done = function () {
+      if (motionGen !== detailMotionGen) return;
+      if (detailCloseListener) {
+        try { detailEl.removeEventListener('transitionend', detailCloseListener); } catch (e) {}
+        detailCloseListener = null;
+      }
+      if (detailMotionTimer) {
+        window.clearTimeout(detailMotionTimer);
+        detailMotionTimer = 0;
+      }
+      finishDetailClose();
+    };
+
+    detailCloseListener = function (e) {
+      if (e.target !== detailEl) return;
+      if (e.propertyName && e.propertyName !== 'opacity') return;
+      done();
+    };
+    detailEl.addEventListener('transitionend', detailCloseListener);
+    detailMotionTimer = window.setTimeout(done, 220);
   }
   window.closeWeatherDetail = closeDetail;
 
@@ -2010,12 +2780,15 @@
   async function searchSuggest(q) {
     if (!suggestEl) return;
     if (!q || q.length < 2) {
+      searchGen += 1;
       closeSuggest();
       return;
     }
+    const gen = ++searchGen;
     try {
       const langParam = lang() === 'zh' ? 'zh' : lang() === 'ja' ? 'ja' : lang() === 'es' ? 'es' : 'en';
       const data = await fetchJson(`${GEOCODE}?name=${encodeURIComponent(q)}&count=8&language=${langParam}&format=json`);
+      if (gen !== searchGen) return;
       const results = data.results || [];
       suggestEl.innerHTML = '';
       if (!results.length) {
@@ -2056,6 +2829,7 @@
       });
       openSuggest();
     } catch (e) {
+      if (gen !== searchGen) return;
       suggestEl.innerHTML = `<li class="s-empty">${escapeHtml(t('weather.error', 'Could not load weather data.'))}</li>`;
       openSuggest();
     }
@@ -2063,14 +2837,24 @@
 
   function openUnitsSheet() {
     if (!sheetEl || !sheetBody) return;
-    sheetBody.innerHTML = `<h3>${escapeHtml(t('weather.units', 'Units'))}</h3>
-      <p class="weather-mod-label">${escapeHtml(t('weather.wind', 'Wind'))}</p>
-      <div class="weather-units-row" id="wxWindUnits2"></div>
-      <p class="weather-mod-label">${escapeHtml(t('weather.precip', 'Precipitation'))}</p>
-      <div class="weather-units-row" id="wxPrecipUnits2"></div>
-      <p class="weather-mod-label">${escapeHtml(t('weather.pressure', 'Pressure'))}</p>
-      <div class="weather-units-row" id="wxPressUnits2"></div>
-      <p style="font-size:12px;opacity:.8">${escapeHtml(useF() ? 'Temperature: °F (Settings)' : 'Temperature: °C (Settings)')} · ${escapeHtml(useMi() ? 'Distance/visibility: mi' : 'Distance/visibility: km')}</p>`;
+    hoistOverlays();
+    setSheetTitle(`
+      <div class="wx-sheet-head" data-sheet-title>
+        <div class="wx-sheet-icon">${modLabelIcon('conditions')}</div>
+        <h3 class="wx-sheet-title">${escapeHtml(t('weather.units', 'Units'))}</h3>
+      </div>`);
+    sheetBody.innerHTML =
+      `<p class="weather-mod-label">${escapeHtml(t('weather.wind', 'Wind'))}</p>` +
+      `<div class="weather-units-row" id="wxWindUnits2"></div>` +
+      `<p class="weather-mod-label">${escapeHtml(t('weather.precip', 'Precipitation'))}</p>` +
+      `<div class="weather-units-row" id="wxPrecipUnits2"></div>` +
+      `<p class="weather-mod-label">${escapeHtml(t('weather.pressure', 'Pressure'))}</p>` +
+      `<div class="weather-units-row" id="wxPressUnits2"></div>` +
+      `<p class="wx-sheet-context" style="margin-top:12px">${escapeHtml(
+        (useF() ? 'Temperature: °F (Settings)' : 'Temperature: °C (Settings)') +
+        ' · ' +
+        (useMi() ? 'Distance/visibility: mi' : 'Distance/visibility: km')
+      )}</p>`;
     const fill = (id, units, current, setter) => {
       const row = document.getElementById(id);
       if (!row) return;
@@ -2081,7 +2865,6 @@
         if (current === u) b.classList.add('active');
         b.addEventListener('click', () => {
           setter(u);
-          // Keep Units sheet open — only update active chip + live values
           row.querySelectorAll('button').forEach((x) => {
             x.classList.toggle('active', x === b);
           });
@@ -2090,7 +2873,6 @@
             const fresh = cache.get(cityKey(openCity.city)) || openCity;
             openDetail(fresh);
           }
-          // Do NOT closeSheet() here
         });
         row.appendChild(b);
       });
@@ -2098,8 +2880,7 @@
     fill('wxWindUnits2', [['mph', 'mph'], ['kmh', 'km/h'], ['ms', 'm/s'], ['bft', 'bft'], ['kn', 'kn']], windUnit(), setWindUnit);
     fill('wxPrecipUnits2', [['in', 'in'], ['mm', 'mm'], ['cm', 'cm']], precipUnit(), setPrecipUnit);
     fill('wxPressUnits2', [['hPa', 'hPa'], ['mbar', 'mbar'], ['inHg', 'inHg'], ['mmHg', 'mmHg'], ['kPa', 'kPa']], pressUnit(), setPressUnit);
-    sheetEl.classList.add('open');
-    sheetEl.setAttribute('aria-hidden', 'false');
+    presentSheet();
   }
 
   function scheduleTimer() {
@@ -2126,6 +2907,23 @@
     });
   }
   if (detailBack) detailBack.addEventListener('click', closeDetail);
+
+  // Delegated module taps — stable across openDetail re-renders and node hoist
+  if (detailMods && !detailMods._wxSheetBound) {
+    detailMods._wxSheetBound = true;
+    detailMods.addEventListener('click', function (e) {
+      const btn = e.target && e.target.closest ? e.target.closest('[data-sheet]') : null;
+      if (!btn || !detailMods.contains(btn)) return;
+      const kind = btn.getAttribute('data-sheet');
+      if (!kind || !openCity) return;
+      e.preventDefault();
+      openSheet(kind, openCity);
+    });
+  }
+
+  // Sheet must never intercept when closed (init safety)
+  hoistOverlays();
+  forceCloseSheet();
   if (detailFavBtn) {
     detailFavBtn.addEventListener('click', () => {
       if (!openCity || !openCity.city) return;
@@ -2217,9 +3015,21 @@
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && detailEl && detailEl.classList.contains('open')) {
-      if (sheetEl && sheetEl.classList.contains('open')) closeSheet();
-      else closeDetail();
+    if (e.key !== 'Escape') return;
+    // Dismiss overlays in order: suggest → sheet → detail
+    if (suggestEl && !suggestEl.hidden && suggestEl.classList.contains('open')) {
+      closeSuggest();
+      e.preventDefault();
+      return;
+    }
+    if (isSheetOpen()) {
+      closeSheet();
+      e.preventDefault();
+      return;
+    }
+    if (isDetailVisible() || (detailEl && detailEl.classList.contains('is-closing'))) {
+      closeDetail();
+      e.preventDefault();
     }
   });
 
@@ -2238,11 +3048,11 @@
     } else if (!refreshInflight) {
       refresh(false);
     }
-    if (openCity && openCity.weather) {
-      const fresh = cache.get(cityKey(openCity.city)) || openCity;
+    // Re-render open detail for unit/language changes only when still visible
+    if (isDetailVisible() && openCity && openCity.weather) {
+      const fresh = (openCity.city && cache.get(cityKey(openCity.city))) || openCity;
       openDetail(fresh);
     }
-    // Localized city names when language is not English
     clearTimeout(nameFetchTimer);
     nameFetchTimer = setTimeout(() => { ensureLocalizedMajorNames(); }, 200);
   };

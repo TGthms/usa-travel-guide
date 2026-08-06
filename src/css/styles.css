@@ -12,6 +12,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 @import url('./tokens.css');
+@import url('./icons.css');
 @import url('./gallery.css');
 @import url('./chrome.css');
 @import url('./tools.css');

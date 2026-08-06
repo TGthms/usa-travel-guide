@@ -60,8 +60,7 @@
 <div id="progress-bar"></div>
 
 <div id="loader">
-  <div class="loader-flag">🇺🇸</div>
-  <div class="loader-text">America</div>
+  <div class="loader-brand" aria-hidden="true">✦ America</div>
   <div class="loader-sub">Preparing your journey</div>
   <div class="loader-bar"><div class="loader-fill"></div></div>
 </div>
@@ -75,7 +74,7 @@
         <div class="modal-tag" id="modal-tag"></div>
         <div class="modal-title" id="modal-title"></div>
       </div>
-      <button type="button" class="modal-close" id="modal-close" aria-label="Close modal" data-i18n-aria="aria.closeModal">✕</button>
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close modal" data-i18n-aria="aria.closeModal"><svg class="sf-icon sf-icon--close" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/></svg></button>
     </div>
     <div class="modal-body" id="modal-body"></div>
   </div>
@@ -258,7 +257,7 @@
         </svg>
         <div class="region-num">01</div>
         <div class="region-content">
-          <div class="region-tag" data-i18n="regions.tag">✦ Region</div>
+          <div class="region-tag" data-i18n="regions.tag">Region</div>
           <div class="region-name" data-i18n="regions.ne.name">The Northeast</div>
           <div class="region-desc" data-i18n="regions.ne.desc">Where American history was born. Cobblestone streets, Ivy League towers, blazing autumn foliage, and NYC.</div>
           <div class="region-spots"><span class="region-spot" data-i18n="regions.ne.spot1">New York</span><span class="region-spot" data-i18n="regions.ne.spot2">Boston</span></div>
@@ -272,7 +271,7 @@
         </svg>
         <div class="region-num">02</div>
         <div class="region-content">
-          <div class="region-tag" data-i18n="regions.tag">✦ Region</div>
+          <div class="region-tag" data-i18n="regions.tag">Region</div>
           <div class="region-name" data-i18n="regions.so.name">The South</div>
           <div class="region-desc" data-i18n="regions.so.desc">Gracious hospitality, legendary cuisine, blues and jazz, and magnolia-scented evenings.</div>
           <div class="region-spots"><span class="region-spot" data-i18n="regions.so.spot1">New Orleans</span><span class="region-spot" data-i18n="regions.so.spot2">Nashville</span></div>
@@ -285,7 +284,7 @@
         </svg>
         <div class="region-num">03</div>
         <div class="region-content">
-          <div class="region-tag" data-i18n="regions.tag">✦ Region</div>
+          <div class="region-tag" data-i18n="regions.tag">Region</div>
           <div class="region-name" data-i18n="regions.mw.name">The Midwest</div>
           <div class="region-desc" data-i18n="regions.mw.desc">America's heartland. Vast prairies, the Great Lakes, world-class Chicago architecture.</div>
           <div class="region-spots"><span class="region-spot" data-i18n="regions.mw.spot1">Chicago</span><span class="region-spot" data-i18n="regions.mw.spot2">Detroit</span></div>
@@ -299,7 +298,7 @@
         </svg>
         <div class="region-num">04</div>
         <div class="region-content">
-          <div class="region-tag" data-i18n="regions.tag">✦ Region</div>
+          <div class="region-tag" data-i18n="regions.tag">Region</div>
           <div class="region-name" data-i18n="regions.we.name">The West</div>
           <div class="region-desc" data-i18n="regions.we.desc">Tech empires and ancient forests. Pacific coastline, volcanic peaks, and the culture of California.</div>
           <div class="region-spots"><span class="region-spot" data-i18n="regions.we.spot1">Los Angeles</span><span class="region-spot" data-i18n="regions.we.spot2">Seattle</span></div>
@@ -313,7 +312,7 @@
         </svg>
         <div class="region-num">05</div>
         <div class="region-content">
-          <div class="region-tag" data-i18n="regions.tag">✦ Region</div>
+          <div class="region-tag" data-i18n="regions.tag">Region</div>
           <div class="region-name" data-i18n="regions.sw.name">The Southwest</div>
           <div class="region-desc" data-i18n="regions.sw.desc">Red canyon walls, ancient civilizations, saguaro forests, and the surreal neon of Las Vegas.</div>
           <div class="region-spots"><span class="region-spot" data-i18n="regions.sw.spot1">Las Vegas</span><span class="region-spot" data-i18n="regions.sw.spot2">Phoenix</span></div>
@@ -394,8 +393,8 @@
       <div class="dest-card" data-modal="dest" data-dest="nyc" data-region="northeast" tabindex="0">
         <div class="dest-bg db-nyc"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span></div>
-          <div class="dest-tag" data-i18n="dest.nyc.tag">✦ The Global Capital</div>
+          <div class="dest-rating" aria-hidden="true"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></div>
+          <div class="dest-tag" data-i18n="dest.nyc.tag">The Global Capital</div>
           <div class="dest-name" data-i18n="dest.nyc.name">New York City</div>
           <div class="dest-desc" data-i18n="dest.nyc.desc">The city that never sleeps. Eight million stories packed into five boroughs — from towering Manhattan to Brooklyn.</div>
           <div class="dest-meta">
@@ -404,14 +403,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="la" data-region="west" tabindex="0">
         <div class="dest-bg db-la"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star half">★</span></div>
-          <div class="dest-tag" data-i18n="dest.la.tag">✦ The Dream Factory</div>
+          <div class="dest-rating"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star half"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg><span class="sf-icon--star-fill" aria-hidden="true"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></span></div>
+          <div class="dest-tag" data-i18n="dest.la.tag">The Dream Factory</div>
           <div class="dest-name" data-i18n="dest.la.name">Los Angeles</div>
           <div class="dest-desc" data-i18n="dest.la.desc">A sprawling metropolis of cinema, surf, and perpetual sunshine. From the Hollywood hills down to the Venice boardwalk.</div>
           <div class="dest-meta">
@@ -420,14 +419,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="chicago" data-region="midwest" tabindex="0">
         <div class="dest-bg db-chi"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span></div>
-          <div class="dest-tag" data-i18n="dest.chicago.tag">✦ The Second City</div>
+          <div class="dest-rating" aria-hidden="true"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></div>
+          <div class="dest-tag" data-i18n="dest.chicago.tag">The Second City</div>
           <div class="dest-name" data-i18n="dest.chicago.name">Chicago</div>
           <div class="dest-desc" data-i18n="dest.chicago.desc">The birthplace of the skyscraper, sitting on the shores of Lake Michigan. Unrivaled architecture, blues, and pizza.</div>
           <div class="dest-meta">
@@ -436,14 +435,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="miami" data-region="south" tabindex="0">
         <div class="dest-bg db-mia"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star half">★</span></div>
-          <div class="dest-tag" data-i18n="dest.miami.tag">✦ Sun & Coast</div>
+          <div class="dest-rating"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star half"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg><span class="sf-icon--star-fill" aria-hidden="true"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></span></div>
+          <div class="dest-tag" data-i18n="dest.miami.tag">Sun & Coast</div>
           <div class="dest-name" data-i18n="dest.miami.name">Miami</div>
           <div class="dest-desc" data-i18n="dest.miami.desc">Art Deco glamour on South Beach, Wynwood's murals, Cuban coffee in Little Havana, and endless vibrant nightlife.</div>
           <div class="dest-meta">
@@ -452,14 +451,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="nola" data-region="south" tabindex="0">
         <div class="dest-bg db-nola"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span></div>
-          <div class="dest-tag" data-i18n="dest.nola.tag">✦ The Big Easy</div>
+          <div class="dest-rating" aria-hidden="true"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></div>
+          <div class="dest-tag" data-i18n="dest.nola.tag">The Big Easy</div>
           <div class="dest-name" data-i18n="dest.nola.name">New Orleans</div>
           <div class="dest-desc" data-i18n="dest.nola.desc">A city vibrating with jazz, voodoo history, and Creole flavor. There is truly no other place on earth like the French Quarter.</div>
           <div class="dest-meta">
@@ -468,14 +467,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="vegas" data-region="southwest" tabindex="0">
         <div class="dest-bg db-veg"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star half">★</span></div>
-          <div class="dest-tag" data-i18n="dest.vegas.tag">✦ Entertainment Capital</div>
+          <div class="dest-rating"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star half"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg><span class="sf-icon--star-fill" aria-hidden="true"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></span></div>
+          <div class="dest-tag" data-i18n="dest.vegas.tag">Entertainment Capital</div>
           <div class="dest-name" data-i18n="dest.vegas.name">Las Vegas</div>
           <div class="dest-desc" data-i18n="dest.vegas.desc">An impossible mirage of neon rising from the Mojave desert. World-class dining, massive casinos, and endless spectacles.</div>
           <div class="dest-meta">
@@ -484,14 +483,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="sf" data-region="west" tabindex="0">
         <div class="dest-bg db-sf"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span></div>
-          <div class="dest-tag" data-i18n="dest.sf.tag">✦ The Golden Gate</div>
+          <div class="dest-rating" aria-hidden="true"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></div>
+          <div class="dest-tag" data-i18n="dest.sf.tag">The Golden Gate</div>
           <div class="dest-name" data-i18n="dest.sf.name">San Francisco</div>
           <div class="dest-desc" data-i18n="dest.sf.desc">Rolling hills, cable cars, and the iconic bridge surrounded by fog. A global center for technology and counter-culture.</div>
           <div class="dest-meta">
@@ -500,14 +499,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="seattle" data-region="west" tabindex="0">
         <div class="dest-bg db-sea"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star half">★</span></div>
-          <div class="dest-tag" data-i18n="dest.seattle.tag">✦ The Emerald City</div>
+          <div class="dest-rating"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star half"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg><span class="sf-icon--star-fill" aria-hidden="true"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></span></div>
+          <div class="dest-tag" data-i18n="dest.seattle.tag">The Emerald City</div>
           <div class="dest-name" data-i18n="dest.seattle.name">Seattle</div>
           <div class="dest-desc" data-i18n="dest.seattle.desc">Surrounded by water, mountains, and evergreen forests. Famous for its coffee culture, Pike Place Market, and tech giants.</div>
           <div class="dest-meta">
@@ -516,14 +515,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="austin" data-region="south" tabindex="0">
         <div class="dest-bg db-aus"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star half">★</span></div>
-          <div class="dest-tag" data-i18n="dest.austin.tag">✦ Live Music Capital</div>
+          <div class="dest-rating"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star half"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg><span class="sf-icon--star-fill" aria-hidden="true"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></span></div>
+          <div class="dest-tag" data-i18n="dest.austin.tag">Live Music Capital</div>
           <div class="dest-name" data-i18n="dest.austin.name">Austin</div>
           <div class="dest-desc" data-i18n="dest.austin.desc">Where Texas tradition meets weird, creative energy. Phenomenal BBQ, outdoor living, and an explosive live music scene.</div>
           <div class="dest-meta">
@@ -532,14 +531,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="dc" data-region="northeast" tabindex="0">
         <div class="dest-bg db-dc"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span></div>
-          <div class="dest-tag" data-i18n="dest.dc.tag">✦ The Nation's Capital</div>
+          <div class="dest-rating" aria-hidden="true"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></div>
+          <div class="dest-tag" data-i18n="dest.dc.tag">The Nation's Capital</div>
           <div class="dest-name" data-i18n="dest.dc.name">Washington D.C.</div>
           <div class="dest-desc" data-i18n="dest.dc.desc">The epicenter of American history and politics. Stunning neoclassical monuments and the world's best free museums.</div>
           <div class="dest-meta">
@@ -548,14 +547,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="honolulu" data-region="west" tabindex="0">
         <div class="dest-bg db-hon"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star half">★</span></div>
-          <div class="dest-tag" data-i18n="dest.honolulu.tag">✦ Tropical Paradise</div>
+          <div class="dest-rating"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star half"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg><span class="sf-icon--star-fill" aria-hidden="true"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></span></div>
+          <div class="dest-tag" data-i18n="dest.honolulu.tag">Tropical Paradise</div>
           <div class="dest-name" data-i18n="dest.honolulu.name">Honolulu</div>
           <div class="dest-desc" data-i18n="dest.honolulu.desc">Waikiki beach, volcanic craters, and deep Polynesian heritage. The gateway to the breathtaking Hawaiian islands.</div>
           <div class="dest-meta">
@@ -564,14 +563,14 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
       <div class="dest-card" data-modal="dest" data-dest="boston" data-region="northeast" tabindex="0">
         <div class="dest-bg db-bos"></div>
         <div class="dest-content">
-          <div class="dest-rating"><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star">★</span><span class="dest-star half">★</span></div>
-          <div class="dest-tag" data-i18n="dest.boston.tag">✦ Historic Hub</div>
+          <div class="dest-rating"><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span><span class="dest-star half"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg><span class="sf-icon--star-fill" aria-hidden="true"><svg class="sf-icon sf-icon--star" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3.2 2.35 4.76 5.25.76-3.8 3.7.9 5.24L12 15.3l-4.7 2.46.9-5.24-3.8-3.7 5.25-.76z"/></svg></span></span></div>
+          <div class="dest-tag" data-i18n="dest.boston.tag">Historic Hub</div>
           <div class="dest-name" data-i18n="dest.boston.name">Boston</div>
           <div class="dest-desc" data-i18n="dest.boston.desc">Cobblestone streets tracing the American Revolution, legendary seafood, and a fiercely loyal sports culture.</div>
           <div class="dest-meta">
@@ -580,7 +579,7 @@
           </div>
         </div>
         <button type="button" class="dest-fav-btn" aria-label="Save to favorites" onclick="event.stopPropagation(); toggleFavorite(this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-        <div class="dest-arrow">→</div>
+        <div class="dest-arrow" aria-hidden="true"><svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       </div>
 
     </div>
@@ -598,31 +597,27 @@
   </div>
   <div class="practical-grid">
     <div class="prac-card reveal" data-modal="prac" data-prac="transport" role="button" tabindex="0">
-      <span class="prac-icon">✈️</span>
       <h3 class="prac-title" data-i18n="prac.transport.title">Getting There</h3>
       <p class="prac-body" data-i18n-html="prac.transport.body">Major gateways: <strong>JFK, LAX, O'Hare, Miami</strong> &amp; Atlanta. Most visitors from visa-waiver countries need an ESTA online before departure.</p>
-      <div class="prac-more" data-i18n="prac.learnMore">Learn more →</div>
+      <div class="prac-more" data-i18n="prac.learnMore">Learn more <svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       <div class="prac-num">01</div>
     </div>
     <div class="prac-card reveal reveal-delay-1" data-modal="prac" data-prac="driving" role="button" tabindex="0">
-      <span class="prac-icon">🚗</span>
       <h3 class="prac-title" data-i18n="prac.driving.title">Getting Around</h3>
       <p class="prac-body" data-i18n-html="prac.driving.body"><strong>Renting a car</strong> is essential outside major cities. Domestic flights are affordable. Uber and Lyft operate in virtually every metro area.</p>
-      <div class="prac-more" data-i18n="prac.learnMore">Learn more →</div>
+      <div class="prac-more" data-i18n="prac.learnMore">Learn more <svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       <div class="prac-num">02</div>
     </div>
     <div class="prac-card reveal reveal-delay-2" data-modal="prac" data-prac="money" role="button" tabindex="0">
-      <span class="prac-icon">💵</span>
       <h3 class="prac-title" data-i18n="prac.money.title">Money &amp; Costs</h3>
       <p class="prac-body" data-i18n-html="prac.money.body">Currency: <strong>US Dollar (USD)</strong>. Tipping 18–22% is standard. Budget travelers: $80–120/day. Mid-range: $180–280. NYC &amp; SF are priciest.</p>
-      <div class="prac-more" data-i18n="prac.learnMore">Learn more →</div>
+      <div class="prac-more" data-i18n="prac.learnMore">Learn more <svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       <div class="prac-num">03</div>
     </div>
     <div class="prac-card reveal reveal-delay-3" data-modal="prac" data-prac="health" role="button" tabindex="0">
-      <span class="prac-icon">🏥</span>
       <h3 class="prac-title" data-i18n="prac.health.title">Health &amp; Safety</h3>
       <p class="prac-body" data-i18n-html="prac.health.body"><strong>Travel insurance is strongly recommended</strong> — US healthcare is world-class but expensive. Emergency number is <strong>911</strong>.</p>
-      <div class="prac-more" data-i18n="prac.learnMore">Learn more →</div>
+      <div class="prac-more" data-i18n="prac.learnMore">Learn more <svg class="sf-icon sf-icon--chevron" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></div>
       <div class="prac-num">04</div>
     </div>
   </div>
@@ -649,7 +644,6 @@
     <div class="seasons-right reveal-right">
       <div class="season-card sc-spring" data-modal="season" data-season="spring" tabindex="0">
         <div class="season-badge" data-i18n="seasons.spring.badge">Best Value</div>
-        <span class="season-emoji">🌸</span>
         <div class="season-name" data-i18n="seasons.spring.name">Spring</div>
         <div class="season-months" data-i18n="seasons.spring.months">March — May</div>
         <div class="season-desc" data-i18n="seasons.spring.desc">Cherry blossoms in D.C., wildflowers in Texas, perfect temperatures coast to coast. Moderate crowds.</div>
@@ -657,7 +651,6 @@
       </div>
       <div class="season-card sc-summer" data-modal="season" data-season="summer" tabindex="0">
         <div class="season-badge" data-i18n="seasons.summer.badge">Peak Season</div>
-        <span class="season-emoji">☀️</span>
         <div class="season-name" data-i18n="seasons.summer.name">Summer</div>
         <div class="season-months" data-i18n="seasons.summer.months">June — August</div>
         <div class="season-desc" data-i18n="seasons.summer.desc">National parks are stunning but crowded. Beach destinations thrive. Book accommodation far ahead.</div>
@@ -665,7 +658,6 @@
       </div>
       <div class="season-card sc-fall" data-modal="season" data-season="fall" tabindex="0">
         <div class="season-badge" data-i18n="seasons.fall.badge">Editor's Pick</div>
-        <span class="season-emoji">🍂</span>
         <div class="season-name" data-i18n="seasons.fall.name">Fall</div>
         <div class="season-months" data-i18n="seasons.fall.months">September — November</div>
         <div class="season-desc" data-i18n="seasons.fall.desc">The finest season. New England foliage is breathtaking. Weather is crisp, cities feel most alive.</div>
@@ -673,7 +665,6 @@
       </div>
       <div class="season-card sc-winter" data-modal="season" data-season="winter" tabindex="0">
         <div class="season-badge" data-i18n="seasons.winter.badge">Ski Season</div>
-        <span class="season-emoji">❄️</span>
         <div class="season-name" data-i18n="seasons.winter.name">Winter</div>
         <div class="season-months" data-i18n="seasons.winter.months">December — February</div>
         <div class="season-desc" data-i18n-html="seasons.winter.desc">Colorado ski resorts peak. Florida, Hawaii &amp; Southern California become warm refuges.</div>
@@ -692,18 +683,18 @@
     <p class="reveal reveal-delay-1" data-i18n="culture.intro">America's greatest cultural export is its diversity itself. No single cuisine, no single music, no single identity — that boundless plurality is precisely what makes experiencing it so endlessly surprising.</p>
   </div>
   <div class="culture-tiles">
-    <div class="culture-tile reveal"             data-modal="culture" data-culture="rock" tabindex="0"><span class="culture-tile-icon">🎸</span><div class="culture-tile-name" data-i18n="culture.rock.name">Rock &amp; Country</div><div class="culture-tile-desc" data-i18n="culture.rock.desc">Nashville's honky-tonks and Memphis' birthplace of rock</div></div>
-    <div class="culture-tile reveal reveal-delay-1" data-modal="culture" data-culture="jazz" tabindex="0"><span class="culture-tile-icon">🎷</span><div class="culture-tile-name" data-i18n="culture.jazz.name">Jazz &amp; Blues</div><div class="culture-tile-desc" data-i18n="culture.jazz.desc">New Orleans' French Quarter breathes music constantly</div></div>
-    <div class="culture-tile reveal reveal-delay-2" data-modal="culture" data-culture="texmex" tabindex="0"><span class="culture-tile-icon">🌮</span><div class="culture-tile-name" data-i18n="culture.texmex.name">Tex-Mex</div><div class="culture-tile-desc" data-i18n="culture.texmex.desc">The magnificent fusion of Texas and Mexico</div></div>
-    <div class="culture-tile reveal reveal-delay-3" data-modal="culture" data-culture="seafood" tabindex="0"><span class="culture-tile-icon">🦞</span><div class="culture-tile-name" data-i18n="culture.seafood.name">New England Seafood</div><div class="culture-tile-desc" data-i18n="culture.seafood.desc">Lobster rolls and oysters straight from Cape Cod</div></div>
-    <div class="culture-tile reveal reveal-delay-4" data-modal="culture" data-culture="broadway" tabindex="0"><span class="culture-tile-icon">🎭</span><div class="culture-tile-name" data-i18n="culture.broadway.name">Broadway</div><div class="culture-tile-desc" data-i18n="culture.broadway.desc">The world's most celebrated stage in Manhattan</div></div>
-    <div class="culture-tile reveal reveal-delay-5" data-modal="culture" data-culture="bbq" tabindex="0"><span class="culture-tile-icon">🍖</span><div class="culture-tile-name" data-i18n="culture.bbq.name">American BBQ</div><div class="culture-tile-desc" data-i18n="culture.bbq.desc">Texas, Kansas City, Carolinas, Memphis — each a religion</div></div>
-    <div class="culture-tile reveal"             data-modal="culture" data-culture="streetart" tabindex="0"><span class="culture-tile-icon">🎨</span><div class="culture-tile-name" data-i18n="culture.streetart.name">Street Art</div><div class="culture-tile-desc" data-i18n="culture.streetart.desc">Wynwood Walls, Detroit murals, SF's Mission District</div></div>
-    <div class="culture-tile reveal reveal-delay-1" data-modal="culture" data-culture="sports" tabindex="0"><span class="culture-tile-icon">🏈</span><div class="culture-tile-name" data-i18n="culture.sports.name">Sport Culture</div><div class="culture-tile-desc" data-i18n="culture.sports.desc">NFL Sundays, baseball, and college football passion</div></div>
-    <div class="culture-tile reveal reveal-delay-2" data-modal="culture" data-culture="hollywood" tabindex="0"><span class="culture-tile-icon">🎬</span><div class="culture-tile-name" data-i18n="culture.hollywood.name">Hollywood</div><div class="culture-tile-desc" data-i18n="culture.hollywood.desc">The global capital of cinema, stars, and stories</div></div>
-    <div class="culture-tile reveal reveal-delay-3" data-modal="culture" data-culture="pizza" tabindex="0"><span class="culture-tile-icon">🍕</span><div class="culture-tile-name" data-i18n="culture.pizza.name">NYC Pizza</div><div class="culture-tile-desc" data-i18n="culture.pizza.desc">The foldable thin-crust slice — a true institution</div></div>
-    <div class="culture-tile reveal reveal-delay-4" data-modal="culture" data-culture="smithsonian" tabindex="0"><span class="culture-tile-icon">🏛️</span><div class="culture-tile-name" data-i18n="culture.smithsonian.name">Free Museums</div><div class="culture-tile-desc" data-i18n="culture.smithsonian.desc">19 Smithsonian museums in D.C. — all completely free</div></div>
-    <div class="culture-tile reveal reveal-delay-5" data-modal="culture" data-culture="farmtable" tabindex="0"><span class="culture-tile-icon">🌽</span><div class="culture-tile-name" data-i18n="culture.farmtable.name">Farm-to-Table</div><div class="culture-tile-desc" data-i18n="culture.farmtable.desc">California leads America's culinary fresh revolution</div></div>
+    <div class="culture-tile reveal"             data-modal="culture" data-culture="rock" tabindex="0"><div class="culture-tile-name" data-i18n="culture.rock.name">Rock &amp; Country</div><div class="culture-tile-desc" data-i18n="culture.rock.desc">Nashville's honky-tonks and Memphis' birthplace of rock</div></div>
+    <div class="culture-tile reveal reveal-delay-1" data-modal="culture" data-culture="jazz" tabindex="0"><div class="culture-tile-name" data-i18n="culture.jazz.name">Jazz &amp; Blues</div><div class="culture-tile-desc" data-i18n="culture.jazz.desc">New Orleans' French Quarter breathes music constantly</div></div>
+    <div class="culture-tile reveal reveal-delay-2" data-modal="culture" data-culture="texmex" tabindex="0"><div class="culture-tile-name" data-i18n="culture.texmex.name">Tex-Mex</div><div class="culture-tile-desc" data-i18n="culture.texmex.desc">The magnificent fusion of Texas and Mexico</div></div>
+    <div class="culture-tile reveal reveal-delay-3" data-modal="culture" data-culture="seafood" tabindex="0"><div class="culture-tile-name" data-i18n="culture.seafood.name">New England Seafood</div><div class="culture-tile-desc" data-i18n="culture.seafood.desc">Lobster rolls and oysters straight from Cape Cod</div></div>
+    <div class="culture-tile reveal reveal-delay-4" data-modal="culture" data-culture="broadway" tabindex="0"><div class="culture-tile-name" data-i18n="culture.broadway.name">Broadway</div><div class="culture-tile-desc" data-i18n="culture.broadway.desc">The world's most celebrated stage in Manhattan</div></div>
+    <div class="culture-tile reveal reveal-delay-5" data-modal="culture" data-culture="bbq" tabindex="0"><div class="culture-tile-name" data-i18n="culture.bbq.name">American BBQ</div><div class="culture-tile-desc" data-i18n="culture.bbq.desc">Texas, Kansas City, Carolinas, Memphis — each a religion</div></div>
+    <div class="culture-tile reveal"             data-modal="culture" data-culture="streetart" tabindex="0"><div class="culture-tile-name" data-i18n="culture.streetart.name">Street Art</div><div class="culture-tile-desc" data-i18n="culture.streetart.desc">Wynwood Walls, Detroit murals, SF's Mission District</div></div>
+    <div class="culture-tile reveal reveal-delay-1" data-modal="culture" data-culture="sports" tabindex="0"><div class="culture-tile-name" data-i18n="culture.sports.name">Sport Culture</div><div class="culture-tile-desc" data-i18n="culture.sports.desc">NFL Sundays, baseball, and college football passion</div></div>
+    <div class="culture-tile reveal reveal-delay-2" data-modal="culture" data-culture="hollywood" tabindex="0"><div class="culture-tile-name" data-i18n="culture.hollywood.name">Hollywood</div><div class="culture-tile-desc" data-i18n="culture.hollywood.desc">The global capital of cinema, stars, and stories</div></div>
+    <div class="culture-tile reveal reveal-delay-3" data-modal="culture" data-culture="pizza" tabindex="0"><div class="culture-tile-name" data-i18n="culture.pizza.name">NYC Pizza</div><div class="culture-tile-desc" data-i18n="culture.pizza.desc">The foldable thin-crust slice — a true institution</div></div>
+    <div class="culture-tile reveal reveal-delay-4" data-modal="culture" data-culture="smithsonian" tabindex="0"><div class="culture-tile-name" data-i18n="culture.smithsonian.name">Free Museums</div><div class="culture-tile-desc" data-i18n="culture.smithsonian.desc">19 Smithsonian museums in D.C. — all completely free</div></div>
+    <div class="culture-tile reveal reveal-delay-5" data-modal="culture" data-culture="farmtable" tabindex="0"><div class="culture-tile-name" data-i18n="culture.farmtable.name">Farm-to-Table</div><div class="culture-tile-desc" data-i18n="culture.farmtable.desc">California leads America's culinary fresh revolution</div></div>
   </div>
 </section>
 
@@ -718,7 +709,7 @@
   <div class="routes-grid">
     <div class="route-card reveal" data-modal="route" data-route="route66" tabindex="0">
       <div class="route-header">
-        <div><span class="route-icon">🛣️</span><div class="route-name" data-i18n="routes.route66.name">Route 66</div><div class="route-dist" data-i18n="routes.route66.dist">Chicago → Los Angeles</div><div class="route-miles unit-dist" data-mi="2448">2,448 mi</div></div>
+        <div><div class="route-name" data-i18n="routes.route66.name">Route 66</div><div class="route-dist" data-i18n="routes.route66.dist">Chicago → Los Angeles</div><div class="route-miles unit-dist" data-mi="2448">2,448 mi</div></div>
         <div class="route-duration" data-i18n="routes.route66.duration">2–3 Weeks</div>
       </div>
       <div class="route-body">
@@ -733,7 +724,7 @@
     </div>
     <div class="route-card reveal reveal-delay-1" data-modal="route" data-route="pch" tabindex="0">
       <div class="route-header">
-        <div><span class="route-icon">🌊</span><div class="route-name" data-i18n="routes.pch.name">Pacific Coast</div><div class="route-dist" data-i18n="routes.pch.dist">Seattle → San Diego</div><div class="route-miles unit-dist" data-mi="1650">1,650 mi</div></div>
+        <div><div class="route-name" data-i18n="routes.pch.name">Pacific Coast</div><div class="route-dist" data-i18n="routes.pch.dist">Seattle → San Diego</div><div class="route-miles unit-dist" data-mi="1650">1,650 mi</div></div>
         <div class="route-duration" data-i18n="routes.pch.duration">10–14 Days</div>
       </div>
       <div class="route-body">
@@ -748,7 +739,7 @@
     </div>
     <div class="route-card reveal reveal-delay-2" data-modal="route" data-route="parksloop" tabindex="0">
       <div class="route-header">
-        <div><span class="route-icon">🏜️</span><div class="route-name" data-i18n="routes.parksloop.name">Parks Loop</div><div class="route-dist" data-i18n="routes.parksloop.dist">Utah · Arizona · Nevada</div><div class="route-miles unit-dist" data-mi="980">980 mi</div></div>
+        <div><div class="route-name" data-i18n="routes.parksloop.name">Parks Loop</div><div class="route-dist" data-i18n="routes.parksloop.dist">Utah · Arizona · Nevada</div><div class="route-miles unit-dist" data-mi="980">980 mi</div></div>
         <div class="route-duration" data-i18n="routes.parksloop.duration">10–12 Days</div>
       </div>
       <div class="route-body">
@@ -771,14 +762,14 @@
     <p class="reveal reveal-delay-1" data-i18n="tips.intro">America rewards the prepared traveler. These tips will save you time, money, and unnecessary stress.</p>
   </div>
   <div class="tips-grid">
-    <div class="tip-row reveal"             data-modal="tip" data-tip="parks" tabindex="0"><div class="tip-icon">🗺️</div><div class="tip-content"><div class="tip-title" data-i18n="tips.parks.title">Book National Parks Early</div><div class="tip-body" data-i18n-html="tips.parks.body">Many parks require <strong>timed-entry reservations</strong>, released 6 months in advance. Yosemite and Zion fill instantly.</div></div></div>
-    <div class="tip-row reveal reveal-delay-1" data-modal="tip" data-tip="tax" tabindex="0"><div class="tip-icon">🧾</div><div class="tip-content"><div class="tip-title" data-i18n="tips.tax.title">Sales Tax Is Added at Register</div><div class="tip-body" data-i18n-html="tips.tax.body">Unlike Europe, <strong>prices shown exclude tax</strong>. Sales tax varies by state (0% to 10%+). Your bill will always be higher.</div></div></div>
-    <div class="tip-row reveal reveal-delay-2" data-modal="tip" data-tip="sim" tabindex="0"><div class="tip-icon">📱</div><div class="tip-content"><div class="tip-title" data-i18n="tips.sim.title">Get a Local SIM Card</div><div class="tip-body" data-i18n-html="tips.sim.body">A <strong>prepaid eSIM</strong> costs $30/month. Verizon has the best rural coverage for national park travel.</div></div></div>
-    <div class="tip-row reveal reveal-delay-3" data-modal="tip" data-tip="distance" tabindex="0"><div class="tip-icon">🌎</div><div class="tip-content"><div class="tip-title" data-i18n="tips.distance.title">Distances Are Enormous</div><div class="tip-body" data-i18n-html="tips.distance.body">Americans think in hours, not miles. <strong>NY to LA is a 41-hour, <span class="unit-dist" data-mi="2789">2,789-mile</span> drive</strong>. Plan fewer stops done well rather than overstretching.</div></div></div>
-    <div class="tip-row reveal"             data-modal="tip" data-tip="tipping" tabindex="0"><div class="tip-icon">🤝</div><div class="tip-content"><div class="tip-title" data-i18n="tips.tipping.title">Tipping Culture</div><div class="tip-body" data-i18n-html="tips.tipping.body">Tip <strong>18–22%</strong> at restaurants, $1–2 per drink at bars. Many workers depend on tips — it is expected, not optional.</div></div></div>
-    <div class="tip-row reveal reveal-delay-1" data-modal="tip" data-tip="pass" tabindex="0"><div class="tip-icon">🏞️</div><div class="tip-content"><div class="tip-title" data-i18n="tips.pass.title">America the Beautiful Pass</div><div class="tip-body" data-i18n-html="tips.pass.body">At <strong>$80/year</strong>, this pass grants free entry to all 63 national parks. It pays for itself after just 2–3 park visits.</div></div></div>
-    <div class="tip-row reveal reveal-delay-2" data-modal="tip" data-tip="food" tabindex="0"><div class="tip-icon">🍽️</div><div class="tip-content"><div class="tip-title" data-i18n="tips.food.title">Eat Where Locals Eat</div><div class="tip-body" data-i18n="tips.food.body">Best food is rarely in tourist zones. Use apps to find highly-rated mom-and-pop diners and ethnic eateries.</div></div></div>
-    <div class="tip-row reveal reveal-delay-3" data-modal="tip" data-tip="driving" tabindex="0"><div class="tip-icon">🚦</div><div class="tip-content"><div class="tip-title" data-i18n="tips.driving.title">Right Turn on Red</div><div class="tip-body" data-i18n-html="tips.driving.body">Unless posted otherwise, you may <strong>turn right at a red traffic light</strong> after stopping, in all 50 states.</div></div></div>
+    <div class="tip-row reveal"             data-modal="tip" data-tip="parks" tabindex="0"><div class="tip-content"><div class="tip-title" data-i18n="tips.parks.title">Book National Parks Early</div><div class="tip-body" data-i18n-html="tips.parks.body">Many parks require <strong>timed-entry reservations</strong>, released 6 months in advance. Yosemite and Zion fill instantly.</div></div></div>
+    <div class="tip-row reveal reveal-delay-1" data-modal="tip" data-tip="tax" tabindex="0"><div class="tip-content"><div class="tip-title" data-i18n="tips.tax.title">Sales Tax Is Added at Register</div><div class="tip-body" data-i18n-html="tips.tax.body">Unlike Europe, <strong>prices shown exclude tax</strong>. Sales tax varies by state (0% to 10%+). Your bill will always be higher.</div></div></div>
+    <div class="tip-row reveal reveal-delay-2" data-modal="tip" data-tip="sim" tabindex="0"><div class="tip-content"><div class="tip-title" data-i18n="tips.sim.title">Get a Local SIM Card</div><div class="tip-body" data-i18n-html="tips.sim.body">A <strong>prepaid eSIM</strong> costs $30/month. Verizon has the best rural coverage for national park travel.</div></div></div>
+    <div class="tip-row reveal reveal-delay-3" data-modal="tip" data-tip="distance" tabindex="0"><div class="tip-content"><div class="tip-title" data-i18n="tips.distance.title">Distances Are Enormous</div><div class="tip-body" data-i18n-html="tips.distance.body">Americans think in hours, not miles. <strong>NY to LA is a 41-hour, <span class="unit-dist" data-mi="2789">2,789-mile</span> drive</strong>. Plan fewer stops done well rather than overstretching.</div></div></div>
+    <div class="tip-row reveal"             data-modal="tip" data-tip="tipping" tabindex="0"><div class="tip-content"><div class="tip-title" data-i18n="tips.tipping.title">Tipping Culture</div><div class="tip-body" data-i18n-html="tips.tipping.body">Tip <strong>18–22%</strong> at restaurants, $1–2 per drink at bars. Many workers depend on tips — it is expected, not optional.</div></div></div>
+    <div class="tip-row reveal reveal-delay-1" data-modal="tip" data-tip="pass" tabindex="0"><div class="tip-content"><div class="tip-title" data-i18n="tips.pass.title">America the Beautiful Pass</div><div class="tip-body" data-i18n-html="tips.pass.body">At <strong>$80/year</strong>, this pass grants free entry to all 63 national parks. It pays for itself after just 2–3 park visits.</div></div></div>
+    <div class="tip-row reveal reveal-delay-2" data-modal="tip" data-tip="food" tabindex="0"><div class="tip-content"><div class="tip-title" data-i18n="tips.food.title">Eat Where Locals Eat</div><div class="tip-body" data-i18n="tips.food.body">Best food is rarely in tourist zones. Use apps to find highly-rated mom-and-pop diners and ethnic eateries.</div></div></div>
+    <div class="tip-row reveal reveal-delay-3" data-modal="tip" data-tip="driving" tabindex="0"><div class="tip-content"><div class="tip-title" data-i18n="tips.driving.title">Right Turn on Red</div><div class="tip-body" data-i18n-html="tips.driving.body">Unless posted otherwise, you may <strong>turn right at a red traffic light</strong> after stopping, in all 50 states.</div></div></div>
   </div>
 </section>
 
@@ -813,100 +804,100 @@
     <span class="section-eyebrow" data-i18n="settings.eyebrow">Preferences</span>
     <div class="settings-title-row">
       <h2 id="settingsTitle" data-i18n-html="settings.heading">Make It <em>Your Guide</em></h2>
-      <button class="settings-close" id="settingsClose" type="button" aria-label="Close settings" data-i18n-aria="aria.closeSettings">✕</button>
+      <button class="settings-close" id="settingsClose" type="button" aria-label="Close settings" data-i18n-aria="aria.closeSettings"><svg class="sf-icon sf-icon--close" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/></svg></button>
     </div>
     <p data-i18n="settings.intro">Preferences are saved on this device.</p>
   </div>
   <div class="settings-grid">
 
     <div class="settings-group reveal">
-      <div class="settings-group-label" data-i18n="settings.themeLabel">🎨 Theme</div>
+      <div class="settings-group-label" data-i18n="settings.themeLabel">Theme</div>
       <div class="settings-group-sub" data-i18n="settings.themeSub">Every section adapts to your chosen palette.</div>
       <div class="theme-swatch-grid" id="themeSwatchGrid">
         <button type="button" class="theme-swatch active" data-theme-val="default">
           <div class="theme-swatch-preview"><span style="background:#07101c;"></span><span style="background:#c9a259;"></span><span style="background:#b85c42;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeDefault">Midnight Atlas</span><span class="theme-swatch-check">✓</span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeDefault">Midnight Atlas</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
         </button>
         <button type="button" class="theme-swatch" data-theme-val="minimal">
           <div class="theme-swatch-preview"><span style="background:#f5f5f7;"></span><span style="background:#0071e3;"></span><span style="background:#1d1d1f;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeMinimal">Gallery Daylight</span><span class="theme-swatch-check">✓</span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeMinimal">Gallery Daylight</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
         </button>
         <button type="button" class="theme-swatch" data-theme-val="elegant">
           <div class="theme-swatch-preview"><span style="background:#f6f1e8;"></span><span style="background:#7a2e2e;"></span><span style="background:#b8956a;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeElegant">Heritage Paper</span><span class="theme-swatch-check">✓</span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeElegant">Heritage Paper</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
         </button>
         <button type="button" class="theme-swatch" data-theme-val="luxury">
           <div class="theme-swatch-preview"><span style="background:#0c0c0c;"></span><span style="background:#c4a462;"></span><span style="background:#a8a29a;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeLuxury">Grand Tour</span><span class="theme-swatch-check">✓</span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeLuxury">Grand Tour</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
         </button>
         <button type="button" class="theme-swatch" data-theme-val="glass">
           <div class="theme-swatch-preview"><span style="background:#000000;"></span><span style="background:#0a84ff;"></span><span style="background:#f5f5f7;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeGlass">Twilight Glass</span><span class="theme-swatch-check">✓</span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeGlass">Twilight Glass</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
         </button>
         <button type="button" class="theme-swatch" data-theme-val="nature">
           <div class="theme-swatch-preview"><span style="background:#141c18;"></span><span style="background:#8fa884;"></span><span style="background:#c9a66b;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeNature">Field Notes</span><span class="theme-swatch-check">✓</span></div>
+          <div class="theme-swatch-name"><span data-i18n="settings.themeNature">Field Notes</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
         </button>
       </div>
     </div>
 
     <div class="settings-group reveal reveal-delay-1">
-      <div class="settings-group-label">🌐 <span data-i18n="settings.languageLabel">Language</span></div>
+      <div class="settings-group-label" data-i18n="settings.languageLabel">Language</div>
       <div class="settings-group-sub" data-i18n="settings.languageSub">Translates all guide content, including region &amp; city details.</div>
       <div class="pill-group" id="langPillGroup">
-        <button type="button" class="pill-btn active" data-lang-val="en"><span>English</span><span class="pill-check">✓</span></button>
-        <button type="button" class="pill-btn" data-lang-val="es"><span>Español <span class="pill-btn-native">Spanish</span></span><span class="pill-check">✓</span></button>
-        <button type="button" class="pill-btn" data-lang-val="zh"><span>中文 <span class="pill-btn-native">Chinese</span></span><span class="pill-check">✓</span></button>
-        <button type="button" class="pill-btn" data-lang-val="ja"><span>日本語 <span class="pill-btn-native">Japanese</span></span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn active" data-lang-val="en"><span>English</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+        <button type="button" class="pill-btn" data-lang-val="es"><span>Español <span class="pill-btn-native">Spanish</span></span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+        <button type="button" class="pill-btn" data-lang-val="zh"><span>中文 <span class="pill-btn-native">Chinese</span></span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+        <button type="button" class="pill-btn" data-lang-val="ja"><span>日本語 <span class="pill-btn-native">Japanese</span></span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
       </div>
     </div>
 
     <div class="settings-group reveal reveal-delay-2">
-      <div class="settings-group-label">📐 <span data-i18n="settings.unitsLabel">Units</span></div>
+      <div class="settings-group-label" data-i18n="settings.unitsLabel">Units</div>
       <div class="settings-group-sub" data-i18n="settings.unitsSub">Applied to temperatures and road-trip distances.</div>
       <div class="settings-subgroup">
         <div class="settings-subgroup-label" data-i18n="settings.temperature">Temperature</div>
         <div class="units-row" id="unitTempGroup">
-          <button type="button" class="pill-btn active" data-unit-val="f"><span>°F</span><span class="pill-check">✓</span></button>
-          <button type="button" class="pill-btn" data-unit-val="c"><span>°C</span><span class="pill-check">✓</span></button>
+          <button type="button" class="pill-btn active" data-unit-val="f"><span>°F</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+          <button type="button" class="pill-btn" data-unit-val="c"><span>°C</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
         </div>
       </div>
       <div class="settings-subgroup">
         <div class="settings-subgroup-label" data-i18n="settings.distance">Distance</div>
         <div class="units-row" id="unitDistGroup">
-          <button type="button" class="pill-btn active" data-unit-val="mi"><span data-i18n="settings.miles">Miles</span><span class="pill-check">✓</span></button>
-          <button type="button" class="pill-btn" data-unit-val="km"><span data-i18n="settings.km">Kilometers</span><span class="pill-check">✓</span></button>
+          <button type="button" class="pill-btn active" data-unit-val="mi"><span data-i18n="settings.miles">Miles</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+          <button type="button" class="pill-btn" data-unit-val="km"><span data-i18n="settings.km">Kilometers</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
         </div>
       </div>
     </div>
 
     <div class="settings-group reveal reveal-delay-3">
-      <div class="settings-group-label">🖼️ <span data-i18n="settings.galleryQualityLabel">Gallery photo quality</span></div>
+      <div class="settings-group-label" data-i18n="settings.galleryQualityLabel">Gallery photo quality</div>
       <div class="settings-group-sub" data-i18n="settings.galleryQualitySub">What loads when you open a photo. Medium is sharp and fast; Full is the original camera file (heavier).</div>
       <div class="units-row" id="galleryQualityGroup">
-        <button type="button" class="pill-btn" data-gallery-quality="thumb"><span data-i18n="settings.qualityThumb">Thumbnail</span><span class="pill-check">✓</span></button>
-        <button type="button" class="pill-btn active" data-gallery-quality="medium"><span data-i18n="settings.qualityMedium">Medium</span><span class="pill-check">✓</span></button>
-        <button type="button" class="pill-btn" data-gallery-quality="full"><span data-i18n="settings.qualityFull">Full</span><span class="pill-check">✓</span></button>
+        <button type="button" class="pill-btn" data-gallery-quality="thumb"><span data-i18n="settings.qualityThumb">Thumbnail</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+        <button type="button" class="pill-btn active" data-gallery-quality="medium"><span data-i18n="settings.qualityMedium">Medium</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+        <button type="button" class="pill-btn" data-gallery-quality="full"><span data-i18n="settings.qualityFull">Full</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
       </div>
     </div>
 
     <div class="settings-group settings-group-wide reveal reveal-delay-4">
-      <div class="settings-group-label">♿ <span data-i18n="settings.accessibilityLabel">Accessibility</span></div>
+      <div class="settings-group-label" data-i18n="settings.accessibilityLabel">Accessibility</div>
       <div class="settings-group-sub" data-i18n="settings.accessibilitySub">Choose how much motion you want: full effects, a calmer reduced mode, or animations off. You can also disable the cursor trail.</div>
       <div class="settings-subgroup-row">
         <div class="settings-subgroup">
           <div class="settings-subgroup-label" data-i18n="settings.reduceMotion">Animations</div>
           <div class="units-row" id="motionPillGroup">
-            <button type="button" class="pill-btn active" data-motion-val="full"><span data-i18n="settings.motionFull">Full</span><span class="pill-check">✓</span></button>
-            <button type="button" class="pill-btn" data-motion-val="reduced"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check">✓</span></button>
-            <button type="button" class="pill-btn" data-motion-val="off"><span data-i18n="settings.motionOff">Off</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn active" data-motion-val="full"><span data-i18n="settings.motionFull">Full</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+            <button type="button" class="pill-btn" data-motion-val="reduced"><span data-i18n="settings.motionReduced">Reduced</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+            <button type="button" class="pill-btn" data-motion-val="off"><span data-i18n="settings.motionOff">Off</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
           </div>
         </div>
         <div class="settings-subgroup">
           <div class="settings-subgroup-label" data-i18n="settings.cursorEffect">Cursor Trail</div>
           <div class="units-row" id="cursorPillGroup">
-            <button type="button" class="pill-btn active" data-cursor-val="on"><span data-i18n="settings.cursorOn">On</span><span class="pill-check">✓</span></button>
-            <button type="button" class="pill-btn" data-cursor-val="off"><span data-i18n="settings.cursorOff">Off</span><span class="pill-check">✓</span></button>
+            <button type="button" class="pill-btn active" data-cursor-val="on"><span data-i18n="settings.cursorOn">On</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+            <button type="button" class="pill-btn" data-cursor-val="off"><span data-i18n="settings.cursorOff">Off</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
           </div>
         </div>
       </div>
@@ -926,7 +917,7 @@
     </div>
     <div class="site-footer-meta">
       <p class="site-footer-copy" data-i18n-html="footer.copyright">© {year} USA Travel Guide · In God We Trust · Created by Tim G · In collaboration with AI</p>
-      <p class="site-footer-motto" data-i18n="footer.motto">Land of the free, home of the brave 🇺🇸</p>
+      <p class="site-footer-motto" data-i18n="footer.motto">Land of the free, home of the brave</p>
       <div class="footer-legal-links" role="navigation" aria-label="Legal">
         <a href="privacy.html" data-i18n="legal.privacyLink">Privacy Policy</a>
         <span class="footer-legal-sep" aria-hidden="true">·</span>

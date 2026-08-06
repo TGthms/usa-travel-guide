@@ -149,7 +149,9 @@ body.page-tools .tools-page .tool-card {
     height: 100%;
   }
 }
-/* Mini-app shell: content + footer, no forced full-viewport gap */
+/* Mini-app shell: content + footer.
+   Desktop may pin footer to the bottom of a short page; mobile must NOT —
+   that left a huge empty band above the footer (see user screenshots). */
 body.page-tools,
 body.page-gallery {
   display: flex;
@@ -163,22 +165,43 @@ body.page-gallery #main {
 }
 body.page-tools .gallery-app-footer,
 body.page-gallery .gallery-app-footer {
-  margin-top: auto;
   flex-shrink: 0;
+  margin-top: 28px;
+}
+@media (min-width: 861px) {
+  body.page-tools .gallery-app-footer,
+  body.page-gallery .gallery-app-footer {
+    margin-top: auto;
+  }
+}
+@media (max-width: 860px) {
+  body.page-tools,
+  body.page-gallery {
+    /* Grow with content; do not invent empty viewport chrome */
+    min-height: 0;
+  }
+  body.page-tools .gallery-app-footer,
+  body.page-gallery .gallery-app-footer {
+    margin-top: 20px;
+  }
 }
 @media (max-width: 640px) {
   body.page-tools .gallery-app-footer,
   body.page-gallery .gallery-app-footer {
     gap: 12px;
-    padding-top: 20px;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    padding-top: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
   body.page-tools .gallery-app-footer-row,
   body.page-gallery .gallery-app-footer-row {
     gap: 10px;
   }
   body.page-tools #tools.tools-page {
-    padding-bottom: 32px;
+    padding-bottom: 20px;
+  }
+  body.page-gallery #gallery,
+  body.page-tools #tools.tools-page {
+    padding-bottom: 24px;
   }
 }
 body.page-tools .tools-page .tool-card .settings-group-label {
