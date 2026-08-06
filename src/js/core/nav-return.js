@@ -1,18 +1,37 @@
 'use strict';
 /* USA Travel Guide — cross-page return context (scroll + back label)
-   Stamp outbound navigations from Guide / Tools hub; restore on return.
+   Stamp outbound navigations; restore contextual Back on destination pages.
    Load after env.js; safe on all pages.
 
+   Return stack (prevents Weather ↔ Gallery loops):
+     · Forward nav (app bar, deep-links, etc.) pushes origin with optional parent
+     · Back chrome (.gallery-app-back / footer home) POPs parent — never re-stamps
+     · Guide → Weather → Gallery → Back → Weather shows Guide again
+
    Rules:
-     · Tools hub (tools.html) always “Back to the Guide” — never “Back to Tools”
-     · Tool mini-apps: Guide deep-link → Guide; hub → Tools
-     · Gallery / legal: same stamp; default Guide
-     · Header + footer home chrome stay in sync
+     · Guide → anywhere           → Back to the Guide
+     · Tools hub → mini/gallery   → Back to Tools
+     · Tool mini → Gallery/legal  → Back to that tool
+     · Tool mini → Tools hub      → do NOT overwrite stamp
+     · Gallery → tools            → Back to Gallery
+     · Tools hub Back: Guide or Gallery only (never Tools / mini-app)
+     · Tool mini default: Back to Tools when no stamp
 */
 
 (function () {
   var KEY = 'usa-travel-return-v1';
   var MAX_AGE_MS = 2 * 60 * 60 * 1000;
+  var MAX_PARENT_DEPTH = 6;
+
+  /** Short display names for “Back to {name}” (EN + es/zh/ja). */
+  var TOOL_SHORT = {
+    weather: { en: 'Weather', es: 'Tiempo', zh: '天气', ja: '天気' },
+    currency: { en: 'Currency', es: 'Divisas', zh: '货币', ja: '通貨' },
+    clock: { en: 'World Clock', es: 'Reloj mundial', zh: '世界时钟', ja: '世界時計' },
+    'tip-tax': { en: 'Tip & Tax', es: 'Propina e impuestos', zh: '小费与税', ja: 'チップと税' },
+    drive: { en: 'Road Trip', es: 'Viaje por carretera', zh: '自驾', ja: 'ロードトリップ' },
+    emergency: { en: 'Emergency', es: 'Emergencias', zh: '紧急电话', ja: '緊急連絡先' }
+  };
 
   function pathOf(href) {
     try {
@@ -34,14 +53,12 @@
     return /\/index\.html$/i.test(p) || p === '/' || /\/$/.test(p);
   }
 
-  /** Hub only — not tools-currency.html etc. */
   function isToolsHubPath(p) {
     return /\/tools\.html$/i.test(p || '') || fileOf(p).toLowerCase() === 'tools.html';
   }
 
-  /** tools-*.html mini-apps only (excludes tools.html hub) */
   function isToolMiniAppPath(p) {
-    return /\/tools-[a-z0-9]+\.html$/i.test(p || '');
+    return /\/tools-[a-z0-9-]+\.html$/i.test(p || '');
   }
 
   function isGalleryPath(p) {
@@ -52,18 +69,43 @@
     return /\/(privacy|terms)\.html$/i.test(p || '');
   }
 
-  /** Destinations that receive a return stamp */
-  function isStampableDest(p) {
-    return isToolMiniAppPath(p)
+  function isAppChromePage(p) {
+    return isGuidePath(p)
       || isToolsHubPath(p)
+      || isToolMiniAppPath(p)
       || isGalleryPath(p)
       || isLegalPath(p);
   }
 
-  function pageKindFromPath(p) {
-    if (isToolsHubPath(p)) return 'tools';
-    if (isGuidePath(p)) return 'guide';
-    return 'other';
+  function toolIdFromPath(p) {
+    var f = fileOf(p).toLowerCase();
+    var m = f.match(/^tools-([a-z0-9-]+)\.html$/);
+    return m ? m[1] : null;
+  }
+
+  function langCode() {
+    return (typeof currentLang === 'string' && currentLang) || 'en';
+  }
+
+  function dictText(key, fallback) {
+    var dict = typeof getI18nDict === 'function' ? getI18nDict(langCode()) : null;
+    if (dict && dict[key]) return dict[key];
+    return fallback;
+  }
+
+  function shortToolName(toolId) {
+    var map = TOOL_SHORT[toolId];
+    if (!map) return toolId || 'Tools';
+    var L = langCode();
+    return map[L] || map.en || toolId;
+  }
+
+  function backToNamed(name) {
+    var L = langCode();
+    if (L === 'zh') return '返回' + name;
+    if (L === 'ja') return name + 'に戻る';
+    if (L === 'es') return 'Volver a ' + name;
+    return 'Back to ' + name;
   }
 
   function readReturn() {
@@ -84,71 +126,178 @@
     } catch (e) { /* private mode */ }
   }
 
-  function dictText(key, fallback) {
-    var lang = typeof currentLang === 'string' ? currentLang : 'en';
-    var dict = typeof getI18nDict === 'function' ? getI18nDict(lang) : null;
-    if (dict && dict[key]) return dict[key];
-    return fallback;
+  function clearReturn() {
+    try { sessionStorage.removeItem(KEY); } catch (e) {}
+  }
+
+  /** Clone a stamp node for nesting as parent (bounded depth). */
+  function cloneAsParent(ret, depth) {
+    if (!ret || !ret.label || depth > MAX_PARENT_DEPTH) return null;
+    return {
+      label: ret.label,
+      href: ret.href || '',
+      toolId: ret.toolId || '',
+      scrollY: typeof ret.scrollY === 'number' ? ret.scrollY : 0,
+      parent: ret.parent ? cloneAsParent(ret.parent, depth + 1) : null,
+      ts: ret.ts || Date.now()
+    };
+  }
+
+  function originFromHere() {
+    var p = pathOf(location.href);
+    if (isGuidePath(p)) {
+      return { label: 'guide', href: 'index.html' };
+    }
+    if (isToolsHubPath(p)) {
+      return { label: 'tools', href: 'tools.html' };
+    }
+    if (isToolMiniAppPath(p)) {
+      var id = toolIdFromPath(p);
+      var file = fileOf(p) || ('tools-' + id + '.html');
+      return { label: 'tool', href: file, toolId: id || '' };
+    }
+    if (isGalleryPath(p)) {
+      return { label: 'gallery', href: 'gallery.html' };
+    }
+    if (isLegalPath(p)) {
+      return { label: 'legal', href: fileOf(p) || 'privacy.html' };
+    }
+    return null;
+  }
+
+  function isBackChromeLink(a) {
+    if (!a || !a.classList) return false;
+    return a.classList.contains('gallery-app-back')
+      || a.classList.contains('gallery-app-footer-home');
+  }
+
+  /**
+   * Following the Back control: pop the stack so the destination keeps its
+   * original parent (Guide → Weather → Gallery → Back → Weather shows Guide).
+   */
+  function popReturnOnBack(targetHref) {
+    var ret = readReturn();
+    var destFile = fileOf(targetHref).toLowerCase();
+
+    // Prefer popping when Back href matches current stamp target
+    if (ret && ret.href && String(ret.href).toLowerCase() === destFile) {
+      if (ret.parent && ret.parent.label) {
+        var p = cloneAsParent(ret.parent, 0);
+        if (p) {
+          p.ts = Date.now();
+          writeReturn(p);
+          return;
+        }
+      }
+      clearReturn();
+      return;
+    }
+
+    // Back went somewhere else — still pop if we have a parent chain, else clear
+    if (ret && ret.parent && ret.parent.label) {
+      var p2 = cloneAsParent(ret.parent, 0);
+      if (p2) {
+        p2.ts = Date.now();
+        writeReturn(p2);
+        return;
+      }
+    }
+    clearReturn();
   }
 
   function stampOutbound(targetHref) {
-    var fromPath = pathOf(location.href);
-    var kind = pageKindFromPath(fromPath);
-    if (kind === 'other') return;
+    var from = originFromHere();
+    if (!from) return;
+    var dest = pathOf(targetHref);
+    var here = pathOf(location.href);
+    if (!dest || dest === here) return;
+    if (!isAppChromePage(dest)) return;
+
+    // Mini-app → Tools hub: keep prior parent (Guide/Gallery)
+    if (from.label === 'tool' && isToolsHubPath(dest)) return;
+
+    // Tools hub → Guide: leaving tools tree
+    if (from.label === 'tools' && isGuidePath(dest)) return;
+
+    // Don't re-stamp if navigating to the current stamp target (edge cases)
+    var prev = readReturn();
+    if (prev && prev.href && String(prev.href).toLowerCase() === fileOf(dest).toLowerCase()
+        && prev.label === from.label && String(prev.href).toLowerCase() === String(from.href).toLowerCase()) {
+      return;
+    }
+
+    // Nest previous stamp as parent so Back can restore it
+    var parent = null;
+    if (prev && prev.label) {
+      // Avoid pointless self-parent (same origin)
+      var sameOrigin = prev.label === from.label
+        && String(prev.href || '').toLowerCase() === String(from.href || '').toLowerCase();
+      if (!sameOrigin) {
+        parent = cloneAsParent(prev, 0);
+      } else if (prev.parent) {
+        // Same surface re-exit: keep existing parent chain
+        parent = cloneAsParent(prev.parent, 0);
+      }
+    }
+
     writeReturn({
-      from: fromPath,
-      href: fileOf(fromPath) || (kind === 'guide' ? 'index.html' : 'tools.html'),
+      from: here,
+      href: from.href,
       scrollY: Math.round(window.scrollY || window.pageYOffset || 0),
-      label: kind === 'tools' ? 'tools' : 'guide',
+      label: from.label,
+      toolId: from.toolId || '',
+      parent: parent,
       ts: Date.now(),
-      to: pathOf(targetHref)
+      to: dest
     });
   }
 
-  /** Capture clicks on internal links leaving guide or tools hub */
   document.addEventListener('click', function (e) {
     var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
     if (!a) return;
     if (a.target === '_blank' || a.hasAttribute('download')) return;
     var href = a.getAttribute('href');
     if (!href || href.charAt(0) === '#' || /^(mailto|tel|javascript):/i.test(href)) return;
-    var dest = pathOf(href);
-    var here = pathOf(location.href);
-    if (dest === here) return;
-    var kind = pageKindFromPath(here);
-    if (kind === 'other') return;
-    if (!isStampableDest(dest)) return;
+    try {
+      var u = new URL(href, location.href);
+      if (u.origin === location.origin && pathOf(u.href) === pathOf(location.href) && u.hash) return;
+    } catch (err) { /* continue */ }
 
-    // Guide → hub / mini / gallery / legal
-    if (kind === 'guide') {
-      stampOutbound(href);
+    // Back chrome: pop stack, never stamp current page as new origin
+    if (isBackChromeLink(a)) {
+      popReturnOnBack(href);
       return;
     }
-    // Tools hub → mini / gallery / legal (not hub self)
-    if (kind === 'tools' && (isToolMiniAppPath(dest) || isGalleryPath(dest) || isLegalPath(dest))) {
-      stampOutbound(href);
-    }
+
+    stampOutbound(href);
   }, true);
 
-  function setChromeLink(el, href, i18nKey, enLabel) {
+  function setChromeLink(el, href, i18nKey, enLabel, plainLabel) {
     if (!el) return;
     el.setAttribute('href', href);
-    el.setAttribute('data-i18n-aria', i18nKey);
-    el.setAttribute('aria-label', dictText(i18nKey, enLabel));
+    var text = plainLabel != null ? plainLabel : dictText(i18nKey, enLabel);
+    if (i18nKey) {
+      el.setAttribute('data-i18n-aria', i18nKey);
+    } else {
+      el.removeAttribute('data-i18n-aria');
+    }
+    el.setAttribute('aria-label', text);
     var labelEl = el.querySelector('.gallery-app-back-label')
       || el.querySelector('[data-i18n]')
       || null;
     if (labelEl) {
-      labelEl.setAttribute('data-i18n', i18nKey);
-      labelEl.textContent = dictText(i18nKey, enLabel);
+      if (i18nKey && !plainLabel) {
+        labelEl.setAttribute('data-i18n', i18nKey);
+      } else {
+        labelEl.removeAttribute('data-i18n');
+      }
+      labelEl.textContent = text;
     }
   }
 
-  function applyGuideChrome(back, footer, i18nKey) {
-    var key = i18nKey || 'gallery.backToGuide';
-    var en = 'Back to the Guide';
-    setChromeLink(back, 'index.html', key, en);
-    if (footer) setChromeLink(footer, 'index.html', key, en);
+  function applyGuideChrome(back, footer) {
+    setChromeLink(back, 'index.html', 'gallery.backToGuide', 'Back to the Guide');
+    if (footer) setChromeLink(footer, 'index.html', 'gallery.backToGuide', 'Back to the Guide');
   }
 
   function applyToolsChrome(back, footer) {
@@ -156,40 +305,132 @@
     if (footer) setChromeLink(footer, 'tools.html', 'tools.backToTools', 'Back to Tools');
   }
 
+  function applyGalleryChrome(back, footer) {
+    var label = dictText('gallery.backToGallery', 'Back to Gallery');
+    setChromeLink(back, 'gallery.html', 'gallery.backToGallery', 'Back to Gallery', label);
+    if (footer) setChromeLink(footer, 'gallery.html', 'gallery.backToGallery', 'Back to Gallery', label);
+  }
+
+  function applyToolChrome(back, footer, ret) {
+    var href = (ret && ret.href) || 'tools.html';
+    if (!/^tools-[a-z0-9-]+\.html$/i.test(href)) {
+      applyToolsChrome(back, footer);
+      return;
+    }
+    var toolId = (ret && ret.toolId) || toolIdFromPath(href) || '';
+    var name = shortToolName(toolId);
+    var label = backToNamed(name);
+    setChromeLink(back, href, null, label, label);
+    if (footer) setChromeLink(footer, href, null, label, label);
+  }
+
+  function applyLegalChrome(back, footer, ret) {
+    var href = (ret && ret.href) || 'index.html';
+    if (!/^(privacy|terms)\.html$/i.test(href)) {
+      applyGuideChrome(back, footer);
+      return;
+    }
+    var label = backToNamed(href.indexOf('terms') >= 0
+      ? dictText('nav.terms', 'Terms')
+      : dictText('nav.privacy', 'Privacy'));
+    setChromeLink(back, href, null, label, label);
+    if (footer) setChromeLink(footer, href, null, label, label);
+  }
+
+  function applyStampChrome(back, footer, ret, opts) {
+    opts = opts || {};
+    if (!ret || !ret.label) return false;
+    var hereFile = fileOf(pathOf(location.href)).toLowerCase();
+    if (ret.href && String(ret.href).toLowerCase() === hereFile) return false;
+
+    if (ret.label === 'guide') {
+      applyGuideChrome(back, footer);
+      return true;
+    }
+    if (ret.label === 'tools') {
+      if (opts.forbidTools) return false;
+      applyToolsChrome(back, footer);
+      return true;
+    }
+    if (ret.label === 'gallery') {
+      if (opts.forbidGallery) return false;
+      applyGalleryChrome(back, footer);
+      return true;
+    }
+    if (ret.label === 'tool') {
+      if (opts.forbidTool) return false;
+      applyToolChrome(back, footer, ret);
+      return true;
+    }
+    if (ret.label === 'legal') {
+      applyLegalChrome(back, footer, ret);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * If the stamp's target IS the page we're on, we already "arrived" —
+   * promote parent (or clear). Covers browser Back and missed pop clicks.
+   */
+  function normalizeStampForCurrentPage() {
+    var hereFile = fileOf(pathOf(location.href)).toLowerCase();
+    if (!hereFile) return;
+    var guard = 0;
+    while (guard++ < MAX_PARENT_DEPTH) {
+      var ret = readReturn();
+      if (!ret || !ret.href) return;
+      if (String(ret.href).toLowerCase() !== hereFile) return;
+      // Stamp pointed at us → restore parent journey
+      if (ret.parent && ret.parent.label) {
+        var p = cloneAsParent(ret.parent, 0);
+        if (p) {
+          p.ts = Date.now();
+          writeReturn(p);
+          continue;
+        }
+      }
+      clearReturn();
+      return;
+    }
+  }
+
   function applyReturnChrome() {
     var back = document.querySelector('a.gallery-app-back');
     var footer = document.querySelector('a.gallery-app-footer-home');
     if (!back && !footer) return;
 
+    normalizeStampForCurrentPage();
+
     var here = pathOf(location.href);
-
-    // ── Tools hub: always Back to the Guide (never “Back to Tools”) ──
-    if (isToolsHubPath(here)) {
-      applyGuideChrome(back, footer, 'tools.backToGuide');
-      return;
-    }
-
     var ret = readReturn();
 
-    // Tool mini-apps: contextual; default markup is Tools if no / other stamp
-    if (isToolMiniAppPath(here)) {
-      if (ret && ret.label === 'guide') {
-        applyGuideChrome(back, footer, 'gallery.backToGuide');
-      } else if (ret && ret.label === 'tools') {
-        applyToolsChrome(back, footer);
+    // Tools hub: Guide or Gallery only
+    if (isToolsHubPath(here)) {
+      if (ret && ret.label === 'gallery') {
+        applyGalleryChrome(back, footer);
+      } else {
+        setChromeLink(back, 'index.html', 'tools.backToGuide', 'Back to the Guide');
+        if (footer) setChromeLink(footer, 'index.html', 'tools.backToGuide', 'Back to the Guide');
       }
-      // else: leave HTML defaults (Back to Tools)
       return;
     }
 
-    // Gallery / legal: default Guide; tools stamp → Tools
-    if (isGalleryPath(here) || isLegalPath(here)) {
-      if (ret && ret.label === 'tools') {
-        applyToolsChrome(back, footer);
-      } else if (ret && ret.label === 'guide') {
-        applyGuideChrome(back, footer, 'gallery.backToGuide');
-      }
-      // else markup default Guide
+    if (isToolMiniAppPath(here)) {
+      if (applyStampChrome(back, footer, ret, {})) return;
+      applyToolsChrome(back, footer);
+      return;
+    }
+
+    if (isGalleryPath(here)) {
+      if (applyStampChrome(back, footer, ret, { forbidGallery: true })) return;
+      applyGuideChrome(back, footer);
+      return;
+    }
+
+    if (isLegalPath(here)) {
+      if (applyStampChrome(back, footer, ret, {})) return;
+      applyGuideChrome(back, footer);
     }
   }
 
@@ -234,6 +475,8 @@
   window.__usaTravelNavReturn = {
     stamp: stampOutbound,
     read: readReturn,
-    apply: applyReturnChrome
+    apply: applyReturnChrome,
+    pop: popReturnOnBack,
+    clear: clearReturn
   };
 })();

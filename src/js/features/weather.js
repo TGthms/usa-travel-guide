@@ -11,6 +11,9 @@
      · Auto-refresh every 10 min while document.visibilityState === 'visible'
      · Auto fully paused (timer cleared) when tab hidden/inactive; resume refreshes if stale
      · Auto/detail use quiet mode (list stays; no progress lock)
+     · List/main view: static sky (no rain loops); detail view keeps full animated FX
+     · Charts: scrub on hover; pointer leave/up resets to current hour
+     · Major city names: static CITY_NAMES map (en/es/zh/ja)
 
    Overlay contract (stability):
      · hoistOverlays() once → detail + sheet on <body>, sheet after detail
@@ -78,6 +81,90 @@
     { name: 'Anchorage', admin1: 'Alaska', lat: 61.2181, lon: -149.9003, tz: 'America/Anchorage' }
   ];
 
+  /**
+   * Localized major-city display names (static — no network).
+   * Keys match cityKey() = lat.toFixed(3)+','+lon.toFixed(3)
+   */
+  const CITY_NAMES = {
+    '40.713,-74.006': { en: 'New York', es: 'Nueva York', zh: '纽约', ja: 'ニューヨーク' },
+    '34.052,-118.244': { en: 'Los Angeles', es: 'Los Ángeles', zh: '洛杉矶', ja: 'ロサンゼルス' },
+    '41.878,-87.630': { en: 'Chicago', es: 'Chicago', zh: '芝加哥', ja: 'シカゴ' },
+    '29.760,-95.370': { en: 'Houston', es: 'Houston', zh: '休斯顿', ja: 'ヒューストン' },
+    '33.448,-112.074': { en: 'Phoenix', es: 'Phoenix', zh: '凤凰城', ja: 'フェニックス' },
+    '39.953,-75.165': { en: 'Philadelphia', es: 'Filadelfia', zh: '费城', ja: 'フィラデルフィア' },
+    '29.424,-98.494': { en: 'San Antonio', es: 'San Antonio', zh: '圣安东尼奥', ja: 'サンアントニオ' },
+    '32.716,-117.161': { en: 'San Diego', es: 'San Diego', zh: '圣地亚哥', ja: 'サンディエゴ' },
+    '32.777,-96.797': { en: 'Dallas', es: 'Dallas', zh: '达拉斯', ja: 'ダラス' },
+    '37.338,-121.886': { en: 'San Jose', es: 'San José', zh: '圣何塞', ja: 'サンノゼ' },
+    '30.267,-97.743': { en: 'Austin', es: 'Austin', zh: '奥斯汀', ja: 'オースティン' },
+    '30.332,-81.656': { en: 'Jacksonville', es: 'Jacksonville', zh: '杰克逊维尔', ja: 'ジャクソンビル' },
+    '37.775,-122.419': { en: 'San Francisco', es: 'San Francisco', zh: '旧金山', ja: 'サンフランシスコ' },
+    '39.961,-82.999': { en: 'Columbus', es: 'Columbus', zh: '哥伦布', ja: 'コロンバス' },
+    '35.227,-80.843': { en: 'Charlotte', es: 'Charlotte', zh: '夏洛特', ja: 'シャーロット' },
+    '39.768,-86.158': { en: 'Indianapolis', es: 'Indianápolis', zh: '印第安纳波利斯', ja: 'インディアナポリス' },
+    '47.606,-122.332': { en: 'Seattle', es: 'Seattle', zh: '西雅图', ja: 'シアトル' },
+    '39.739,-104.990': { en: 'Denver', es: 'Denver', zh: '丹佛', ja: 'デンバー' },
+    '38.907,-77.037': { en: 'Washington', es: 'Washington D. C.', zh: '华盛顿', ja: 'ワシントン' },
+    '42.360,-71.059': { en: 'Boston', es: 'Boston', zh: '波士顿', ja: 'ボストン' },
+    '36.163,-86.782': { en: 'Nashville', es: 'Nashville', zh: '纳什维尔', ja: 'ナッシュビル' },
+    '42.331,-83.046': { en: 'Detroit', es: 'Detroit', zh: '底特律', ja: 'デトロイト' },
+    '45.515,-122.678': { en: 'Portland', es: 'Portland', zh: '波特兰', ja: 'ポートランド' },
+    '36.170,-115.140': { en: 'Las Vegas', es: 'Las Vegas', zh: '拉斯维加斯', ja: 'ラスベガス' },
+    '35.150,-90.049': { en: 'Memphis', es: 'Memphis', zh: '孟菲斯', ja: 'メンフィス' },
+    '38.253,-85.758': { en: 'Louisville', es: 'Louisville', zh: '路易斯维尔', ja: 'ルイビル' },
+    '39.290,-76.612': { en: 'Baltimore', es: 'Baltimore', zh: '巴尔的摩', ja: 'ボルチモア' },
+    '43.039,-87.906': { en: 'Milwaukee', es: 'Milwaukee', zh: '密尔沃基', ja: 'ミルウォーキー' },
+    '35.084,-106.650': { en: 'Albuquerque', es: 'Albuquerque', zh: '阿尔伯克基', ja: 'アルバカーキ' },
+    '32.223,-110.975': { en: 'Tucson', es: 'Tucson', zh: '图森', ja: 'ツーソン' },
+    '36.738,-119.787': { en: 'Fresno', es: 'Fresno', zh: '弗雷斯诺', ja: 'フレズノ' },
+    '38.582,-121.494': { en: 'Sacramento', es: 'Sacramento', zh: '萨克拉门托', ja: 'サクラメント' },
+    '33.749,-84.388': { en: 'Atlanta', es: 'Atlanta', zh: '亚特兰大', ja: 'アトランタ' },
+    '25.762,-80.192': { en: 'Miami', es: 'Miami', zh: '迈阿密', ja: 'マイアミ' },
+    '29.951,-90.072': { en: 'New Orleans', es: 'Nueva Orleans', zh: '新奥尔良', ja: 'ニューオーリンズ' },
+    '44.978,-93.265': { en: 'Minneapolis', es: 'Minneapolis', zh: '明尼阿波利斯', ja: 'ミネアポリス' },
+    '40.761,-111.891': { en: 'Salt Lake City', es: 'Salt Lake City', zh: '盐湖城', ja: 'ソルトレイクシティ' },
+    '21.307,-157.858': { en: 'Honolulu', es: 'Honolulu', zh: '火奴鲁鲁', ja: 'ホノルル' },
+    '61.218,-149.900': { en: 'Anchorage', es: 'Anchorage', zh: '安克雷奇', ja: 'アンカレッジ' }
+  };
+
+  /** Localized US state / region labels for list meta line */
+  const ADMIN1_NAMES = {
+    'New York': { es: 'Nueva York', zh: '纽约州', ja: 'ニューヨーク州' },
+    'California': { es: 'California', zh: '加利福尼亚州', ja: 'カリフォルニア州' },
+    'Illinois': { es: 'Illinois', zh: '伊利诺伊州', ja: 'イリノイ州' },
+    'Texas': { es: 'Texas', zh: '得克萨斯州', ja: 'テキサス州' },
+    'Arizona': { es: 'Arizona', zh: '亚利桑那州', ja: 'アリゾナ州' },
+    'Pennsylvania': { es: 'Pensilvania', zh: '宾夕法尼亚州', ja: 'ペンシルベニア州' },
+    'Florida': { es: 'Florida', zh: '佛罗里达州', ja: 'フロリダ州' },
+    'Ohio': { es: 'Ohio', zh: '俄亥俄州', ja: 'オハイオ州' },
+    'North Carolina': { es: 'Carolina del Norte', zh: '北卡罗来纳州', ja: 'ノースカロライナ州' },
+    'Indiana': { es: 'Indiana', zh: '印第安纳州', ja: 'インディアナ州' },
+    'Washington': { es: 'Washington', zh: '华盛顿州', ja: 'ワシントン州' },
+    'Colorado': { es: 'Colorado', zh: '科罗拉多州', ja: 'コロラド州' },
+    'District of Columbia': { es: 'Distrito de Columbia', zh: '哥伦比亚特区', ja: 'コロンビア特別区' },
+    'Massachusetts': { es: 'Massachusetts', zh: '马萨诸塞州', ja: 'マサチューセッツ州' },
+    'Tennessee': { es: 'Tennessee', zh: '田纳西州', ja: 'テネシー州' },
+    'Michigan': { es: 'Míchigan', zh: '密歇根州', ja: 'ミシガン州' },
+    'Oregon': { es: 'Oregón', zh: '俄勒冈州', ja: 'オレゴン州' },
+    'Nevada': { es: 'Nevada', zh: '内华达州', ja: 'ネバダ州' },
+    'Kentucky': { es: 'Kentucky', zh: '肯塔基州', ja: 'ケンタッキー州' },
+    'Maryland': { es: 'Maryland', zh: '马里兰州', ja: 'メリーランド州' },
+    'Wisconsin': { es: 'Wisconsin', zh: '威斯康星州', ja: 'ウィスコンシン州' },
+    'New Mexico': { es: 'Nuevo México', zh: '新墨西哥州', ja: 'ニューメキシコ州' },
+    'Georgia': { es: 'Georgia', zh: '佐治亚州', ja: 'ジョージア州' },
+    'Louisiana': { es: 'Luisiana', zh: '路易斯安那州', ja: 'ルイジアナ州' },
+    'Minnesota': { es: 'Minnesota', zh: '明尼苏达州', ja: 'ミネソタ州' },
+    'Utah': { es: 'Utah', zh: '犹他州', ja: 'ユタ州' },
+    'Hawaii': { es: 'Hawái', zh: '夏威夷', ja: 'ハワイ' },
+    'Alaska': { es: 'Alaska', zh: '阿拉斯加州', ja: 'アラスカ州' }
+  };
+
+  /**
+   * Main list + page canvas: static visuals (no rain/particle loops) for performance.
+   * City detail keeps full animated FX (rain, storm, ornaments) as before.
+   */
+  const WEATHER_STATIC_LIST_FX = true;
+
   const WMO = {
     0: { en: 'Clear', es: 'Despejado', zh: '晴', ja: '快晴' },
     1: { en: 'Mainly clear', es: 'Mayormente despejado', zh: '大部晴朗', ja: 'ほぼ晴れ' },
@@ -91,6 +178,8 @@
     61: { en: 'Light rain', es: 'Lluvia ligera', zh: '小雨', ja: '弱い雨' },
     63: { en: 'Rain', es: 'Lluvia', zh: '雨', ja: '雨' },
     65: { en: 'Heavy rain', es: 'Lluvia intensa', zh: '大雨', ja: '強い雨' },
+    66: { en: 'Freezing rain', es: 'Lluvia helada', zh: '冻雨', ja: '着氷性の雨' },
+    67: { en: 'Heavy freezing rain', es: 'Lluvia helada intensa', zh: '强冻雨', ja: '強い着氷性の雨' },
     71: { en: 'Light snow', es: 'Nieve ligera', zh: '小雪', ja: '弱い雪' },
     73: { en: 'Snow', es: 'Nieve', zh: '雪', ja: '雪' },
     75: { en: 'Heavy snow', es: 'Nieve intensa', zh: '大雪', ja: '大雪' },
@@ -618,15 +707,16 @@
     const isPrecipFx = s.fx === 'rain' || s.fx === 'storm' || s.fx === 'snow';
     el.style.setProperty('--wx-cloud-op', isPrecipFx ? '0.9' : ((code >= 2 && code < 50) ? '0.85' : (s.fx === 'clear' || s.fx === 'clear-dawn' || s.fx === 'clear-dusk') ? '0.22' : '0.55'));
 
-    // Rain opacity: clearly visible, but capped below the old ~0.78 “static” peak
+    // List rows: static (no rain particles). Detail view: full animated FX.
+    const listStatic = WEATHER_STATIC_LIST_FX && isRow;
     const intensity = precipIntensity(code || 0, opts.precipMm);
     const rowScale = isRow ? 0.55 : 1;
     let rainOp = 0;
-    if (intensity > 0) {
+    if (!listStatic && intensity > 0) {
       if (level === 'reduced') {
         rainOp = Math.min(0.42, 0.28 + intensity * 0.2) * rowScale;
       } else {
-        // Light ~0.35 → heavy ~0.58 (was up to 0.78 — that caused discomfort)
+        // Light ~0.35 → heavy ~0.58 (capped for comfort)
         rainOp = Math.min(0.58, 0.32 + intensity * 0.32) * rowScale;
       }
     }
@@ -638,7 +728,11 @@
       el.style.setProperty('--wx-fx-bg-2', 'none');
       el.style.setProperty('--wx-fx-opacity', '0');
       el.style.setProperty('--wx-rain-opacity', '0');
-      if (!opts.noOrnaments) paintSkyMode(el, code || 0, isoTime, { hour, seed, isRow, intensity });
+      if (!opts.noOrnaments) {
+        paintSkyMode(el, code || 0, isoTime, {
+          hour, seed, isRow, intensity, staticFx: true
+        });
+      }
       return;
     }
     // Soft atmospheric base (mist/veil) — particles are separate ornaments
@@ -664,7 +758,11 @@
     el.style.setProperty('--wx-fx-bg', fx);
     el.style.setProperty('--wx-fx-bg-2', fx2);
     el.style.setProperty('--wx-fx-opacity', level === 'reduced' ? String(op * 0.55) : String(op));
-    if (!opts.noOrnaments) paintSkyMode(el, code || 0, isoTime, { hour, seed, isRow, intensity });
+    if (!opts.noOrnaments) {
+      paintSkyMode(el, code || 0, isoTime, {
+        hour, seed, isRow, intensity, staticFx: listStatic
+      });
+    }
   }
 
   /** Page canvas: time-of-day + theme gradient — independent of city weather cards. */
@@ -1935,7 +2033,7 @@
     main.className = 'weather-row-main';
     main.innerHTML = `
         <div class="weather-row-city">${escapeHtml(displayCityName(c))}</div>
-        <div class="weather-row-meta">${escapeHtml(localTime)}${c.admin1 ? ' · ' + escapeHtml(c.admin1) : ''}</div>
+        <div class="weather-row-meta">${escapeHtml(localTime)}${c.admin1 ? ' · ' + escapeHtml(displayAdmin1(c)) : ''}</div>
         ${statusLine}`;
 
     const temps = document.createElement('div');
@@ -2520,7 +2618,7 @@
       '', sunViz, true, true));
 
     // Apple-style location attribution
-    const placeBits = [displayCityName(c), c.admin1, c.country || (c.admin1 ? '' : '')].filter(Boolean);
+    const placeBits = [displayCityName(c), displayAdmin1(c), c.country || (c.admin1 ? '' : '')].filter(Boolean);
     // Majors are US — append country label when missing
     if (!c.country && MAJOR.some((m) => sameCity(m, c))) {
       placeBits.push(countryLabelUS());
@@ -2664,11 +2762,30 @@
     if (!c) return '';
     const L = lang();
     if (c.names && c.names[L]) return c.names[L];
-    // Lookup major by coordinates
+    if (c.names && c.names.en && L === 'en') return c.names.en;
+    // Static major-city map (instant, offline)
     const key = cityKey(c);
+    const staticNames = CITY_NAMES[key];
+    if (staticNames) {
+      if (staticNames[L]) return staticNames[L];
+      if (staticNames.en) return staticNames.en;
+    }
+    // Geocode cache fallback (search results / sparse fills)
     const cached = nameCache.get(L + ':' + key);
     if (cached) return cached;
     return c.name || '';
+  }
+
+  /** Localized admin1 / state label when we have a mapping. */
+  function displayAdmin1(c) {
+    if (!c) return '';
+    const raw = c.admin1 || '';
+    if (!raw) return '';
+    const L = lang();
+    if (L === 'en') return raw;
+    const hit = ADMIN1_NAMES[raw];
+    if (hit && hit[L]) return hit[L];
+    return raw;
   }
 
   // lang → "lat,lon" → localized name
@@ -2676,51 +2793,28 @@
   let nameFetchTimer = 0;
   let namesFetching = false;
 
+  /** Seed nameCache from static CITY_NAMES for all languages (instant, offline). */
+  function seedStaticCityNames() {
+    MAJOR.forEach(function (c) {
+      const key = cityKey(c);
+      const sn = CITY_NAMES[key];
+      if (!sn) return;
+      ['en', 'es', 'zh', 'ja'].forEach(function (L) {
+        if (sn[L]) nameCache.set(L + ':' + key, sn[L]);
+      });
+    });
+  }
+
   async function ensureLocalizedMajorNames() {
-    const L = lang();
-    if (L === 'en' || namesFetching) return;
-    namesFetching = true;
-    try {
-      // Batch a few at a time to avoid hammering geocode
-      const pending = MAJOR.filter((c) => !nameCache.has(L + ':' + cityKey(c)));
-      for (let i = 0; i < pending.length; i++) {
-        const c = pending[i];
-        const k = L + ':' + cityKey(c);
-        try {
-          const data = await fetchJson(
-            `${GEOCODE}?name=${encodeURIComponent(c.name)}&count=3&language=${L === 'zh' ? 'zh' : L}&format=json`
-          );
-          const results = data.results || [];
-          // Prefer nearest match to known lat/lon
-          let best = results[0];
-          let bestD = Infinity;
-          results.forEach((r) => {
-            const d = Math.abs(r.latitude - c.lat) + Math.abs(r.longitude - c.lon);
-            if (d < bestD) { bestD = d; best = r; }
-          });
-          if (best && best.name) nameCache.set(k, best.name);
-          else nameCache.set(k, c.name);
-        } catch (e) {
-          nameCache.set(k, c.name);
-        }
-        // Small yield every few requests
-        if (i % 4 === 3) await new Promise((r) => setTimeout(r, 80));
-      }
-      // Persist lightly
-      try {
-        const obj = {};
-        nameCache.forEach((v, k) => { if (k.startsWith(L + ':')) obj[k] = v; });
-        sessionStorage.setItem('usa-travel-wx-names-' + L, JSON.stringify(obj));
-      } catch (e) {}
-      // Never re-paint during locked bootstrap; names apply on next unlock paint
-      if (cache.size && !listPaintLocked) refreshListsFromCache({ skipAmbient: true });
-    } finally {
-      namesFetching = false;
-    }
+    // Majors use static CITY_NAMES — no geocode fan-out (avoids rate limits + English flash)
+    seedStaticCityNames();
+    if (cache.size && !listPaintLocked) refreshListsFromCache({ skipAmbient: true });
   }
 
   function loadNameCacheFromSession() {
-    ['es', 'zh', 'ja'].forEach((L) => {
+    seedStaticCityNames();
+    // Optional: keep any search-result names previously cached
+    ['es', 'zh', 'ja', 'en'].forEach((L) => {
       try {
         const raw = sessionStorage.getItem('usa-travel-wx-names-' + L);
         if (!raw) return;
@@ -2806,8 +2900,15 @@
       + ' L' + first.x.toFixed(1) + ',' + (H - padB).toFixed(1)
       + ' Z';
     const id = 'wxChart' + Math.random().toString(36).slice(2, 8);
-    // Default scrub position near “now” (first third) like Apple
-    const mid = pts[Math.min(pts.length - 1, Math.max(0, Math.floor(pts.length * 0.22)))];
+    // Default scrub = sample closest to current time
+    const nowMs = Date.now();
+    let midIdx = 0;
+    let midBest = Infinity;
+    for (let mi = 0; mi < pts.length; mi++) {
+      const d = Math.abs(new Date(pts[mi].t).getTime() - nowMs);
+      if (d < midBest) { midBest = d; midIdx = mi; }
+    }
+    const mid = pts[midIdx];
     const payload = pts.map((p) => ({ x: p.x, y: p.y, v: p.v, t: p.t }));
     // Subtle horizontal rules
     let grids = '';
@@ -2869,8 +2970,16 @@
       const padT = Number(wrap.getAttribute('data-padt')) || 12;
       const padB = Number(wrap.getAttribute('data-padb')) || 26;
       const vh = Number(wrap.getAttribute('data-vh')) || 176;
-      let idx0 = Math.min(pts.length - 1, Math.max(0, Math.floor(pts.length * 0.22)));
-      let curPt = pts[idx0];
+      // Default = sample closest to current clock time
+      const nowMs = Date.now();
+      let idxNow = 0;
+      let bestNow = Infinity;
+      for (let i = 0; i < pts.length; i++) {
+        const d = Math.abs(new Date(pts[i].t).getTime() - nowMs);
+        if (d < bestNow) { bestNow = d; idxNow = i; }
+      }
+      const defaultPt = pts[idxNow];
+      let curPt = defaultPt;
       const formatVal = (v) => {
         if (kind === 'temperature_2m' || kind === 'apparent_temperature') return fmtTemp(v);
         if (kind === 'surface_pressure') return fmtPress(v);
@@ -2895,7 +3004,10 @@
         if (sub) sub.textContent = formatClock(pt.t);
         curPt = pt;
       };
-      paintImmediate(curPt.x, curPt.y, curPt);
+      const resetToNow = () => {
+        paintImmediate(defaultPt.x, defaultPt.y, defaultPt);
+      };
+      resetToNow();
       const scrub = (clientX) => {
         const rect = svg.getBoundingClientRect();
         if (!rect.width) return;
@@ -2929,15 +3041,21 @@
       };
       hit.style.touchAction = 'none';
       hit.style.cursor = 'ew-resize';
-      // Hover + drag follow immediately
+      // Hover + drag follow immediately; leave/up → snap back to current time
       hit.addEventListener('pointerdown', (e) => {
         hit.setPointerCapture && hit.setPointerCapture(e.pointerId);
         onMove(e);
       });
       hit.addEventListener('pointermove', onMove);
       hit.addEventListener('pointerenter', onMove);
+      hit.addEventListener('pointerup', resetToNow);
+      hit.addEventListener('pointercancel', resetToNow);
+      hit.addEventListener('pointerleave', resetToNow);
+      hit.addEventListener('lostpointercapture', resetToNow);
       svg.addEventListener('pointermove', onMove);
       svg.addEventListener('mousemove', onMove);
+      svg.addEventListener('pointerleave', resetToNow);
+      svg.addEventListener('mouseleave', resetToNow);
     });
   }
 
@@ -3720,6 +3838,12 @@
     else if ((c >= 71 && c < 80) || (c >= 85 && c < 90)) mode = 'snow';
     else if (c >= 2 && c <= 3) mode = night ? 'night' : 'cloud';
     else if (c === 45 || c === 48) mode = 'cloud';
+    // List-only static: demote rain/storm/snow modes so particle layers stay off
+    if (opts.staticFx || (WEATHER_STATIC_LIST_FX && opts.isRow)) {
+      if (mode === 'rain' || mode === 'storm' || mode === 'snow') {
+        mode = night ? 'night' : 'cloud';
+      }
+    }
     host.classList.remove('wx-sky--day', 'wx-sky--night', 'wx-sky--cloud', 'wx-sky--rain', 'wx-sky--storm', 'wx-sky--snow');
     host.classList.add('wx-sky--' + mode);
     if (opts.isRow) host.classList.add('wx-sky--row');
@@ -3835,13 +3959,18 @@
         const admin = [r.admin1, r.country].filter(Boolean).join(', ');
         btn.innerHTML = `<div class="s-name">${escapeHtml(r.name)}</div><div class="s-meta">${escapeHtml(admin)}</div>`;
         btn.addEventListener('click', async () => {
+          const L = lang();
           const city = {
             name: r.name,
+            names: {},
             admin1: r.admin1 || r.country || '',
             lat: r.latitude,
             lon: r.longitude,
             tz: r.timezone
           };
+          city.names[L] = r.name;
+          city.names.en = r.name;
+          try { nameCache.set(L + ':' + cityKey(city), r.name); } catch (e2) {}
           closeSuggest();
           if (searchEl) searchEl.value = r.name;
           if (searchClear) {

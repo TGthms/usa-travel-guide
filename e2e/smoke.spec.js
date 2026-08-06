@@ -471,6 +471,89 @@ test.describe('USA Travel Guide smoke', () => {
       expect(href).toMatch(/index\.html/i);
       expect(label).toMatch(/guide|guía|指南|ガイド/i);
     });
+
+    test('tool mini-app → Gallery → Back to that tool', async ({ page }) => {
+      await blockLiveWeatherApis(page);
+      await page.goto('/tools-weather.html');
+      await waitLoaderGone(page);
+      await waitAppReady(page);
+      // Jump to Gallery via app-bar
+      await page.locator('a.nav-tool-btn[href="gallery.html"], a[href="gallery.html"]').first().click();
+      await page.waitForURL(/gallery\.html/);
+      await waitLoaderGone(page);
+      const { href, label } = await backChrome(page);
+      expect(href).toMatch(/tools-weather\.html/i);
+      expect(label).toMatch(/weather|tiempo|天气|天気/i);
+      expect(label).not.toMatch(/guide|guía|指南|ガイド/i);
+    });
+
+    test('Guide → Weather → Gallery → Back does not loop', async ({ page }) => {
+      await blockLiveWeatherApis(page);
+      // Guide deep-link to weather
+      await page.goto('/index.html');
+      await waitLoaderGone(page);
+      await waitAppReady(page);
+      const wxLink = page.locator('a.guide-tool-link[href="tools-weather.html"], a.seasons-weather-cta[href="tools-weather.html"]').first();
+      await wxLink.scrollIntoViewIfNeeded();
+      await wxLink.click();
+      await page.waitForURL(/tools-weather\.html/);
+      await waitLoaderGone(page);
+      let chrome = await backChrome(page);
+      expect(chrome.href).toMatch(/index\.html/i);
+      expect(chrome.label).toMatch(/guide|guía|指南|ガイド/i);
+
+      // Weather → Gallery
+      await page.locator('a.nav-tool-btn[href="gallery.html"], a[href="gallery.html"]').first().click();
+      await page.waitForURL(/gallery\.html/);
+      await waitLoaderGone(page);
+      chrome = await backChrome(page);
+      expect(chrome.href).toMatch(/tools-weather\.html/i);
+      expect(chrome.label).toMatch(/weather|tiempo|天气|天気/i);
+
+      // Gallery → Back to Weather: must restore Guide, not loop to Gallery
+      await page.locator('a.gallery-app-back').first().click();
+      await page.waitForURL(/tools-weather\.html/);
+      await waitLoaderGone(page);
+      chrome = await backChrome(page);
+      expect(chrome.href).toMatch(/index\.html/i);
+      expect(chrome.label).toMatch(/guide|guía|指南|ガイド/i);
+      expect(chrome.href).not.toMatch(/gallery/i);
+      expect(chrome.label).not.toMatch(/gallery|galería|图库|ギャラリー/i);
+
+      // One more hop: Gallery again then back — still Guide, never loop
+      await page.locator('a.nav-tool-btn[href="gallery.html"], a[href="gallery.html"]').first().click();
+      await page.waitForURL(/gallery\.html/);
+      await page.locator('a.gallery-app-back').first().click();
+      await page.waitForURL(/tools-weather\.html/);
+      await waitLoaderGone(page);
+      chrome = await backChrome(page);
+      expect(chrome.href).toMatch(/index\.html/i);
+      expect(chrome.label).toMatch(/guide|guía|指南|ガイド/i);
+    });
+
+    test('tools hub → Gallery → Back to Tools', async ({ page }) => {
+      await page.goto('/tools.html');
+      await waitLoaderGone(page);
+      await waitAppReady(page);
+      await page.locator('a[href="gallery.html"]').first().click();
+      await page.waitForURL(/gallery\.html/);
+      await waitLoaderGone(page);
+      const { href, label } = await backChrome(page);
+      expect(href).toMatch(/tools\.html/i);
+      expect(label).toMatch(/tools|herramientas|工具|ツール/i);
+    });
+
+    test('gallery → tools hub → Back to Gallery', async ({ page }) => {
+      await page.goto('/gallery.html');
+      await waitLoaderGone(page);
+      await waitAppReady(page);
+      await page.locator('a[href="tools.html"]').first().click();
+      await page.waitForURL(/tools\.html/);
+      await waitLoaderGone(page);
+      const { href, label } = await backChrome(page);
+      expect(href).toMatch(/gallery\.html/i);
+      expect(label).toMatch(/gallery|galería|图库|ギャラリー/i);
+    });
   });
 
   test('modal opens for a destination and closes with Escape', async ({ page }) => {

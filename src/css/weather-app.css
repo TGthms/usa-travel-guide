@@ -913,8 +913,33 @@ html.has-fine-pointer .region-card:hover .region-desc {
 .weather-attribution { color: rgba(255,255,255,.45) !important; }
 
 @media (max-width: 640px) {
-  .weather-toolbar { flex-direction: column !important; align-items: stretch !important; }
-  .weather-toolbar-actions { justify-content: flex-start; }
+  .weather-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    flex-wrap: nowrap !important;
+  }
+  /* Prevent search wrap from flex-growing (orphan 🔍 mid-screen on mobile) */
+  .weather-toolbar .weather-search-wrap {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    align-self: stretch;
+  }
+  .weather-search-icon {
+    /* Pin to 48px input height — not 50% of a stretched wrap */
+    top: 24px !important;
+    transform: translateY(-50%) !important;
+  }
+  .weather-search-clear {
+    top: 24px !important;
+  }
+  .weather-toolbar-actions {
+    width: 100%;
+    justify-content: flex-start !important;
+    flex-wrap: wrap;
+    flex: 0 0 auto !important;
+  }
 }
 .weather-chart {
   width: 100%;
@@ -2914,4 +2939,54 @@ html[data-theme="glass"] .weather-page-sky {
   inset: 0;
   height: 100%;
   min-height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Weather MAIN LIST only: static visuals (performance)
+   City detail (#weatherDetail / .weather-detail-sky) keeps full animated FX.
+   ═══════════════════════════════════════════════════════════════════ */
+/* Page ambient canvas behind the list */
+body.page-tools:has(.weather-root) .weather-page-sky,
+body.page-tools:has(.weather-root) .weather-page-sky::before,
+body.page-tools:has(.weather-root) .weather-page-sky::after,
+body.page-tools:has(.weather-root) .weather-page-sky .wx-page-blob,
+body.page-tools:has(.weather-root) .weather-page-sky .wx-page-sun,
+body.page-tools:has(.weather-root) .weather-page-sky .wx-page-glow {
+  animation: none !important;
+  will-change: auto !important;
+}
+body.page-tools:has(.weather-root) .weather-page-sky::before,
+body.page-tools:has(.weather-root) .weather-page-sky::after {
+  transform: none !important;
+}
+body.page-tools:has(.weather-root) .weather-page-sky .wx-page-blob {
+  transform: none !important;
+}
+/* City list cards — static gradients, no particle rain/snow/lightning */
+body.page-tools:has(.weather-root) .weather-row,
+body.page-tools:has(.weather-root) .weather-row.wx-sky--row,
+body.page-tools:has(.weather-root) .weather-row .wx-ornament,
+body.page-tools:has(.weather-root) .weather-row .wx-cloud,
+body.page-tools:has(.weather-root) .weather-row .wx-sun,
+body.page-tools:has(.weather-root) .weather-row .wx-moon,
+body.page-tools:has(.weather-root) .weather-row .wx-stars {
+  animation: none !important;
+  will-change: auto !important;
+}
+body.page-tools:has(.weather-root) .weather-row .wx-rain,
+body.page-tools:has(.weather-root) .weather-row .wx-snow,
+body.page-tools:has(.weather-root) .weather-row .wx-lightning {
+  opacity: 0 !important;
+  display: none !important;
+  animation: none !important;
+}
+/* Explicitly allow detail FX (overrides any broad rules; detail is outside .weather-row) */
+body.page-tools:has(.weather-root) .weather-detail .wx-rain,
+body.page-tools:has(.weather-root) .weather-detail-sky .wx-rain,
+body.page-tools:has(.weather-root) .weather-detail .wx-snow,
+body.page-tools:has(.weather-root) .weather-detail-sky .wx-snow,
+body.page-tools:has(.weather-root) .weather-detail .wx-lightning,
+body.page-tools:has(.weather-root) .weather-detail-sky .wx-lightning {
+  display: block !important;
+  /* opacity controlled by --wx-rain-opacity / mode classes in weather.js */
 }
