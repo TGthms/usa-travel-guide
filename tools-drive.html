@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Travel tools for the USA — currency, world clock, tip & sales tax, road-trip costs, weather, and emergency numbers.">
-<link rel="canonical" href="https://travelusa.pages.dev/tools.html">
+<meta name="description" content="Gas or EV road-trip cost and drive time calculator.">
+<link rel="canonical" href="https://travelusa.pages.dev/tools-drive.html">
 <meta name="theme-color" content="#07101c">
 <meta name="color-scheme" content="dark light">
-<title>Travel Tools — America, A Travel Guide by Tim G</title>
+<title>Road Trip Cost — America, A Travel Guide by Tim G</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23060b18'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='%23e8a435'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="America — A Travel Guide">
-<meta property="og:title" content="Travel Tools">
-<meta property="og:description" content="Travel tools for the USA — currency, world clock, tip & sales tax, road-trip costs, weather, and emergency numbers.">
-<meta property="og:url" content="https://travelusa.pages.dev/tools.html">
+<meta property="og:title" content="Road Trip Cost">
+<meta property="og:description" content="Gas or EV road-trip cost and drive time calculator.">
+<meta property="og:url" content="https://travelusa.pages.dev/tools-drive.html">
 <meta property="og:image" content="https://travelusa.pages.dev/images/og-tools.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,8 +48,8 @@
 <a class="skip-link" href="#main">Skip to main content</a>
 <div id="progress-bar"></div>
 <div id="loader">
-  <div class="loader-flag loader-flag-svg"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/></svg></div>
-  <div class="loader-text">Tools</div>
+  <div class="loader-flag loader-flag-svg"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5"/><path d="M5 13h14v5H5z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/></svg></div>
+  <div class="loader-text">Drive</div>
   <div class="loader-sub">Preparing...</div>
   <div class="loader-bar"><div class="loader-fill"></div></div>
 </div>
@@ -67,78 +67,44 @@
   </div>
 </div>
 <header id="navbar" class="gallery-app-bar" role="banner">
-  <a href="index.html" class="gallery-app-back" data-i18n-aria="tools.backToGuide" aria-label="Back to the Guide">
+  <a href="tools.html" class="gallery-app-back" data-i18n-aria="tools.backToTools" aria-label="Back to Tools">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
-    <span class="gallery-app-back-label" data-i18n="tools.backToGuide">Back to the Guide</span>
+    <span class="gallery-app-back-label" data-i18n="tools.backToTools">Back to Tools</span>
   </a>
   <div class="gallery-app-title" aria-current="page">
-    <span class="gallery-app-mark gallery-app-mark-svg" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/></svg></span>
-    <span data-i18n="nav.tools">Tools</span>
+    <span class="gallery-app-mark gallery-app-mark-svg" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5"/><path d="M5 13h14v5H5z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/></svg></span>
+    <span data-i18n="tools.driveLabel">Road Trip Cost</span>
   </div>
   <div class="nav-actions gallery-app-actions">
+    <a href="tools.html" class="nav-tool-btn" data-i18n-aria="nav.tools" aria-label="Travel tools" title="Tools"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/></svg></a>
     <a href="gallery.html" class="nav-tool-btn" data-i18n-aria="nav.gallery" aria-label="Photo gallery" title="Gallery"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></a>
     <button class="nav-settings-btn" id="settingsOpen" type="button" aria-haspopup="dialog" aria-controls="settingsOverlay" data-i18n-aria="nav.settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
 </header>
 <main id="main" tabindex="-1">
-<section id="tools" class="tools-page tools-hub-page" aria-labelledby="toolsTitle">
-  <div class="section-header tools-app-header reveal">
-    <div>
-      <span class="section-eyebrow" data-i18n="tools.eyebrow">Travel Tools</span>
-      <h2 id="toolsTitle" data-i18n-html="tools.heading">Plan With <em>Confidence</em></h2>
-    </div>
-    <p data-i18n="tools.intro">Currency, clocks, tip &amp; sales tax, road costs, weather, and emergency numbers — open a tool to get started.</p>
+<section id="tools" class="tools-page tools-detail-page tools-miniapp" aria-labelledby="toolsTitle" data-tool="drive">
+  <p class="tools-miniapp-sub reveal" data-i18n="tools.driveSub">Drive time and fuel or EV energy cost for your route.</p>
+  <div class="tools-miniapp-body reveal" id="driveToolCard" data-drive-mode="gas">
+    <div class="tool-form stacked">
+        <div class="tool-seg" role="group" aria-label="Vehicle type">
+          <button type="button" class="tool-seg-btn active" data-drive-type="gas" data-i18n="tools.driveGas">Gas</button>
+          <button type="button" class="tool-seg-btn" data-drive-type="ev" data-i18n="tools.driveEv">EV</button>
+        </div>
+        <label class="tool-field"><span data-i18n="tools.driveDist">Distance</span><input id="driveDist" type="number" min="0" step="1" value="400" inputmode="decimal"></label>
+        <label class="tool-field"><span data-i18n="tools.driveSpeed">Avg speed</span><input id="driveSpeed" type="number" min="1" step="1" value="60" inputmode="decimal"></label>
+        <div class="tool-two-col drive-gas-field">
+          <label class="tool-field"><span id="driveEconLabel" data-i18n="tools.driveMpg">MPG / L/100km</span><input id="driveMpg" type="number" min="0.1" step="0.1" value="28" inputmode="decimal"></label>
+          <label class="tool-field"><span id="drivePriceLabel" data-i18n="tools.driveFuel">Fuel $/gal or $/L</span><input id="driveFuel" type="number" min="0" step="0.01" value="3.80" inputmode="decimal"></label>
+        </div>
+        <div class="tool-two-col drive-ev-field">
+          <label class="tool-field"><span id="driveEvEconLabel" data-i18n="tools.driveEvEcon">mi/kWh or kWh/100km</span><input id="driveEvEcon" type="number" min="0.1" step="0.1" value="3.5" inputmode="decimal"></label>
+          <label class="tool-field"><span data-i18n="tools.driveEvPrice">Electricity $/kWh</span><input id="driveEvPrice" type="number" min="0" step="0.01" value="0.16" inputmode="decimal"></label>
+        </div>
+      </div>
+      <div class="tool-result tool-result-sm" id="driveResult" aria-live="polite">—</div>
+      <div class="tool-meta" id="driveMeta"></div>
   </div>
-  <div class="tools-hub-grid">
-    <a href="tools-currency.html" class="tools-hub-card reveal">
-      <span class="tools-hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c.5-1 1.5-1.5 2.5-1.5s2 .6 2 1.75-1 1.75-2.5 2.25-2.5.9-2.5 2.25 1 1.75 2.5 1.75 2-.5 2.5-1.5"/></svg></span>
-      <span class="tools-hub-body">
-        <span class="tools-hub-title" data-i18n="tools.currencyLabel">Live Currency Converter</span>
-        <span class="tools-hub-blurb" data-i18n="tools.currencySub">Convert USD and other major currencies with daily rates.</span>
-      </span>
-      <span class="tools-hub-chevron" aria-hidden="true">→</span>
-    </a>
-    <a href="tools-clock.html" class="tools-hub-card reveal">
-      <span class="tools-hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
-      <span class="tools-hub-body">
-        <span class="tools-hub-title" data-i18n="tools.clockLabel">World Clock</span>
-        <span class="tools-hub-blurb" data-i18n="tools.clockSub">Key time zones for planning calls, arrivals, and check-ins.</span>
-      </span>
-      <span class="tools-hub-chevron" aria-hidden="true">→</span>
-    </a>
-    <a href="tools-tip-tax.html" class="tools-hub-card reveal">
-      <span class="tools-hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/><path d="M12 11v4M10 13h4"/></svg></span>
-      <span class="tools-hub-body">
-        <span class="tools-hub-title" data-i18n="tools.tipLabel">Tip & Sales Tax</span>
-        <span class="tools-hub-blurb" data-i18n="tools.tipSub">State sales tax estimates plus tip for restaurants and purchases.</span>
-      </span>
-      <span class="tools-hub-chevron" aria-hidden="true">→</span>
-    </a>
-    <a href="tools-drive.html" class="tools-hub-card reveal">
-      <span class="tools-hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5"/><path d="M5 13h14v5H5z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/></svg></span>
-      <span class="tools-hub-body">
-        <span class="tools-hub-title" data-i18n="tools.driveLabel">Road Trip Cost</span>
-        <span class="tools-hub-blurb" data-i18n="tools.driveSub">Drive time and fuel or EV energy cost for your route.</span>
-      </span>
-      <span class="tools-hub-chevron" aria-hidden="true">→</span>
-    </a>
-    <a href="tools-emergency.html" class="tools-hub-card reveal">
-      <span class="tools-hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 14H4L12 3z"/><path d="M12 10v3M12 16h.01"/></svg></span>
-      <span class="tools-hub-body">
-        <span class="tools-hub-title" data-i18n="tools.emergencyLabel">Useful Numbers</span>
-        <span class="tools-hub-blurb" data-i18n="tools.emergencySub">Emergency and traveler numbers to keep handy in the U.S.</span>
-      </span>
-      <span class="tools-hub-chevron" aria-hidden="true">→</span>
-    </a>
-    <a href="tools-weather.html" class="tools-hub-card reveal">
-      <span class="tools-hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>
-      <span class="tools-hub-body">
-        <span class="tools-hub-title" data-i18n="tools.weatherLabel">Weather</span>
-        <span class="tools-hub-blurb" data-i18n="tools.weatherSub">U.S. cities, forecasts, air quality — live via Open-Meteo.</span>
-      </span>
-      <span class="tools-hub-chevron" aria-hidden="true">→</span>
-    </a>
-  </div>
+  <h2 id="toolsTitle" class="visually-hidden" data-i18n="tools.driveLabel">Road Trip Cost</h2>
 </section>
 </main>
 <div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="settingsTitle">
@@ -251,13 +217,13 @@
 </div>
 <footer class="gallery-app-footer">
   <div class="gallery-app-footer-row">
-    <a href="index.html" class="gallery-app-footer-home">
-      <span aria-hidden="true">✦</span>
-      <span data-i18n="tools.backToGuide">Back to the Guide</span>
+    <a href="tools.html" class="gallery-app-footer-home">
+      <span aria-hidden="true">←</span>
+      <span data-i18n="tools.backToTools">Back to Tools</span>
     </a>
     <p class="gallery-app-footer-copy" data-i18n-html="footer.copyright">© {year} USA Travel Guide · Created by Tim G</p>
     <div class="footer-social gallery-app-footer-links">
-      <a href="gallery.html" class="footer-about-link" data-i18n="nav.gallery">Gallery</a>
+      <a href="index.html" class="footer-about-link" data-i18n="tools.backToGuide">Guide</a>
     </div>
   </div>
   <div class="footer-legal-links" role="navigation" aria-label="Legal">

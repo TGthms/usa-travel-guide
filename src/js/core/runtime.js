@@ -160,6 +160,7 @@ function applyLanguage(lang) {
   // Gallery chrome (placeholders / open lightbox) — function is declared later and hoisted.
   if (typeof refreshGalleryLanguageChrome === 'function') refreshGalleryLanguageChrome();
   if (typeof refreshFunFact === 'function') refreshFunFact();
+  if (typeof window.refreshWeatherUi === 'function') window.refreshWeatherUi();
   // Dest filter empty-state key can change at runtime (Saved vs region). Re-sync so
   // English restore doesn't snap back to the original region empty message.
   if (typeof window.syncDestFilterUi === 'function') window.syncDestFilterUi();
@@ -385,6 +386,9 @@ function applyMotionModeToDom() {
   document.documentElement.setAttribute('data-motion-effective', effective);
   // Legacy flag: only fully-off matches the old hard cut
   document.documentElement.setAttribute('data-reduce-motion', effective === 'off' ? 'true' : 'false');
+  if (typeof window.refreshWeatherUi === 'function') {
+    try { window.refreshWeatherUi(); } catch (e) {}
+  }
 }
 
 applyMotionModeToDom();
@@ -428,6 +432,10 @@ function applyThemePreference(preferred, { persist = false } = {}) {
   document.documentElement.setAttribute('data-theme', preferred);
   applyThemeChrome(preferred);
   updateThemeUI(preferred);
+  // Weather page sky is theme-dependent — update live without full reload
+  if (typeof window.refreshWeatherUi === 'function') {
+    try { window.refreshWeatherUi(); } catch (e) {}
+  }
 }
 themeSwatches.forEach(sw => {
   sw.addEventListener('click', () => {
@@ -1038,3 +1046,29 @@ document.addEventListener('keydown', e => {
   }
 })();
 
+
+
+/* Hybrid tablet / mouse: enable fine-pointer hover when a real mouse moves */
+(function initFinePointerHover() {
+  const root = document.documentElement;
+  const mq = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)');
+  const apply = (on) => {
+    try {
+      if (on) root.classList.add('has-fine-pointer');
+      else root.classList.remove('has-fine-pointer');
+    } catch (e) {}
+  };
+  if (mq) {
+    apply(mq.matches);
+    if (mq.addEventListener) mq.addEventListener('change', (e) => apply(e.matches));
+    else if (mq.addListener) mq.addListener((e) => apply(e.matches));
+  }
+  // First real mouse move also enables (covers iPadOS + trackpad quirks)
+  const onMove = (e) => {
+    if (e && e.pointerType === 'mouse') {
+      apply(true);
+      window.removeEventListener('pointermove', onMove, true);
+    }
+  };
+  window.addEventListener('pointermove', onMove, true);
+})();

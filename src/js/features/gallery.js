@@ -43,13 +43,18 @@ const GALLERY_PLACEHOLDER_TEXT = {
 // attributes (aspect-ratio) so lazy-load never reflows the masonry or moves
 // neighbors. We deliberately do NOT re-pack columns when a thumb finishes —
 // that was the "photos magically jump while scrolling" bug.
+/** Lock tile box aspect ratio from HTML width/height (stable before decode).
+ *  Image uses object-fit:cover to fill the box — no side letterboxing. */
 function applyGalleryAspectRatio(img, item) {
-  if (!img) return;
+  if (!img || !item) return;
   const aw = parseFloat(img.getAttribute('width') || '') || 0;
   const ah = parseFloat(img.getAttribute('height') || '') || 0;
   if (aw > 0 && ah > 0) {
-    img.style.aspectRatio = `${aw} / ${ah}`;
-    if (item) item.style.aspectRatio = `${aw} / ${ah}`;
+    item.style.aspectRatio = `${aw} / ${ah}`;
+    return;
+  }
+  if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+    item.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
   }
 }
 
@@ -61,10 +66,9 @@ function watchImageLoad(img) {
     img.classList.add('loaded');
     if (item) {
       item.classList.add('img-ready');
-      // Prefer measured size only if attributes were missing (keeps layout stable).
-      if (!img.style.aspectRatio && img.naturalWidth > 0 && img.naturalHeight > 0) {
-        img.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
-        item.style.aspectRatio = img.style.aspectRatio;
+      // Fill in aspect only if attrs were missing (layout was already stable when attrs present).
+      if (!item.style.aspectRatio && img.naturalWidth > 0 && img.naturalHeight > 0) {
+        item.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
       }
       if (item.getBoundingClientRect().top < window.innerHeight + 80) {
         item.classList.add('is-revealed', 'in-view');
@@ -540,6 +544,7 @@ applyGalleryVisibility({ animate: false });
 // --- Lightbox ---
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
+const lightboxVideo = document.getElementById('lightboxVideo');
 const lightboxCaption = document.getElementById('lightboxCaption');
 const lightboxMeta = document.getElementById('lightboxMeta');
 const lightboxCounter = document.getElementById('lightboxCounter');
@@ -547,6 +552,76 @@ const lightboxCloseBtn = document.getElementById('lightboxClose');
 const lightboxNextBtn = document.getElementById('lightboxNext');
 const lightboxPrevBtn = document.getElementById('lightboxPrev');
 const lightboxHdBtn = document.getElementById('lightboxHdBtn');
+
+const VIDEO_BADGE_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>';
+
+function isGalleryVideoItem(item) {
+  if (!item) return false;
+  if (item.getAttribute('data-media') === 'video') return true;
+  const img = item.querySelector('img');
+  return !!(img && img.getAttribute('data-video'));
+}
+
+function galleryVideoSrc(itemOrImg) {
+  if (!itemOrImg) return '';
+  const img = itemOrImg.tagName === 'IMG' ? itemOrImg : itemOrImg.querySelector('img');
+  if (!img) return '';
+  return (img.getAttribute('data-video') || '').trim();
+}
+
+function ensureVideoBadge(item) {
+  if (!item || !isGalleryVideoItem(item) || item.querySelector('.gallery-video-badge')) return;
+  const badge = document.createElement('span');
+  badge.className = 'gallery-video-badge';
+  badge.setAttribute('aria-hidden', 'true');
+  const label = (typeof getI18nDict === 'function' && getI18nDict(currentLang)
+    && getI18nDict(currentLang)['gallery.videoBadge'])
+    || (currentLang === 'es' ? 'Vídeo' : currentLang === 'zh' ? '视频' : currentLang === 'ja' ? 'ビデオ' : 'Video');
+  badge.innerHTML = VIDEO_BADGE_SVG + '<span data-i18n="gallery.videoBadge">' + label + '</span>';
+  item.appendChild(badge);
+}
+
+function stopLightboxVideo() {
+  if (!lightboxVideo) return;
+  try {
+    lightboxVideo.pause();
+    lightboxVideo.removeAttribute('src');
+    lightboxVideo.load();
+  } catch (e) { /* ignore */ }
+  lightboxVideo.hidden = true;
+}
+
+function showLightboxMediaMode(mode) {
+  // mode: 'photo' | 'video'
+  if (lightboxImg) {
+    if (mode === 'video') {
+      lightboxImg.hidden = true;
+      lightboxImg.setAttribute('hidden', '');
+      lightboxImg.removeAttribute('src');
+      lightboxImg.removeAttribute('data-full-src');
+      lightboxImg.removeAttribute('data-loaded-tier');
+      lightboxImg.classList.remove('is-loading');
+    } else {
+      lightboxImg.hidden = false;
+      lightboxImg.removeAttribute('hidden');
+    }
+  }
+  if (lightboxVideo) {
+    if (mode !== 'video') {
+      stopLightboxVideo();
+      lightboxVideo.hidden = true;
+      lightboxVideo.setAttribute('hidden', '');
+    } else {
+      lightboxVideo.hidden = false;
+      lightboxVideo.removeAttribute('hidden');
+    }
+  }
+  if (lightboxHdBtn && mode === 'video') {
+    lightboxHdBtn.hidden = true;
+    lightboxHdBtn.classList.remove('is-loading');
+  }
+  setLightboxProgressUI({ visible: false });
+}
 
 function galleryFullSrc(img) {
   if (!img) return '';
@@ -811,9 +886,10 @@ function lbProgBeginDecode(estimatedBytes) {
 
   // Estimate how long decode/render should take from payload size.
   // Multi‑MB full JPEGs often spend several seconds in decode on mid devices.
+  // Slightly stretched so the bottom bar tracks long full-quality waits (not fake delay after ready).
   const mb = estimatedBytes > 0 ? estimatedBytes / (1024 * 1024) : 5;
-  // Primary climb duration: ~1.6s for small, up to ~12s for huge files
-  lbProgDecodeExpected = Math.min(12, Math.max(1.6, 1.1 + mb * 0.85));
+  // Primary climb: ~2.2s small → ~16s huge full files
+  lbProgDecodeExpected = Math.min(16, Math.max(2.2, 1.6 + mb * 1.15));
 
   if (lbProgDecodeTimer) clearInterval(lbProgDecodeTimer);
   lbProgDecodeTimer = setInterval(() => {
@@ -835,7 +911,7 @@ function lbProgBeginDecode(estimatedBytes) {
       // Phase B — overtime: slow crawl toward LB_DECODE_CAP, never freezes.
       // Over 0→∞ maps to 0→1 of remaining 94→98 band.
       const over = t - lbProgDecodeExpected;
-      const crawlFrac = 1 - Math.exp(-over / 5.5); // ~half of tail in ~4s
+      const crawlFrac = 1 - Math.exp(-over / 7.5); // slower overtime crawl for long full waits
       curved = LB_DECODE_MID + (LB_DECODE_CAP - LB_DECODE_MID) * crawlFrac;
       lbProgMsgKey = over > 1.2 ? 'almost' : 'preparing';
     }
@@ -1214,6 +1290,28 @@ function showLightboxPhoto(index, { fromNav = false, force = false, forceTier = 
     lightboxHdBtn.classList.remove('is-loading');
   }
 
+  // Videos: play the file as-is with native controls (no tiered quality ladder).
+  const videoSrc = galleryVideoSrc(item);
+  if (isGalleryVideoItem(item) && videoSrc && lightboxVideo) {
+    showLightboxMediaMode('video');
+    const poster = galleryThumbSrc(img) || galleryPreferredSrc(img, 'medium') || '';
+    if (poster) lightboxVideo.setAttribute('poster', poster);
+    else lightboxVideo.removeAttribute('poster');
+    if (lightboxVideo.getAttribute('src') !== videoSrc) {
+      lightboxVideo.src = videoSrc;
+    }
+    lightboxVideo.hidden = false;
+    try { lightboxVideo.currentTime = 0; } catch (e) { /* ignore */ }
+    // Autoplay when allowed; user can always use controls.
+    const playPromise = lightboxVideo.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => { /* autoplay blocked — controls remain */ });
+    }
+    return;
+  }
+
+  showLightboxMediaMode('photo');
+
   const thumb = galleryThumbSrc(img);
   const preferredTier = forceTier || galleryQuality || 'medium';
   const preferred = forceTier === 'full'
@@ -1290,7 +1388,9 @@ function closeLightbox() {
   lightbox.setAttribute('aria-hidden', 'true');
   // Abort download + free the displayed full bitmap when the viewer closes.
   cancelLightboxLoad();
+  stopLightboxVideo();
   if (lightboxImg) {
+    lightboxImg.hidden = false;
     lightboxImg.removeAttribute('src');
     lightboxImg.removeAttribute('data-full-src');
     lightboxImg.removeAttribute('data-loaded-tier');
@@ -1346,6 +1446,7 @@ function openGalleryItem(item) {
 }
 
 document.querySelectorAll('.gallery-item').forEach((item) => {
+  ensureVideoBadge(item);
   item.addEventListener('click', () => openGalleryItem(item));
   // role="button" tiles must open on Enter/Space (matches destination cards).
   // preventDefault stops the browser from also synthesizing a click after Space.

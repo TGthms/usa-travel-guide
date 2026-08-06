@@ -57,7 +57,7 @@
 <div id="progress-bar"></div>
 
 <div id="loader">
-  <div class="loader-flag">📷</div>
+  <div class="loader-flag loader-flag-svg"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
   <div class="loader-text">Gallery</div>
   <div class="loader-sub">Preparing...</div>
   <div class="loader-bar"><div class="loader-fill"></div></div>
@@ -616,7 +616,7 @@
       <img src="images/gallery/thumbs/newyorknewyorkhotelcasino.jpeg" data-thumb="images/gallery/thumbs/newyorknewyorkhotelcasino.jpeg" data-medium="images/gallery/medium/newyorknewyorkhotelcasino.jpeg" data-full="images/gallery/newyorknewyorkhotelcasino.jpeg" width="675" height="900" alt="New York-New York Hotel &amp; Casino" loading="lazy" decoding="async">
       <div class="gallery-caption" data-i18n="gallery.item.newyorknewyorkhotelcasino.caption">New York-New York Hotel &amp; Casino</div>
     </div>
-    <!-- GALLERY_MANAGER_INSERT -->
+<!-- GALLERY_MANAGER_INSERT -->
   </div>
   <p class="gallery-empty-state" id="galleryEmptyState" data-i18n="gallery.emptyState" role="status">No photos in this category yet — check back soon.</p>
 </section>
@@ -630,6 +630,7 @@
   <div class="lightbox-stage">
     <div class="lightbox-frame">
       <img class="lightbox-img" id="lightboxImg" src="" alt="" decoding="async" fetchpriority="high">
+      <video class="lightbox-video" id="lightboxVideo" controls playsinline preload="metadata" hidden></video>
       <div class="lightbox-progress" id="lightboxProgress" hidden aria-live="polite" aria-atomic="true">
         <div class="lightbox-progress-track" aria-hidden="true">
           <div class="lightbox-progress-fill" id="lightboxProgressFill"></div>

@@ -42,7 +42,8 @@ window.LEGAL_I18N = {
           title: 'What we collect',
           html: `<p>Depending on how you use the Site, the following may be involved:</p>
 <ul>
-<li><strong>Preferences you choose.</strong> Theme, language, units (temperature/distance), motion and cursor preferences, and gallery photo quality may be saved on your device using browser storage (such as <code>localStorage</code>). These settings stay on your device unless you clear site data.</li>
+<li><strong>Preferences you choose.</strong> Theme, language, units (temperature/distance), weather unit preferences (wind, precipitation, pressure), motion and cursor preferences, and gallery photo quality may be saved on your device using browser storage (such as <code>localStorage</code>). These settings stay on your device unless you clear site data.</li>
+<li><strong>Optional location (Weather tool only).</strong> If you tap “Use my location,” your browser may ask for permission. We only need an <strong>approximate</strong> position for the forecast (weather grids are not street-level). Before any request is made, coordinates are rounded on your device to about <strong>1 kilometer</strong> (roughly two decimal places of latitude/longitude). That rounded value may be sent to the weather data provider and may be saved in your browser’s local storage so your “My Location” card can reload. We do not receive or store precise GPS tracks on our servers. You can deny permission and still search cities by name.</li>
 <li><strong>Technical data processed by your browser or host.</strong> Like most websites, standard request information (for example IP address, browser type, and requested URLs) may be processed by the service that hosts or delivers the Site (for example a static host or CDN) for delivery, security, and reliability. We do not operate a separate advertising profile from this Site.</li>
 <li><strong>Information you send voluntarily.</strong> If you contact us (for example via GitHub or an external about page), we receive what you choose to include in that message.</li>
 <li><strong>No account system.</strong> The Site does not require registration, passwords, or payment information for normal use of the guide, gallery, or tools.</li>
@@ -53,7 +54,7 @@ window.LEGAL_I18N = {
           title: 'How we use information',
           html: `<ul>
 <li>To remember your display and accessibility preferences between visits on the same browser.</li>
-<li>To provide interactive tools (for example currency conversion, which may call a third-party rate API).</li>
+<li>To provide interactive tools (for example currency conversion, weather forecasts, and air quality), which may call third-party APIs.</li>
 <li>To operate, secure, and improve delivery of the Site through hosting infrastructure.</li>
 <li>To respond if you contact us.</li>
 </ul>
@@ -71,6 +72,8 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>Fonts.</strong> Web fonts may be loaded from Google Fonts so text displays correctly across languages. That request may include technical data such as your IP address, subject to Google’s policies.</li>
 <li><strong>Exchange rates (Tools).</strong> The currency converter may request rates from a public API (for example Frankfurter). Only the currency codes needed for the conversion are sent for that request.</li>
+<li><strong>Weather &amp; air quality (Tools).</strong> The Weather tool may request forecast and air-quality data from Open-Meteo (or a compatible provider). Requests typically include the coordinates or place name you selected. If you use “Use my location,” coordinates are rounded on your device to about <strong>1 km</strong> before the forecast request and before any local storage of that place. Optional browser geolocation is sent only if you allow it. Weather data is for general travel guidance only—not for emergencies or life-safety decisions.</li>
+<li><strong>Gallery media.</strong> Photos and videos in the Gallery are static files hosted with the Site. Playing a video loads that file in your browser; no separate analytics SDK is required for playback.</li>
 <li><strong>External / outbound links.</strong> For convenience, the Site includes links to third-party websites—including official city tourism bureaus, public-transit agencies, National Park Service pages, museums, GitHub, About Me, and similar resources (for example “Helpful links” on destination cards). Clicking such a link leaves the Site and takes you to a service we do not operate. Those operators may collect information under their own privacy policies; this policy does not cover them. We do not receive your activity on those external sites by virtue of the link alone, and a link does not mean we endorse or control that third party.</li>
 </ul>`
         },
@@ -84,6 +87,7 @@ window.LEGAL_I18N = {
           title: 'Your choices',
           html: `<ul>
 <li>Change theme, language, units, motion, and gallery quality anytime in <strong>Settings</strong>.</li>
+<li>Deny or revoke location permission in your browser if you do not want the Weather tool to use geolocation.</li>
 <li>Clear site data in your browser to remove locally stored preferences.</li>
 <li>Disable network access to third-party font or API hosts if you prefer; some features may degrade.</li>
 <li>Contact us (below) with privacy questions about this Site.</li>
@@ -172,6 +176,8 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>Fuentes tipográficas.</strong> Pueden cargarse fuentes web desde Google Fonts para mostrar correctamente el texto en varios idiomas. Esa solicitud puede incluir datos técnicos como tu dirección IP, sujetos a las políticas de Google.</li>
 <li><strong>Tipos de cambio (Herramientas).</strong> El conversor de divisas puede solicitar cotizaciones a una API pública (por ejemplo, Frankfurter). Solo se envían los códigos de moneda necesarios para la conversión.</li>
+<li><strong>Tiempo y calidad del aire (Herramientas).</strong> La herramienta de tiempo puede solicitar previsiones y calidad del aire a Open-Meteo (o un proveedor compatible). Las solicitudes suelen incluir las coordenadas o el lugar que elijas. Si usas “Usar mi ubicación”, las coordenadas se redondean en tu dispositivo a unos <strong>1 km</strong> de precisión antes de pedirse la previsión o guardarse en el almacenamiento local del navegador. La geolocalización del navegador solo se usa si la permites. Los datos son orientativos, no para emergencias.</li>
+<li><strong>Medios de la galería.</strong> Fotos y vídeos se sirven como archivos estáticos del Sitio. Reproducir un vídeo descarga ese archivo en tu navegador.</li>
 <li><strong>Enlaces a sitios externos.</strong> Para tu comodidad, el Sitio incluye enlaces a sitios de terceros —oficinas oficiales de turismo, agencias de transporte, páginas del National Park Service, museos, GitHub, “Sobre mí” y recursos similares (por ejemplo, “Enlaces útiles” en las tarjetas de destinos). Al seguir un enlace de ese tipo, abandonas el Sitio y pasas a un servicio que no operamos. Esos operadores pueden recopilar información conforme a sus propias políticas de privacidad; esta política no los cubre. El simple hecho de que exista un enlace no nos da acceso a tu actividad en esos sitios, ni implica que respaldemos o controlemos a ese tercero.</li>
 </ul>`
         },
@@ -273,6 +279,8 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>字体。</strong>为正确显示多语言文字，可能从 Google Fonts 加载网络字体。相关请求可能包含 IP 地址等技术数据，并受 Google 相关政策约束。</li>
 <li><strong>汇率（工具页）。</strong>货币换算器可能向公开接口（例如 Frankfurter）请求汇率，且仅发送完成换算所需的货币代码。</li>
+<li><strong>天气与空气质量（工具页）。</strong>天气工具可能向 Open-Meteo（或兼容服务）请求预报与空气质量。请求通常包含你选择的坐标或地点。若使用“使用我的位置”，会在你的设备上将坐标<strong>约化到约 1 公里</strong>精度后再请求预报，并可能保存在浏览器本地存储中。仅在你授权时才会使用浏览器定位。天气数据仅供出行参考，不适用于紧急情况。</li>
+<li><strong>相册媒体。</strong>相册中的照片与视频作为本站静态文件提供。播放视频会在浏览器中加载该文件。</li>
 <li><strong>站外链接。</strong>为方便规划行程，本网站会提供指向第三方网站的链接，例如城市官方旅游网站、公共交通机构、美国国家公园管理局页面、博物馆、GitHub、“关于我”，以及目的地卡片中的“实用链接”等。点击此类链接即离开本网站，进入我们不运营的服务。那些运营方可能按其自身隐私政策处理信息；本政策不适用于它们。链接本身并不会让我们获知你在外部网站上的活动，也不表示我们认可或控制该第三方。</li>
 </ul>`
         },
@@ -374,6 +382,8 @@ window.LEGAL_I18N = {
 <ul>
 <li><strong>フォント。</strong>多言語を正しく表示するため、Google Fonts からウェブフォントを読み込むことがあります。その際、IP アドレス等の技術データが含まれる場合があり、Google の方針が適用されます。</li>
 <li><strong>為替（ツール）。</strong>通貨換算は、公開 API（例：Frankfurter）にレートを問い合わせることがあります。換算に必要な通貨コードのみを送信します。</li>
+<li><strong>天気と大気質（ツール）。</strong>天気ツールは Open-Meteo（または互換サービス）に予報・大気質を問い合わせることがあります。リクエストには選択した座標や地名が含まれます。「現在地を使う」では、端末上で座標を約 <strong>1 km</strong> 精度に丸めてから予報を取得し、ブラウザのローカル保存に残す場合があります。ブラウザの位置情報は許可した場合のみ使用します。データは旅行の参考用であり、緊急判断には使えません。</li>
+<li><strong>ギャラリーのメディア。</strong>写真と動画はサイトの静的ファイルとして配信されます。動画再生時はブラウザがそのファイルを読み込みます。</li>
 <li><strong>外部サイトへのリンク。</strong>便宜のため、本サイトは第三者ウェブサイトへのリンクを含みます（都市の公式観光サイト、公共交通機関、National Park Service のページ、博物館、GitHub、About Me、目的地カードの「役立つリンク」など）。そのようなリンクをクリックすると本サイトを離れ、当方が運営していないサービスへ移動します。各運営者は独自のプライバシーポリシーに基づき情報を取り扱う場合があり、本ポリシーの対象外です。リンクがあること自体により、外部サイト上でのお客様の行動を当方が受け取ることはなく、リンクは当該第三者の推奨や管理を意味しません。</li>
 </ul>`
         },
@@ -499,9 +509,10 @@ window.LEGAL_I18N = {
         {
           id: 'third-party',
           title: 'Third-party links & tools',
-          html: `<p>The Site may link to third-party websites or call third-party APIs (for example exchange rates or font delivery). Those services are not under our control.</p>
+          html: `<p>The Site may link to third-party websites or call third-party APIs (for example exchange rates, weather data, or font delivery). Those services are not under our control.</p>
 <ul>
 <li><strong>Destination and travel links.</strong> City and destination cards may include “Helpful links” to official tourism sites, transit agencies, National Park Service pages, museums, and similar external resources. These links are provided solely for convenience and planning reference. They do <strong>not</strong> create a partnership, sponsorship, agency, or endorsement relationship with any linked organization unless we expressly say so in writing.</li>
+<li><strong>Tools APIs.</strong> Currency rates and weather/air-quality forecasts may come from third-party public APIs. Values can be delayed, incomplete, or wrong. Weather is not for emergencies.</li>
 <li><strong>No control or warranty.</strong> We do not operate, monitor, or guarantee the accuracy, safety, availability, or privacy practices of third-party sites or APIs. Content, URLs, branding, and policies on those sites may change or break without notice.</li>
 <li><strong>Your responsibility.</strong> When you leave the Site via an external link, you do so at your own risk and become subject to that third party’s terms and privacy policy. Verify critical travel, booking, or payment details directly with the official source.</li>
 </ul>

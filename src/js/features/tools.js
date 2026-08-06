@@ -25,22 +25,46 @@ const TOOLS_TEXT = {
     driveGal: 'gal', driveL: 'L', salesTaxZero: 'No statewide sales tax (local may apply).',
     driveMpgMi: 'MPG', driveMpgKm: 'L/100 km', driveFuelGal: 'Fuel $/gal', driveFuelL: 'Fuel $/L',
     driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100 km',
-    cities: { 'Los Angeles': 'Los Angeles', 'New York': 'New York', 'London': 'London', 'Paris': 'Paris', 'Tokyo': 'Tokyo', 'Shanghai': 'Shanghai' } },
+    cities: {
+      'Honolulu': 'Honolulu', 'Anchorage': 'Anchorage', 'Los Angeles': 'Los Angeles', 'Denver': 'Denver',
+      'Chicago': 'Chicago', 'New York': 'New York', 'Toronto': 'Toronto', 'Mexico City': 'Mexico City',
+      'São Paulo': 'São Paulo', 'London': 'London', 'Paris': 'Paris', 'Berlin': 'Berlin',
+      'Dubai': 'Dubai', 'Mumbai': 'Mumbai', 'Singapore': 'Singapore', 'Hong Kong': 'Hong Kong',
+      'Shanghai': 'Shanghai', 'Seoul': 'Seoul', 'Tokyo': 'Tokyo', 'Sydney': 'Sydney'
+    } },
   es: { sameCurrency: 'Misma divisa seleccionada.', updating: 'Actualizando…', fetching: 'Obteniendo el último tipo de cambio diario disponible.', rateUnavailable: 'Tipo de cambio no disponible', checkConnection: 'Comprueba tu conexión e inténtalo de nuevo.', tax: 'Impuesto', tip: 'Propina',
     driveGal: 'gal', driveL: 'L', salesTaxZero: 'Sin impuesto estatal de ventas (puede haber impuestos locales).',
     driveMpgMi: 'MPG', driveMpgKm: 'L/100 km', driveFuelGal: 'Combustible $/gal', driveFuelL: 'Combustible $/L',
     driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100 km',
-    cities: { 'Los Angeles': 'Los Ángeles', 'New York': 'Nueva York', 'London': 'Londres', 'Paris': 'París', 'Tokyo': 'Tokio', 'Shanghai': 'Shanghái' } },
+    cities: {
+      'Honolulu': 'Honolulú', 'Anchorage': 'Anchorage', 'Los Angeles': 'Los Ángeles', 'Denver': 'Denver',
+      'Chicago': 'Chicago', 'New York': 'Nueva York', 'Toronto': 'Toronto', 'Mexico City': 'Ciudad de México',
+      'São Paulo': 'São Paulo', 'London': 'Londres', 'Paris': 'París', 'Berlin': 'Berlín',
+      'Dubai': 'Dubái', 'Mumbai': 'Bombay', 'Singapore': 'Singapur', 'Hong Kong': 'Hong Kong',
+      'Shanghai': 'Shanghái', 'Seoul': 'Seúl', 'Tokyo': 'Tokio', 'Sydney': 'Sídney'
+    } },
   zh: { sameCurrency: '已选择相同货币。', updating: '更新中…', fetching: '正在获取最新每日汇率。', rateUnavailable: '汇率不可用', checkConnection: '请检查网络连接后重试。', tax: '税费', tip: '小费',
     driveGal: '加仑', driveL: '升', salesTaxZero: '该州无州销售税（可能仍有地方税）。',
     driveMpgMi: 'MPG', driveMpgKm: '升/百公里', driveFuelGal: '油价 $/加仑', driveFuelL: '油价 $/升',
     driveEvMi: '英里/度', driveEvKm: '度/百公里',
-    cities: { 'Los Angeles': '洛杉矶', 'New York': '纽约', 'London': '伦敦', 'Paris': '巴黎', 'Tokyo': '东京', 'Shanghai': '上海' } },
+    cities: {
+      'Honolulu': '火奴鲁鲁', 'Anchorage': '安克雷奇', 'Los Angeles': '洛杉矶', 'Denver': '丹佛',
+      'Chicago': '芝加哥', 'New York': '纽约', 'Toronto': '多伦多', 'Mexico City': '墨西哥城',
+      'São Paulo': '圣保罗', 'London': '伦敦', 'Paris': '巴黎', 'Berlin': '柏林',
+      'Dubai': '迪拜', 'Mumbai': '孟买', 'Singapore': '新加坡', 'Hong Kong': '香港',
+      'Shanghai': '上海', 'Seoul': '首尔', 'Tokyo': '东京', 'Sydney': '悉尼'
+    } },
   ja: { sameCurrency: '同じ通貨が選択されています。', updating: '更新中…', fetching: '最新の為替レートを取得しています。', rateUnavailable: 'レートを取得できません', checkConnection: '接続を確認して再度お試しください。', tax: '税金', tip: 'チップ',
     driveGal: 'ガロン', driveL: 'L', salesTaxZero: '州の売上税はありません（地方税がかかる場合あり）。',
     driveMpgMi: 'MPG', driveMpgKm: 'L/100km', driveFuelGal: '燃料 $/gal', driveFuelL: '燃料 $/L',
     driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100km',
-    cities: { 'Los Angeles': 'ロサンゼルス', 'New York': 'ニューヨーク', 'London': 'ロンドン', 'Paris': 'パリ', 'Tokyo': '東京', 'Shanghai': '上海' } },
+    cities: {
+      'Honolulu': 'ホノルル', 'Anchorage': 'アンカレッジ', 'Los Angeles': 'ロサンゼルス', 'Denver': 'デンバー',
+      'Chicago': 'シカゴ', 'New York': 'ニューヨーク', 'Toronto': 'トロント', 'Mexico City': 'メキシコシティ',
+      'São Paulo': 'サンパウロ', 'London': 'ロンドン', 'Paris': 'パリ', 'Berlin': 'ベルリン',
+      'Dubai': 'ドバイ', 'Mumbai': 'ムンバイ', 'Singapore': 'シンガポール', 'Hong Kong': '香港',
+      'Shanghai': '上海', 'Seoul': 'ソウル', 'Tokyo': '東京', 'Sydney': 'シドニー'
+    } },
 };
 function toolsText() { return TOOLS_TEXT[currentLang] || TOOLS_TEXT.en; }
 
@@ -179,17 +203,54 @@ if (currencySwap) {
 }
 
 const worldClockList = document.getElementById('worldClockList');
+const clockSearch = document.getElementById('clockSearch');
+/* West → east for travelers: U.S. + nearby Americas, then Europe/ME, then Asia/Oceania. */
 const CLOCK_ZONES = [
-  ['Los Angeles', 'America/Los_Angeles'], ['New York', 'America/New_York'], ['London', 'Europe/London'], ['Paris', 'Europe/Paris'], ['Tokyo', 'Asia/Tokyo'], ['Shanghai', 'Asia/Shanghai']
+  ['Honolulu', 'Pacific/Honolulu'],
+  ['Anchorage', 'America/Anchorage'],
+  ['Los Angeles', 'America/Los_Angeles'],
+  ['Denver', 'America/Denver'],
+  ['Chicago', 'America/Chicago'],
+  ['New York', 'America/New_York'],
+  ['Toronto', 'America/Toronto'],
+  ['Mexico City', 'America/Mexico_City'],
+  ['São Paulo', 'America/Sao_Paulo'],
+  ['London', 'Europe/London'],
+  ['Paris', 'Europe/Paris'],
+  ['Berlin', 'Europe/Berlin'],
+  ['Dubai', 'Asia/Dubai'],
+  ['Mumbai', 'Asia/Kolkata'],
+  ['Singapore', 'Asia/Singapore'],
+  ['Hong Kong', 'Asia/Hong_Kong'],
+  ['Shanghai', 'Asia/Shanghai'],
+  ['Seoul', 'Asia/Seoul'],
+  ['Tokyo', 'Asia/Tokyo'],
+  ['Sydney', 'Australia/Sydney']
 ];
 function updateWorldClock() {
   if (!worldClockList) return;
   const locale = currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : 'en-US';
   const cities = toolsText().cities;
-  worldClockList.innerHTML = CLOCK_ZONES.map(([city, zone]) => {
+  const q = (clockSearch && clockSearch.value ? clockSearch.value : '').trim().toLowerCase();
+  const filtered = !q ? CLOCK_ZONES : CLOCK_ZONES.filter(([city, zone]) => {
+    const en = city.toLowerCase();
+    const loc = String(cities[city] || city).toLowerCase();
+    const z = zone.toLowerCase().replace(/_/g, ' ');
+    return en.includes(q) || loc.includes(q) || z.includes(q);
+  });
+  if (!filtered.length) {
+    const empty = (typeof getI18nDict === 'function' && getI18nDict(currentLang) && getI18nDict(currentLang)['tools.clockSearchEmpty'])
+      || (currentLang === 'zh' ? '未找到城市。' : currentLang === 'ja' ? '都市が見つかりません。' : currentLang === 'es' ? 'No se encontraron ciudades.' : 'No cities found.');
+    worldClockList.innerHTML = `<p class="clock-empty">${empty}</p>`;
+    return;
+  }
+  worldClockList.innerHTML = filtered.map(([city, zone]) => {
     const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: currentLang === 'en', timeZone: zone }).format(new Date());
     return `<div class="clock-row"><div><div class="clock-city">${cities[city] || city}</div><div class="clock-zone">${zone.replace(/_/g, ' ')}</div></div><div class="clock-time">${time}</div></div>`;
   }).join('');
+}
+if (clockSearch) {
+  clockSearch.addEventListener('input', () => updateWorldClock());
 }
 // World clock interval — started only when the tools page is active.
 let worldClockInterval = null;
