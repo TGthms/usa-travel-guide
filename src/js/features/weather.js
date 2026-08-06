@@ -5,6 +5,13 @@
      · Open-Meteo for non-US, geocode, AQ, detail enrich, and NWS fallback
    Load order: data/i18n → core/env → core/runtime → weather.js → app.js
 
+   Refresh contract:
+     · Manual Refresh always available (never stuck disabled; re-click cancels prior)
+     · Manual force re-fetches NWS + Open-Meteo (+ alerts)
+     · Auto-refresh every 10 min while document.visibilityState === 'visible'
+     · Auto fully paused (timer cleared) when tab hidden/inactive; resume refreshes if stale
+     · Auto/detail use quiet mode (list stays; no progress lock)
+
    Overlay contract (stability):
      · hoistOverlays() once → detail + sheet on <body>, sheet after detail
      · Sheet closed ⇒ pointer-events:none + aria-hidden (never trap list taps)
@@ -125,7 +132,7 @@
   const sheetClose = $('weatherSheetClose');
 
   let cache = new Map();
-  let timer = null;
+  let autoRefreshTimer = null;
   let searchTimer = 0;
   let openCity = null;
   let abortCtl = null;
@@ -611,17 +618,20 @@
     const isPrecipFx = s.fx === 'rain' || s.fx === 'storm' || s.fx === 'snow';
     el.style.setProperty('--wx-cloud-op', isPrecipFx ? '0.9' : ((code >= 2 && code < 50) ? '0.85' : (s.fx === 'clear' || s.fx === 'clear-dawn' || s.fx === 'clear-dusk') ? '0.22' : '0.55'));
 
-    // Rain opacity: always readable when raining, never near-zero for drizzle
+    // Rain opacity: clearly visible, but capped below the old ~0.78 “static” peak
     const intensity = precipIntensity(code || 0, opts.precipMm);
     const rowScale = isRow ? 0.55 : 1;
     let rainOp = 0;
     if (intensity > 0) {
-      // Floor so light drizzle still shows; cap so it never becomes “static”
-      const base = level === 'reduced' ? 0.38 : 0.52;
-      rainOp = Math.min(0.78, Math.max(base, intensity * 0.9)) * rowScale;
+      if (level === 'reduced') {
+        rainOp = Math.min(0.42, 0.28 + intensity * 0.2) * rowScale;
+      } else {
+        // Light ~0.35 → heavy ~0.58 (was up to 0.78 — that caused discomfort)
+        rainOp = Math.min(0.58, 0.32 + intensity * 0.32) * rowScale;
+      }
     }
     el.style.setProperty('--wx-rain-opacity', String(rainOp));
-    el.dataset.wxIntensity = intensity < 0.4 ? 'light' : intensity < 0.7 ? 'med' : 'heavy';
+    el.dataset.wxIntensity = intensity < 0.4 ? 'light' : intensity < 0.72 ? 'med' : 'heavy';
 
     if (level === 'off') {
       el.style.setProperty('--wx-fx-bg', 'none');
@@ -1553,12 +1563,13 @@
    * US: NWS → Open-Meteo fallback
    * Non-US: Open-Meteo only
    * opts.enrich: Open-Meteo gap-fill after NWS (detail open only)
+   * opts.forceFetch: bypass TTL cache (manual/auto refresh)
    */
   async function loadCity(c, signal, opts) {
     opts = opts || {};
     const key = cityKey(c);
     const hit = cache.get(key);
-    if (hit && hit.weather && Date.now() - hit.fetchedAt < REFRESH_MS - 5000) {
+    if (!opts.forceFetch && hit && hit.weather && Date.now() - hit.fetchedAt < REFRESH_MS - 5000) {
       if (opts.enrich && hit.needsEnrich) {
         const en = await enrichWithOpenMeteo(hit, signal);
         cache.set(key, en);
@@ -1711,14 +1722,17 @@
     });
   }
 
-  async function loadMany(cities) {
+  async function loadMany(cities, opts) {
+    opts = opts || {};
+    const quiet = !!opts.quiet;
+    const forceFetch = !!opts.forceFetch;
     if (abortCtl) try { abortCtl.abort(); } catch (e) {}
     abortCtl = typeof AbortController === 'function' ? new AbortController() : null;
     const myCtl = abortCtl;
     const signal = abortCtl ? abortCtl.signal : undefined;
     const total = cities.length;
     const out = new Array(total);
-    setLoadProgress(5, t('weather.loadingForecasts', 'Loading forecasts…'));
+    if (!quiet) setLoadProgress(5, t('weather.loadingForecasts', 'Loading forecasts…'));
 
     const usIdx = [];
     const omIdx = [];
@@ -1731,6 +1745,7 @@
     function bump() {
       done++;
       if (signal && signal.aborted) return;
+      if (quiet) return;
       // Forecasts: 5% → 62% (alerts continue 62% → 96%; never park at ~85% as the "start")
       const pct = 5 + Math.round((done / Math.max(1, total)) * 57);
       setLoadProgress(Math.min(62, pct), t('weather.loadingForecasts', 'Loading forecasts…')
@@ -1743,7 +1758,7 @@
         if (signal && signal.aborted) return;
         const idx = queue.shift();
         try {
-          out[idx] = await loadCity(cities[idx], signal, { enrich: false });
+          out[idx] = await loadCity(cities[idx], signal, { enrich: false, forceFetch: forceFetch });
         } catch (e) {
           if (e && e.name === 'AbortError') return;
           out[idx] = { error: true, city: cities[idx], fetchedAt: Date.now() };
@@ -2013,22 +2028,104 @@
     if (!opts.skipAmbient) applyAmbientPageSky();
   }
 
-  async function refresh(force) {
+  /** Page is foreground-active (auto-refresh only runs then). */
+  function isPageActive() {
+    try {
+      return document.visibilityState === 'visible';
+    } catch (e) {
+      return true;
+    }
+  }
+
+  /** Manual Refresh must always stay clickable; busy is visual only. */
+  function setRefreshBusy(busy) {
+    [refreshBtn, detailRefresh].forEach(function (btn) {
+      if (!btn) return;
+      // Never leave the control disabled — user can always re-trigger.
+      btn.disabled = false;
+      if (busy) {
+        btn.setAttribute('aria-busy', 'true');
+        btn.classList.add('is-busy');
+      } else {
+        btn.removeAttribute('aria-busy');
+        btn.classList.remove('is-busy');
+      }
+    });
+  }
+
+  function clearAutoRefresh() {
+    if (autoRefreshTimer) {
+      try { clearInterval(autoRefreshTimer); } catch (e) {}
+      autoRefreshTimer = null;
+    }
+  }
+
+  /**
+   * Auto-refresh every REFRESH_MS while the page is active.
+   * Fully paused (timer cleared) when tab is hidden / inactive.
+   * Rescheduling after a successful load resets the 10-minute clock.
+   */
+  function scheduleAutoRefresh() {
+    clearAutoRefresh();
+    if (!isPageActive()) return;
+    autoRefreshTimer = setInterval(function () {
+      if (!isPageActive()) return;
+      // Don't stack on an in-flight manual/auto load
+      if (refreshInflight) return;
+      refresh(true, { quiet: true, reason: 'auto' });
+    }, REFRESH_MS);
+  }
+
+  function onPageActivityChange() {
+    if (isPageActive()) {
+      scheduleAutoRefresh();
+      // If data is stale after being away, quiet-refresh immediately
+      const stale = !lastListFetch || (Date.now() - lastListFetch >= REFRESH_MS);
+      if (stale && !refreshInflight) {
+        refresh(true, { quiet: true, reason: 'resume' });
+      }
+    } else {
+      clearAutoRefresh();
+    }
+  }
+
+  /**
+   * @param {boolean} force  Re-fetch from NWS + Open-Meteo (not cache-only paint)
+   * @param {{ quiet?: boolean, reason?: string }} [opts]
+   *   quiet: background refresh (auto/resume) — keep list visible, no progress lock
+   */
+  async function refresh(force, opts) {
+    opts = opts || {};
+    const quiet = !!opts.quiet;
     const gen = ++refreshGen;
-    // Refresh button / forced reload: wipe ALL weather data layers so NWS + OM re-fetch
+
+    // Forced reload: ensure NWS + OM re-fetch
     if (force) {
-      cache.clear();
-      clearAllNwsPointsCache();
+      if (!quiet) {
+        // Manual / first load: wipe layers so UI can show progress cleanly
+        cache.clear();
+        clearAllNwsPointsCache();
+      } else {
+        // Quiet auto: keep showing last good list; invalidate NWS grid + forceFetch
+        clearAllNwsPointsCache();
+      }
       alertsPrefetchGen++; // cancel any in-flight alert prefetch
       if (abortCtl) {
         try { abortCtl.abort(); } catch (e) {}
         abortCtl = null;
       }
     }
+
     showError('');
-    if (favBlock) favBlock.hidden = true;
-    if (myLocBlock) myLocBlock.hidden = true;
-    if (refreshBtn) refreshBtn.disabled = true;
+    // Manual always available — busy state only (re-click cancels prior gen)
+    setRefreshBusy(true);
+
+    if (!quiet) {
+      if (favBlock) favBlock.hidden = true;
+      if (myLocBlock) myLocBlock.hidden = true;
+      // Single progress surface until forecasts + alerts complete — then one list paint
+      showWeatherLoadingUI();
+    }
 
     if (!myLocationCity) myLocationCity = loadMyLocation();
     const favs = loadFavorites();
@@ -2040,48 +2137,56 @@
     const seen = new Set(cities.map(cityKey));
     MAJOR.forEach((c) => { if (!seen.has(cityKey(c))) cities.push(c); });
 
-    // Single progress surface until forecasts + alerts complete — then one list paint
-    showWeatherLoadingUI();
-
     const run = (async () => {
       try {
-        // Let the browser paint 0–3% before network work (avoids "starts at 85%")
-        await new Promise(function (r) {
-          window.requestAnimationFrame(function () {
-            window.requestAnimationFrame(r);
+        if (!quiet) {
+          // Let the browser paint 0–3% before network work (avoids "starts at 85%")
+          await new Promise(function (r) {
+            window.requestAnimationFrame(function () {
+              window.requestAnimationFrame(r);
+            });
           });
-        });
+        }
         if (gen !== refreshGen) return;
 
-        await loadMany(cities);
+        await loadMany(cities, {
+          quiet: quiet,
+          forceFetch: !!force
+        });
         if (gen !== refreshGen) return;
         lastListFetch = Date.now();
 
-        // Phase 2: alerts (still locked — no list paint). Range 64% → 96%.
-        setLoadProgress(64, t('weather.loadingAlerts', 'Checking weather alerts…'));
+        // Phase 2: alerts
+        if (!quiet) {
+          setLoadProgress(64, t('weather.loadingAlerts', 'Checking weather alerts…'));
+        }
         await prefetchAlertsForCache(function (done, total) {
-          if (gen !== refreshGen) return;
+          if (gen !== refreshGen || quiet) return;
           const pct = 64 + Math.round((done / Math.max(1, total)) * 32);
           setLoadProgress(Math.min(96, pct), t('weather.loadingAlerts', 'Checking weather alerts…')
             + ' (' + done + '/' + total + ')');
         });
         if (gen !== refreshGen) return;
 
-        setLoadProgress(100, t('weather.loadingDone', 'Ready'));
-        // Brief beat so the bar can ease to 100% before the list appears
-        await new Promise(function (r) { window.setTimeout(r, 180); });
-        if (gen !== refreshGen) return;
+        if (!quiet) {
+          setLoadProgress(100, t('weather.loadingDone', 'Ready'));
+          // Brief beat so the bar can ease to 100% before the list appears
+          await new Promise(function (r) { window.setTimeout(r, 180); });
+          if (gen !== refreshGen) return;
+        }
 
-        // ONE reveal
+        // ONE reveal (or quiet single paint over existing list)
         listPaintLocked = false;
         cancelPendingListPaints();
-        clearWeatherSkeleton();
+        if (!quiet) clearWeatherSkeleton();
         refreshListsFromCache({ force: true });
 
         let ok = 0;
         cache.forEach(function (p) { if (p && p.weather && !p.error) ok++; });
         if (ok) showError('');
-        else showError(t('weather.error', 'Could not load weather data. Pull to refresh or try again shortly.'));
+        else if (!quiet) {
+          showError(t('weather.error', 'Could not load weather data. Pull to refresh or try again shortly.'));
+        }
 
         if (isDetailVisible() && openCity && openCity.city) {
           forceCloseSheet();
@@ -2090,27 +2195,32 @@
         }
       } catch (e) {
         if (e && e.name === 'AbortError') {
+          // Superseded by a newer refresh — leave UI to the winner
           if (gen === refreshGen) {
             listPaintLocked = false;
-            clearWeatherSkeleton();
+            if (!quiet) clearWeatherSkeleton();
             if (cache.size) refreshListsFromCache({ force: true });
-            else showError(t('weather.error', 'Could not load weather data.'));
+            else if (!quiet) showError(t('weather.error', 'Could not load weather data.'));
           }
           return;
         }
         if (gen !== refreshGen) return;
         listPaintLocked = false;
-        showError(t('weather.error', 'Could not load weather data.'));
-        clearWeatherSkeleton();
+        if (!quiet) {
+          showError(t('weather.error', 'Could not load weather data.'));
+          clearWeatherSkeleton();
+        }
         if (cache.size) refreshListsFromCache({ force: true });
-        else if (listEl) {
+        else if (!quiet && listEl) {
           listEl.innerHTML = '';
           listEl.hidden = false;
         }
       } finally {
         if (gen === refreshGen) {
           listPaintLocked = false;
-          if (refreshBtn) refreshBtn.disabled = false;
+          setRefreshBusy(false);
+          // Reset 10-minute auto clock after every completed cycle (while active)
+          if (isPageActive()) scheduleAutoRefresh();
         }
       }
     })();
@@ -2119,6 +2229,10 @@
       await run;
     } finally {
       if (refreshInflight === run) refreshInflight = null;
+      // Belt-and-suspenders: never leave buttons disabled
+      if (gen === refreshGen) setRefreshBusy(false);
+      if (refreshBtn) refreshBtn.disabled = false;
+      if (detailRefresh) detailRefresh.disabled = false;
     }
   }
 
@@ -3800,27 +3914,19 @@
     presentSheet();
   }
 
-  function scheduleTimer() {
-    if (timer) clearInterval(timer);
-    timer = setInterval(() => {
-      if (document.visibilityState !== 'visible') return;
-      refresh(true);
-    }, REFRESH_MS);
+  // Wire UI — manual refresh always works (re-click cancels prior load via refreshGen)
+  if (refreshBtn) {
+    refreshBtn.disabled = false;
+    refreshBtn.addEventListener('click', function () {
+      refresh(true, { quiet: false, reason: 'manual' });
+    });
   }
-
-  // Wire UI
-  if (refreshBtn) refreshBtn.addEventListener('click', () => refresh(true));
   if (detailRefresh) {
-    detailRefresh.addEventListener('click', async () => {
-      if (!openCity || !openCity.city) return;
-      cache.delete(cityKey(openCity.city));
-      try {
-        const pack = await loadCity(openCity.city);
-        openDetail(pack);
-        refreshListsFromCache();
-      } catch (e) {
-        showError(t('weather.error', 'Could not load weather data.'));
-      }
+    detailRefresh.disabled = false;
+    detailRefresh.addEventListener('click', function () {
+      // Always force NWS + Open-Meteo re-fetch. Quiet keeps detail open without
+      // blanking the list under the overlay; re-click cancels prior load.
+      refresh(true, { quiet: true, reason: 'manual-detail' });
     });
   }
   if (detailBack) detailBack.addEventListener('click', closeDetail);
@@ -3950,8 +4056,18 @@
     }
   });
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') scheduleTimer();
+  // Pause auto-refresh when tab/page is not active; resume (+ stale refresh) when active
+  document.addEventListener('visibilitychange', onPageActivityChange);
+  window.addEventListener('pageshow', function (e) {
+    if (e && e.persisted) onPageActivityChange();
+  });
+  window.addEventListener('focus', function () {
+    // Window focus while still "visible" — ensure timer is running
+    if (isPageActive() && !autoRefreshTimer) scheduleAutoRefresh();
+  });
+  window.addEventListener('blur', function () {
+    // Do not clear on blur alone (user may be in another app on same desktop
+    // while the tab remains visible). Visibility API owns pause.
   });
 
   window.refreshWeatherUi = function refreshWeatherUi() {
@@ -3965,7 +4081,7 @@
     if (cache.size) {
       refreshListsFromCache();
     } else {
-      refresh(false);
+      refresh(true, { quiet: false, reason: 'lang' });
     }
     if (isDetailVisible() && openCity && openCity.weather) {
       const fresh = (openCity.city && cache.get(cityKey(openCity.city))) || openCity;
@@ -3979,11 +4095,11 @@
   myLocationCity = loadMyLocation();
   loadNameCacheFromSession();
   applyAmbientPageSky();
-  refresh(true);
-  scheduleTimer();
+  refresh(true, { quiet: false, reason: 'boot' });
+  scheduleAutoRefresh();
   clearTimeout(nameFetchTimer);
   nameFetchTimer = setTimeout(() => { ensureLocalizedMajorNames(); }, 600);
   // Keep ambient sky in sync with clock / theme
-  setInterval(() => { if (document.visibilityState === 'visible') applyAmbientPageSky(); }, 5 * 60 * 1000);
+  setInterval(() => { if (isPageActive()) applyAmbientPageSky(); }, 5 * 60 * 1000);
   document.querySelectorAll('.weather-root .reveal, .tools-page .reveal').forEach((el) => el.classList.add('visible'));
 })();

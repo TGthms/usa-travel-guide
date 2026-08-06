@@ -159,7 +159,12 @@
       <div class="wx-sheet-grab" aria-hidden="true"></div>
       <div class="wx-sheet-title-host" data-sheet-title-host></div>
     </div>
-    <button type="button" class="weather-sheet-close" id="weatherSheetClose" aria-label="Close"><svg class="sf-icon sf-icon--close" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/></svg></button>
+    <button type="button" class="weather-sheet-close" id="weatherSheetClose" aria-label="Close" data-i18n-aria="weather.close">
+      <svg class="sf-icon sf-icon--close" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false">
+        <path d="M6.5 6.5L17.5 17.5"/>
+        <path d="M17.5 6.5L6.5 17.5"/>
+      </svg>
+    </button>
     <div class="wx-sheet-surface" id="weatherSheetBody"></div>
   </div>
 </div>

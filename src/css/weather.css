@@ -187,10 +187,8 @@ html[data-motion-effective="reduced"] .weather-shell {
 }
 .weather-sheet-panel h3 { margin: 0 0 10px; font-family: var(--ff-display); font-size: 1.15rem; }
 .weather-sheet-panel p { margin: 0 0 10px; font-size: 13px; line-height: 1.55; color: rgba(255,255,255,.88); }
-.weather-sheet-close {
-  float: right; border: 0; background: rgba(255,255,255,.1); color: #fff;
-  width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px;
-}
+/* Full close styles live in weather-app.css (absolute + flex center). */
+.weather-sheet-close { float: none; }
 .weather-units-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
 .weather-units-row button {
   border: 1px solid rgba(255,255,255,.2); background: transparent; color: #fff;

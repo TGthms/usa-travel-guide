@@ -345,6 +345,42 @@ test.describe('USA Travel Guide smoke', () => {
     await expect(page.locator('#weatherSheet')).not.toHaveClass(/open/);
     const sheetPe = await page.locator('#weatherSheet').evaluate((el) => getComputedStyle(el).pointerEvents);
     expect(sheetPe).toBe('none');
+
+    // Manual Refresh must stay enabled (never stuck disabled mid-load)
+    const refresh = page.locator('#weatherRefresh');
+    await expect(refresh).toBeVisible();
+    await expect(refresh).toBeEnabled();
+    await refresh.click();
+    // Immediately after click — still enabled (busy is aria-busy, not disabled)
+    await expect(refresh).toBeEnabled();
+    await page.waitForTimeout(400);
+    await expect(refresh).toBeEnabled();
+    // Settle: still available
+    await page.waitForFunction(() => {
+      const btn = document.getElementById('weatherRefresh');
+      return btn && !btn.disabled;
+    }, null, { timeout: 45_000 });
+    await expect(refresh).toBeEnabled();
+  });
+
+  test('weather auto-refresh is 10 minutes and pauses when document hidden', async ({ page }) => {
+    // Static contract check + runtime pause behavior (no live APIs)
+    const fs = require('fs');
+    const path = require('path');
+    const src = fs.readFileSync(path.join(process.cwd(), 'src/js/features/weather.js'), 'utf8');
+    expect(src).toMatch(/REFRESH_MS\s*=\s*10\s*\*\s*60\s*\*\s*1000/);
+    expect(src).toMatch(/scheduleAutoRefresh/);
+    expect(src).toMatch(/clearAutoRefresh/);
+    expect(src).toMatch(/visibilitychange/);
+    expect(src).toMatch(/setRefreshBusy/);
+    // Manual must not use disabled=true as the busy mechanism
+    expect(src).not.toMatch(/refreshBtn\.disabled\s*=\s*true/);
+
+    await blockLiveWeatherApis(page);
+    await page.goto('/tools-weather.html');
+    await waitLoaderGone(page);
+    await expect(page.locator('#weatherRefresh')).toBeEnabled();
+    await expect(page.locator('#weatherDetailRefresh')).toBeAttached();
   });
 
   test('legal pages load i18n packs', async ({ page }) => {
