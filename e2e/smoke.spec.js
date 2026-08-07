@@ -3,7 +3,13 @@
 
 const { test, expect } = require('@playwright/test');
 
-const THEMES = ['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'];
+/** Resolved data-theme for Appearance × Style */
+const THEME_MATRIX = [
+  { appearance: 'light', style: 'modern', theme: 'minimal' },
+  { appearance: 'light', style: 'classic', theme: 'elegant' },
+  { appearance: 'dark', style: 'classic', theme: 'default' },
+  { appearance: 'dark', style: 'modern', theme: 'glass' },
+];
 const LANGS = ['en', 'es', 'zh', 'ja'];
 const TOOL_PAGES = [
   '/tools-currency.html',
@@ -87,14 +93,20 @@ test.describe('USA Travel Guide smoke', () => {
     }
   });
 
-  test('cycles all six themes', async ({ page }) => {
+  test('cycles appearance × style theme matrix', async ({ page }) => {
     await openSettings(page);
-    for (const theme of THEMES) {
-      await page.locator(`.theme-swatch[data-theme-val="${theme}"]`).click();
-      const stored = await page.evaluate(() => localStorage.getItem('usa-travel-theme'));
-      expect(stored).toBe(theme);
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-      await expect(page.locator(`.theme-swatch[data-theme-val="${theme}"]`)).toHaveClass(/active/);
+    // System default
+    await page.locator('#appearancePillGroup .pill-btn[data-appearance-val="system"]').click();
+    await expect(page.locator('#appearancePillGroup .pill-btn[data-appearance-val="system"]')).toHaveClass(/active/);
+    const storedApp = await page.evaluate(() => localStorage.getItem('usa-travel-appearance'));
+    expect(storedApp).toBe('system');
+
+    for (const row of THEME_MATRIX) {
+      await page.locator(`#appearancePillGroup .pill-btn[data-appearance-val="${row.appearance}"]`).click();
+      await page.locator(`#stylePillGroup .pill-btn[data-style-val="${row.style}"]`).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', row.theme);
+      await expect(page.locator(`#appearancePillGroup .pill-btn[data-appearance-val="${row.appearance}"]`)).toHaveClass(/active/);
+      await expect(page.locator(`#stylePillGroup .pill-btn[data-style-val="${row.style}"]`)).toHaveClass(/active/);
     }
     await closeSettings(page);
   });
@@ -296,6 +308,47 @@ test.describe('USA Travel Guide smoke', () => {
     await expect(page.locator('#driveEconLabel')).toContainText(/L\/100|升/);
   });
 
+  test('Auto units resolve live and paint data-temp-unit', async ({ page }) => {
+    await page.goto('/index.html');
+    await openSettings(page);
+    // Explicit °C first
+    await page.locator('#unitTempGroup .pill-btn[data-unit-val="c"]').click();
+    await expect(page.locator('html')).toHaveAttribute('data-temp-unit', 'c');
+    await expect(page.locator('#unitTempGroup .pill-btn[data-unit-val="c"]')).toHaveClass(/active/);
+    // Auto re-detects system (must highlight Auto + set f or c)
+    await page.locator('#unitTempGroup .pill-btn[data-unit-val="auto"]').click();
+    await expect(page.locator('#unitTempGroup .pill-btn[data-unit-val="auto"]')).toHaveClass(/active/);
+    const tempUnit = await page.locator('html').getAttribute('data-temp-unit');
+    expect(tempUnit === 'f' || tempUnit === 'c').toBeTruthy();
+    const distUnit = await page.locator('html').getAttribute('data-dist-unit');
+    expect(distUnit === 'mi' || distUnit === 'km').toBeTruthy();
+    // Live debug helper must agree
+    const info = await page.evaluate(() => window.__usaTravelUnits());
+    expect(info.prefTemp).toBe('auto');
+    expect(info.effectiveTemp).toBe(tempUnit);
+    expect(info.detected && info.detected.temp).toBeTruthy();
+    // Hint shows resolved units
+    await expect(page.locator('#unitsResolvedHint')).toBeVisible();
+    const hint = await page.locator('#unitsResolvedHint').textContent();
+    expect(hint).toMatch(/°[FC]|Using|当前|現在|Ahora/);
+  });
+
+  test('weather alerts use class accordion (not details)', async ({ page }) => {
+    // Static source check — class-based open/close, no native details
+    const fs = require('fs');
+    const path = require('path');
+    const weatherJs = fs.readFileSync(path.join(__dirname, '../src/js/features/weather.js'), 'utf8');
+    expect(weatherJs).toMatch(/class="weather-alert/);
+    expect(weatherJs).toMatch(/weather-alert-summary/);
+    expect(weatherJs).toMatch(/is-open/);
+    expect(weatherJs).toMatch(/bindAlertCollapseAnimation/);
+    // Must not emit native <details class="weather-alert
+    expect(weatherJs).not.toMatch(/<details class="weather-alert/);
+    // Height pixel animation (smooth collapse)
+    expect(weatherJs).toMatch(/scrollHeight/);
+    expect(weatherJs).toMatch(/panel\.style\.height/);
+  });
+
   test('world clock renders cities', async ({ page }) => {
     await page.goto('/tools-clock.html');
     await page.waitForFunction(() => {
@@ -341,6 +394,15 @@ test.describe('USA Travel Guide smoke', () => {
     // Units sheet must not trap the page when data is unavailable
     await page.locator('#weatherUnitsBtn').click();
     await expect(page.locator('#weatherSheet')).toHaveClass(/open/, { timeout: 5_000 });
+    // Temp + distance share Settings prefs (Auto / °F / °C · Auto / mi / km)
+    await expect(page.locator('#wxTempUnits')).toBeVisible();
+    await expect(page.locator('#wxDistUnits')).toBeVisible();
+    await expect(page.locator('#wxTempUnits button[data-unit="auto"]')).toBeVisible();
+    await expect(page.locator('#wxTempUnits button[data-unit="c"]')).toBeVisible();
+    await page.locator('#wxTempUnits button[data-unit="c"]').click();
+    await expect(page.locator('html')).toHaveAttribute('data-temp-unit', 'c');
+    await page.locator('#wxTempUnits button[data-unit="f"]').click();
+    await expect(page.locator('html')).toHaveAttribute('data-temp-unit', 'f');
     await page.keyboard.press('Escape');
     await expect(page.locator('#weatherSheet')).not.toHaveClass(/open/);
     const sheetPe = await page.locator('#weatherSheet').evaluate((el) => getComputedStyle(el).pointerEvents);

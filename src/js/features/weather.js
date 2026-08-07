@@ -249,9 +249,34 @@
     return lang() === 'zh' ? 'zh-CN' : lang() === 'ja' ? 'ja-JP' : lang() === 'es' ? 'es-ES' : 'en-US';
   }
   function useF() {
+    // Always live: Auto re-resolves system locale/TZ every call (never stale let)
+    try {
+      if (typeof window.getEffectiveTempUnit === 'function') {
+        return window.getEffectiveTempUnit() === 'f';
+      }
+    } catch (e) { /* fall through */ }
+    try {
+      var attr = document.documentElement.getAttribute('data-temp-unit');
+      if (attr === 'f' || attr === 'c') return attr === 'f';
+    } catch (eAttr) { /* fall through */ }
+    try {
+      if (typeof window.currentTempUnit === 'string') return window.currentTempUnit === 'f';
+    } catch (e2) { /* fall through */ }
     return typeof currentTempUnit === 'undefined' || currentTempUnit === 'f';
   }
   function useMi() {
+    try {
+      if (typeof window.getEffectiveDistUnit === 'function') {
+        return window.getEffectiveDistUnit() === 'mi';
+      }
+    } catch (e) { /* fall through */ }
+    try {
+      var attr = document.documentElement.getAttribute('data-dist-unit');
+      if (attr === 'mi' || attr === 'km') return attr === 'mi';
+    } catch (eAttr) { /* fall through */ }
+    try {
+      if (typeof window.currentDistUnit === 'string') return window.currentDistUnit === 'mi';
+    } catch (e2) { /* fall through */ }
     return typeof currentDistUnit === 'undefined' || currentDistUnit === 'mi';
   }
   function motionLevel() {
@@ -728,7 +753,9 @@
       el.style.setProperty('--wx-fx-bg-2', 'none');
       el.style.setProperty('--wx-fx-opacity', '0');
       el.style.setProperty('--wx-rain-opacity', '0');
-      if (!opts.noOrnaments) {
+      if (isRow || opts.noOrnaments) {
+        paintSkyModeClassOnly(el, code || 0, hour, { isRow: isRow, staticFx: true });
+      } else {
         paintSkyMode(el, code || 0, isoTime, {
           hour, seed, isRow, intensity, staticFx: true
         });
@@ -758,9 +785,13 @@
     el.style.setProperty('--wx-fx-bg', fx);
     el.style.setProperty('--wx-fx-bg-2', fx2);
     el.style.setProperty('--wx-fx-opacity', level === 'reduced' ? String(op * 0.55) : String(op));
-    if (!opts.noOrnaments) {
+    // List rows: mode class + CSS vars only (no ornament DOM — major battery win)
+    // Detail: full ornaments + rain when not noOrnaments
+    if (isRow || opts.noOrnaments) {
+      paintSkyModeClassOnly(el, code || 0, hour, { isRow: isRow, staticFx: listStatic || isRow });
+    } else if (!opts.noOrnaments) {
       paintSkyMode(el, code || 0, isoTime, {
-        hour, seed, isRow, intensity, staticFx: listStatic
+        hour, seed, isRow, intensity, staticFx: false
       });
     }
   }
@@ -837,25 +868,37 @@
     sky.style.setProperty('--wx-page-fx-o', level === 'off' ? '0' : (level === 'reduced' ? String(op * 0.55) : String(op)));
     // Theme class for CSS light/dark text tuning
     document.body.classList.toggle('weather-sky-light', theme === 'minimal' || (theme === 'elegant' && period === 'day'));
-    // Ensure living page ornaments (drifting blobs / sun disc) exist
+    // Full motion: living sun/moon/cloud ornaments. Reduced/off: static gradient only.
     let live = sky.querySelector('.wx-page-live');
-    if (!live) {
-      live = document.createElement('div');
-      live.className = 'wx-page-live';
-      live.setAttribute('aria-hidden', 'true');
-      live.innerHTML = `
-        <div class="wx-page-blob wx-page-blob-1"></div>
-        <div class="wx-page-blob wx-page-blob-2"></div>
-        <div class="wx-page-blob wx-page-blob-3"></div>
-        <div class="wx-page-sun"></div>
-        <div class="wx-page-glow"></div>`;
-      sky.appendChild(live);
+    if (level === 'full') {
+      if (!live) {
+        live = document.createElement('div');
+        live.className = 'wx-page-live';
+        live.setAttribute('aria-hidden', 'true');
+        live.innerHTML =
+          '<div class="wx-page-blob wx-page-blob-1"></div>' +
+          '<div class="wx-page-blob wx-page-blob-2"></div>' +
+          '<div class="wx-page-blob wx-page-blob-3"></div>' +
+          '<div class="wx-page-cloud wx-page-cloud-a"></div>' +
+          '<div class="wx-page-cloud wx-page-cloud-b"></div>' +
+          '<div class="wx-page-sun"></div>' +
+          '<div class="wx-page-moon"></div>' +
+          '<div class="wx-page-glow"></div>';
+        sky.appendChild(live);
+      } else if (!live.querySelector('.wx-page-cloud')) {
+        // Upgrade older live layers that only had blobs/sun
+        live.insertAdjacentHTML('beforeend',
+          '<div class="wx-page-cloud wx-page-cloud-a"></div>' +
+          '<div class="wx-page-cloud wx-page-cloud-b"></div>' +
+          '<div class="wx-page-moon"></div>');
+      }
+      const pos = celestialPos(hour, false);
+      sky.style.setProperty('--wx-page-sun-left', pos.left.toFixed(1) + '%');
+      sky.style.setProperty('--wx-page-sun-top', Math.max(8, pos.top * 0.55).toFixed(1) + '%');
+      sky.style.setProperty('--wx-page-sun-size', (pos.night ? 48 : Math.max(100, pos.size * 1.15)).toFixed(0) + 'px');
+    } else if (live) {
+      try { live.remove(); } catch (e) { live.innerHTML = ''; }
     }
-    // Position page sun by local clock (viewer time for ambient canvas)
-    const pos = celestialPos(hour, false);
-    sky.style.setProperty('--wx-page-sun-left', pos.left.toFixed(1) + '%');
-    sky.style.setProperty('--wx-page-sun-top', Math.max(8, pos.top * 0.55).toFixed(1) + '%');
-    sky.style.setProperty('--wx-page-sun-size', (pos.night ? 0 : Math.max(90, pos.size * 1.1)).toFixed(0) + 'px');
     sky.classList.toggle('wx-page--night', period === 'night');
     sky.classList.toggle('wx-page--day', period === 'day' || period === 'dawn' || period === 'dusk');
   }
@@ -1336,7 +1379,7 @@
   function captureOpenAlertTitles() {
     if (!detailMods) return [];
     var titles = [];
-    detailMods.querySelectorAll('details.weather-alert[open]').forEach(function (d) {
+    detailMods.querySelectorAll('.weather-alert.is-open').forEach(function (d) {
       var tEl = d.querySelector('.weather-alert-title');
       var name = tEl ? String(tEl.textContent || '').trim() : '';
       if (name) titles.push(name);
@@ -1348,16 +1391,21 @@
     if (!detailMods || !titles || !titles.length) return;
     var want = {};
     for (var i = 0; i < titles.length; i++) want[titles[i]] = true;
-    detailMods.querySelectorAll('details.weather-alert').forEach(function (d) {
+    detailMods.querySelectorAll('.weather-alert').forEach(function (d) {
       var tEl = d.querySelector('.weather-alert-title');
       var name = tEl ? String(tEl.textContent || '').trim() : '';
-      if (name && want[name]) d.open = true;
+      if (!(name && want[name])) return;
+      d.classList.add('is-open');
+      var panel = d.querySelector('.weather-alert-collapse');
+      var btn = d.querySelector('.weather-alert-summary');
+      if (panel) panel.style.height = 'auto';
+      if (btn) btn.setAttribute('aria-expanded', 'true');
     });
   }
 
   /**
    * Update only the alerts block in an open detail — never rebuild the whole
-   * detail (that was collapsing expanded <details> mid-read).
+   * detail (that was collapsing expanded alerts mid-read).
    */
   function patchDetailAlerts(pack) {
     if (!pack || !pack.city || !detailMods || !isDetailVisible()) return;
@@ -1377,6 +1425,102 @@
     if (existing) existing.replaceWith(node);
     else detailMods.insertAdjacentElement('afterbegin', node);
     restoreOpenAlertTitles(openTitles);
+    bindAlertCollapseAnimation(detailMods);
+  }
+
+  /**
+   * Smooth accordion — class + pixel height (no native <details>).
+   * Expand: 0 → scrollHeight → auto. Collapse: auto → scrollHeight → 0.
+   */
+  function bindAlertCollapseAnimation(root) {
+    if (!root) return;
+    const DURATION = 280;
+    const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+    root.querySelectorAll('.weather-alert').forEach(function (card) {
+      if (card._wxCollapseBound) return;
+      card._wxCollapseBound = true;
+      const summary = card.querySelector('.weather-alert-summary');
+      const panel = card.querySelector('.weather-alert-collapse');
+      if (!summary || !panel) return;
+
+      // Initial closed height (unless restored open)
+      if (!card.classList.contains('is-open')) {
+        panel.style.height = '0px';
+        summary.setAttribute('aria-expanded', 'false');
+      } else {
+        panel.style.height = 'auto';
+        summary.setAttribute('aria-expanded', 'true');
+      }
+
+      summary.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (card.classList.contains('is-animating')) return;
+
+        const reduced = motionLevel() === 'off' || motionLevel() === 'reduced';
+        const isOpen = card.classList.contains('is-open');
+
+        if (isOpen) {
+          // ── collapse ──
+          if (reduced) {
+            card.classList.remove('is-open');
+            panel.style.height = '0px';
+            summary.setAttribute('aria-expanded', 'false');
+            return;
+          }
+          card.classList.add('is-animating');
+          // lock current pixel height then animate to 0
+          const h = panel.scrollHeight;
+          panel.style.transition = 'none';
+          panel.style.height = h + 'px';
+          void panel.offsetHeight;
+          panel.style.transition = 'height ' + DURATION + 'ms ' + EASE;
+          panel.style.height = '0px';
+          var finished = false;
+          var finish = function (ev) {
+            if (finished) return;
+            if (ev && ev.target !== panel) return;
+            if (ev && ev.propertyName && ev.propertyName !== 'height') return;
+            finished = true;
+            panel.removeEventListener('transitionend', finish);
+            card.classList.remove('is-open', 'is-animating');
+            summary.setAttribute('aria-expanded', 'false');
+            panel.style.height = '0px';
+          };
+          panel.addEventListener('transitionend', finish);
+          window.setTimeout(finish, DURATION + 60);
+        } else {
+          // ── expand ──
+          if (reduced) {
+            card.classList.add('is-open');
+            panel.style.height = 'auto';
+            summary.setAttribute('aria-expanded', 'true');
+            return;
+          }
+          card.classList.add('is-open', 'is-animating');
+          summary.setAttribute('aria-expanded', 'true');
+          panel.style.transition = 'none';
+          panel.style.height = '0px';
+          void panel.offsetHeight;
+          const h = panel.scrollHeight;
+          panel.style.transition = 'height ' + DURATION + 'ms ' + EASE;
+          panel.style.height = h + 'px';
+          var finishedOpen = false;
+          var finishOpen = function (ev) {
+            if (finishedOpen) return;
+            if (ev && ev.target !== panel) return;
+            if (ev && ev.propertyName && ev.propertyName !== 'height') return;
+            finishedOpen = true;
+            panel.removeEventListener('transitionend', finishOpen);
+            panel.style.height = 'auto';
+            card.classList.remove('is-animating');
+          };
+          panel.addEventListener('transitionend', finishOpen);
+          window.setTimeout(finishOpen, DURATION + 60);
+        }
+      });
+    });
   }
 
   function ensureNwsAlerts(pack) {
@@ -1405,7 +1549,7 @@
 
   /**
    * Prefetch NWS alerts into cache. Returns a Promise — does NOT paint the list.
-   * Caller paints once after this resolves (with forecasts).
+   * Cheap: 1 worker, skips when tab hidden, yield between cities (battery).
    */
   var alertsPrefetchGen = 0;
   function prefetchAlertsForCache(onProgress) {
@@ -1422,7 +1566,8 @@
     let idx = 0;
     let finished = 0;
     const total = pending.length;
-    const workers = Math.min(2, pending.length);
+    // Single worker — was 2 concurrent × N cities thrashing main thread + radio
+    const workers = 1;
 
     return new Promise(function (resolve) {
       function oneDone() {
@@ -1435,6 +1580,19 @@
 
       async function worker() {
         while (idx < pending.length && gen === alertsPrefetchGen) {
+          // Pause when backgrounded — resume when tab is visible again
+          if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+            await new Promise(function (r) {
+              function onVis() {
+                if (document.visibilityState === 'visible') {
+                  document.removeEventListener('visibilitychange', onVis);
+                  r();
+                }
+              }
+              document.addEventListener('visibilitychange', onVis);
+            });
+            if (gen !== alertsPrefetchGen) { resolve(finished); return; }
+          }
           const pack = pending[idx++];
           if (!pack || Array.isArray(pack.alerts) || pack._alertsLoading) {
             oneDone();
@@ -1450,6 +1608,8 @@
               return;
             }
             applyAlertsToPack(pack, alerts || []);
+            // Yield to UI between cities
+            await new Promise(function (r) { window.setTimeout(r, 40); });
           } catch (e) {
             if (gen !== alertsPrefetchGen) {
               resolve(finished);
@@ -1542,16 +1702,18 @@
         (a.senderName ? ' · ' + escapeHtml(a.senderName) : '') +
         '</p>');
       return (
-        // Collapsed by default — summary is the scannable Apple-style chip
-        '<details class="weather-alert ' + sevClass + '">' +
-          '<summary class="weather-alert-summary">' +
+        // Class-based accordion (not <details>) — pixel height animate open/close
+        '<div class="weather-alert ' + sevClass + '">' +
+          '<button type="button" class="weather-alert-summary" aria-expanded="false">' +
             '<span class="weather-alert-badge" aria-hidden="true">!</span>' +
             '<span class="weather-alert-title">' + escapeHtml(head) + '</span>' +
             (until ? '<span class="weather-alert-until">' + escapeHtml(until) + '</span>' : '') +
             '<span class="weather-alert-chevron" aria-hidden="true"></span>' +
-          '</summary>' +
-          '<div class="weather-alert-body">' + bodyParts.join('') + '</div>' +
-        '</details>'
+          '</button>' +
+          '<div class="weather-alert-collapse" style="height:0px">' +
+            '<div class="weather-alert-body">' + bodyParts.join('') + '</div>' +
+          '</div>' +
+        '</div>'
       );
     }).join('');
     return (
@@ -1565,7 +1727,7 @@
   const FORECAST_Q =
     'current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,precipitation'
     + '&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,precipitation,wind_speed_10m,wind_direction_10m,relative_humidity_2m,surface_pressure,uv_index'
-    + '&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum'
+    + '&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max'
     + '&temperature_unit=celsius&wind_speed_unit=ms&timezone=auto&forecast_days=10';
 
   async function loadOpenMeteoCity(c, signal) {
@@ -2015,6 +2177,7 @@
     row.tabIndex = 0;
     applySky(row, code, cur.time, {
       hour, seed, isRow: true,
+      noOrnaments: true,
       precipMm: cur.precipitation,
       windDeg: cur.wind_direction_10m
     });
@@ -2342,11 +2505,64 @@
     detailFavBtn.setAttribute('aria-label', fav ? t('weather.unfavorite', 'Remove favorite') : t('weather.favorite', 'Favorite'));
   }
 
-  function dailyBarsHtml(daily) {
+  /**
+   * Apple Weather–style temp → RGB (°C absolute). Cold blues → warm yellows → hot reds.
+   * Independent of display unit; internal data is always Celsius.
+   */
+  function tempToBarColor(c) {
+    if (c == null || !Number.isFinite(c)) return 'rgb(142,142,147)';
+    const stops = [
+      { t: -20, c: [110, 90, 210] },
+      { t: -10, c: [80, 100, 230] },
+      { t: 0, c: [70, 140, 255] },
+      { t: 8, c: [70, 190, 235] },
+      { t: 14, c: [100, 210, 160] },
+      { t: 20, c: [180, 220, 90] },
+      { t: 26, c: [255, 210, 60] },
+      { t: 32, c: [255, 150, 45] },
+      { t: 38, c: [255, 90, 45] },
+      { t: 44, c: [220, 45, 40] }
+    ];
+    if (c <= stops[0].t) {
+      return 'rgb(' + stops[0].c[0] + ',' + stops[0].c[1] + ',' + stops[0].c[2] + ')';
+    }
+    if (c >= stops[stops.length - 1].t) {
+      const last = stops[stops.length - 1].c;
+      return 'rgb(' + last[0] + ',' + last[1] + ',' + last[2] + ')';
+    }
+    for (let i = 0; i < stops.length - 1; i++) {
+      const a = stops[i];
+      const b = stops[i + 1];
+      if (c >= a.t && c <= b.t) {
+        const u = (c - a.t) / (b.t - a.t || 1);
+        const r = Math.round(a.c[0] + (b.c[0] - a.c[0]) * u);
+        const g = Math.round(a.c[1] + (b.c[1] - a.c[1]) * u);
+        const bl = Math.round(a.c[2] + (b.c[2] - a.c[2]) * u);
+        return 'rgb(' + r + ',' + g + ',' + bl + ')';
+      }
+    }
+    return 'rgb(255,210,60)';
+  }
+
+  function dailyBarsHtml(daily, opts) {
+    opts = opts || {};
     const highs = daily.temperature_2m_max || [];
     const lows = daily.temperature_2m_min || [];
     const codes = daily.weather_code || [];
     const times = daily.time || [];
+    let pops = daily.precipitation_probability_max || daily.precipitation_probability || null;
+    // NWS path often has no daily pop — derive max POP per calendar day from hourly
+    if (!pops && opts.hourly && Array.isArray(opts.hourly.time) && opts.hourly.precipitation_probability) {
+      const byDay = {};
+      for (let hi = 0; hi < opts.hourly.time.length; hi++) {
+        const dk = String(opts.hourly.time[hi] || '').slice(0, 10);
+        if (!dk) continue;
+        const p = opts.hourly.precipitation_probability[hi];
+        if (p == null || !Number.isFinite(Number(p))) continue;
+        if (byDay[dk] == null || Number(p) > byDay[dk]) byDay[dk] = Number(p);
+      }
+      pops = times.map(function (t) { return byDay[String(t || '').slice(0, 10)]; });
+    }
     const n = Math.min(10, times.length, highs.length, lows.length);
     let weekMin = Infinity;
     let weekMax = -Infinity;
@@ -2357,26 +2573,70 @@
     if (!Number.isFinite(weekMin) || !Number.isFinite(weekMax) || weekMax <= weekMin) {
       weekMin = 0; weekMax = 1;
     }
-    const span = weekMax - weekMin;
+    // Small padding so edge bars aren't flush to the track ends
+    const pad = Math.max(1, (weekMax - weekMin) * 0.04);
+    weekMin -= pad;
+    weekMax += pad;
+    const span = weekMax - weekMin || 1;
+
+    // Current temp for "Today" marker (optional, Apple-style white dot)
+    let nowC = null;
+    if (opts.currentTemp != null && Number.isFinite(opts.currentTemp)) {
+      nowC = opts.currentTemp;
+    }
+
+    const todayKey = (function () {
+      try {
+        const tz = opts.timeZone || undefined;
+        return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+      } catch (e) {
+        return new Date().toISOString().slice(0, 10);
+      }
+    })();
+
     let html = '<div class="weather-daily">';
     for (let i = 0; i < n; i++) {
+      const dayKey = String(times[i] || '').slice(0, 10);
+      const isToday = dayKey === todayKey;
       let day = '';
       try {
-        day = new Date(times[i] + 'T12:00:00').toLocaleDateString(localeTag(), { weekday: 'short' });
+        day = isToday
+          ? t('weather.today', 'Today')
+          : new Date(times[i] + 'T12:00:00').toLocaleDateString(localeTag(), { weekday: 'short' });
       } catch (e) { day = ''; }
       const lo = lows[i];
       const hi = highs[i];
       const left = Math.max(0, Math.min(92, ((lo - weekMin) / span) * 100));
-      let width = Math.max(8, ((hi - lo) / span) * 100);
+      let width = Math.max(6, ((hi - lo) / span) * 100);
       if (left + width > 100) width = 100 - left;
+      const c0 = tempToBarColor(lo);
+      const c1 = tempToBarColor(hi);
+      const barBg = 'linear-gradient(90deg,' + c0 + ',' + c1 + ')';
       const icon = condIcon(codes[i] || 0, false);
-      html += `<div class="weather-daily-row">
-        <span>${escapeHtml(day)}</span>
-        <span>${icon}</span>
-        <span class="weather-daily-track"><span class="weather-daily-bar" style="left:${left.toFixed(1)}%;width:${width.toFixed(1)}%"></span></span>
-        <span class="weather-daily-lo">${fmtTemp(lo)}</span>
-        <span class="weather-daily-hi">${fmtTemp(hi)}</span>
-      </div>`;
+
+      // Precip % under icon when meaningful (Apple-style)
+      let popHtml = '';
+      if (pops && pops[i] != null && Number(pops[i]) >= 20) {
+        popHtml = '<span class="weather-daily-pop">' + Math.round(Number(pops[i])) + '%</span>';
+      }
+
+      // Today: current-temp dot on the track
+      let nowDot = '';
+      if (isToday && nowC != null && hi != null && lo != null) {
+        const nowLeft = Math.max(0, Math.min(100, ((nowC - weekMin) / span) * 100));
+        nowDot = '<span class="weather-daily-now" style="left:' + nowLeft.toFixed(1) + '%" aria-hidden="true"></span>';
+      }
+
+      html += '<div class="weather-daily-row' + (isToday ? ' weather-daily-row--today' : '') + '">' +
+        '<span class="weather-daily-day">' + escapeHtml(day) + '</span>' +
+        '<span class="weather-daily-icon">' + icon + popHtml + '</span>' +
+        '<span class="weather-daily-lo">' + escapeHtml(fmtTemp(lo)) + '</span>' +
+        '<span class="weather-daily-track">' +
+          '<span class="weather-daily-bar" style="left:' + left.toFixed(1) + '%;width:' + width.toFixed(1) + '%;background:' + barBg + '"></span>' +
+          nowDot +
+        '</span>' +
+        '<span class="weather-daily-hi">' + escapeHtml(fmtTemp(hi)) + '</span>' +
+      '</div>';
     }
     html += '</div>';
     return html;
@@ -2609,13 +2869,23 @@
     hourlyHtml += '</div>';
     mods.push(`<button type="button" class="weather-mod weather-mod-wide is-tappable" data-sheet="conditions"><div class="weather-mod-label">${modLabelIcon('conditions')}<span>${escapeHtml(t('weather.hourly', 'Hourly Forecast'))}</span></div>${hourlyHtml}</button>`);
 
-    mods.push(`<div class="weather-mod weather-mod-wide"><div class="weather-mod-label">${escapeHtml(t('weather.daily', '10-Day Forecast'))}</div>${dailyBarsHtml(daily)}</div>`);
+    mods.push(`<div class="weather-mod weather-mod-wide"><div class="weather-mod-label">${escapeHtml(t('weather.daily', '10-Day Forecast'))}</div>${dailyBarsHtml(daily, {
+      currentTemp: cur && cur.temperature_2m != null ? cur.temperature_2m : null,
+      timeZone: w.timezone || (c && c.tz) || undefined,
+      hourly: hourly
+    })}</div>`);
 
     const sr = daily.sunrise && daily.sunrise[0];
     const ss = daily.sunset && daily.sunset[0];
-    const sunViz = `<div class="wx-sun-mod-times"><span>${escapeHtml(formatClock(sr))}</span><span>${escapeHtml(formatClock(ss))}</span></div>` + sunArcSvg(sr, ss, true);
-    mods.push(modHtml('sun', t('weather.sunrise', 'Sunrise') + ' & ' + t('weather.sunset', 'Sunset'),
-      '', sunViz, true, true));
+    const sunViz = sunArcSvg(sr, ss, true);
+    const sunTitle = (function () {
+      const now = Date.now();
+      const rise = sr ? new Date(sr).getTime() : 0;
+      const set = ss ? new Date(ss).getTime() : 0;
+      if (rise && set && now >= rise && now <= set) return t('weather.sunset', 'Sunset');
+      return t('weather.sunrise', 'Sunrise');
+    })();
+    mods.push(modHtml('sun', sunTitle, '', sunViz, true, true));
 
     // Apple-style location attribution
     const placeBits = [displayCityName(c), displayAdmin1(c), c.country || (c.admin1 ? '' : '')].filter(Boolean);
@@ -2630,6 +2900,7 @@
     detailMods.innerHTML = mods.join('');
     // Restore any expanded alerts the user had open before this re-render
     if (keepAlertOpen && keepAlertOpen.length) restoreOpenAlertTitles(keepAlertOpen);
+    bindAlertCollapseAnimation(detailMods);
     // Clicks use delegated handler on detailMods (bound once) — survives re-renders
 
     const isClosing = detailEl.classList.contains('is-closing');
@@ -2836,6 +3107,44 @@
     return { start, end, times };
   }
 
+  /** YYYY-MM-DD in a timezone (en-CA is ISO-like). */
+  function localDateKey(ms, timeZone) {
+    try {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: timeZone || undefined,
+        year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(new Date(ms));
+    } catch (e) {
+      try { return new Date(ms).toISOString().slice(0, 10); } catch (e2) { return ''; }
+    }
+  }
+
+  /**
+   * Full local calendar day (00–23) for charts — Apple Weather style.
+   * Falls back to rolling window if today is missing from the series.
+   */
+  function hourlyLocalDay(hourly, timeZone) {
+    const times = hourly.time || [];
+    if (!times.length) return { start: 0, end: 0, times: times };
+    const todayKey = localDateKey(Date.now(), timeZone);
+    let start = -1;
+    let end = -1;
+    for (let i = 0; i < times.length; i++) {
+      let tMs;
+      try { tMs = new Date(times[i]).getTime(); } catch (e) { continue; }
+      if (!Number.isFinite(tMs)) continue;
+      const key = localDateKey(tMs, timeZone);
+      if (key === todayKey) {
+        if (start < 0) start = i;
+        end = i + 1;
+      } else if (start >= 0) {
+        break;
+      }
+    }
+    if (start < 0 || end <= start) return hourlyWindow(hourly, 24);
+    return { start: start, end: end, times: times };
+  }
+
   /**
    * Smooth open cubic path through points (Catmull–Rom → Bezier).
    * Avoids the jagged “connect the dots” look on hourly charts.
@@ -2870,8 +3179,8 @@
   }
 
   /** Apple-style scrub chart used by Wind, Hourly, Humidity, etc. */
-  function buildTempChart(hourly, key, unitFmt) {
-    const { start, end, times } = hourlyWindow(hourly, 24);
+  function buildTempChart(hourly, key, unitFmt, timeZone) {
+    const { start, end, times } = hourlyLocalDay(hourly, timeZone || hourly.timezone);
     const vals = [];
     for (let i = start; i < end; i++) {
       const v = hourly[key] && hourly[key][i];
@@ -2885,7 +3194,8 @@
     min -= padAmt;
     max += padAmt;
     const span = (max - min) || 1;
-    const W = 360, H = 176, padL = 10, padR = 10, padT = 14, padB = 28;
+    // padL wide enough for Y-axis data labels
+    const W = 360, H = 176, padL = 40, padR = 10, padT = 14, padB = 28;
     const plotW = W - padL - padR, plotH = H - padT - padB;
     const pts = vals.map((d, idx) => {
       const x = padL + (idx / (vals.length - 1)) * plotW;
@@ -2916,9 +3226,21 @@
       const gy = padT + (g / 3) * plotH;
       grids += `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}" stroke="rgba(255,255,255,.1)" stroke-width="1"/>`;
     }
-    // Apple-style axis: only ~4 short hour marks (00 / 06 / 12 / 18), never dense “9:00 AM”
-    const axisCount = Math.min(4, pts.length);
+    // Y-axis (data values) + X-axis (time)
     let labels = '';
+    const yTicks = [
+      { v: max, y: padT + 4 },
+      { v: (max + min) / 2, y: padT + plotH / 2 + 4 },
+      { v: min, y: padT + plotH }
+    ];
+    yTicks.forEach(function (tick) {
+      let lab;
+      try { lab = unitFmt(tick.v); } catch (e) { lab = String(Math.round(tick.v)); }
+      // Compact: strip long unit words for axis if very long
+      if (lab && lab.length > 8) lab = String(Math.round(tick.v * 10) / 10);
+      labels += `<text class="wx-chart-axis wx-chart-axis-y" x="${(padL - 6).toFixed(1)}" y="${tick.y.toFixed(1)}" fill="rgba(255,255,255,.48)" font-size="10" font-weight="500" text-anchor="end" font-family="system-ui,-apple-system,BlinkMacSystemFont,sans-serif" font-variant-numeric="tabular-nums">${escapeHtml(lab)}</text>`;
+    });
+    const axisCount = Math.min(4, pts.length);
     for (let k = 0; k < axisCount; k++) {
       const i = axisCount === 1
         ? 0
@@ -2989,7 +3311,41 @@
         if (kind === 'uv_index') return String(Math.round(v * 10) / 10);
         return String(Math.round(v * 10) / 10);
       };
-      const paintImmediate = (x, y, pt) => {
+      let displayNum = defaultPt.v;
+      let tweenRaf = 0;
+      const animateReadoutTo = (toV) => {
+        if (!readout) return;
+        if (motionLevel() !== 'full') {
+          readout.textContent = formatVal(toV);
+          displayNum = toV;
+          return;
+        }
+        if (tweenRaf) {
+          try { cancelAnimationFrame(tweenRaf); } catch (e) {}
+          tweenRaf = 0;
+        }
+        const fromV = displayNum;
+        displayNum = toV;
+        if (!Number.isFinite(fromV) || !Number.isFinite(toV) || fromV === toV) {
+          readout.textContent = formatVal(toV);
+          return;
+        }
+        const t0 = performance.now();
+        const dur = 160;
+        const step = (now) => {
+          const u = Math.min(1, (now - t0) / dur);
+          const e = 1 - Math.pow(1 - u, 3);
+          const v = fromV + (toV - fromV) * e;
+          readout.textContent = formatVal(v);
+          if (u < 1) tweenRaf = requestAnimationFrame(step);
+          else {
+            tweenRaf = 0;
+            readout.textContent = formatVal(toV);
+          }
+        };
+        tweenRaf = requestAnimationFrame(step);
+      };
+      const paintImmediate = (x, y, pt, animateNum) => {
         if (guide) {
           guide.setAttribute('x1', x);
           guide.setAttribute('x2', x);
@@ -3000,25 +3356,27 @@
           dot.setAttribute('cx', x);
           dot.setAttribute('cy', y);
         }
-        if (readout) readout.textContent = formatVal(pt.v);
+        if (animateNum) animateReadoutTo(pt.v);
+        else if (readout) {
+          readout.textContent = formatVal(pt.v);
+          displayNum = pt.v;
+        }
         if (sub) sub.textContent = formatClock(pt.t);
         curPt = pt;
       };
       const resetToNow = () => {
-        paintImmediate(defaultPt.x, defaultPt.y, defaultPt);
+        paintImmediate(defaultPt.x, defaultPt.y, defaultPt, true);
       };
-      resetToNow();
+      paintImmediate(defaultPt.x, defaultPt.y, defaultPt, false);
       const scrub = (clientX) => {
         const rect = svg.getBoundingClientRect();
         if (!rect.width) return;
         const x = ((clientX - rect.left) / rect.width) * vw;
-        // Nearest sample for honest reading
         let best = pts[0], bestD = Infinity;
         for (let i = 0; i < pts.length; i++) {
           const d = Math.abs(pts[i].x - x);
           if (d < bestD) { bestD = d; best = pts[i]; }
         }
-        // Visual position interpolates along the polyline so the dot stays on the curve
         let i0 = 0;
         for (let i = 0; i < pts.length - 1; i++) {
           if (x >= pts[i].x && x <= pts[i + 1].x) { i0 = i; break; }
@@ -3029,19 +3387,26 @@
         const u = Math.max(0, Math.min(1, (x - a.x) / sp));
         const px = a.x + (b.x - a.x) * u;
         const py = a.y + (b.y - a.y) * u;
-        // Instant follow — no lerp lag
-        paintImmediate(px, py, best);
+        // Animate number only when hour sample changes (Apple-like)
+        const hourChanged = !curPt || curPt.t !== best.t;
+        paintImmediate(px, py, best, hourChanged);
       };
+      let scrubRaf = 0;
+      let pendingX = null;
       const onMove = (e) => {
         const cx = e.clientX != null ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX);
-        if (cx != null) {
-          if (e.cancelable) e.preventDefault();
-          scrub(cx);
+        if (cx == null) return;
+        if (e.cancelable) e.preventDefault();
+        pendingX = cx;
+        if (!scrubRaf) {
+          scrubRaf = requestAnimationFrame(function () {
+            scrubRaf = 0;
+            if (pendingX != null) scrub(pendingX);
+          });
         }
       };
       hit.style.touchAction = 'none';
       hit.style.cursor = 'ew-resize';
-      // Hover + drag follow immediately; leave/up → snap back to current time
       hit.addEventListener('pointerdown', (e) => {
         hit.setPointerCapture && hit.setPointerCapture(e.pointerId);
         onMove(e);
@@ -3071,32 +3436,114 @@
       <div class="weather-mod-sub">${escapeHtml(lab)}</div>`;
   }
 
-  function sunArcSvg(sunriseIso, sunsetIso, compact) {
+  /**
+   * Apple Weather–style sun path: full day sine over horizon.
+   * Dot tracks current elevation; curve peaks at solar noon.
+   */
+  function sunPathGeometry(sunriseIso, sunsetIso, W, H, padL, padR, padT, padB) {
     const now = Date.now();
     let rise = sunriseIso ? new Date(sunriseIso).getTime() : now;
-    let set = sunsetIso ? new Date(sunsetIso).getTime() : now + 1;
-    if (set <= rise) set = rise + 1;
-    let p = (now - rise) / (set - rise);
-    p = Math.max(0, Math.min(1, p));
-    const W = compact ? 280 : 320;
-    const H = compact ? 64 : 88;
-    const cx = W / 2, cy = H - 10, r = compact ? 100 : 118;
-    const x = (ang) => cx + r * Math.cos(Math.PI - ang * Math.PI);
-    const y = (ang) => cy - r * Math.sin(Math.PI - ang * Math.PI) * 0.55;
-    let d = '';
-    for (let i = 0; i <= 48; i++) {
-      const a = i / 48;
-      d += (i ? ' L' : 'M') + x(a).toFixed(1) + ',' + y(a).toFixed(1);
+    let set = sunsetIso ? new Date(sunsetIso).getTime() : now + 12 * 3600000;
+    if (set <= rise) set = rise + 12 * 3600000;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+    // Midnight of the sunrise calendar day (viewer-local; good enough for path shape)
+    let day0 = rise;
+    try {
+      const d = new Date(rise);
+      day0 = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    } catch (e) {
+      day0 = rise - 6 * 3600000;
     }
-    const px = x(p), py = y(p);
-    // Soft fill under daytime arc
-    const area = d + ` L${x(1).toFixed(1)},${cy} L${x(0).toFixed(1)},${cy} Z`;
-    return `<svg class="weather-sun-arc${compact ? ' weather-sun-arc--compact' : ''}" viewBox="0 0 ${W} ${H}" aria-hidden="true">
-      <path d="${area}" fill="rgba(255,210,120,.12)"/>
-      <path d="${d}" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"/>
-      <line x1="12" y1="${cy}" x2="${W - 12}" y2="${cy}" stroke="rgba(255,255,255,.22)" stroke-width="1"/>
-      <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${compact ? 5 : 7}" fill="#ffe08a" stroke="#fff" stroke-width="1.5"/>
-    </svg>`;
+    const dayMs = 24 * 3600000;
+    const elevAt = function (tms) {
+      if (tms >= rise && tms <= set) {
+        const u = (tms - rise) / (set - rise);
+        return Math.sin(u * Math.PI); // 0→1→0 through day
+      }
+      // Night: gentle dip below horizon
+      if (tms < rise) return -0.12 * Math.min(1, (rise - tms) / (4 * 3600000));
+      return -0.12 * Math.min(1, (tms - set) / (4 * 3600000));
+    };
+    const elevToY = function (elev) {
+      // elev -0.2 .. 1.0 maps to plot bottom..top
+      return padT + (1 - (elev + 0.2) / 1.2) * plotH;
+    };
+    const pts = [];
+    for (let i = 0; i <= 48; i++) {
+      const tms = day0 + (i / 48) * dayMs;
+      const elev = elevAt(tms);
+      pts.push({
+        x: padL + (i / 48) * plotW,
+        y: elevToY(elev),
+        tms: tms,
+        elev: elev
+      });
+    }
+    const horizonY = elevToY(0);
+    const frac = Math.max(0, Math.min(1, (now - day0) / dayMs));
+    const curX = padL + frac * plotW;
+    const curElev = elevAt(now);
+    const curY = elevToY(curElev);
+    const line = smoothLinePath(pts);
+    // Day fill between rise–set above horizon
+    const riseX = padL + Math.max(0, Math.min(1, (rise - day0) / dayMs)) * plotW;
+    const setX = padL + Math.max(0, Math.min(1, (set - day0) / dayMs)) * plotW;
+    let area = '';
+    pts.forEach(function (p) {
+      if (p.x < riseX - 0.5 || p.x > setX + 0.5) return;
+      area += (area ? ' L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1);
+    });
+    if (area) {
+      area += ' L' + setX.toFixed(1) + ',' + horizonY.toFixed(1)
+        + ' L' + riseX.toFixed(1) + ',' + horizonY.toFixed(1) + ' Z';
+    }
+    const beforeRise = now < rise;
+    const afterSet = now > set;
+    const isDay = !beforeRise && !afterSet;
+    return {
+      now: now, rise: rise, set: set, day0: day0, dayMs: dayMs,
+      pts: pts, line: line, area: area, horizonY: horizonY,
+      curX: curX, curY: curY, curElev: curElev,
+      isDay: isDay, beforeRise: beforeRise, afterSet: afterSet,
+      riseX: riseX, setX: setX, padL: padL, padR: padR, padT: padT, padB: padB, W: W, H: H
+    };
+  }
+
+  /** Compact module tile — Apple style: hero next event + path + secondary time */
+  function sunArcSvg(sunriseIso, sunsetIso, compact) {
+    const W = compact ? 300 : 320;
+    const H = compact ? 72 : 100;
+    const g = sunPathGeometry(sunriseIso, sunsetIso, W, H, 8, 8, 10, 8);
+    // Apple: during day emphasize SUNSET; at night emphasize SUNRISE
+    const heroIsSunset = g.isDay;
+    const heroIso = heroIsSunset ? sunsetIso : sunriseIso;
+    const secondaryIso = heroIsSunset ? sunriseIso : sunsetIso;
+    const heroLabel = heroIsSunset
+      ? t('weather.sunset', 'Sunset')
+      : t('weather.sunrise', 'Sunrise');
+    const secondaryLabel = heroIsSunset
+      ? t('weather.sunrise', 'Sunrise')
+      : t('weather.sunset', 'Sunset');
+    const hourLabs = [0, 0.25, 0.5, 0.75, 1].map(function (f, i) {
+      const labs = ['00', '06', '12', '18', '24'];
+      const x = 8 + f * (W - 16);
+      return `<text x="${x.toFixed(1)}" y="${H - 1}" fill="rgba(255,255,255,.35)" font-size="8" text-anchor="middle" font-family="system-ui,sans-serif">${labs[i]}</text>`;
+    }).join('');
+    return (
+      `<div class="wx-sun-mod-hero">` +
+        `<div class="wx-sun-mod-hero-label">${escapeHtml(heroLabel)}</div>` +
+        `<div class="wx-sun-mod-hero-time">${escapeHtml(formatClock(heroIso))}</div>` +
+      `</div>` +
+      `<svg class="weather-sun-arc${compact ? ' weather-sun-arc--compact' : ''}" viewBox="0 0 ${W} ${H}" aria-hidden="true">` +
+        `<line x1="8" y1="${g.horizonY.toFixed(1)}" x2="${W - 8}" y2="${g.horizonY.toFixed(1)}" stroke="rgba(255,255,255,.28)" stroke-width="1"/>` +
+        (g.area ? `<path d="${g.area}" fill="rgba(255,210,120,.14)"/>` : '') +
+        `<path d="${g.line}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linejoin="round"/>` +
+        `<circle cx="${g.curX.toFixed(1)}" cy="${g.curY.toFixed(1)}" r="5.5" fill="#fff" stroke="rgba(255,220,140,.9)" stroke-width="2"/>` +
+        hourLabs +
+      `</svg>` +
+      `<div class="wx-sun-mod-secondary">${escapeHtml(secondaryLabel)}: ${escapeHtml(formatClock(secondaryIso))}</div>`
+    );
   }
 
   function formatDurationMs(ms) {
@@ -3110,92 +3557,37 @@
     return h + ' hr ' + m + ' min';
   }
 
-  /** Full-day sun path chart + metrics (Apple-inspired, civil twilight approx). */
+  /** Full-day sun path chart + metrics (Apple-inspired). No Y-axis — path is symbolic. */
   function buildSunDaySheet(sunriseIso, sunsetIso) {
-    const now = Date.now();
-    let rise = sunriseIso ? new Date(sunriseIso).getTime() : now;
-    let set = sunsetIso ? new Date(sunsetIso).getTime() : now + 12 * 3600000;
-    if (set <= rise) set = rise + 12 * 3600000;
-    const TW = 35 * 60 * 1000; // civil twilight approx
-    const firstLight = rise - TW;
-    const lastLight = set + TW;
-    const daylight = set - rise;
-    const beforeRise = now < rise;
-    const afterSet = now > set;
-    const nextIsSunset = !beforeRise && !afterSet;
-    const heroIso = beforeRise ? sunriseIso : (afterSet ? sunriseIso : sunsetIso);
-    // If after sunset, hero is next sunrise (already tomorrow's in daily[0] for evening — use sunrise)
-    // Daylight remaining / until event
+    const W = 340, H = 160, padL = 10, padR = 10, padT = 14, padB = 28;
+    const g = sunPathGeometry(sunriseIso, sunsetIso, W, H, padL, padR, padT, padB);
+    const TW = 35 * 60 * 1000;
+    const firstLight = g.rise - TW;
+    const lastLight = g.set + TW;
+    const daylight = g.set - g.rise;
+    // Day → hero Sunset; Night → hero Sunrise
+    const heroIsSunset = g.isDay;
+    const heroIso = heroIsSunset ? sunsetIso : sunriseIso;
+    const heroTitle = heroIsSunset
+      ? t('weather.sunset', 'Sunset')
+      : t('weather.sunrise', 'Sunrise');
     let remainLab = t('weather.daylightRemaining', 'Daylight remaining');
-    let remainVal = formatDurationMs(Math.max(0, set - now));
-    if (beforeRise) {
+    let remainVal = formatDurationMs(Math.max(0, g.set - g.now));
+    if (g.beforeRise) {
       remainLab = t('weather.untilSunrise', 'Until sunrise');
-      remainVal = formatDurationMs(rise - now);
-    } else if (afterSet) {
+      remainVal = formatDurationMs(g.rise - g.now);
+    } else if (g.afterSet) {
       remainLab = t('weather.untilSunrise', 'Until sunrise');
-      // next sunrise ~ +24h if we only have today
-      remainVal = formatDurationMs(rise + 24 * 3600000 - now);
+      remainVal = formatDurationMs(g.rise + 24 * 3600000 - g.now);
+    } else {
+      remainLab = t('weather.untilSunset', 'Until sunset');
+      remainVal = formatDurationMs(g.set - g.now);
     }
-    const heroTitle = beforeRise || afterSet
-      ? t('weather.sunrise', 'Sunrise')
-      : t('weather.sunset', 'Sunset');
-
-    // 24h elevation-style curve (sinusoid between rise/set, night below horizon)
-    const W = 340, H = 150, padL = 8, padR = 8, padT = 16, padB = 28;
-    const plotW = W - padL - padR, plotH = H - padT - padB;
-    const dayStart = new Date(sunriseIso || Date.now());
-    dayStart.setHours(0, 0, 0, 0);
-    const day0 = dayStart.getTime();
-    const pts = [];
-    for (let i = 0; i <= 48; i++) {
-      const tms = day0 + (i / 48) * 24 * 3600000;
-      // elevation 0 at rise/set, 1 at solar noon, negative at night
-      let elev = 0;
-      if (tms >= rise && tms <= set) {
-        const u = (tms - rise) / (set - rise);
-        elev = Math.sin(u * Math.PI);
-      } else if (tms < rise) {
-        elev = -0.15 * Math.min(1, (rise - tms) / (6 * 3600000));
-      } else {
-        elev = -0.15 * Math.min(1, (tms - set) / (6 * 3600000));
-      }
-      const x = padL + (i / 48) * plotW;
-      const y = padT + (1 - (elev + 0.2) / 1.2) * plotH;
-      pts.push({ x, y, tms, elev });
-    }
-    const line = smoothLinePath(pts);
-    // Horizon y at elev=0
-    const horizonY = padT + (1 - (0 + 0.2) / 1.2) * plotH;
-    // Current sun position
-    let curIdx = 0;
-    const fracDay = (now - day0) / (24 * 3600000);
-    const curX = padL + Math.max(0, Math.min(1, fracDay)) * plotW;
-    let curY = horizonY;
-    for (let i = 0; i < pts.length - 1; i++) {
-      if (curX >= pts[i].x && curX <= pts[i + 1].x) {
-        const u = (curX - pts[i].x) / ((pts[i + 1].x - pts[i].x) || 1);
-        curY = pts[i].y + (pts[i + 1].y - pts[i].y) * u;
-        curIdx = i;
-        break;
-      }
-    }
-    const areaDay = (() => {
-      // fill only above horizon between rise and set
-      const riseX = padL + Math.max(0, Math.min(1, (rise - day0) / (24 * 3600000))) * plotW;
-      const setX = padL + Math.max(0, Math.min(1, (set - day0) / (24 * 3600000))) * plotW;
-      let d = '';
-      pts.forEach((p, i) => {
-        if (p.x < riseX || p.x > setX) return;
-        d += (d ? ' L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1);
-      });
-      if (!d) return '';
-      return d + ` L${setX.toFixed(1)},${horizonY.toFixed(1)} L${riseX.toFixed(1)},${horizonY.toFixed(1)} Z`;
-    })();
     const hourLabs = [
       { f: 0, lab: '00' }, { f: 0.25, lab: '06' }, { f: 0.5, lab: '12' }, { f: 0.75, lab: '18' }, { f: 1, lab: '24' }
-    ].map(({ f, lab }) => {
-      const x = padL + f * plotW;
-      return `<text x="${x.toFixed(1)}" y="${H - 8}" fill="rgba(255,255,255,.4)" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">${lab}</text>`;
+    ].map(function (item) {
+      const x = padL + item.f * (W - padL - padR);
+      return `<text x="${x.toFixed(1)}" y="${H - 8}" fill="rgba(255,255,255,.45)" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">${item.lab}</text>`;
     }).join('');
 
     let html = `<div class="wx-sheet-hero">
@@ -3205,10 +3597,10 @@
     </div>`;
     html += `<div class="weather-chart-card wx-sun-day-card">
       <svg class="weather-chart weather-sun-day" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
-        <line x1="${padL}" y1="${horizonY.toFixed(1)}" x2="${W - padR}" y2="${horizonY.toFixed(1)}" stroke="rgba(255,255,255,.28)" stroke-width="1"/>
-        ${areaDay ? `<path d="${areaDay}" fill="rgba(255,210,120,.16)"/>` : ''}
-        <path d="${line}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linejoin="round"/>
-        <circle cx="${curX.toFixed(1)}" cy="${curY.toFixed(1)}" r="7" fill="#ffe08a" stroke="#fff" stroke-width="1.5"/>
+        <line x1="${padL}" y1="${g.horizonY.toFixed(1)}" x2="${W - padR}" y2="${g.horizonY.toFixed(1)}" stroke="rgba(255,255,255,.28)" stroke-width="1"/>
+        ${g.area ? `<path d="${g.area}" fill="rgba(255,210,120,.16)"/>` : ''}
+        <path d="${g.line}" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2.25" stroke-linejoin="round"/>
+        <circle cx="${g.curX.toFixed(1)}" cy="${g.curY.toFixed(1)}" r="7" fill="#fff" stroke="rgba(255,220,140,.95)" stroke-width="2"/>
         ${hourLabs}
       </svg>
     </div>`;
@@ -3350,22 +3742,27 @@
       </div>`;
     let body = '';
 
+    // City-local calendar day for charts (Apple Weather style 00–24)
+    const chartTz = (pack.weather && pack.weather.timezone)
+      || (pack.city && pack.city.tz)
+      || undefined;
+
     // Chart sheets: Apple pattern = title → large live value lives in chart readout → scrub chart → about
     if (kind === 'conditions') {
       // Chart owns the big readout (scrub updates it). Secondary context line above.
       body += `<p class="wx-sheet-context">${escapeHtml(condLabel(cur.weather_code))}</p>`;
-      body += buildTempChart(hourly, 'temperature_2m', (v) => fmtTemp(v));
+      body += buildTempChart(hourly, 'temperature_2m', (v) => fmtTemp(v), chartTz);
       body += `<p class="weather-mod-label" style="margin-top:16px">${escapeHtml(t('weather.feelsLike', 'Feels Like'))}</p>`;
-      body += buildTempChart(hourly, 'apparent_temperature', (v) => fmtTemp(v));
+      body += buildTempChart(hourly, 'apparent_temperature', (v) => fmtTemp(v), chartTz);
     } else if (kind === 'feels') {
       body += `<p class="wx-sheet-context">${escapeHtml(condLabel(cur.weather_code))}</p>`;
-      body += buildTempChart(hourly, 'apparent_temperature', (v) => fmtTemp(v));
+      body += buildTempChart(hourly, 'apparent_temperature', (v) => fmtTemp(v), chartTz);
     } else if (kind === 'humidity') {
-      body += buildTempChart(hourly, 'relative_humidity_2m', (v) => Math.round(v) + '%');
+      body += buildTempChart(hourly, 'relative_humidity_2m', (v) => Math.round(v) + '%', chartTz);
     } else if (kind === 'wind') {
       // Direction as context; speed is the scrub readout
       body += `<p class="wx-sheet-context">${escapeHtml(degToCompass(cur.wind_direction_10m))}${cur.wind_direction_10m != null ? ' · ' + Math.round(cur.wind_direction_10m) + '°' : ''}</p>`;
-      body += buildTempChart(hourly, 'wind_speed_10m', (v) => fmtWind(v));
+      body += buildTempChart(hourly, 'wind_speed_10m', (v) => fmtWind(v), chartTz);
       body += `<div class="wx-sheet-compass-row">${windCompass(cur.wind_direction_10m)}</div>`;
       body += `<p class="weather-mod-label">${escapeHtml(t('weather.units', 'Units'))}</p><div class="weather-units-row" id="wxWindUnits">`;
       [['mph', 'mph'], ['kmh', 'km/h'], ['ms', 'm/s'], ['bft', 'bft'], ['kn', 'kn']].forEach(([u, lab]) => {
@@ -3373,7 +3770,7 @@
       });
       body += '</div>';
     } else if (kind === 'pressure') {
-      body += buildTempChart(hourly, 'surface_pressure', (v) => fmtPress(v));
+      body += buildTempChart(hourly, 'surface_pressure', (v) => fmtPress(v), chartTz);
       body += `<div class="weather-units-row" id="wxPressUnits">`;
       ['hPa', 'mbar', 'inHg', 'mmHg', 'kPa'].forEach((u) => {
         body += `<button type="button" data-u="${u}" class="${pressUnit() === u ? 'active' : ''}">${u}</button>`;
@@ -3382,7 +3779,7 @@
     } else if (kind === 'uv') {
       const uv = daily.uv_index_max ? daily.uv_index_max[0] : null;
       if (hourly.uv_index) {
-        body += buildTempChart(hourly, 'uv_index', (v) => String(Math.round(v * 10) / 10));
+        body += buildTempChart(hourly, 'uv_index', (v) => String(Math.round(v * 10) / 10), chartTz);
       } else {
         body += `<div class="wx-sheet-hero"><div class="weather-chart-readout">${uv != null ? Math.round(uv * 10) / 10 : '—'}</div></div>`;
       }
@@ -3403,7 +3800,7 @@
         </div>`;
       }
     } else if (kind === 'precip') {
-      if (hourly.precipitation) body += buildTempChart(hourly, 'precipitation', (v) => fmtPrecip(v));
+      if (hourly.precipitation) body += buildTempChart(hourly, 'precipitation', (v) => fmtPrecip(v), chartTz);
       else {
         body += `<div class="wx-sheet-hero"><div class="weather-chart-readout">${escapeHtml(fmtPrecip(cur.precipitation))}</div></div>`;
       }
@@ -3814,6 +4211,40 @@
     }
     return box;
   }
+  function skyModeFromCode(code, hour, staticFx) {
+    const night = hour < 6 || hour >= 20;
+    const c = code || 0;
+    let mode = night ? 'night' : 'day';
+    if (c >= 95) mode = 'storm';
+    else if ((c >= 51 && c < 70) || (c >= 80 && c < 85)) mode = 'rain';
+    else if ((c >= 71 && c < 80) || (c >= 85 && c < 90)) mode = 'snow';
+    else if (c >= 2 && c <= 3) mode = night ? 'night' : 'cloud';
+    else if (c === 45 || c === 48) mode = 'cloud';
+    if (staticFx) {
+      if (mode === 'rain' || mode === 'storm' || mode === 'snow') {
+        mode = night ? 'night' : 'cloud';
+      }
+    }
+    return mode;
+  }
+
+  /** List rows: CSS vars + mode class only — no ornament DOM. */
+  function paintSkyModeClassOnly(host, code, hour, opts) {
+    if (!host) return;
+    opts = opts || {};
+    const h = hour != null ? hour : 12;
+    const mode = skyModeFromCode(code, h, !!(opts.staticFx || opts.isRow));
+    host.classList.remove('wx-sky--day', 'wx-sky--night', 'wx-sky--cloud', 'wx-sky--rain', 'wx-sky--storm', 'wx-sky--snow');
+    host.classList.add('wx-sky--' + mode);
+    if (opts.isRow) host.classList.add('wx-sky--row');
+    else host.classList.remove('wx-sky--row');
+    // Strip leftover ornaments if a row was ever upgraded
+    const box = host.querySelector('.wx-ornaments');
+    if (box) {
+      try { box.remove(); } catch (e) { box.innerHTML = ''; }
+    }
+  }
+
   function paintSkyMode(host, code, isoTime, opts) {
     if (!host) return;
     ensureOrnaments(host);
@@ -3829,21 +4260,7 @@
         } else hour = new Date().getHours();
       } catch (e) {}
     }
-    const night = hour < 6 || hour >= 20;
-    const c = code || 0;
-    let mode = night ? 'night' : 'day';
-    // WMO: drizzle 51–57, rain 61–67, snow 71–77, showers 80–82, snow showers 85–86, thunder 95–99
-    if (c >= 95) mode = 'storm';
-    else if ((c >= 51 && c < 70) || (c >= 80 && c < 85)) mode = 'rain';
-    else if ((c >= 71 && c < 80) || (c >= 85 && c < 90)) mode = 'snow';
-    else if (c >= 2 && c <= 3) mode = night ? 'night' : 'cloud';
-    else if (c === 45 || c === 48) mode = 'cloud';
-    // List-only static: demote rain/storm/snow modes so particle layers stay off
-    if (opts.staticFx || (WEATHER_STATIC_LIST_FX && opts.isRow)) {
-      if (mode === 'rain' || mode === 'storm' || mode === 'snow') {
-        mode = night ? 'night' : 'cloud';
-      }
-    }
+    const mode = skyModeFromCode(code, hour, !!(opts.staticFx || (WEATHER_STATIC_LIST_FX && opts.isRow)));
     host.classList.remove('wx-sky--day', 'wx-sky--night', 'wx-sky--cloud', 'wx-sky--rain', 'wx-sky--storm', 'wx-sky--snow');
     host.classList.add('wx-sky--' + mode);
     if (opts.isRow) host.classList.add('wx-sky--row');
@@ -4003,43 +4420,118 @@
         <div class="wx-sheet-icon">${modLabelIcon('conditions')}</div>
         <h3 class="wx-sheet-title">${escapeHtml(t('weather.units', 'Units'))}</h3>
       </div>`);
+    const tempPref = (typeof window.getTempUnitPreference === 'function')
+      ? window.getTempUnitPreference()
+      : 'auto';
+    const distPref = (typeof window.getDistUnitPreference === 'function')
+      ? window.getDistUnitPreference()
+      : 'auto';
+    const autoLab = t('settings.auto', 'Auto');
+    const tempLab = t('settings.temperature', 'Temperature');
+    const distLab = t('settings.distance', 'Distance');
+    const miLab = t('settings.miles', 'Miles');
+    const kmLab = t('settings.km', 'Kilometers');
+    const resolvedHint =
+      (useF() ? '°F' : '°C') + ' · ' + (useMi() ? 'mi' : 'km');
+
     sheetBody.innerHTML =
+      `<p class="weather-mod-label">${escapeHtml(tempLab)}</p>` +
+      `<div class="weather-units-row" id="wxTempUnits"></div>` +
+      `<p class="weather-mod-label">${escapeHtml(distLab)}</p>` +
+      `<div class="weather-units-row" id="wxDistUnits"></div>` +
+      `<p class="wx-sheet-context" id="wxUnitsResolvedHint">${escapeHtml(
+        (lang() === 'zh' ? '当前：' : lang() === 'ja' ? '現在：' : lang() === 'es' ? 'Ahora: ' : 'Using ') +
+        resolvedHint
+      )}</p>` +
       `<p class="weather-mod-label">${escapeHtml(t('weather.wind', 'Wind'))}</p>` +
       `<div class="weather-units-row" id="wxWindUnits2"></div>` +
       `<p class="weather-mod-label">${escapeHtml(t('weather.precip', 'Precipitation'))}</p>` +
       `<div class="weather-units-row" id="wxPrecipUnits2"></div>` +
       `<p class="weather-mod-label">${escapeHtml(t('weather.pressure', 'Pressure'))}</p>` +
-      `<div class="weather-units-row" id="wxPressUnits2"></div>` +
-      `<p class="wx-sheet-context" style="margin-top:12px">${escapeHtml(
-        (useF() ? 'Temperature: °F (Settings)' : 'Temperature: °C (Settings)') +
-        ' · ' +
-        (useMi() ? 'Distance/visibility: mi' : 'Distance/visibility: km')
-      )}</p>`;
-    const fill = (id, units, current, setter) => {
+      `<div class="weather-units-row" id="wxPressUnits2"></div>`;
+
+    const updateResolvedHint = function () {
+      const el = document.getElementById('wxUnitsResolvedHint');
+      if (!el) return;
+      const tip = (useF() ? '°F' : '°C') + ' · ' + (useMi() ? 'mi' : 'km');
+      el.textContent =
+        (lang() === 'zh' ? '当前：' : lang() === 'ja' ? '現在：' : lang() === 'es' ? 'Ahora: ' : 'Using ') + tip;
+    };
+
+    const fill = function (id, units, current, onPick) {
       const row = document.getElementById(id);
       if (!row) return;
-      units.forEach(([u, lab]) => {
+      units.forEach(function (pair) {
+        const u = pair[0];
+        const lab = pair[1];
         const b = document.createElement('button');
         b.type = 'button';
         b.textContent = lab;
+        b.setAttribute('data-unit', u);
         if (current === u) b.classList.add('active');
-        b.addEventListener('click', () => {
-          setter(u);
-          row.querySelectorAll('button').forEach((x) => {
+        b.addEventListener('click', function () {
+          onPick(u);
+          row.querySelectorAll('button').forEach(function (x) {
             x.classList.toggle('active', x === b);
           });
-          refreshListsFromCache();
-          if (openCity && openCity.weather && openCity.city) {
-            const fresh = cache.get(cityKey(openCity.city)) || openCity;
-            openDetail(fresh);
-          }
         });
         row.appendChild(b);
       });
     };
-    fill('wxWindUnits2', [['mph', 'mph'], ['kmh', 'km/h'], ['ms', 'm/s'], ['bft', 'bft'], ['kn', 'kn']], windUnit(), setWindUnit);
-    fill('wxPrecipUnits2', [['in', 'in'], ['mm', 'mm'], ['cm', 'cm']], precipUnit(), setPrecipUnit);
-    fill('wxPressUnits2', [['hPa', 'hPa'], ['mbar', 'mbar'], ['inHg', 'inHg'], ['mmHg', 'mmHg'], ['kPa', 'kPa']], pressUnit(), setPressUnit);
+
+    // Temp / distance share Settings prefs (same localStorage + live repaint)
+    fill('wxTempUnits', [
+      ['auto', autoLab],
+      ['f', '°F'],
+      ['c', '°C']
+    ], tempPref, function (u) {
+      if (typeof window.setTempUnitPreference === 'function') {
+        window.setTempUnitPreference(u);
+      }
+      updateResolvedHint();
+      // Keep sheet open; runtime already force-refreshes weather numbers
+    });
+    fill('wxDistUnits', [
+      ['auto', autoLab],
+      ['mi', miLab],
+      ['km', kmLab]
+    ], distPref, function (u) {
+      if (typeof window.setDistUnitPreference === 'function') {
+        window.setDistUnitPreference(u);
+      }
+      updateResolvedHint();
+    });
+
+    fill('wxWindUnits2', [
+      ['mph', 'mph'], ['kmh', 'km/h'], ['ms', 'm/s'], ['bft', 'bft'], ['kn', 'kn']
+    ], windUnit(), function (u) {
+      setWindUnit(u);
+      refreshListsFromCache();
+      if (openCity && openCity.weather && openCity.city) {
+        const fresh = cache.get(cityKey(openCity.city)) || openCity;
+        openDetail(fresh);
+      }
+    });
+    fill('wxPrecipUnits2', [
+      ['in', 'in'], ['mm', 'mm'], ['cm', 'cm']
+    ], precipUnit(), function (u) {
+      setPrecipUnit(u);
+      refreshListsFromCache();
+      if (openCity && openCity.weather && openCity.city) {
+        const fresh = cache.get(cityKey(openCity.city)) || openCity;
+        openDetail(fresh);
+      }
+    });
+    fill('wxPressUnits2', [
+      ['hPa', 'hPa'], ['mbar', 'mbar'], ['inHg', 'inHg'], ['mmHg', 'mmHg'], ['kPa', 'kPa']
+    ], pressUnit(), function (u) {
+      setPressUnit(u);
+      refreshListsFromCache();
+      if (openCity && openCity.weather && openCity.city) {
+        const fresh = cache.get(cityKey(openCity.city)) || openCity;
+        openDetail(fresh);
+      }
+    });
     presentSheet();
   }
 
@@ -4199,26 +4691,49 @@
     // while the tab remains visible). Visibility API owns pause.
   });
 
-  window.refreshWeatherUi = function refreshWeatherUi() {
+  var pendingUiRefresh = false;
+
+  window.refreshWeatherUi = function refreshWeatherUi(opts) {
+    opts = opts || {};
+    // force: true — unit/language changes must repaint even mid-load
+    var force = !!(opts && opts.force);
     applyAmbientPageSky();
-    // Never interrupt bootstrap list-lock / inflight load with extra paints
-    if (listPaintLocked || refreshInflight) {
+    // Never interrupt bootstrap list-lock / inflight load unless forced
+    if (!force && (listPaintLocked || refreshInflight)) {
+      pendingUiRefresh = true;
       clearTimeout(nameFetchTimer);
       nameFetchTimer = setTimeout(function () { ensureLocalizedMajorNames(); }, 400);
       return;
     }
+    pendingUiRefresh = false;
     if (cache.size) {
       refreshListsFromCache();
-    } else {
+    } else if (!listPaintLocked && !refreshInflight) {
       refresh(true, { quiet: false, reason: 'lang' });
     }
     if (isDetailVisible() && openCity && openCity.weather) {
       const fresh = (openCity.city && cache.get(cityKey(openCity.city))) || openCity;
+      // Preserve open alerts across unit repaint
+      const keepAlerts = captureOpenAlertTitles();
       openDetail(fresh);
+      if (keepAlerts && keepAlerts.length) restoreOpenAlertTitles(keepAlerts);
     }
     clearTimeout(nameFetchTimer);
     nameFetchTimer = setTimeout(function () { ensureLocalizedMajorNames(); }, 200);
   };
+
+  // After list unlock, apply any deferred unit/lang repaint
+  (function watchPendingUiRefresh() {
+    var lastLocked = !!listPaintLocked;
+    setInterval(function () {
+      var locked = !!(listPaintLocked || refreshInflight);
+      if (lastLocked && !locked && pendingUiRefresh) {
+        pendingUiRefresh = false;
+        try { window.refreshWeatherUi({ force: true }); } catch (e) {}
+      }
+      lastLocked = locked;
+    }, 400);
+  })();
 
   // Kick off
   myLocationCity = loadMyLocation();

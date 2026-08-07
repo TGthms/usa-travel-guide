@@ -233,10 +233,14 @@ function numberLocale() {
 }
 
 function applyUnits() {
+  // Always re-sync from Auto / prefs before painting (fixes stale unit bug)
+  syncUnitGlobals();
   const loc = numberLocale();
+  const tempU = currentTempUnit;
+  const distU = currentDistUnit;
   document.querySelectorAll('.unit-temp[data-f]').forEach(el => {
     const f = parseFloat(el.getAttribute('data-f'));
-    if (currentTempUnit === 'c') {
+    if (tempU === 'c') {
       const c = Math.round((f - 32) * 5 / 9);
       el.textContent = c + '°C';
     } else {
@@ -246,7 +250,7 @@ function applyUnits() {
   document.querySelectorAll('.unit-dist[data-mi]').forEach(el => {
     const mi = parseFloat(el.getAttribute('data-mi'));
     const suffix = el.dataset.suffix || '';
-    if (currentDistUnit === 'km') {
+    if (distU === 'km') {
       const km = Math.round(mi * 1.60934).toLocaleString(loc);
       el.textContent = km + (currentLang === 'zh' ? ' 公里' : ' km') + suffix;
     } else {
@@ -317,71 +321,244 @@ function detectLanguage() {
 const LIGHT_THEMES = ['minimal', 'elegant'];
 
 /**
- * Style-matched dark twins used only when the OS *switches into* dark mode
- * while a light theme is active — we change the user's selection to the twin
- * (so Settings UI matches what is painted). We do NOT silently paint a light
- * pick as its twin; choosing Gallery Daylight always paints Gallery Daylight.
- *   Gallery Daylight (minimal) → Twilight Glass (glass)
- *   Heritage Paper (elegant)   → Grand Tour (luxury)
+ * Appearance: system | light | dark
+ * Style: classic | modern
+ *   Light + Classic → Heritage Paper (elegant)
+ *   Light + Modern  → Gallery Daylight (minimal)
+ *   Dark  + Classic → Midnight Atlas (default)
+ *   Dark  + Modern  → Twilight Glass (glass)
  */
-const LIGHT_THEME_DARK_TWIN = {
-  minimal: 'glass',
-  elegant: 'luxury'
-};
+function isOsLight() {
+  return !!safeMatchMedia('(prefers-color-scheme: light)').matches;
+}
+
+function resolveThemeFromAppearanceStyle(appearance, style) {
+  const light = appearance === 'system'
+    ? isOsLight()
+    : appearance === 'light';
+  const classic = style === 'classic';
+  if (light) return classic ? 'elegant' : 'minimal';
+  return classic ? 'default' : 'glass';
+}
 
 function detectTheme() {
-  /* First visit only (no saved Settings choice):
-     · OS light mode  → Gallery Daylight (`minimal`)
-     · OS dark mode / no preference → Midnight Atlas (`default`) */
-  if (safeMatchMedia('(prefers-color-scheme: light)').matches) return 'minimal';
-  return 'default';
+  // Used when appearance is system + default modern style
+  return resolveThemeFromAppearanceStyle('system', 'modern');
+}
+
+/**
+ * Units auto-detect priority (highest → lowest):
+ *   1. Explicit region in system locales (en-US, zh-CN) — never invent US from bare "en"
+ *   2. System time zone → country (Asia/Shanghai → CN, Europe/London → GB, …)
+ *   3. UI language fallback only if system gives nothing
+ *
+ * BUG FIX: Intl.Locale('en').maximize() becomes en-Latn-US on many engines, which
+ * wrongly forced °F for every English speaker. We never maximize bare language tags.
+ */
+const IMPERIAL_REGIONS = new Set([
+  'US', 'LR', 'MM',
+  'BS', 'BZ', 'KY', 'PW', 'FM', 'MH', 'GU', 'AS', 'MP', 'VI', 'PR'
+]);
+
+/** Common IANA zones → ISO 3166-1 alpha-2 (enough for units). */
+const TZ_TO_REGION = {
+  'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US',
+  'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Anchorage': 'US',
+  'America/Adak': 'US', 'America/Boise': 'US', 'America/Detroit': 'US',
+  'America/Indiana/Indianapolis': 'US', 'America/Kentucky/Louisville': 'US',
+  'America/Puerto_Rico': 'US', 'Pacific/Honolulu': 'US',
+  'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'America/Edmonton': 'CA',
+  'America/Winnipeg': 'CA', 'America/Halifax': 'CA', 'America/St_Johns': 'CA',
+  'America/Mexico_City': 'MX', 'America/Cancun': 'MX',
+  'America/Sao_Paulo': 'BR', 'America/Argentina/Buenos_Aires': 'AR',
+  'America/Santiago': 'CL', 'America/Bogota': 'CO', 'America/Lima': 'PE',
+  'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR',
+  'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Europe/Rome': 'IT',
+  'Europe/Amsterdam': 'NL', 'Europe/Brussels': 'BE', 'Europe/Zurich': 'CH',
+  'Europe/Vienna': 'AT', 'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO',
+  'Europe/Copenhagen': 'DK', 'Europe/Helsinki': 'FI', 'Europe/Warsaw': 'PL',
+  'Europe/Prague': 'CZ', 'Europe/Budapest': 'HU', 'Europe/Bucharest': 'RO',
+  'Europe/Athens': 'GR', 'Europe/Lisbon': 'PT', 'Europe/Moscow': 'RU',
+  'Europe/Istanbul': 'TR', 'Europe/Kyiv': 'UA',
+  'Asia/Shanghai': 'CN', 'Asia/Hong_Kong': 'HK', 'Asia/Taipei': 'TW',
+  'Asia/Chongqing': 'CN', 'Asia/Urumqi': 'CN', 'Asia/Harbin': 'CN',
+  'Asia/Tokyo': 'JP', 'Asia/Seoul': 'KR', 'Asia/Singapore': 'SG',
+  'Asia/Bangkok': 'TH', 'Asia/Jakarta': 'ID', 'Asia/Manila': 'PH',
+  'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN', 'Asia/Dubai': 'AE',
+  'Asia/Riyadh': 'SA', 'Asia/Jerusalem': 'IL', 'Asia/Ho_Chi_Minh': 'VN',
+  'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU', 'Australia/Perth': 'AU',
+  'Australia/Brisbane': 'AU', 'Australia/Adelaide': 'AU', 'Pacific/Auckland': 'NZ',
+  'Africa/Johannesburg': 'ZA', 'Africa/Cairo': 'EG', 'Africa/Lagos': 'NG',
+  'Pacific/Auckland': 'NZ'
+};
+
+function detectUnitsForLang(lang) {
+  const L = String(lang || 'en').toLowerCase();
+  if (L === 'zh' || L === 'ja') return { temp: 'c', dist: 'km' };
+  // Bare EN/ES without system region: prefer metric for travelers (safer default
+  // than forcing US). US still wins via region/timezone above.
+  if (L === 'es') return { temp: 'c', dist: 'km' };
+  return { temp: 'c', dist: 'km' };
+}
+
+function collectSystemLocales() {
+  const locales = [];
+  const push = function (v) {
+    if (!v) return;
+    const s = String(v).replace(/_/g, '-');
+    if (s && locales.indexOf(s) === -1) locales.push(s);
+  };
+  try {
+    // Prefer the resolved system locale first (most accurate OS setting)
+    push(Intl.DateTimeFormat().resolvedOptions().locale);
+  } catch (_) { /* ignore */ }
+  try {
+    if (navigator.language) push(navigator.language);
+    if (Array.isArray(navigator.languages)) {
+      for (let i = 0; i < navigator.languages.length; i++) push(navigator.languages[i]);
+    }
+  } catch (_) { /* ignore */ }
+  return locales;
+}
+
+/**
+ * Extract region only when the tag already implies one.
+ * Do NOT call maximize() on bare "en" — that invents US.
+ */
+function regionFromLocaleTag(raw) {
+  if (!raw) return '';
+  const tag = String(raw).replace(/_/g, '-');
+  try {
+    if (typeof Intl !== 'undefined' && typeof Intl.Locale === 'function') {
+      const L = new Intl.Locale(tag);
+      if (L.region && String(L.region).length === 2) return String(L.region).toUpperCase();
+      // Only maximize when script is present but region missing (e.g. zh-Hans)
+      const parts = tag.split('-');
+      const hasLikelyRegion = parts.some(function (p) { return /^[A-Za-z]{2}$/.test(p) && p.length === 2 && p === p.toUpperCase(); });
+      if (!L.region && parts.length >= 2 && typeof L.maximize === 'function') {
+        // zh-Hans → CN is OK; bare en already returned above without region
+        if (parts[0].toLowerCase() !== 'en' && parts[0].toLowerCase() !== 'es') {
+          const maxed = L.maximize();
+          if (maxed.region && String(maxed.region).length === 2) {
+            return String(maxed.region).toUpperCase();
+          }
+        }
+      }
+      void hasLikelyRegion;
+    }
+  } catch (_) { /* fall through */ }
+  // Explicit region subtag: en-US, zh-CN, pt-BR (not en-Latn)
+  const m = tag.match(/-([A-Za-z]{2})(?:-|$)/g);
+  if (m) {
+    for (let i = 0; i < m.length; i++) {
+      const cand = m[i].replace(/^-/, '').toUpperCase();
+      if (cand.length !== 2) continue;
+      if (cand === 'HA' || cand === 'HI' || cand === 'LA') continue;
+      // Prefer uppercase region-looking tags from original (en-US)
+      const orig = tag.match(new RegExp('-(' + cand + ')(?:-|$)', 'i'));
+      if (orig) return cand;
+    }
+  }
+  const m2 = tag.match(/-([A-Z]{2})$/);
+  if (m2) return m2[1];
+  return '';
+}
+
+function detectSystemRegion() {
+  const locales = collectSystemLocales();
+  for (let i = 0; i < locales.length; i++) {
+    const r = regionFromLocaleTag(locales[i]);
+    if (r) return r;
+  }
+  return '';
+}
+
+function detectRegionFromTimeZone() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (!tz) return '';
+    if (TZ_TO_REGION[tz]) return TZ_TO_REGION[tz];
+    // Prefix heuristics
+    if (tz.indexOf('America/') === 0) {
+      // Default non-mapped America/* to metric (Canada/LatAm) unless clearly US list
+      if (/^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Adak|Boise|Detroit|Indiana\/|Kentucky\/|Menominee|Metlakatla|Nome|North_Dakota\/|Sitka|Yakutat|Juneau)/.test(tz)) {
+        return 'US';
+      }
+      return ''; // unknown America — don't assume US
+    }
+    if (tz.indexOf('Asia/Shanghai') === 0 || tz.indexOf('Asia/Chongqing') === 0) return 'CN';
+    if (tz.indexOf('Asia/Tokyo') === 0) return 'JP';
+    if (tz.indexOf('Europe/') === 0) return 'EU'; // metric stand-in
+    if (tz.indexOf('Australia/') === 0) return 'AU';
+  } catch (_) { /* ignore */ }
+  return '';
+}
+
+function unitsFromRegion(region) {
+  if (!region) return null;
+  if (region === 'EU') return { temp: 'c', dist: 'km', source: 'timezone:EU' };
+  const imperial = IMPERIAL_REGIONS.has(region);
+  return {
+    temp: imperial ? 'f' : 'c',
+    dist: imperial ? 'mi' : 'km',
+    source: 'region:' + region
+  };
+}
+
+/**
+ * Optional: engines that expose measurement systems on Intl.Locale
+ * (not universal — always fall through if missing).
+ */
+function detectUnitsFromMeasurementSystem() {
+  try {
+    const locales = collectSystemLocales();
+    for (let i = 0; i < locales.length; i++) {
+      const tag = locales[i];
+      if (!tag || typeof Intl === 'undefined' || typeof Intl.Locale !== 'function') continue;
+      const L = new Intl.Locale(tag);
+      // Some engines expose getMeasurementSystems / measurementSystems
+      let systems = null;
+      if (typeof L.getMeasurementSystems === 'function') {
+        systems = L.getMeasurementSystems();
+      } else if (L.measurementSystems) {
+        systems = L.measurementSystems;
+      }
+      if (!systems || !systems.length) continue;
+      const primary = String(systems[0] || '').toLowerCase();
+      if (primary === 'ussystem' || primary === 'us' || primary === 'imperial') {
+        return { temp: 'f', dist: 'mi', source: 'measurement:' + tag };
+      }
+      if (primary === 'metric' || primary === 'si') {
+        return { temp: 'c', dist: 'km', source: 'measurement:' + tag };
+      }
+    }
+  } catch (_) { /* ignore */ }
+  return null;
 }
 
 function detectUnits() {
-  // Prefer full locale region when available (en-GB → metric, en-US → imperial).
-  const locales = [];
+  // 0) Explicit measurement system when the engine reports it
+  const fromMs = detectUnitsFromMeasurementSystem();
+  if (fromMs) return fromMs;
+
+  // 1) Explicit system locale region (en-US, zh-CN, …)
+  const region = detectSystemRegion();
+  const fromRegion = unitsFromRegion(region);
+  if (fromRegion) return fromRegion;
+
+  // 2) Time zone → country
+  const tzRegion = detectRegionFromTimeZone();
+  const fromTz = unitsFromRegion(tzRegion);
+  if (fromTz) return fromTz;
+
+  // 3) UI language only as last resort (metric-leaning for bare en)
+  let lang = 'en';
   try {
-    if (Array.isArray(navigator.languages)) locales.push(...navigator.languages);
-    if (navigator.language) locales.push(navigator.language);
-    const resolved = Intl.DateTimeFormat().resolvedOptions().locale;
-    if (resolved) locales.push(resolved);
+    if (typeof currentLang === 'string' && currentLang) lang = currentLang;
+    else lang = detectLanguage();
   } catch (_) { /* ignore */ }
-
-  let region = '';
-  for (const loc of locales) {
-    const raw = String(loc || '').replace(/_/g, '-');
-    if (!raw) continue;
-    // Intl.Locale is the most reliable way to extract region (handles zh-Hans-CN, etc.)
-    try {
-      if (typeof Intl !== 'undefined' && typeof Intl.Locale === 'function') {
-        const L = new Intl.Locale(raw);
-        const maxed = typeof L.maximize === 'function' ? L.maximize() : L;
-        const r = maxed.region || L.region;
-        if (r && String(r).length === 2) {
-          region = String(r).toUpperCase();
-          break;
-        }
-      }
-    } catch (_) { /* fall through */ }
-    // en-US, en-GB, zh-CN
-    const m = raw.match(/(?:^|-)([a-z]{2})$/i) || raw.match(/-([A-Z]{2})\b/);
-    if (m && m[1] && m[1].length === 2) {
-      const cand = m[1].toUpperCase();
-      // Skip common script codes mistaken as region
-      if (cand !== 'HA' && cand !== 'HI' && cand !== 'LA') {
-        region = cand;
-        break;
-      }
-    }
-  }
-
-  // Everyday °F / miles. Most of the world is metric (°C / km).
-  const imperialRegions = new Set([
-    'US', 'LR', 'MM',
-    'BS', 'BZ', 'KY', 'PW', 'FM', 'MH', 'GU', 'AS', 'MP', 'VI', 'PR'
-  ]);
-  const imperial = imperialRegions.has(region);
-  return { temp: imperial ? 'f' : 'c', dist: imperial ? 'mi' : 'km' };
+  const byLang = detectUnitsForLang(lang);
+  return { temp: byLang.temp, dist: byLang.dist, source: 'lang:' + lang };
 }
 
 /** Default animation level: OS “reduce motion” → reduced; constrained → off. */
@@ -413,20 +590,134 @@ function loadMotionModePreference() {
 }
 
 /* ── SETTINGS STATE ──
-   Saved preference → use it. Never saved → detect from the environment. */
-const detectedUnits = detectUnits();
-let currentTheme    = safeStorage.has('usa-travel-theme')
-  ? safeStorage.get('usa-travel-theme', 'default')
-  : detectTheme();
-let currentLang     = safeStorage.has('usa-travel-lang')
+   pref* = what Settings stores (may be "auto" / "system")
+   current* = effective value used by the app (always concrete) */
+
+let currentLang = safeStorage.has('usa-travel-lang')
   ? safeStorage.get('usa-travel-lang', 'en')
   : detectLanguage();
-let currentTempUnit = safeStorage.has('usa-travel-temp-unit')
-  ? safeStorage.get('usa-travel-temp-unit', 'f')
-  : detectedUnits.temp;
-let currentDistUnit = safeStorage.has('usa-travel-dist-unit')
-  ? safeStorage.get('usa-travel-dist-unit', 'mi')
-  : detectedUnits.dist;
+if (!SUPPORTED_LANGS.includes(currentLang)) currentLang = 'en';
+
+/** Appearance: system | light | dark · Style: classic | modern */
+function migrateAppearanceStyleFromLegacyTheme() {
+  if (safeStorage.has('usa-travel-appearance')) {
+    return {
+      appearance: safeStorage.get('usa-travel-appearance', 'system'),
+      style: safeStorage.get('usa-travel-style', 'modern')
+    };
+  }
+  // Migrate old 6-theme key once
+  const old = safeStorage.has('usa-travel-theme')
+    ? safeStorage.get('usa-travel-theme', 'auto')
+    : 'auto';
+  let appearance = 'system';
+  let style = 'modern';
+  if (old === 'auto') { appearance = 'system'; style = 'modern'; }
+  else if (old === 'minimal') { appearance = 'light'; style = 'modern'; }
+  else if (old === 'elegant') { appearance = 'light'; style = 'classic'; }
+  else if (old === 'default') { appearance = 'dark'; style = 'classic'; }
+  else if (old === 'glass') { appearance = 'dark'; style = 'modern'; }
+  else if (old === 'luxury' || old === 'nature') { appearance = 'dark'; style = 'classic'; }
+  try {
+    safeStorage.set('usa-travel-appearance', appearance);
+    safeStorage.set('usa-travel-style', style);
+  } catch (e) {}
+  return { appearance: appearance, style: style };
+}
+const _as0 = migrateAppearanceStyleFromLegacyTheme();
+let prefAppearance = _as0.appearance;
+let prefStyle = _as0.style;
+if (prefAppearance !== 'system' && prefAppearance !== 'light' && prefAppearance !== 'dark') {
+  prefAppearance = 'system';
+}
+if (prefStyle !== 'classic' && prefStyle !== 'modern') prefStyle = 'modern';
+let currentTheme = resolveThemeFromAppearanceStyle(prefAppearance, prefStyle);
+// Legacy alias used by some UI code
+let prefTheme = prefAppearance === 'system' ? 'auto' : currentTheme;
+
+/** Unit prefs: auto | f/c | mi/km
+ *  v5: re-force Auto so sticky °F/mi from older maximize() bug is cleared once more.
+ *  (Users who explicitly picked °F/°C after v5 keep their choice.) */
+if (!safeStorage.has('usa-travel-units-v5')) {
+  try {
+    safeStorage.set('usa-travel-temp-unit', 'auto');
+    safeStorage.set('usa-travel-dist-unit', 'auto');
+    safeStorage.set('usa-travel-units-v5', '1');
+    safeStorage.set('usa-travel-units-v4', '1');
+  } catch (_) { /* ignore */ }
+}
+let prefTempUnit = safeStorage.has('usa-travel-temp-unit')
+  ? safeStorage.get('usa-travel-temp-unit', 'auto')
+  : 'auto';
+let prefDistUnit = safeStorage.has('usa-travel-dist-unit')
+  ? safeStorage.get('usa-travel-dist-unit', 'auto')
+  : 'auto';
+if (prefTempUnit !== 'auto' && prefTempUnit !== 'f' && prefTempUnit !== 'c') prefTempUnit = 'auto';
+if (prefDistUnit !== 'auto' && prefDistUnit !== 'mi' && prefDistUnit !== 'km') prefDistUnit = 'auto';
+
+function resolveUnitsFromPrefs() {
+  // Auto → system locale / timezone first (detectUnits) — always live, never cached wrong
+  const detected = detectUnits();
+  return {
+    temp: prefTempUnit === 'auto' ? detected.temp : prefTempUnit,
+    dist: prefDistUnit === 'auto' ? detected.dist : prefDistUnit,
+    source: detected.source || '',
+    autoTemp: prefTempUnit === 'auto',
+    autoDist: prefDistUnit === 'auto'
+  };
+}
+
+/** Sync window globals used by weather.js / tools (must not go stale). */
+function syncUnitGlobals() {
+  const r = resolveUnitsFromPrefs();
+  currentTempUnit = r.temp;
+  currentDistUnit = r.dist;
+  try {
+    window.currentTempUnit = currentTempUnit;
+    window.currentDistUnit = currentDistUnit;
+    window.prefTempUnit = prefTempUnit;
+    window.prefDistUnit = prefDistUnit;
+    document.documentElement.setAttribute('data-temp-unit', currentTempUnit);
+    document.documentElement.setAttribute('data-dist-unit', currentDistUnit);
+    document.documentElement.setAttribute('data-temp-pref', prefTempUnit);
+    document.documentElement.setAttribute('data-dist-pref', prefDistUnit);
+  } catch (_) { /* ignore */ }
+  return r;
+}
+
+let _u0 = resolveUnitsFromPrefs();
+let currentTempUnit = _u0.temp;
+let currentDistUnit = _u0.dist;
+syncUnitGlobals();
+
+/** Live getters — weather and tools should use these so Auto always re-detects */
+window.getEffectiveTempUnit = function getEffectiveTempUnit() {
+  return syncUnitGlobals().temp;
+};
+window.getEffectiveDistUnit = function getEffectiveDistUnit() {
+  return syncUnitGlobals().dist;
+};
+
+/** Debug helper — open console: __usaTravelUnits() */
+window.__usaTravelUnits = function () {
+  const d = detectUnits();
+  const r = syncUnitGlobals();
+  return {
+    prefTemp: prefTempUnit,
+    prefDist: prefDistUnit,
+    effectiveTemp: currentTempUnit,
+    effectiveDist: currentDistUnit,
+    detected: d,
+    resolved: r,
+    locales: collectSystemLocales(),
+    region: detectSystemRegion(),
+    tzRegion: detectRegionFromTimeZone(),
+    timeZone: (function () {
+      try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ''; }
+    })()
+  };
+};
+
 /** User preference: full | reduced | off */
 let motionMode = loadMotionModePreference();
 let cursorEffectEnabled = safeStorage.has('usa-travel-cursor-fx')
@@ -435,13 +726,46 @@ let cursorEffectEnabled = safeStorage.has('usa-travel-cursor-fx')
 // Gallery lightbox quality: thumb | medium (default) | full
 let galleryQuality = safeStorage.get('usa-travel-gallery-quality', 'medium');
 
-// Guard against corrupt storage values
+// Guard against corrupt effective values
 if (!['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'].includes(currentTheme)) currentTheme = 'default';
-if (!SUPPORTED_LANGS.includes(currentLang)) currentLang = 'en';
 if (currentTempUnit !== 'f' && currentTempUnit !== 'c') currentTempUnit = 'f';
 if (currentDistUnit !== 'mi' && currentDistUnit !== 'km') currentDistUnit = 'mi';
 if (!['thumb', 'medium', 'full'].includes(galleryQuality)) galleryQuality = 'medium';
 if (!['full', 'reduced', 'off'].includes(motionMode)) motionMode = 'full';
+
+function recomputeAutoPrefs({ paint = true } = {}) {
+  let themeChanged = false;
+  let unitsChanged = false;
+  const nextTheme = resolveThemeFromAppearanceStyle(prefAppearance, prefStyle);
+  if (nextTheme !== currentTheme) {
+    currentTheme = nextTheme;
+    themeChanged = true;
+  }
+  const u = resolveUnitsFromPrefs();
+  if (u.temp !== currentTempUnit || u.dist !== currentDistUnit) {
+    currentTempUnit = u.temp;
+    currentDistUnit = u.dist;
+    unitsChanged = true;
+  }
+  if (!paint) return { themeChanged, unitsChanged };
+  if (themeChanged || prefAppearance === 'system') {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    applyThemeChrome(currentTheme);
+    if (typeof updateAppearanceStyleUI === 'function') updateAppearanceStyleUI();
+    if (typeof window.refreshWeatherUi === 'function') {
+      try { window.refreshWeatherUi(); } catch (e) {}
+    }
+  }
+  if (unitsChanged || (prefTempUnit === 'auto' || prefDistUnit === 'auto')) {
+    syncUnitGlobals();
+    updateUnitUI();
+    if (typeof applyUnits === 'function') applyUnits();
+    if (unitsChanged && typeof window.refreshWeatherUi === 'function') {
+      try { window.refreshWeatherUi({ force: true }); } catch (e) {}
+    }
+  }
+  return { themeChanged, unitsChanged };
+}
 
 /* Respects the Settings choice AND the OS-level preference. Checked live so
    OS flips mid-session still calm things down. Constrained devices force off. */
@@ -498,10 +822,23 @@ function scrollBehaviorPref() {
    currentTheme is always what paints AND what Settings highlights.
    OS dark does not repaint a light pick as its twin; user choice is sacred
    after an explicit swatch click. */
+const appearancePills = document.querySelectorAll('#appearancePillGroup .pill-btn');
+const stylePills = document.querySelectorAll('#stylePillGroup .pill-btn');
+// Legacy nodes (if any leftover pages)
 const themeSwatches = document.querySelectorAll('.theme-swatch');
-function updateThemeUI(theme) {
-  themeSwatches.forEach(sw => sw.classList.toggle('active', sw.dataset.themeVal === theme));
+
+function updateAppearanceStyleUI() {
+  appearancePills.forEach(function (p) {
+    p.classList.toggle('active', p.dataset.appearanceVal === prefAppearance);
+  });
+  stylePills.forEach(function (p) {
+    p.classList.toggle('active', p.dataset.styleVal === prefStyle);
+  });
 }
+function updateThemeUI() {
+  updateAppearanceStyleUI();
+}
+
 const THEME_META_COLORS = {
   default: '#07101c',
   minimal: '#f5f5f7',
@@ -516,44 +853,81 @@ function applyThemeChrome(theme) {
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', THEME_META_COLORS[theme] || THEME_META_COLORS.default);
 }
-function applyThemePreference(preferred, { persist = false } = {}) {
-  if (!['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'].includes(preferred)) {
-    preferred = 'default';
+
+function applyAppearanceStyle({ persist = false } = {}) {
+  currentTheme = resolveThemeFromAppearanceStyle(prefAppearance, prefStyle);
+  prefTheme = prefAppearance === 'system' ? 'auto' : currentTheme;
+  if (persist) {
+    safeStorage.set('usa-travel-appearance', prefAppearance);
+    safeStorage.set('usa-travel-style', prefStyle);
+    // Keep legacy key in sync for any old readers
+    safeStorage.set('usa-travel-theme', prefAppearance === 'system' ? 'auto' : currentTheme);
   }
-  currentTheme = preferred;
-  if (persist) safeStorage.set('usa-travel-theme', preferred);
-  // Paint exactly what the user chose — never silently substitute a twin.
-  document.documentElement.setAttribute('data-theme', preferred);
-  applyThemeChrome(preferred);
-  updateThemeUI(preferred);
-  // Weather page sky is theme-dependent — update live without full reload
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  applyThemeChrome(currentTheme);
+  updateAppearanceStyleUI();
   if (typeof window.refreshWeatherUi === 'function') {
     try { window.refreshWeatherUi(); } catch (e) {}
   }
 }
-themeSwatches.forEach(sw => {
-  sw.addEventListener('click', () => {
+
+/** @deprecated name kept for any callers; maps to new appearance model */
+function applyThemePreference(preferred, { persist = false } = {}) {
+  if (preferred === 'auto' || preferred === 'system') {
+    prefAppearance = 'system';
+  } else if (preferred === 'minimal') {
+    prefAppearance = 'light'; prefStyle = 'modern';
+  } else if (preferred === 'elegant') {
+    prefAppearance = 'light'; prefStyle = 'classic';
+  } else if (preferred === 'default') {
+    prefAppearance = 'dark'; prefStyle = 'classic';
+  } else if (preferred === 'glass') {
+    prefAppearance = 'dark'; prefStyle = 'modern';
+  } else if (preferred === 'light' || preferred === 'dark') {
+    prefAppearance = preferred;
+  }
+  applyAppearanceStyle({ persist: persist });
+}
+
+appearancePills.forEach(function (p) {
+  p.addEventListener('click', function () {
+    const v = p.dataset.appearanceVal;
+    if (v !== 'system' && v !== 'light' && v !== 'dark') return;
+    prefAppearance = v;
+    applyAppearanceStyle({ persist: true });
+  });
+});
+stylePills.forEach(function (p) {
+  p.addEventListener('click', function () {
+    const v = p.dataset.styleVal;
+    if (v !== 'classic' && v !== 'modern') return;
+    prefStyle = v;
+    applyAppearanceStyle({ persist: true });
+  });
+});
+// Legacy swatches if present
+themeSwatches.forEach(function (sw) {
+  sw.addEventListener('click', function () {
     applyThemePreference(sw.dataset.themeVal, { persist: true });
   });
 });
-applyThemePreference(currentTheme, { persist: false });
-// When the OS flips into dark while a light theme is active, *switch selection*
-// to the style-matched twin (persist). User can still pick Daylight/Paper after.
+applyAppearanceStyle({ persist: false });
+
 const prefersColorSchemeDarkMQ = safeMatchMedia('(prefers-color-scheme: dark)');
 function onColorSchemeChange() {
-  const osDark = !!prefersColorSchemeDarkMQ.matches;
-  if (osDark && LIGHT_THEMES.includes(currentTheme)) {
-    const twin = LIGHT_THEME_DARK_TWIN[currentTheme];
-    if (twin) applyThemePreference(twin, { persist: true });
-    return;
+  // Only System appearance tracks OS light/dark
+  if (prefAppearance === 'system') {
+    applyAppearanceStyle({ persist: false });
   }
-  applyThemePreference(currentTheme, { persist: false });
 }
 if (typeof prefersColorSchemeDarkMQ.addEventListener === 'function') {
   prefersColorSchemeDarkMQ.addEventListener('change', onColorSchemeChange);
 } else if (typeof prefersColorSchemeDarkMQ.addListener === 'function') {
   prefersColorSchemeDarkMQ.addListener(onColorSchemeChange);
 }
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'visible') recomputeAutoPrefs({ paint: true });
+});
 
 /* ── LANGUAGE PILLS ── */
 const langPills = document.querySelectorAll('#langPillGroup .pill-btn');
@@ -565,35 +939,125 @@ langPills.forEach(p => {
     currentLang = p.dataset.langVal;
     safeStorage.set('usa-travel-lang', currentLang);
     updateLangUI(currentLang);
+    // Auto units: system locale still wins; language is only fallback
+    recomputeAutoPrefs({ paint: true });
     applyLanguage(currentLang);
   });
 });
 updateLangUI(currentLang);
 
-/* ── UNIT PILLS ── */
+/* ── UNIT PILLS (auto | f/c | mi/km) ── */
 const tempPills = document.querySelectorAll('#unitTempGroup .pill-btn');
 const distPills = document.querySelectorAll('#unitDistGroup .pill-btn');
-function updateUnitUI() {
-  tempPills.forEach(p => p.classList.toggle('active', p.dataset.unitVal === currentTempUnit));
-  distPills.forEach(p => p.classList.toggle('active', p.dataset.unitVal === currentDistUnit));
+
+function unitsResolvedHintText(resolved) {
+  const r = resolved || resolveUnitsFromPrefs();
+  const tempLab = r.temp === 'f' ? '°F' : '°C';
+  const distLab = r.dist === 'mi'
+    ? (currentLang === 'zh' ? '英里' : currentLang === 'ja' ? 'マイル' : currentLang === 'es' ? 'millas' : 'mi')
+    : (currentLang === 'zh' ? '公里' : currentLang === 'ja' ? 'km' : currentLang === 'es' ? 'km' : 'km');
+  if (currentLang === 'zh') return '当前：' + tempLab + ' · ' + distLab;
+  if (currentLang === 'ja') return '現在：' + tempLab + ' · ' + distLab;
+  if (currentLang === 'es') return 'Ahora: ' + tempLab + ' · ' + distLab;
+  return 'Using ' + tempLab + ' · ' + distLab;
 }
-tempPills.forEach(p => p.addEventListener('click', () => {
-  currentTempUnit = p.dataset.unitVal;
-  safeStorage.set('usa-travel-temp-unit', currentTempUnit);
+
+function ensureUnitsResolvedHintEl() {
+  let el = document.getElementById('unitsResolvedHint');
+  if (el) return el;
+  const tempGroup = document.getElementById('unitTempGroup');
+  const host = tempGroup && tempGroup.closest
+    ? (tempGroup.closest('.settings-group') || tempGroup.parentElement)
+    : null;
+  if (!host) return null;
+  el = document.createElement('p');
+  el.id = 'unitsResolvedHint';
+  el.className = 'settings-units-resolved';
+  el.setAttribute('aria-live', 'polite');
+  // Place after the distance subgroup (end of units group content)
+  host.appendChild(el);
+  return el;
+}
+
+function updateUnitsResolvedHint() {
+  const el = ensureUnitsResolvedHintEl();
+  if (!el) return;
+  const r = syncUnitGlobals();
+  el.textContent = unitsResolvedHintText(r);
+  el.hidden = false;
+  el.setAttribute('data-temp', r.temp);
+  el.setAttribute('data-dist', r.dist);
+  el.setAttribute('data-source', r.source || '');
+}
+
+function updateUnitUI() {
+  tempPills.forEach(function (p) {
+    p.classList.toggle('active', p.dataset.unitVal === prefTempUnit);
+  });
+  distPills.forEach(function (p) {
+    p.classList.toggle('active', p.dataset.unitVal === prefDistUnit);
+  });
+  updateUnitsResolvedHint();
+}
+
+function paintUnitsEverywhere() {
+  const resolved = syncUnitGlobals();
   updateUnitUI();
   applyUnits();
-}));
-distPills.forEach(p => p.addEventListener('click', () => {
-  const next = p.dataset.unitVal;
-  if (next !== currentDistUnit && typeof convertDriveInputsForUnitChange === 'function') {
-    convertDriveInputsForUnitChange(currentDistUnit, next);
+  // Weather must repaint even mid-load (force bypasses list lock)
+  if (typeof window.refreshWeatherUi === 'function') {
+    try { window.refreshWeatherUi({ force: true }); } catch (e) {}
   }
-  currentDistUnit = next;
-  safeStorage.set('usa-travel-dist-unit', currentDistUnit);
-  updateUnitUI();
-  applyUnits();
-}));
+  return resolved;
+}
+
+function applyResolvedUnits(resolved) {
+  if (resolved) {
+    currentTempUnit = resolved.temp;
+    currentDistUnit = resolved.dist;
+  }
+  return paintUnitsEverywhere();
+}
+
+/** Shared setters — Settings pills + Weather units sheet use the same prefs. */
+window.getTempUnitPreference = function getTempUnitPreference() {
+  return prefTempUnit;
+};
+window.getDistUnitPreference = function getDistUnitPreference() {
+  return prefDistUnit;
+};
+window.setTempUnitPreference = function setTempUnitPreference(next) {
+  if (next !== 'auto' && next !== 'f' && next !== 'c') return null;
+  prefTempUnit = next;
+  safeStorage.set('usa-travel-temp-unit', prefTempUnit);
+  return applyResolvedUnits(resolveUnitsFromPrefs());
+};
+window.setDistUnitPreference = function setDistUnitPreference(next) {
+  if (next !== 'auto' && next !== 'mi' && next !== 'km') return null;
+  const prevDist = currentDistUnit;
+  prefDistUnit = next;
+  safeStorage.set('usa-travel-dist-unit', prefDistUnit);
+  const resolved = resolveUnitsFromPrefs();
+  if (resolved.dist !== prevDist && typeof convertDriveInputsForUnitChange === 'function') {
+    convertDriveInputsForUnitChange(prevDist, resolved.dist);
+  }
+  return applyResolvedUnits(resolved);
+};
+
+tempPills.forEach(function (p) {
+  p.addEventListener('click', function () {
+    window.setTempUnitPreference(p.dataset.unitVal);
+  });
+});
+distPills.forEach(function (p) {
+  p.addEventListener('click', function () {
+    window.setDistUnitPreference(p.dataset.unitVal);
+  });
+});
 updateUnitUI();
+// Ensure guide unit spans match Auto detection on first paint
+applyUnits();
+updateUnitsResolvedHint();
 
 /* ── ACCESSIBILITY PILLS (Animations: full / reduced / off · Cursor Effect) ── */
 const motionPills = document.querySelectorAll('#motionPillGroup .pill-btn');

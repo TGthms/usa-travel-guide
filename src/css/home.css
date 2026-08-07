@@ -428,6 +428,113 @@
 .region-num { position: absolute; top: 18px; right: 18px; z-index: 2; font-family: var(--ff-display); font-size: 4.5rem; font-weight: 800; color: rgba(255,255,255,0.12); line-height: 1; pointer-events: none; transition: color .4s, transform .4s; }
 .region-card:hover .region-num { color: rgba(255,255,255,0.2); transform: scale(1.04); }
 
+/* Light Modern (minimal / Gallery Daylight): clean cool cards, not charcoal mud */
+html[data-theme="minimal"] .region-card {
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+}
+html[data-theme="minimal"] .rc-northeast { background: linear-gradient(165deg, #eef3fb 0%, #d5e2f4 45%, #b8c9e0 100%); }
+html[data-theme="minimal"] .rc-south     { background: linear-gradient(165deg, #f7f0ea 0%, #e8d8cc 45%, #d4bfb0 100%); }
+html[data-theme="minimal"] .rc-midwest   { background: linear-gradient(165deg, #eaf4ee 0%, #d0e4d8 45%, #b4cfc0 100%); }
+html[data-theme="minimal"] .rc-west      { background: linear-gradient(165deg, #f0eef8 0%, #d8d4ec 45%, #beb8d8 100%); }
+html[data-theme="minimal"] .rc-southwest { background: linear-gradient(165deg, #f6efe8 0%, #e6d4c4 45%, #d0b8a0 100%); }
+html[data-theme="minimal"] .region-card::after {
+  background: linear-gradient(
+    to top,
+    rgba(15, 23, 42, 0.72) 0%,
+    rgba(15, 23, 42, 0.28) 40%,
+    rgba(15, 23, 42, 0.06) 70%,
+    transparent 100%
+  );
+}
+html[data-theme="minimal"] .deco-northeast,
+html[data-theme="minimal"] .deco-south,
+html[data-theme="minimal"] .deco-midwest,
+html[data-theme="minimal"] .deco-west,
+html[data-theme="minimal"] .deco-southwest {
+  opacity: 0.3;
+  background: linear-gradient(180deg, transparent 45%, rgba(15, 23, 42, 0.2) 100%);
+}
+html[data-theme="minimal"] .region-tag {
+  color: #c7d7ff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+html[data-theme="minimal"] .region-name {
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+html[data-theme="minimal"] .region-desc { color: rgba(255, 255, 255, 0.9); }
+html[data-theme="minimal"] .region-spot {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+  background: rgba(15, 23, 42, 0.25);
+}
+html[data-theme="minimal"] .region-card:hover .region-spot:hover {
+  background: var(--accent-1);
+  border-color: var(--accent-1);
+  color: #fff;
+}
+html[data-theme="minimal"] .region-num { color: rgba(15, 23, 42, 0.1); }
+html[data-theme="minimal"] .region-card:hover .region-num { color: rgba(0, 113, 227, 0.18); }
+html[data-theme="minimal"] .region-svg {
+  opacity: 0.22;
+  filter: grayscale(10%) brightness(1.08);
+}
+
+/* Light Classic (elegant / Heritage Paper): warm paper cards — not muddy charcoal washes */
+html[data-theme="elegant"] .region-card {
+  border-color: rgba(122, 46, 46, 0.12);
+  box-shadow: 0 12px 32px rgba(36, 31, 27, 0.08);
+}
+html[data-theme="elegant"] .rc-northeast { background: linear-gradient(165deg, #eef2f8 0%, #e2d8cc 48%, #d4c4b0 100%); }
+html[data-theme="elegant"] .rc-south     { background: linear-gradient(165deg, #f7ebe4 0%, #ebd4c8 48%, #d9b8a8 100%); }
+html[data-theme="elegant"] .rc-midwest   { background: linear-gradient(165deg, #e8f0ea 0%, #d8e4d6 48%, #c4d0bc 100%); }
+html[data-theme="elegant"] .rc-west      { background: linear-gradient(165deg, #ece8f4 0%, #ddd4e8 48%, #c8bcd8 100%); }
+html[data-theme="elegant"] .rc-southwest { background: linear-gradient(165deg, #f4ebe4 0%, #e8d4c4 48%, #d4b8a0 100%); }
+html[data-theme="elegant"] .region-card::after {
+  /* Soft burgundy dusk — keeps type readable without black mud on paper */
+  background: linear-gradient(
+    to top,
+    rgba(54, 28, 24, 0.82) 0%,
+    rgba(54, 28, 24, 0.38) 38%,
+    rgba(54, 28, 24, 0.08) 72%,
+    transparent 100%
+  );
+}
+html[data-theme="elegant"] .deco-northeast,
+html[data-theme="elegant"] .deco-south,
+html[data-theme="elegant"] .deco-midwest,
+html[data-theme="elegant"] .deco-west,
+html[data-theme="elegant"] .deco-southwest {
+  opacity: 0.35;
+  background: linear-gradient(180deg, transparent 40%, rgba(54, 28, 24, 0.25) 100%);
+}
+html[data-theme="elegant"] .region-tag {
+  color: #f0d0c8;
+  text-shadow: 0 1px 6px rgba(36, 20, 16, 0.4);
+}
+html[data-theme="elegant"] .region-name {
+  color: #fffdf8;
+  text-shadow: 0 2px 14px rgba(36, 20, 16, 0.45);
+}
+html[data-theme="elegant"] .region-desc { color: rgba(255, 253, 248, 0.9); }
+html[data-theme="elegant"] .region-spot {
+  border-color: rgba(255, 253, 248, 0.4);
+  color: #fffdf8;
+  background: rgba(54, 28, 24, 0.28);
+}
+html[data-theme="elegant"] .region-card:hover .region-spot:hover {
+  background: var(--accent-1);
+  border-color: var(--accent-1);
+  color: var(--text-inv);
+}
+html[data-theme="elegant"] .region-num { color: rgba(54, 28, 24, 0.12); }
+html[data-theme="elegant"] .region-card:hover .region-num { color: rgba(122, 46, 46, 0.18); }
+html[data-theme="elegant"] .region-svg {
+  opacity: 0.28;
+  filter: grayscale(20%) sepia(18%) brightness(1.05);
+}
+
 /* ═══ DESTINATIONS (Horizontal Carousel) ═══ */
 #destinations { padding: var(--section-y) var(--section-x); background: var(--bg-surface); position: relative; overflow: hidden; }
 #destinations::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(to right, transparent, var(--border-light), transparent); }

@@ -108,34 +108,23 @@
   </div>
   <div class="settings-grid">
 
-    <div class="settings-group reveal">
+        <div class="settings-group reveal">
       <div class="settings-group-label" data-i18n="settings.themeLabel">Theme</div>
-      <div class="settings-group-sub" data-i18n="settings.themeSub">Every section adapts to your chosen palette.</div>
-      <div class="theme-swatch-grid" id="themeSwatchGrid">
-        <button type="button" class="theme-swatch active" data-theme-val="default">
-          <div class="theme-swatch-preview"><span style="background:#07101c;"></span><span style="background:#c9a259;"></span><span style="background:#b85c42;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeDefault">Midnight Atlas</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
-        </button>
-        <button type="button" class="theme-swatch" data-theme-val="minimal">
-          <div class="theme-swatch-preview"><span style="background:#f5f5f7;"></span><span style="background:#0071e3;"></span><span style="background:#1d1d1f;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeMinimal">Gallery Daylight</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
-        </button>
-        <button type="button" class="theme-swatch" data-theme-val="elegant">
-          <div class="theme-swatch-preview"><span style="background:#f6f1e8;"></span><span style="background:#7a2e2e;"></span><span style="background:#b8956a;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeElegant">Heritage Paper</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
-        </button>
-        <button type="button" class="theme-swatch" data-theme-val="luxury">
-          <div class="theme-swatch-preview"><span style="background:#0c0c0c;"></span><span style="background:#c4a462;"></span><span style="background:#a8a29a;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeLuxury">Grand Tour</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
-        </button>
-        <button type="button" class="theme-swatch" data-theme-val="glass">
-          <div class="theme-swatch-preview"><span style="background:#000000;"></span><span style="background:#0a84ff;"></span><span style="background:#f5f5f7;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeGlass">Twilight Glass</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
-        </button>
-        <button type="button" class="theme-swatch" data-theme-val="nature">
-          <div class="theme-swatch-preview"><span style="background:#141c18;"></span><span style="background:#8fa884;"></span><span style="background:#c9a66b;"></span></div>
-          <div class="theme-swatch-name"><span data-i18n="settings.themeNature">Field Notes</span><span class="theme-swatch-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
-        </button>
+      <div class="settings-group-sub" data-i18n="settings.themeSub">System follows your device. Classic and Modern set the palette style.</div>
+      <div class="settings-subgroup">
+        <div class="settings-subgroup-label" data-i18n="settings.appearance">Appearance</div>
+        <div class="pill-group" id="appearancePillGroup">
+          <button type="button" class="pill-btn active" data-appearance-val="system"><span data-i18n="settings.themeSystem">System</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+          <button type="button" class="pill-btn" data-appearance-val="light"><span data-i18n="settings.appearanceLight">Light</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+          <button type="button" class="pill-btn" data-appearance-val="dark"><span data-i18n="settings.appearanceDark">Dark</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+        </div>
+      </div>
+      <div class="settings-subgroup">
+        <div class="settings-subgroup-label" data-i18n="settings.styleLabel">Style</div>
+        <div class="pill-group" id="stylePillGroup">
+          <button type="button" class="pill-btn" data-style-val="classic"><span data-i18n="settings.styleClassic">Classic</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+          <button type="button" class="pill-btn active" data-style-val="modern"><span data-i18n="settings.styleModern">Modern</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
+        </div>
       </div>
     </div>
 
@@ -156,6 +145,7 @@
       <div class="settings-subgroup">
         <div class="settings-subgroup-label" data-i18n="settings.temperature">Temperature</div>
         <div class="units-row" id="unitTempGroup">
+          <button type="button" class="pill-btn" data-unit-val="auto"><span data-i18n="settings.auto">Auto</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
           <button type="button" class="pill-btn active" data-unit-val="f"><span>°F</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
           <button type="button" class="pill-btn" data-unit-val="c"><span>°C</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
         </div>
@@ -163,6 +153,7 @@
       <div class="settings-subgroup">
         <div class="settings-subgroup-label" data-i18n="settings.distance">Distance</div>
         <div class="units-row" id="unitDistGroup">
+          <button type="button" class="pill-btn" data-unit-val="auto"><span data-i18n="settings.auto">Auto</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
           <button type="button" class="pill-btn active" data-unit-val="mi"><span data-i18n="settings.miles">Miles</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
           <button type="button" class="pill-btn" data-unit-val="km"><span data-i18n="settings.km">Kilometers</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
         </div>

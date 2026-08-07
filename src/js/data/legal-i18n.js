@@ -1,928 +1,913 @@
 'use strict';
 /**
  * Privacy Policy & Terms of Use — full copy in en / es / zh / ja.
- * Rendered by app.js when body.page-legal is present.
+ * Rendered by features/legal.js when body.page-legal is present.
  *
  * Localization notes:
  * - English is the source of legal meaning.
- * - es / zh / ja aim for native legal register (inspired by Apple’s localized
- *   privacy/legal voice: clear, direct, region-appropriate wording) while
- *   preserving the same section structure and substance.
+ * - es / zh / ja are rewritten for natural product-policy voice in each language
+ *   (not line-by-line calques). Same section structure and substance as English.
+ * - Updated August 6, 2026.
  */
 window.LEGAL_I18N = {
-  privacy: {
-    en: {
-      title: 'Privacy Policy',
-      eyebrow: 'Legal',
-      updatedLabel: 'Updated',
-      updatedDate: 'August 6, 2026',
-      onThisPage: 'On this page',
-      lead: 'This Privacy Policy describes how <strong>America — A Travel Guide</strong> (the “Site,” “we,” “us”) handles information when you visit or use this website, including the guide, photo gallery, and tools. We designed the Site to work well with as little personal data as possible.',
-      toc: [
-        { id: 'overview', label: 'Overview' },
-        { id: 'what-we-collect', label: 'What we collect' },
-        { id: 'how-we-use', label: 'How we use information' },
-        { id: 'storage', label: 'Where information is stored' },
-        { id: 'third-parties', label: 'Third-party services' },
-        { id: 'cookies', label: 'Cookies & similar technologies' },
-        { id: 'choices', label: 'Your choices' },
-        { id: 'children', label: 'Children' },
-        { id: 'changes', label: 'Changes to this policy' },
-        { id: 'contact', label: 'Contact' }
-      ],
-      sections: [
+  "privacy": {
+    "en": {
+      "title": "Privacy Policy",
+      "eyebrow": "Legal",
+      "updatedLabel": "Updated",
+      "updatedDate": "August 6, 2026",
+      "onThisPage": "On this page",
+      "lead": "This Privacy Policy describes how <strong>America — A Travel Guide</strong> (the “Site,” “we,” “us”) handles information when you visit or use this website, including the guide, photo gallery, and tools. We designed the Site to work well with as little personal data as possible.",
+      "toc": [
         {
-          id: 'overview',
-          title: 'Overview',
-          html: `<p>The Site is an editorial travel guide and photo journal created by <strong>Tim G</strong> (GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>). It is primarily a static website: most content is delivered as pages and files, and core browsing does not require an account.</p>
-<p>We treat as “personal data” any information that identifies you or can reasonably be linked to you. Aggregated or purely technical data that cannot reasonably identify you is not personal data for this policy.</p>`
+          "id": "overview",
+          "label": "Overview"
         },
         {
-          id: 'what-we-collect',
-          title: 'What we collect',
-          html: `<p>Depending on how you use the Site, the following may be involved:</p>
-<ul>
-<li><strong>Preferences you choose.</strong> Theme, language, units (temperature/distance), weather unit preferences (wind, precipitation, pressure), motion and cursor preferences, and gallery photo quality may be saved on your device using browser storage (such as <code>localStorage</code>). These settings stay on your device unless you clear site data.</li>
-<li><strong>Optional location (Weather tool only).</strong> If you tap “Use my location,” your browser may ask for permission. We only need an <strong>approximate</strong> position for the forecast (weather grids are not street-level). Before any request is made, coordinates are rounded on your device to about <strong>1 kilometer</strong> (roughly two decimal places of latitude/longitude). That rounded value may be sent to the weather data provider and may be saved in your browser’s local storage so your “My Location” card can reload. We do not receive or store precise GPS tracks on our servers. You can deny permission and still search cities by name.</li>
-<li><strong>Technical data processed by your browser or host.</strong> Like most websites, standard request information (for example IP address, browser type, and requested URLs) may be processed by the service that hosts or delivers the Site (for example a static host or CDN) for delivery, security, and reliability. We do not operate a separate advertising profile from this Site.</li>
-<li><strong>Information you send voluntarily.</strong> If you contact us (for example via GitHub or an external about page), we receive what you choose to include in that message.</li>
-<li><strong>No account system.</strong> The Site does not require registration, passwords, or payment information for normal use of the guide, gallery, or tools.</li>
-</ul>`
+          "id": "what-we-collect",
+          "label": "What we collect"
         },
         {
-          id: 'how-we-use',
-          title: 'How we use information',
-          html: `<ul>
-<li>To remember your display and accessibility preferences between visits on the same browser.</li>
-<li>To provide interactive tools (for example currency conversion, weather forecasts, and air quality), which may call third-party APIs.</li>
-<li>To operate, secure, and improve delivery of the Site through hosting infrastructure.</li>
-<li>To respond if you contact us.</li>
-</ul>
-<p>We do <strong>not</strong> sell your personal data. We do not use the Site’s preference storage for cross-site advertising.</p>`
+          "id": "how-we-use",
+          "label": "How we use information"
         },
         {
-          id: 'storage',
-          title: 'Where information is stored',
-          html: `<p>Preference data is stored <strong>locally on your device</strong> by your browser. Hosting providers may process connection logs in the regions where their infrastructure is located. If the Site is served from a public repository or static host (for example GitHub Pages), their respective privacy terms also apply to that hosting.</p>`
+          "id": "storage",
+          "label": "Where information is stored"
         },
         {
-          id: 'third-parties',
-          title: 'Third-party services',
-          html: `<p>The Site may load or contact third-party services necessary for features you use:</p>
-<ul>
-<li><strong>Fonts.</strong> Web fonts may be loaded from Google Fonts so text displays correctly across languages. That request may include technical data such as your IP address, subject to Google’s policies.</li>
-<li><strong>Exchange rates (Tools).</strong> The currency converter may request rates from a public API (for example Frankfurter). Only the currency codes needed for the conversion are sent for that request.</li>
-<li><strong>Weather, alerts &amp; air quality (Tools).</strong> The Weather tool may request U.S. forecast data and active severe-weather alerts (watches, warnings, and advisories) from the National Weather Service (api.weather.gov), and world forecasts, gap-fill fields, geocoding, and air quality from Open-Meteo (or a compatible provider). Requests typically include the coordinates or place name you selected. If you use “Use my location,” coordinates are rounded on your device to about <strong>1 km</strong> before the forecast or alerts request and before any local storage of that place. Optional browser geolocation is sent only if you allow it. Weather and alert data are for general travel guidance only—not for emergencies or life-safety decisions. Always follow official emergency authorities when severe weather threatens.</li>
-<li><strong>Gallery media.</strong> Photos and videos in the Gallery are static files hosted with the Site. Playing a video loads that file in your browser; no separate analytics SDK is required for playback.</li>
-<li><strong>External / outbound links.</strong> For convenience, the Site includes links to third-party websites—including official city tourism bureaus, public-transit agencies, National Park Service pages, museums, GitHub, About Me, and similar resources (for example “Helpful links” on destination cards). Clicking such a link leaves the Site and takes you to a service we do not operate. Those operators may collect information under their own privacy policies; this policy does not cover them. We do not receive your activity on those external sites by virtue of the link alone, and a link does not mean we endorse or control that third party.</li>
-</ul>`
+          "id": "third-parties",
+          "label": "Third-party services"
         },
         {
-          id: 'cookies',
-          title: 'Cookies & similar technologies',
-          html: `<p>The Site primarily uses <strong>local browser storage</strong> for preferences rather than advertising cookies. Your browser or host may still use cookies or similar technologies for security, load balancing, or session continuity. You can clear site data or block storage in your browser settings; some preferences will then reset on each visit.</p>`
+          "id": "cookies",
+          "label": "Cookies & similar technologies"
         },
         {
-          id: 'choices',
-          title: 'Your choices',
-          html: `<ul>
-<li>Change theme, language, units, motion, and gallery quality anytime in <strong>Settings</strong>.</li>
-<li>Deny or revoke location permission in your browser if you do not want the Weather tool to use geolocation.</li>
-<li>Clear site data in your browser to remove locally stored preferences.</li>
-<li>Disable network access to third-party font or API hosts if you prefer; some features may degrade.</li>
-<li>Contact us (below) with privacy questions about this Site.</li>
-</ul>`
+          "id": "choices",
+          "label": "Your choices"
         },
         {
-          id: 'children',
-          title: 'Children',
-          html: `<p>The Site is a general travel information resource and is not directed at children under 13 (or the equivalent minimum age in your jurisdiction). We do not knowingly collect personal data from children through this Site. If you believe a child has provided personal data, please contact us so we can take appropriate steps.</p>`
+          "id": "children",
+          "label": "Children"
         },
         {
-          id: 'changes',
-          title: 'Changes to this policy',
-          html: `<p>We may update this Privacy Policy from time to time. When we do, we will revise the “Updated” date at the top of this page. Continued use of the Site after changes means you acknowledge the updated policy. Material changes may be highlighted on the Site when practical.</p>`
+          "id": "changes",
+          "label": "Changes to this policy"
         },
         {
-          id: 'contact',
-          title: 'Contact',
-          html: `<p>For questions about this Privacy Policy or privacy practices related to the Site, please reach out via:</p>
-<ul>
-<li><a href="mailto:contact.timg@icloud.com">contact.timg@icloud.com</a></li>
-<li><a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">GitHub repository</a></li>
-</ul>
-<p class="legal-note">This policy is provided for transparency about a personal project website. It is not legal advice.</p>`
+          "id": "contact",
+          "label": "Contact"
         }
       ],
-      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)'
+      "sections": [
+        {
+          "id": "overview",
+          "title": "Overview",
+          "html": "<p>The Site is an editorial travel guide and photo journal created by <strong>Tim G</strong> (GitHub <a href=\"https://github.com/TGthms\" target=\"_blank\" rel=\"noopener\">@TGthms</a>). It is primarily a static website: most content is delivered as pages and files, and core browsing does not require an account.</p>\n<p>We treat as “personal data” any information that identifies you or can reasonably be linked to you. Aggregated or purely technical data that cannot reasonably identify you is not personal data for this policy.</p>"
+        },
+        {
+          "id": "what-we-collect",
+          "title": "What we collect",
+          "html": "<p>Depending on how you use the Site, the following may be involved:</p>\n<ul>\n<li><strong>Preferences you choose.</strong> Theme, language, units (temperature/distance), weather unit preferences (wind, precipitation, pressure), motion and cursor preferences, and gallery photo quality may be saved on your device using browser storage (such as <code>localStorage</code>). These settings stay on your device unless you clear site data.</li>\n<li><strong>Optional location (Weather tool only).</strong> If you tap “Use my location,” your browser may ask for permission. We only need an <strong>approximate</strong> position for the forecast (weather grids are not street-level). Before any request is made, coordinates are rounded on your device to about <strong>1 kilometer</strong> (roughly two decimal places of latitude/longitude). That rounded value may be sent to the weather data provider and may be saved in your browser’s local storage so your “My Location” card can reload. We do not receive or store precise GPS tracks on our servers. You can deny permission and still search cities by name.</li>\n<li><strong>Technical data processed by your browser or host.</strong> Like most websites, standard request information (for example IP address, browser type, and requested URLs) may be processed by the service that hosts or delivers the Site (for example a static host or CDN) for delivery, security, and reliability. We do not operate a separate advertising profile from this Site.</li>\n<li><strong>Information you send voluntarily.</strong> If you contact us (for example via GitHub or an external about page), we receive what you choose to include in that message.</li>\n<li><strong>No account system.</strong> The Site does not require registration, passwords, or payment information for normal use of the guide, gallery, or tools.</li>\n</ul>"
+        },
+        {
+          "id": "how-we-use",
+          "title": "How we use information",
+          "html": "<ul>\n<li>To remember your display and accessibility preferences between visits on the same browser.</li>\n<li>To provide interactive tools (for example currency conversion, weather forecasts, and air quality), which may call third-party APIs.</li>\n<li>To operate, secure, and improve delivery of the Site through hosting infrastructure.</li>\n<li>To respond if you contact us.</li>\n</ul>\n<p>We do <strong>not</strong> sell your personal data. We do not use the Site’s preference storage for cross-site advertising.</p>"
+        },
+        {
+          "id": "storage",
+          "title": "Where information is stored",
+          "html": "<p>Preference data is stored <strong>locally on your device</strong> by your browser. Hosting providers may process connection logs in the regions where their infrastructure is located. If the Site is served from a public repository or static host (for example GitHub Pages), their respective privacy terms also apply to that hosting.</p>"
+        },
+        {
+          "id": "third-parties",
+          "title": "Third-party services",
+          "html": "<p>The Site may load or contact third-party services necessary for features you use:</p>\n<ul>\n<li><strong>Fonts.</strong> Web fonts may be loaded from Google Fonts so text displays correctly across languages. That request may include technical data such as your IP address, subject to Google’s policies.</li>\n<li><strong>Exchange rates (Tools).</strong> The currency converter may request rates from a public API (for example Frankfurter). Only the currency codes needed for the conversion are sent for that request.</li>\n<li><strong>Weather, alerts &amp; air quality (Tools).</strong> The Weather tool may request U.S. forecast data and active severe-weather alerts (watches, warnings, and advisories) from the National Weather Service (api.weather.gov), and world forecasts, gap-fill fields, geocoding, and air quality from Open-Meteo (or a compatible provider). Requests typically include the coordinates or place name you selected. If you use “Use my location,” coordinates are rounded on your device to about <strong>1 km</strong> before the forecast or alerts request and before any local storage of that place. Optional browser geolocation is sent only if you allow it. Weather and alert data are for general travel guidance only—not for emergencies or life-safety decisions. Always follow official emergency authorities when severe weather threatens.</li>\n<li><strong>Gallery media.</strong> Photos and videos in the Gallery are static files hosted with the Site. Playing a video loads that file in your browser; no separate analytics SDK is required for playback.</li>\n<li><strong>External / outbound links.</strong> For convenience, the Site includes links to third-party websites—including official city tourism bureaus, public-transit agencies, National Park Service pages, museums, GitHub, About Me, and similar resources (for example “Helpful links” on destination cards). Clicking such a link leaves the Site and takes you to a service we do not operate. Those operators may collect information under their own privacy policies; this policy does not cover them. We do not receive your activity on those external sites by virtue of the link alone, and a link does not mean we endorse or control that third party.</li>\n</ul>"
+        },
+        {
+          "id": "cookies",
+          "title": "Cookies & similar technologies",
+          "html": "<p>The Site primarily uses <strong>local browser storage</strong> for preferences rather than advertising cookies. Your browser or host may still use cookies or similar technologies for security, load balancing, or session continuity. You can clear site data or block storage in your browser settings; some preferences will then reset on each visit.</p>"
+        },
+        {
+          "id": "choices",
+          "title": "Your choices",
+          "html": "<ul>\n<li>Change theme, language, units, motion, and gallery quality anytime in <strong>Settings</strong>.</li>\n<li>Deny or revoke location permission in your browser if you do not want the Weather tool to use geolocation.</li>\n<li>Clear site data in your browser to remove locally stored preferences.</li>\n<li>Disable network access to third-party font or API hosts if you prefer; some features may degrade.</li>\n<li>Contact us (below) with privacy questions about this Site.</li>\n</ul>"
+        },
+        {
+          "id": "children",
+          "title": "Children",
+          "html": "<p>The Site is a general travel information resource and is not directed at children under 13 (or the equivalent minimum age in your jurisdiction). We do not knowingly collect personal data from children through this Site. If you believe a child has provided personal data, please contact us so we can take appropriate steps.</p>"
+        },
+        {
+          "id": "changes",
+          "title": "Changes to this policy",
+          "html": "<p>We may update this Privacy Policy from time to time. When we do, we will revise the “Updated” date at the top of this page. Continued use of the Site after changes means you acknowledge the updated policy. Material changes may be highlighted on the Site when practical.</p>"
+        },
+        {
+          "id": "contact",
+          "title": "Contact",
+          "html": "<p>For questions about this Privacy Policy or privacy practices related to the Site, please reach out via:</p>\n<ul>\n<li><a href=\"mailto:contact.timg@icloud.com\">contact.timg@icloud.com</a></li>\n<li><a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">GitHub repository</a></li>\n</ul>\n<p class=\"legal-note\">This policy is provided for transparency about a personal project website. It is not legal advice.</p>"
+        }
+      ],
+      "footerNote": "© {year} USA Travel Guide · Tim G (TGthms)"
     },
-    es: {
-      title: 'Política de privacidad',
-      eyebrow: 'Legal',
-      updatedLabel: 'Actualización',
-      updatedDate: '6 de agosto de 2026',
-      onThisPage: 'En esta página',
-      lead: 'Tu privacidad es importante. Esta Política de privacidad explica con claridad cómo <strong>América — Una Guía de Viaje</strong> (el “Sitio”, “nosotros”) recopila, usa, revela, transmite y guarda la información cuando visitas o usas este sitio web —incluida la guía, la galería de fotos y las herramientas—. Diseñamos el Sitio para funcionar bien con la menor cantidad posible de datos personales.',
-      toc: [
-        { id: 'overview', label: 'Descripción general' },
-        { id: 'what-we-collect', label: 'Información que recopilamos' },
-        { id: 'how-we-use', label: 'Cómo usamos la información' },
-        { id: 'storage', label: 'Dónde se guarda la información' },
-        { id: 'third-parties', label: 'Servicios de terceros' },
-        { id: 'cookies', label: 'Cookies y tecnologías similares' },
-        { id: 'choices', label: 'Tus opciones' },
-        { id: 'children', label: 'Menores de edad' },
-        { id: 'changes', label: 'Cambios en esta política' },
-        { id: 'contact', label: 'Contacto' }
-      ],
-      sections: [
+    "es": {
+      "title": "Política de privacidad",
+      "eyebrow": "Legal",
+      "updatedLabel": "Actualizado",
+      "updatedDate": "August 6, 2026",
+      "onThisPage": "En esta página",
+      "lead": "Esta política explica cómo <strong>América — Una Guía de Viaje</strong> (el “Sitio”) trata la información cuando usas la guía, la galería o las herramientas. El Sitio está pensado para funcionar bien con la menor cantidad posible de datos personales.",
+      "toc": [
         {
-          id: 'overview',
-          title: 'Descripción general',
-          html: `<p>El Sitio es una guía de viaje editorial y un diario fotográfico creado por <strong>Tim G</strong> (GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>). Es, sobre todo, un sitio estático: la mayor parte del contenido se entrega como páginas y archivos, y no hace falta una cuenta para navegar por lo esencial.</p>
-<p>Consideramos “datos personales” cualquier información que te identifique o que pueda asociarse razonablemente a ti. Los datos agregados o meramente técnicos que no permitan identificarte de forma razonable no se tratan como datos personales en esta política.</p>`
+          "id": "overview",
+          "label": "Resumen"
         },
         {
-          id: 'what-we-collect',
-          title: 'Información que recopilamos',
-          html: `<p>Según cómo uses el Sitio, puede intervenir lo siguiente:</p>
-<ul>
-<li><strong>Preferencias que eliges.</strong> El tema, el idioma, las unidades (temperatura y distancia), las preferencias de animación y del cursor, y la calidad de las fotos de la galería pueden guardarse en tu dispositivo con el almacenamiento del navegador (por ejemplo, <code>localStorage</code>). Esas preferencias permanecen en tu dispositivo a menos que borres los datos del sitio.</li>
-<li><strong>Datos técnicos del navegador o del alojamiento.</strong> Como en la mayoría de los sitios web, el servicio que aloja o entrega el Sitio (por ejemplo, un host estático o una CDN) puede procesar información habitual de las solicitudes —como la dirección IP, el tipo de navegador y las URL solicitadas— para la entrega, la seguridad y la fiabilidad. No elaboramos un perfil publicitario a partir de este Sitio.</li>
-<li><strong>Información que envías de forma voluntaria.</strong> Si te pones en contacto con nosotros (por ejemplo, a través de GitHub o de una página externa “Sobre mí”), recibimos lo que decidas incluir en ese mensaje.</li>
-<li><strong>Sin cuentas de usuario.</strong> El uso habitual de la guía, la galería o las herramientas no exige registro, contraseñas ni datos de pago.</li>
-</ul>`
+          "id": "what-we-collect",
+          "label": "Qué información interviene"
         },
         {
-          id: 'how-we-use',
-          title: 'Cómo usamos la información',
-          html: `<ul>
-<li>Recordar tus preferencias de visualización y accesibilidad entre visitas en el mismo navegador.</li>
-<li>Ofrecer herramientas interactivas (por ejemplo, la conversión de divisas, que puede consultar una API de tipos de cambio de terceros).</li>
-<li>Operar, proteger y mejorar la entrega del Sitio a través de la infraestructura de alojamiento.</li>
-<li>Responder cuando nos escribes.</li>
-</ul>
-<p><strong>No vendemos</strong> tus datos personales. Tampoco usamos el almacenamiento de preferencias del Sitio para publicidad entre sitios.</p>`
+          "id": "how-we-use",
+          "label": "Para qué se usa"
         },
         {
-          id: 'storage',
-          title: 'Dónde se guarda la información',
-          html: `<p>Las preferencias se guardan <strong>en tu dispositivo</strong>, de forma local, a través del navegador. Los proveedores de alojamiento pueden procesar registros de conexión en las regiones donde se encuentra su infraestructura. Si el Sitio se publica desde un repositorio público o un host estático (por ejemplo, GitHub Pages), también se aplican las políticas de privacidad de ese proveedor al alojamiento.</p>`
+          "id": "storage",
+          "label": "Dónde se guarda"
         },
         {
-          id: 'third-parties',
-          title: 'Servicios de terceros',
-          html: `<p>El Sitio puede cargar o contactar servicios de terceros necesarios para las funciones que uses:</p>
-<ul>
-<li><strong>Fuentes tipográficas.</strong> Pueden cargarse fuentes web desde Google Fonts para mostrar correctamente el texto en varios idiomas. Esa solicitud puede incluir datos técnicos como tu dirección IP, sujetos a las políticas de Google.</li>
-<li><strong>Tipos de cambio (Herramientas).</strong> El conversor de divisas puede solicitar cotizaciones a una API pública (por ejemplo, Frankfurter). Solo se envían los códigos de moneda necesarios para la conversión.</li>
-<li><strong>Tiempo, avisos y calidad del aire (Herramientas).</strong> La herramienta de tiempo puede solicitar previsiones de EE. UU. y avisos meteorológicos activos (vigilances, advertencias y avisos) al National Weather Service (api.weather.gov), y previsiones mundiales, campos complementarios, geocodificación y calidad del aire a Open-Meteo (o un proveedor compatible). Las solicitudes suelen incluir las coordenadas o el lugar que elijas. Si usas “Usar mi ubicación”, las coordenadas se redondean en tu dispositivo a unos <strong>1 km</strong> de precisión antes de pedirse la previsión o los avisos, o de guardarse en el almacenamiento local del navegador. La geolocalización del navegador solo se usa si la permites. Los datos son orientativos, no para emergencias; ante tiempo severo, sigue siempre a las autoridades oficiales.</li>
-<li><strong>Medios de la galería.</strong> Fotos y vídeos se sirven como archivos estáticos del Sitio. Reproducir un vídeo descarga ese archivo en tu navegador.</li>
-<li><strong>Enlaces a sitios externos.</strong> Para tu comodidad, el Sitio incluye enlaces a sitios de terceros —oficinas oficiales de turismo, agencias de transporte, páginas del National Park Service, museos, GitHub, “Sobre mí” y recursos similares (por ejemplo, “Enlaces útiles” en las tarjetas de destinos). Al seguir un enlace de ese tipo, abandonas el Sitio y pasas a un servicio que no operamos. Esos operadores pueden recopilar información conforme a sus propias políticas de privacidad; esta política no los cubre. El simple hecho de que exista un enlace no nos da acceso a tu actividad en esos sitios, ni implica que respaldemos o controlemos a ese tercero.</li>
-</ul>`
+          "id": "third-parties",
+          "label": "Servicios de terceros"
         },
         {
-          id: 'cookies',
-          title: 'Cookies y tecnologías similares',
-          html: `<p>El Sitio prioriza el <strong>almacenamiento local del navegador</strong> para las preferencias, no las cookies publicitarias. Aun así, tu navegador o el host pueden usar cookies o tecnologías similares por seguridad, reparto de carga o continuidad de sesión. Puedes borrar los datos del sitio o limitar el almacenamiento en la configuración del navegador; en ese caso, algunas preferencias se reiniciarán en cada visita.</p>`
+          "id": "cookies",
+          "label": "Cookies y almacenamiento local"
         },
         {
-          id: 'choices',
-          title: 'Tus opciones',
-          html: `<ul>
-<li>Cambia el tema, el idioma, las unidades, el movimiento y la calidad de la galería cuando quieras en <strong>Ajustes</strong>.</li>
-<li>Borra los datos del sitio en el navegador para eliminar las preferencias guardadas en el dispositivo.</li>
-<li>Si lo prefieres, puedes restringir el acceso de red a fuentes o API de terceros; algunas funciones podrían limitarse.</li>
-<li>Escríbenos (más abajo) si tienes preguntas de privacidad sobre este Sitio.</li>
-</ul>`
+          "id": "choices",
+          "label": "Tus opciones"
         },
         {
-          id: 'children',
-          title: 'Menores de edad',
-          html: `<p>El Sitio es un recurso general de información de viajes y no está dirigido a menores de 13 años (o la edad mínima equivalente en tu jurisdicción). No recopilamos a sabiendas datos personales de menores a través de este Sitio. Si crees que un menor ha facilitado datos personales, contáctanos para que podamos actuar de forma adecuada.</p>`
+          "id": "children",
+          "label": "Menores"
         },
         {
-          id: 'changes',
-          title: 'Cambios en esta política',
-          html: `<p>Podemos actualizar esta Política de privacidad periódicamente. Cuando lo hagamos, modificaremos la fecha de “Actualización” al inicio de esta página. Si sigues usando el Sitio después de un cambio, reconoces la política actualizada. Cuando sea práctico, podremos destacar en el Sitio los cambios más relevantes.</p>`
+          "id": "changes",
+          "label": "Cambios de esta política"
         },
         {
-          id: 'contact',
-          title: 'Contacto',
-          html: `<p>Si tienes preguntas sobre esta Política de privacidad o sobre las prácticas de privacidad del Sitio, puedes escribirnos a:</p>
-<ul>
-<li><a href="mailto:contact.timg@icloud.com">contact.timg@icloud.com</a></li>
-<li><a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">Repositorio en GitHub</a></li>
-</ul>
-<p class="legal-note">Esta política se ofrece para dar transparencia sobre un sitio de proyecto personal. No constituye asesoramiento jurídico.</p>`
+          "id": "contact",
+          "label": "Contacto"
         }
       ],
-      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)'
+      "sections": [
+        {
+          "id": "overview",
+          "title": "Resumen",
+          "html": "<p>El Sitio es una guía de viaje y un diario fotográfico personal creado por <strong>Tim G</strong> (GitHub <a href=\"https://github.com/TGthms\" target=\"_blank\" rel=\"noopener\">@TGthms</a>). Es principalmente un sitio estático: abres las páginas y lees; no hace falta crear una cuenta.</p>\n<p>Aquí, “datos personales” significa información que te identifica o que se puede relacionar contigo de forma razonable. Los datos agregados o meramente técnicos que no permitan identificarte no se tratan como datos personales.</p>"
+        },
+        {
+          "id": "what-we-collect",
+          "title": "Qué información interviene",
+          "html": "<p>Según cómo uses el Sitio, puede intervenir lo siguiente:</p>\n<ul>\n<li><strong>Preferencias que eliges.</strong> Tema, idioma, unidades de temperatura y distancia, unidades del tiempo (viento, precipitación, presión), animaciones, cursor y calidad de la galería pueden guardarse en tu dispositivo con el almacenamiento del navegador (por ejemplo <code>localStorage</code>). Permanecen en el dispositivo hasta que borres los datos del sitio.</li>\n<li><strong>Ubicación aproximada opcional (solo Tiempo).</strong> Si tocas “Usar mi ubicación”, el navegador pedirá permiso. Solo necesitamos una posición <strong>aproximada</strong> para el pronóstico (no a nivel de calle). Antes de enviar nada, las coordenadas se redondean en tu dispositivo a unos <strong>1 km</strong>. Ese valor redondeado puede enviarse al proveedor del tiempo y guardarse en local para la tarjeta “Mi ubicación”. No recibimos ni guardamos trayectorias GPS precisas en nuestros servidores. Puedes denegar el permiso y buscar ciudades por nombre.</li>\n<li><strong>Datos técnicos del navegador o del alojamiento.</strong> Como en casi cualquier web, el host o la CDN pueden procesar IP, tipo de navegador y URL solicitadas para entregar el sitio con seguridad y fiabilidad. No creamos un perfil publicitario a partir de este Sitio.</li>\n<li><strong>Lo que nos envías voluntariamente.</strong> Si escribes por correo, GitHub u otra vía, recibimos el contenido de ese mensaje.</li>\n<li><strong>Sin cuentas.</strong> Para usar la guía, la galería o las herramientas no hace falta registrarse ni facilitar contraseñas o pagos.</li>\n</ul>"
+        },
+        {
+          "id": "how-we-use",
+          "title": "Para qué se usa",
+          "html": "<ul>\n<li>Recordar tus preferencias de pantalla y accesibilidad en el mismo navegador.</li>\n<li>Ofrecer herramientas (divisas, tiempo, calidad del aire), que pueden llamar a APIs de terceros.</li>\n<li>Mantener el Sitio disponible, seguro y estable a través del alojamiento.</li>\n<li>Responder cuando nos contactas.</li>\n</ul>\n<p><strong>No vendemos</strong> tus datos personales ni usamos el almacenamiento de preferencias para publicidad entre sitios.</p>"
+        },
+        {
+          "id": "storage",
+          "title": "Dónde se guarda",
+          "html": "<p>Las preferencias se guardan <strong>en tu dispositivo</strong>. Los proveedores de alojamiento pueden procesar registros de conexión en las regiones de su infraestructura. Si el Sitio se publica en un host público (por ejemplo GitHub Pages), también aplican sus políticas de privacidad al alojamiento.</p>"
+        },
+        {
+          "id": "third-parties",
+          "title": "Servicios de terceros",
+          "html": "<p>Algunas funciones pueden contactar servicios externos:</p>\n<ul>\n<li><strong>Fuentes.</strong> Pueden cargarse fuentes web de Google Fonts para mostrar bien el texto en varios idiomas. Esa petición puede incluir datos técnicos como la IP, según las políticas de Google.</li>\n<li><strong>Tipos de cambio (Herramientas).</strong> El conversor puede pedir cotizaciones a una API pública (por ejemplo Frankfurter). Solo se envían los códigos de moneda necesarios.</li>\n<li><strong>Tiempo, avisos y calidad del aire (Herramientas).</strong> El pronóstico y los avisos severos de EE. UU. pueden venir del National Weather Service (api.weather.gov); el pronóstico mundial, campos complementarios, geocodificación y calidad del aire, de Open-Meteo (o un proveedor compatible). Las peticiones suelen incluir las coordenadas o el lugar que elegiste. Con “Usar mi ubicación”, las coordenadas se redondean a ~1 km en el dispositivo antes de enviarse. El tiempo y los avisos son orientativos para viajar; no sustituyen la información oficial de emergencia. Ante tiempo severo, sigue a las autoridades.</li>\n<li><strong>Galería.</strong> Fotos y vídeos se cargan como archivos estáticos del Sitio; no hace falta un SDK de analítica para reproducirlos.</li>\n<li><strong>Enlaces externos.</strong> Hay enlaces a oficinas de turismo, transporte, parques nacionales, museos, GitHub, etc. Al hacer clic sales del Sitio y entras en un servicio que no operamos. Allí rigen sus políticas. Un enlace no implica respaldo.</li>\n</ul>"
+        },
+        {
+          "id": "cookies",
+          "title": "Cookies y almacenamiento local",
+          "html": "<p>El Sitio prioriza el <strong>almacenamiento local del navegador</strong> para las preferencias, no las cookies publicitarias. Aun así, el navegador o el host pueden usar cookies u otras tecnologías por seguridad o reparto de carga. Puedes borrar los datos del sitio o limitar el almacenamiento; entonces algunas preferencias volverán al valor por defecto.</p>"
+        },
+        {
+          "id": "choices",
+          "title": "Tus opciones",
+          "html": "<ul>\n<li>Cambia tema, idioma, unidades, movimiento y calidad de la galería en <strong>Ajustes</strong> cuando quieras.</li>\n<li>Borra los datos del sitio en el navegador para eliminar las preferencias locales.</li>\n<li>Si lo prefieres, restringe el acceso de red a fuentes o APIs de terceros (algunas funciones pueden dejar de estar disponibles).</li>\n<li>Escríbenos si tienes dudas de privacidad sobre este Sitio.</li>\n</ul>"
+        },
+        {
+          "id": "children",
+          "title": "Menores",
+          "html": "<p>El Sitio ofrece información general de viajes y no está dirigido a menores de 13 años (o la edad mínima equivalente donde vivas). No recopilamos a sabiendas datos personales de menores. Si crees que un menor nos ha facilitado datos, contáctanos y actuaremos de forma adecuada.</p>"
+        },
+        {
+          "id": "changes",
+          "title": "Cambios de esta política",
+          "html": "<p>Podemos actualizar esta política de vez en cuando. Cuando lo hagamos, cambiaremos la fecha de “Actualizado” al inicio de la página. Si sigues usando el Sitio después del cambio, das por conocida la versión actual. Cuando sea posible, destacaremos los cambios más importantes.</p>"
+        },
+        {
+          "id": "contact",
+          "title": "Contacto",
+          "html": "<p>Para preguntas sobre esta política o sobre la privacidad del Sitio:</p>\n<ul>\n<li><a href=\"mailto:contact.timg@icloud.com\">contact.timg@icloud.com</a></li>\n<li><a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">Repositorio en GitHub</a></li>\n</ul>\n<p class=\"legal-note\">Esta política busca transparencia en un proyecto personal de viajes. No es asesoramiento jurídico.</p>"
+        }
+      ],
+      "footerNote": "© {year} USA Travel Guide · Tim G (TGthms)"
     },
-    zh: {
-      title: '隐私政策',
-      eyebrow: '法律信息',
-      updatedLabel: '更新日期',
-      updatedDate: '2026年8月6日',
-      onThisPage: '本页内容',
-      lead: '我们重视你的隐私。本《隐私政策》清楚说明<strong>美国 — 旅行指南</strong>（以下简称“本网站”“我们”）在你访问或使用本网站（包括指南、相册与工具）时，如何收集、使用、披露、传输与保存相关信息。我们尽量在少处理个人数据的前提下，让本网站顺畅可用。',
-      toc: [
-        { id: 'overview', label: '概述' },
-        { id: 'what-we-collect', label: '我们收集的信息' },
-        { id: 'how-we-use', label: '我们如何使用信息' },
-        { id: 'storage', label: '信息如何保存' },
-        { id: 'third-parties', label: '第三方服务' },
-        { id: 'cookies', label: 'Cookie 与类似技术' },
-        { id: 'choices', label: '你的选择' },
-        { id: 'children', label: '儿童' },
-        { id: 'changes', label: '政策更新' },
-        { id: 'contact', label: '联系我们' }
-      ],
-      sections: [
+    "zh": {
+      "title": "隐私政策",
+      "eyebrow": "法律信息",
+      "updatedLabel": "更新日期",
+      "updatedDate": "August 6, 2026",
+      "onThisPage": "本页目录",
+      "lead": "本隐私政策说明你在使用 <strong>美国 — 旅行指南</strong>（下称「本网站」）时，信息会如何被处理。本网站包含旅行指南、相册与实用工具。我们尽量少收集个人信息，让你安心浏览。",
+      "toc": [
         {
-          id: 'overview',
-          title: '概述',
-          html: `<p>本网站是由 <strong>Tim G</strong>（GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>）制作的编辑型旅行指南与影像手记。内容以静态页面与文件为主；浏览指南与相册等核心功能无需注册账户。</p>
-<p>我们将任何可识别你身份、或可合理关联到你的信息视为“个人数据”。无法合理识别个人的汇总信息，或纯粹的技术性数据，在本政策中不作为个人数据对待。</p>`
+          "id": "overview",
+          "label": "概要"
         },
         {
-          id: 'what-we-collect',
-          title: '我们收集的信息',
-          html: `<p>取决于你如何使用本网站，可能涉及以下信息：</p>
-<ul>
-<li><strong>你选择的偏好。</strong>主题、语言、单位（温度／距离）、动效与光标偏好、相册画质等，可能通过浏览器本地存储（例如 <code>localStorage</code>）保存在你的设备上。除非你清除本网站数据，这些设置会留在本机。</li>
-<li><strong>浏览器或托管方处理的技术数据。</strong>与多数网站一样，托管或分发本网站的服务（例如静态托管或 CDN）可能处理常规请求信息（如 IP 地址、浏览器类型、请求 URL），用于内容交付、安全与稳定运行。我们不会基于本网站建立独立的广告画像。</li>
-<li><strong>你主动提供的信息。</strong>若你通过 GitHub 或外部“关于我”页面与我们联系，我们会收到你在消息中自愿填写的内容。</li>
-<li><strong>无需账户。</strong>正常使用指南、相册或工具时，不需要注册、密码或支付信息。</li>
-</ul>`
+          "id": "what-we-collect",
+          "label": "会涉及哪些信息"
         },
         {
-          id: 'how-we-use',
-          title: '我们如何使用信息',
-          html: `<ul>
-<li>在同一浏览器中记住你的显示与无障碍相关偏好。</li>
-<li>提供互动工具（例如货币换算；该功能可能调用第三方汇率接口）。</li>
-<li>通过托管基础设施运营、保护并改进网站访问体验。</li>
-<li>在你联系我们时作出回复。</li>
-</ul>
-<p>我们<strong>不会出售</strong>你的个人数据，也不会把本网站的偏好存储用于跨站广告。</p>`
+          "id": "how-we-use",
+          "label": "信息如何使用"
         },
         {
-          id: 'storage',
-          title: '信息如何保存',
-          html: `<p>偏好数据由浏览器<strong>保存在你的本地设备</strong>。托管服务商可能在其基础设施所在地区处理连接日志。若本网站通过公共代码仓库或静态托管（例如 GitHub Pages）提供访问，则该托管方的隐私政策也适用于相应的托管服务。</p>`
+          "id": "storage",
+          "label": "信息保存在哪里"
         },
         {
-          id: 'third-parties',
-          title: '第三方服务',
-          html: `<p>为实现你使用的功能，本网站可能加载或访问第三方服务：</p>
-<ul>
-<li><strong>字体。</strong>为正确显示多语言文字，可能从 Google Fonts 加载网络字体。相关请求可能包含 IP 地址等技术数据，并受 Google 相关政策约束。</li>
-<li><strong>汇率（工具页）。</strong>货币换算器可能向公开接口（例如 Frankfurter）请求汇率，且仅发送完成换算所需的货币代码。</li>
-<li><strong>天气、预警与空气质量（工具页）。</strong>天气工具可能向美国国家气象局 National Weather Service（api.weather.gov）请求美国预报及现行严重天气预警（观察、警告与咨询），并向 Open-Meteo（或兼容服务）请求全球预报、补充字段、地理编码与空气质量。请求通常包含你选择的坐标或地点。若使用“使用我的位置”，会在你的设备上将坐标<strong>约化到约 1 公里</strong>精度后再请求预报或预警，并可能保存在浏览器本地存储中。仅在你授权时才会使用浏览器定位。天气与预警数据仅供出行参考，不适用于紧急情况；遇恶劣天气请遵循官方应急指示。</li>
-<li><strong>相册媒体。</strong>相册中的照片与视频作为本站静态文件提供。播放视频会在浏览器中加载该文件。</li>
-<li><strong>站外链接。</strong>为方便规划行程，本网站会提供指向第三方网站的链接，例如城市官方旅游网站、公共交通机构、美国国家公园管理局页面、博物馆、GitHub、“关于我”，以及目的地卡片中的“实用链接”等。点击此类链接即离开本网站，进入我们不运营的服务。那些运营方可能按其自身隐私政策处理信息；本政策不适用于它们。链接本身并不会让我们获知你在外部网站上的活动，也不表示我们认可或控制该第三方。</li>
-</ul>`
+          "id": "third-parties",
+          "label": "第三方服务"
         },
         {
-          id: 'cookies',
-          title: 'Cookie 与类似技术',
-          html: `<p>本网站主要使用<strong>浏览器本地存储</strong>保存偏好，而不是以广告 Cookie 为目的。你的浏览器或托管方仍可能出于安全、负载均衡或会话连续性等原因使用 Cookie 或类似技术。你可以在浏览器中清除本网站数据，或限制存储；之后部分偏好会在每次访问时恢复为默认。</p>`
+          "id": "cookies",
+          "label": "Cookie 与本地存储"
         },
         {
-          id: 'choices',
-          title: '你的选择',
-          html: `<ul>
-<li>随时在<strong>设置</strong>中更改主题、语言、单位、动效与相册画质。</li>
-<li>在浏览器中清除本网站数据，以删除保存在本机的偏好。</li>
-<li>如有需要，可限制对第三方字体或接口的网络访问；部分功能可能因此受限。</li>
-<li>如对本网站隐私事宜有疑问，欢迎通过下方方式联系我们。</li>
-</ul>`
+          "id": "choices",
+          "label": "你可以怎么做"
         },
         {
-          id: 'children',
-          title: '儿童',
-          html: `<p>本网站提供一般性旅行信息，并非面向 13 岁以下儿童（或以你所在地区法律规定的同等最低年龄为准）。我们不会通过本网站有意收集儿童的个人数据。若你认为儿童向我们提供了个人数据，请与我们联系，以便我们采取适当措施。</p>`
+          "id": "children",
+          "label": "未成年人"
         },
         {
-          id: 'changes',
-          title: '政策更新',
-          html: `<p>我们可能会不时更新本《隐私政策》。更新时，我们会修改本页顶部的“更新日期”。更新后你如继续使用本网站，即表示你知悉更新后的政策。如有重大变更，我们会在可行时在网站上予以提示。</p>`
+          "id": "changes",
+          "label": "政策如何更新"
         },
         {
-          id: 'contact',
-          title: '联系我们',
-          html: `<p>如对本《隐私政策》或本网站的隐私实践有疑问，请通过以下方式联系：</p>
-<ul>
-<li><a href="mailto:contact.timg@icloud.com">contact.timg@icloud.com</a></li>
-<li><a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">GitHub 仓库</a></li>
-</ul>
-<p class="legal-note">本政策旨在提高个人项目网站的透明度，不构成法律意见。</p>`
+          "id": "contact",
+          "label": "联系我们"
         }
       ],
-      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)'
+      "sections": [
+        {
+          "id": "overview",
+          "title": "概要",
+          "html": "<p>本网站由 <strong>Tim G</strong>（GitHub <a href=\"https://github.com/TGthms\" target=\"_blank\" rel=\"noopener\">@TGthms</a>）制作，是一份个人维护的旅行指南与影像记录。主体为静态网页：打开页面即可阅读，不需要注册账号。</p>\n<p>本政策里的「个人信息」，指能够识别你、或可合理关联到你的信息。无法识别个人的汇总数据或纯技术日志，不按个人信息处理。</p>"
+        },
+        {
+          "id": "what-we-collect",
+          "title": "会涉及哪些信息",
+          "html": "<p>取决于你怎么用本网站，可能涉及：</p>\n<ul>\n<li><strong>你自己选的偏好。</strong>主题、语言、温度与距离单位、天气相关单位、动效与光标、相册清晰度等，可能保存在本机浏览器（例如 <code>localStorage</code>）。除非你清除本站数据，这些设置会留在你的设备上。</li>\n<li><strong>可选的大致位置（仅天气工具）。</strong>若你点「使用我的位置」，浏览器会询问权限。我们只需要<strong>大概位置</strong>来拉预报（不是街道级定位）。在发送请求前，会在你的设备上把坐标<strong>约化到约 1 公里</strong>精度；约化后的坐标可能发给天气数据方，并保存在本机，方便「我的位置」卡片下次打开。我们不会在服务器上接收或保存精确 GPS 轨迹。你可以拒绝定位，改用城市搜索。</li>\n<li><strong>浏览器与托管方处理的技术信息。</strong>与多数网站一样，托管或 CDN 可能处理 IP、浏览器类型、访问地址等常规请求信息，用于传输、安全与稳定运行。我们不会据此做跨站广告画像。</li>\n<li><strong>你主动发来的内容。</strong>若你通过邮件、GitHub 等联系我们，我们会收到你写在消息里的内容。</li>\n<li><strong>没有账号体系。</strong>正常使用指南、相册与工具，不需要注册、密码或支付信息。</li>\n</ul>"
+        },
+        {
+          "id": "how-we-use",
+          "title": "信息如何使用",
+          "html": "<ul>\n<li>在同一浏览器里记住你的显示与无障碍相关设置；</li>\n<li>提供货币换算、天气预报、空气质量等工具（可能调用第三方接口）；</li>\n<li>通过托管基础设施保障网站可访问、安全与性能；</li>\n<li>在你联系我们时回复你。</li>\n</ul>\n<p>我们<strong>不会出售</strong>你的个人信息，也不会把本站偏好存储用于跨站广告。</p>"
+        },
+        {
+          "id": "storage",
+          "title": "信息保存在哪里",
+          "html": "<p>偏好数据保存在<strong>你的设备本地</strong>。托管服务商可能在其机房所在地区处理访问日志。若本站通过 GitHub Pages 等公开托管发布，该托管方的隐私条款也适用于托管环节。</p>"
+        },
+        {
+          "id": "third-parties",
+          "title": "第三方服务",
+          "html": "<p>使用某些功能时，本站可能请求以下第三方服务：</p>\n<ul>\n<li><strong>字体。</strong>可能从 Google Fonts 加载网络字体，以便多语言正确显示。请求可能带有 IP 等技术信息，并受 Google 政策约束。</li>\n<li><strong>汇率（工具）。</strong>货币换算可能向公开汇率接口（如 Frankfurter）请求数据，只发送换算所需的货币代码。</li>\n<li><strong>天气、预警与空气质量（工具）。</strong>美国预报与现行恶劣天气预警可能来自美国国家气象局（api.weather.gov）；全球预报、补充字段、地理编码与空气质量可能来自 Open-Meteo（或同类服务）。请求通常包含你选的城市坐标或地名。使用「我的位置」时，坐标会先在本机约化到约 1 公里再发送。天气与预警仅供出行参考，不能替代官方应急信息；遇到恶劣天气请听从当地官方指引。</li>\n<li><strong>相册媒体。</strong>照片与视频作为本站静态文件加载，不需要额外统计 SDK。</li>\n<li><strong>站外链接。</strong>目的地卡片等处可能链到官方旅游局、公交、国家公园、博物馆、GitHub 等。点开后你将离开本站，进入我们无法控制的网站，适用对方的隐私政策。链接不等于背书。</li>\n</ul>"
+        },
+        {
+          "id": "cookies",
+          "title": "Cookie 与本地存储",
+          "html": "<p>本站优先用<strong>浏览器本地存储</strong>记住偏好，而不是广告 Cookie。浏览器或托管方仍可能因安全、负载均衡等原因使用 Cookie 或类似技术。你可以在浏览器里清除本站数据或限制存储；之后部分设置会在下次访问时恢复默认。</p>"
+        },
+        {
+          "id": "choices",
+          "title": "你可以怎么做",
+          "html": "<ul>\n<li>随时在<strong>设置</strong>中更改主题、语言、单位、动效与相册画质；</li>\n<li>在浏览器中清除本站数据，删除本机保存的偏好；</li>\n<li>如有需要，可限制对第三方字体或接口的访问（部分功能可能不可用）；</li>\n<li>隐私相关问题可通过下方方式联系我们。</li>\n</ul>"
+        },
+        {
+          "id": "children",
+          "title": "未成年人",
+          "html": "<p>本站提供一般性旅行信息，并非面向 13 岁以下儿童（或以你所在地区法律规定的同等年龄为准）。我们不会故意通过本站收集儿童的个人信息。若你认为有儿童向我们提供了个人信息，请联系我们，我们会妥善处理。</p>"
+        },
+        {
+          "id": "changes",
+          "title": "政策如何更新",
+          "html": "<p>我们可能不时更新本政策，并在本页顶部修改「更新日期」。更新后若你继续使用本站，即视为知悉更新内容。重大变更时，我们会尽量在站内提示。</p>"
+        },
+        {
+          "id": "contact",
+          "title": "联系我们",
+          "html": "<p>对本隐私政策或本站隐私做法有疑问，欢迎联系：</p>\n<ul>\n<li><a href=\"mailto:contact.timg@icloud.com\">contact.timg@icloud.com</a></li>\n<li><a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">GitHub 项目仓库</a></li>\n</ul>\n<p class=\"legal-note\">本政策旨在说明个人旅行项目的数据处理方式，不构成法律意见。</p>"
+        }
+      ],
+      "footerNote": "© {year} USA Travel Guide · Tim G (TGthms)"
     },
-    ja: {
-      title: 'プライバシーポリシー',
-      eyebrow: 'リーガル',
-      updatedLabel: '更新日',
-      updatedDate: '2026年8月6日',
-      onThisPage: 'このページの内容',
-      lead: 'お客様のプライバシーを大切にしています。本プライバシーポリシーでは、<strong>アメリカ — 旅行ガイド</strong>（以下「本サイト」）が、ガイド・フォトギャラリー・ツールを含む本ウェブサイトのご利用時に、情報をどのように収集、利用、開示、移転、保存するかを明確にご説明します。本サイトは、できるだけ少ない個人データで快適にご利用いただけるよう設計されています。',
-      toc: [
-        { id: 'overview', label: '概要' },
-        { id: 'what-we-collect', label: '収集する情報' },
-        { id: 'how-we-use', label: '情報の利用目的' },
-        { id: 'storage', label: '情報の保存場所' },
-        { id: 'third-parties', label: '第三者サービス' },
-        { id: 'cookies', label: 'Cookie 等の技術' },
-        { id: 'choices', label: 'お客様の選択' },
-        { id: 'children', label: 'お子様について' },
-        { id: 'changes', label: 'ポリシーの変更' },
-        { id: 'contact', label: 'お問い合わせ' }
-      ],
-      sections: [
+    "ja": {
+      "title": "プライバシーポリシー",
+      "eyebrow": "リーガル",
+      "updatedLabel": "更新日",
+      "updatedDate": "August 6, 2026",
+      "onThisPage": "このページの内容",
+      "lead": "このプライバシーポリシーは、<strong>アメリカ — 旅行ガイド</strong>（以下「本サイト」）をご利用いただく際に、情報がどのように扱われるかをご説明するものです。本サイトにはガイド、フォトギャラリー、各種ツールが含まれます。できるだけ個人情報を少なく扱いながら、快適に使えるよう設計しています。",
+      "toc": [
         {
-          id: 'overview',
-          title: '概要',
-          html: `<p>本サイトは、<strong>Tim G</strong>（GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>）が制作する編集型の旅行ガイド兼フォトジャーナルです。主に静的サイトとして提供され、大半のコンテンツはページとファイルとして配信されます。基本的な閲覧にアカウントは不要です。</p>
-<p>本ポリシーでは、お客様を識別できる情報、または合理的にお客様に結び付けられる情報を「個人データ」として扱います。個人を合理的に特定できない集計データや、純粋に技術的なデータは、個人データには含めません。</p>`
+          "id": "overview",
+          "label": "はじめに"
         },
         {
-          id: 'what-we-collect',
-          title: '収集する情報',
-          html: `<p>ご利用の状況に応じて、次のような情報が関わる場合があります。</p>
-<ul>
-<li><strong>お客様が選択する設定。</strong>テーマ、言語、単位（気温・距離）、モーション／カーソル設定、ギャラリーの画質などは、ブラウザの保存領域（例：<code>localStorage</code>）によりお客様の端末に保存されることがあります。サイトデータを消去しない限り、端末上に残ります。</li>
-<li><strong>ブラウザまたはホストが処理する技術データ。</strong>多くのウェブサイトと同様、配信・セキュリティ・安定稼働のため、ホストや CDN 等が標準的なリクエスト情報（IP アドレス、ブラウザの種類、要求 URL など）を処理する場合があります。本サイトから別途の広告プロフィールを構築することはありません。</li>
-<li><strong>任意で送信される情報。</strong>GitHub や外部の About ページなどからご連絡いただいた場合、そのメッセージに含まれる内容を受領します。</li>
-<li><strong>アカウント不要。</strong>ガイド・ギャラリー・ツールの通常のご利用に、登録・パスワード・お支払い情報は不要です。</li>
-</ul>`
+          "id": "what-we-collect",
+          "label": "どのような情報が関わるか"
         },
         {
-          id: 'how-we-use',
-          title: '情報の利用目的',
-          html: `<ul>
-<li>同一ブラウザでの表示およびアクセシビリティ設定の記憶</li>
-<li>インタラクティブなツールの提供（例：通貨換算。第三者の為替 API を利用する場合があります）</li>
-<li>ホスティング基盤を通じた本サイトの運用、保護、配信の改善</li>
-<li>お問い合わせへの対応</li>
-</ul>
-<p>個人データの<strong>販売は行いません</strong>。本サイトの設定保存をクロスサイト広告に使用することもありません。</p>`
+          "id": "how-we-use",
+          "label": "情報の利用目的"
         },
         {
-          id: 'storage',
-          title: '情報の保存場所',
-          html: `<p>設定データは、ブラウザにより<strong>お客様の端末上にローカル保存</strong>されます。ホスティング事業者は、そのインフラが所在する地域で接続ログを処理する場合があります。公開リポジトリや静的ホスト（例：GitHub Pages）経由で提供される場合、当該ホストのプライバシー条件もホスティングに適用されます。</p>`
+          "id": "storage",
+          "label": "情報の保存場所"
         },
         {
-          id: 'third-parties',
-          title: '第三者サービス',
-          html: `<p>ご利用機能のため、次のような第三者サービスを読み込んだり接続したりする場合があります。</p>
-<ul>
-<li><strong>フォント。</strong>多言語を正しく表示するため、Google Fonts からウェブフォントを読み込むことがあります。その際、IP アドレス等の技術データが含まれる場合があり、Google の方針が適用されます。</li>
-<li><strong>為替（ツール）。</strong>通貨換算は、公開 API（例：Frankfurter）にレートを問い合わせることがあります。換算に必要な通貨コードのみを送信します。</li>
-<li><strong>天気・警報と大気質（ツール）。</strong>天気ツールは、米国の予報および有効な悪天候警報（注意報・警報・勧告）を National Weather Service（api.weather.gov）へ、世界の予報・不足項目の補完・ジオコーディング・大気質を Open-Meteo（または互換サービス）へ問い合わせることがあります。リクエストには選択した座標や地名が含まれます。「現在地を使う」では、端末上で座標を約 <strong>1 km</strong> 精度に丸めてから予報または警報を取得し、ブラウザのローカル保存に残す場合があります。ブラウザの位置情報は許可した場合のみ使用します。データは旅行の参考用であり、緊急判断には使えません。悪天候時は公式機関の指示に従ってください。</li>
-<li><strong>ギャラリーのメディア。</strong>写真と動画はサイトの静的ファイルとして配信されます。動画再生時はブラウザがそのファイルを読み込みます。</li>
-<li><strong>外部サイトへのリンク。</strong>便宜のため、本サイトは第三者ウェブサイトへのリンクを含みます（都市の公式観光サイト、公共交通機関、National Park Service のページ、博物館、GitHub、About Me、目的地カードの「役立つリンク」など）。そのようなリンクをクリックすると本サイトを離れ、当方が運営していないサービスへ移動します。各運営者は独自のプライバシーポリシーに基づき情報を取り扱う場合があり、本ポリシーの対象外です。リンクがあること自体により、外部サイト上でのお客様の行動を当方が受け取ることはなく、リンクは当該第三者の推奨や管理を意味しません。</li>
-</ul>`
+          "id": "third-parties",
+          "label": "第三者サービス"
         },
         {
-          id: 'cookies',
-          title: 'Cookie 等の技術',
-          html: `<p>本サイトは主に設定のために<strong>ブラウザのローカル保存</strong>を用い、広告を目的とした Cookie の利用を主眼としていません。ただし、ブラウザやホストは、セキュリティ、負荷分散、セッション維持などのために Cookie 等を用いる場合があります。ブラウザでサイトデータを消去したり、保存を制限したりできます（その場合、一部の設定は訪問のたびにリセットされます）。</p>`
+          "id": "cookies",
+          "label": "Cookie とローカル保存"
         },
         {
-          id: 'choices',
-          title: 'お客様の選択',
-          html: `<ul>
-<li><strong>設定</strong>から、テーマ・言語・単位・モーション・ギャラリー画質をいつでも変更できます。</li>
-<li>ブラウザでサイトデータを消去し、端末に保存された設定を削除できます。</li>
-<li>第三者フォントや API への通信を制限することもできます（一部機能が制限される場合があります）。</li>
-<li>本サイトのプライバシーに関するご質問は、下記までお問い合わせください。</li>
-</ul>`
+          "id": "choices",
+          "label": "お客様にできること"
         },
         {
-          id: 'children',
-          title: 'お子様について',
-          html: `<p>本サイトは一般的な旅行情報であり、13 歳未満（またはお住まいの法域で定められる同等の最低年齢）のお子様を対象としていません。本サイトを通じて故意にお子様の個人データを収集することはありません。お子様の個人データが提供されたと思われる場合は、適切な対応ができるようご連絡ください。</p>`
+          "id": "children",
+          "label": "お子さまについて"
         },
         {
-          id: 'changes',
-          title: 'ポリシーの変更',
-          html: `<p>本プライバシーポリシーは、必要に応じて更新されることがあります。更新する際は、ページ上部の「更新日」を改めます。変更後も本サイトをご利用いただくことは、更新後のポリシーを認識したものとみなします。重要な変更については、可能な範囲でサイト上でもお知らせします。</p>`
+          "id": "changes",
+          "label": "ポリシーの更新"
         },
         {
-          id: 'contact',
-          title: 'お問い合わせ',
-          html: `<p>本プライバシーポリシー、または本サイトのプライバシーに関するご質問は、次の方法でご連絡ください。</p>
-<ul>
-<li><a href="mailto:contact.timg@icloud.com">contact.timg@icloud.com</a></li>
-<li><a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">GitHub リポジトリ</a></li>
-</ul>
-<p class="legal-note">本ポリシーは個人プロジェクトのウェブサイトの透明性のためのものであり、法的助言ではありません。</p>`
+          "id": "contact",
+          "label": "お問い合わせ"
         }
       ],
-      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)'
+      "sections": [
+        {
+          "id": "overview",
+          "title": "はじめに",
+          "html": "<p>本サイトは <strong>Tim G</strong>（GitHub <a href=\"https://github.com/TGthms\" target=\"_blank\" rel=\"noopener\">@TGthms</a>）が制作・運営する、個人プロジェクトの旅行ガイド兼フォトジャーナルです。基本的には静的サイトで、ページを開けばすぐ読めます。アカウント登録は不要です。</p>\n<p>本ポリシーでいう「個人情報」とは、お客様を識別できる情報、または合理的に結び付けられる情報を指します。個人を特定できない集計データや、単なる技術ログは個人情報として扱いません。</p>"
+        },
+        {
+          "id": "what-we-collect",
+          "title": "どのような情報が関わるか",
+          "html": "<p>ご利用方法によって、次のような情報が関わることがあります。</p>\n<ul>\n<li><strong>設定として選んだ内容。</strong>テーマ、言語、温度・距離の単位、天気関連の単位、動きやカーソルの設定、ギャラリー画質などは、ブラウザの保存領域（例：<code>localStorage</code>）に端末へ残ることがあります。サイトデータを消さない限り、その端末に保持されます。</li>\n<li><strong>任意の位置情報（天気ツールのみ）。</strong>「現在地を使う」を選ぶと、ブラウザが許可を求めることがあります。予報に必要なのは<strong>おおよその位置</strong>です（番地レベルの精度は不要です）。送信前に端末上で座標を<strong>約 1 km 程度</strong>に丸めます。丸めた座標は天気データ提供元へ送られ、次回表示のため端末に保存される場合があります。精密な GPS 軌跡を当方のサーバーで受け取ることはありません。許可しなくても、都市名検索でご利用いただけます。</li>\n<li><strong>ブラウザやホスティング側の技術情報。</strong>一般的なウェブサイトと同様、配信・セキュリティのため、IP アドレス、ブラウザの種類、アクセス先 URL などがホスティングや CDN で処理されることがあります。本サイトから広告用プロファイルを作成することはありません。</li>\n<li><strong>ご自身で送った内容。</strong>メールや GitHub などでご連絡いただいた場合、そのメッセージに書かれた内容を受け取ります。</li>\n<li><strong>アカウントはありません。</strong>ガイド・ギャラリー・ツールの通常利用に、登録やパスワード、支払い情報は不要です。</li>\n</ul>"
+        },
+        {
+          "id": "how-we-use",
+          "title": "情報の利用目的",
+          "html": "<ul>\n<li>同じブラウザで表示・アクセシビリティ設定を覚え直すため</li>\n<li>通貨換算、天気予報、大気質などのツール提供のため（第三者 API を使う場合があります）</li>\n<li>ホスティング基盤を通じた配信・安全・安定運用のため</li>\n<li>お問い合わせへのご返信のため</li>\n</ul>\n<p>個人情報を<strong>販売することはありません</strong>。本サイトの設定保存を、サイト横断の広告に使うこともありません。</p>"
+        },
+        {
+          "id": "storage",
+          "title": "情報の保存場所",
+          "html": "<p>設定データは<strong>お客様の端末内</strong>に保存されます。ホスティング事業者は、そのインフラがある地域で接続ログを処理する場合があります。GitHub Pages など公開ホスティング経由の場合、その事業者のプライバシー規約もホスティング部分に適用されます。</p>"
+        },
+        {
+          "id": "third-parties",
+          "title": "第三者サービス",
+          "html": "<p>機能の提供にあたり、次のような第三者サービスを利用することがあります。</p>\n<ul>\n<li><strong>フォント。</strong>多言語表示のため Google Fonts からウェブフォントを読み込むことがあります。IP などの技術情報が含まれる場合があり、Google の方針が適用されます。</li>\n<li><strong>為替（ツール）。</strong>通貨換算は公開 API（例：Frankfurter）へレートを問い合わせることがあります。必要な通貨コードのみ送信します。</li>\n<li><strong>天気・警報・大気質（ツール）。</strong>米国の予報と有効な悪天候警報は National Weather Service（api.weather.gov）から、世界の予報・補完データ・地名検索・大気質は Open-Meteo（または同等のサービス）から取得する場合があります。選んだ地点の座標や地名が含まれます。「現在地」利用時は、約 1 km に丸めたうえで送信します。天気・警報は旅行の参考情報であり、緊急時の公式情報の代わりにはなりません。悪天候時は当局の指示に従ってください。</li>\n<li><strong>ギャラリー。</strong>写真・動画は本サイトの静的ファイルとして読み込まれます。別途の解析 SDK は不要です。</li>\n<li><strong>外部リンク。</strong>公式観光局、交通機関、国立公園、博物館、GitHub などへのリンクがあります。クリックすると本サイトを離れ、当方が管理しないサイトへ移ります。相手方のプライバシーポリシーが適用され、リンクは推奨を意味しません。</li>\n</ul>"
+        },
+        {
+          "id": "cookies",
+          "title": "Cookie とローカル保存",
+          "html": "<p>本サイトは、広告 Cookie ではなく<strong>ブラウザのローカル保存</strong>で設定を覚えることを優先しています。ただし、セキュリティや負荷分散などのために、ブラウザやホストが Cookie 等を使う場合があります。ブラウザでサイトデータを消したり保存を制限したりできます。その場合、一部の設定は次回アクセス時に初期状態へ戻ります。</p>"
+        },
+        {
+          "id": "choices",
+          "title": "お客様にできること",
+          "html": "<ul>\n<li><strong>設定</strong>から、テーマ・言語・単位・動き・ギャラリー画質をいつでも変更できます</li>\n<li>ブラウザでサイトデータを削除し、端末上の設定を消せます</li>\n<li>必要に応じて第三者フォントや API への通信を制限できます（一部機能が使えなくなる場合があります）</li>\n<li>プライバシーに関するご質問は、下記までお気軽にどうぞ</li>\n</ul>"
+        },
+        {
+          "id": "children",
+          "title": "お子さまについて",
+          "html": "<p>本サイトは一般的な旅行情報を提供するもので、13 歳未満（またはお住まいの地域で同等とされる年齢）のお子さまを対象としていません。故意に児童の個人情報を収集することはありません。お子さまの情報が提供されたと思われる場合はご連絡ください。適切に対応します。</p>"
+        },
+        {
+          "id": "changes",
+          "title": "ポリシーの更新",
+          "html": "<p>本ポリシーは必要に応じて更新することがあります。更新時はページ上部の「更新日」を変更します。更新後も本サイトをご利用いただいた場合、更新内容をご了承いただいたものとみなします。重要な変更があるときは、可能な範囲でサイト上でもお知らせします。</p>"
+        },
+        {
+          "id": "contact",
+          "title": "お問い合わせ",
+          "html": "<p>本プライバシーポリシーや本サイトの取り扱いについてご質問がある場合は、次までご連絡ください。</p>\n<ul>\n<li><a href=\"mailto:contact.timg@icloud.com\">contact.timg@icloud.com</a></li>\n<li><a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">GitHub リポジトリ</a></li>\n</ul>\n<p class=\"legal-note\">本ポリシーは個人の旅行プロジェクト向けの説明であり、法律アドバイスではありません。</p>"
+        }
+      ],
+      "footerNote": "© {year} USA Travel Guide · Tim G (TGthms)"
     }
   },
-
-  terms: {
-    en: {
-      title: 'Terms of Use',
-      eyebrow: 'Legal',
-      updatedLabel: 'Updated',
-      updatedDate: 'August 6, 2026',
-      onThisPage: 'On this page',
-      lead: 'These Terms of Use (“Terms”) govern your access to and use of <strong>America — A Travel Guide</strong> (the “Site”), including the main guide, photo gallery, tools, and related pages operated by <strong>Tim G</strong> (GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>). By using the Site, you agree to these Terms. If you do not agree, please do not use the Site.',
-      toc: [
-        { id: 'agreement', label: 'Agreement to terms' },
-        { id: 'ownership', label: 'Ownership of the Site' },
-        { id: 'photos', label: 'Photographs & visual content' },
-        { id: 'software', label: 'Site software & code' },
-        { id: 'travel', label: 'Travel information disclaimer' },
-        { id: 'acceptable-use', label: 'Acceptable use' },
-        { id: 'third-party', label: 'Third-party links & tools' },
-        { id: 'privacy', label: 'Privacy' },
-        { id: 'disclaimers', label: 'Disclaimers' },
-        { id: 'liability', label: 'Limitation of liability' },
-        { id: 'changes', label: 'Changes' },
-        { id: 'contact', label: 'Contact' }
-      ],
-      sections: [
+  "terms": {
+    "en": {
+      "title": "Terms of Use",
+      "eyebrow": "Legal",
+      "updatedLabel": "Updated",
+      "updatedDate": "August 6, 2026",
+      "onThisPage": "On this page",
+      "lead": "These Terms of Use (“Terms”) govern your access to and use of <strong>America — A Travel Guide</strong> (the “Site”), including the main guide, photo gallery, tools, and related pages operated by <strong>Tim G</strong> (GitHub <a href=\"https://github.com/TGthms\" target=\"_blank\" rel=\"noopener\">@TGthms</a>). By using the Site, you agree to these Terms. If you do not agree, please do not use the Site.",
+      "toc": [
         {
-          id: 'agreement',
-          title: 'Agreement to terms',
-          html: `<p>These Terms apply to the Site as made available online (including any mirror or static hosting of the project). We may update these Terms from time to time by posting a revised version on this page and updating the date above. Your continued use after changes constitutes acceptance of the revised Terms.</p>
-<p>As long as you comply with these Terms, we grant you a personal, non-exclusive, non-transferable, limited right to access and use the Site for your own personal, non-commercial purposes.</p>`
+          "id": "agreement",
+          "label": "Agreement to terms"
         },
         {
-          id: 'ownership',
-          title: 'Ownership of the Site',
-          html: `<p>The Site—including its text, layout, design, user interface, logos, graphics, compilation of content, and original editorial material—is owned by Tim G / TGthms or used under license, and is protected by copyright and other intellectual property laws.</p>
-<p>Except as expressly allowed in these Terms or under a stated open license for a specific component, you may not copy, reproduce, republish, upload, post, publicly display, encode, translate, transmit, or distribute any part of the Site for commercial purposes without prior written permission.</p>`
+          "id": "ownership",
+          "label": "Ownership of the Site"
         },
         {
-          id: 'photos',
-          title: 'Photographs & visual content',
-          html: `<p>Photographs and related visual works in the gallery and elsewhere on the Site (including files under <code>images/</code>) are <strong>© {year} Tim G (GitHub @TGthms)</strong> unless a different credit is shown for a specific work.</p>
-<p>Those photographs are made available under the <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons Attribution 4.0 International (CC BY 4.0)</a> license. In plain language, you may share and adapt the photos—including for commercial use—provided that you:</p>
-<ul>
-<li>Give appropriate credit to <strong>Tim G / @TGthms</strong>;</li>
-<li>Provide a link to the CC BY 4.0 license where practical;</li>
-<li>Indicate if changes were made; and</li>
-<li>Do not suggest that the author endorses you or your use.</li>
-</ul>
-<p>Suggested attribution: <em>“Photo © Tim G (@TGthms), licensed under CC BY 4.0.”</em></p>
-<p>Removing watermarks, false attribution, or using photos in a way that violates applicable law is not permitted. If you need rights beyond CC BY 4.0, contact us.</p>`
+          "id": "photos",
+          "label": "Photographs & visual content"
         },
         {
-          id: 'software',
-          title: 'Site software & code',
-          html: `<p>Source code for the Site project may be published under an open-source license (for example the <a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">MIT License</a> accompanying the repository). Open-source licenses govern the software itself; they do <strong>not</strong> automatically place photographs under that same license. Photo rights remain as described in the section above unless a file’s notice states otherwise.</p>`
+          "id": "software",
+          "label": "Site software & code"
         },
         {
-          id: 'travel',
-          title: 'Travel information disclaimer',
-          html: `<p>Content on the Site—including destinations, seasons, routes, tips, visa notes, costs, tools, and practical information—is provided for <strong>general informational and educational purposes</strong> only. It is not professional legal, immigration, medical, financial, or safety advice.</p>
-<ul>
-<li>Travel rules, prices, hours, road conditions, and requirements change frequently.</li>
-<li>Always verify critical details with official government sources, carriers, and local authorities before you travel.</li>
-<li>Interactive tools (currency, tip, drive cost, clocks) produce estimates only and may be incomplete or outdated.</li>
-<li>Outbound “helpful” or official tourism / transit / park links are provided as starting points only; schedules, fees, and policies on those sites can change without notice on this Site.</li>
-</ul>
-<p>You assume full responsibility for decisions you make based on the Site. We are not liable for losses arising from reliance on Site content.</p>`
+          "id": "travel",
+          "label": "Travel information disclaimer"
         },
         {
-          id: 'acceptable-use',
-          title: 'Acceptable use',
-          html: `<p>You agree not to:</p>
-<ul>
-<li>Use the Site for any unlawful purpose or in violation of these Terms;</li>
-<li>Attempt to gain unauthorized access to systems, accounts, or networks related to the Site;</li>
-<li>Probe, scan, or stress-test the Site in a way that degrades service for others;</li>
-<li>Scrape or bulk-download the Site in a manner that imposes unreasonable load or circumvents access controls, except as allowed by robots rules or an open license;</li>
-<li>Misrepresent affiliation with the Site or its author; or</li>
-<li>Use content in a way that infringes intellectual property or privacy rights of others.</li>
-</ul>`
+          "id": "acceptable-use",
+          "label": "Acceptable use"
         },
         {
-          id: 'third-party',
-          title: 'Third-party links & tools',
-          html: `<p>The Site may link to third-party websites or call third-party APIs (for example exchange rates, weather data, or font delivery). Those services are not under our control.</p>
-<ul>
-<li><strong>Destination and travel links.</strong> City and destination cards may include “Helpful links” to official tourism sites, transit agencies, National Park Service pages, museums, and similar external resources. These links are provided solely for convenience and planning reference. They do <strong>not</strong> create a partnership, sponsorship, agency, or endorsement relationship with any linked organization unless we expressly say so in writing.</li>
-<li><strong>Tools APIs.</strong> Currency rates may come from third-party public APIs. U.S. weather forecasts and severe-weather alerts may come from the National Weather Service (api.weather.gov); world forecasts, enrichment fields, geocoding, and air quality may come from Open-Meteo (or a compatible provider). Values can be delayed, incomplete, or wrong. Weather and alerts are not substitutes for official emergency guidance.</li>
-<li><strong>No control or warranty.</strong> We do not operate, monitor, or guarantee the accuracy, safety, availability, or privacy practices of third-party sites or APIs. Content, URLs, branding, and policies on those sites may change or break without notice.</li>
-<li><strong>Your responsibility.</strong> When you leave the Site via an external link, you do so at your own risk and become subject to that third party’s terms and privacy policy. Verify critical travel, booking, or payment details directly with the official source.</li>
-</ul>
-<p>If a third-party link is broken, outdated, or inappropriate, you may contact us so we can consider an update; we are not obligated to maintain any particular external URL.</p>`
+          "id": "third-party",
+          "label": "Third-party links & tools"
         },
         {
-          id: 'privacy',
-          title: 'Privacy',
-          html: `<p>Our <a href="privacy.html">Privacy Policy</a> explains how the Site handles information. It is incorporated into these Terms by reference. By using the Site, you also acknowledge that internet transmissions are never completely private or secure.</p>`
+          "id": "privacy",
+          "label": "Privacy"
         },
         {
-          id: 'disclaimers',
-          title: 'Disclaimers',
-          html: `<p>THE SITE AND ALL CONTENT ARE PROVIDED ON AN “AS IS” AND “AS AVAILABLE” BASIS. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SITE WILL BE UNINTERRUPTED, ERROR-FREE, OR FREE OF HARMFUL COMPONENTS, OR THAT ANY DEFECTS WILL BE CORRECTED.</p>
-<p>Information on the Site may change without notice. We have no obligation to update any particular page or tool.</p>`
+          "id": "disclaimers",
+          "label": "Disclaimers"
         },
         {
-          id: 'liability',
-          title: 'Limitation of liability',
-          html: `<p>To the fullest extent permitted by law, Tim G / TGthms and contributors to the Site will not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, data, or goodwill, arising out of or related to your use of (or inability to use) the Site—even if advised of the possibility of such damages.</p>`
+          "id": "liability",
+          "label": "Limitation of liability"
         },
         {
-          id: 'changes',
-          title: 'Changes to the Site',
-          html: `<p>We may modify, suspend, or discontinue any part of the Site at any time without notice, including for maintenance, redesign, or project direction. We are not obligated to continue hosting any particular feature or photo.</p>`
+          "id": "changes",
+          "label": "Changes"
         },
         {
-          id: 'contact',
-          title: 'Contact',
-          html: `<p>Questions about these Terms, photo licensing, or permissions:</p>
-<ul>
-<li><a href="mailto:contact.timg@icloud.com">contact.timg@icloud.com</a></li>
-<li><a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">GitHub repository</a></li>
-</ul>
-<p class="legal-note">These Terms are written for a personal travel-guide project and are not a substitute for legal advice.</p>`
+          "id": "contact",
+          "label": "Contact"
         }
       ],
-      footerNote: '© {year} USA Travel Guide · Tim G (TGthms). All rights reserved except where open licenses apply.'
+      "sections": [
+        {
+          "id": "agreement",
+          "title": "Agreement to terms",
+          "html": "<p>These Terms apply to the Site as made available online (including any mirror or static hosting of the project). We may update these Terms from time to time by posting a revised version on this page and updating the date above. Your continued use after changes constitutes acceptance of the revised Terms.</p>\n<p>As long as you comply with these Terms, we grant you a personal, non-exclusive, non-transferable, limited right to access and use the Site for your own personal, non-commercial purposes.</p>"
+        },
+        {
+          "id": "ownership",
+          "title": "Ownership of the Site",
+          "html": "<p>The Site—including its text, layout, design, user interface, logos, graphics, compilation of content, and original editorial material—is owned by Tim G / TGthms or used under license, and is protected by copyright and other intellectual property laws.</p>\n<p>Except as expressly allowed in these Terms or under a stated open license for a specific component, you may not copy, reproduce, republish, upload, post, publicly display, encode, translate, transmit, or distribute any part of the Site for commercial purposes without prior written permission.</p>"
+        },
+        {
+          "id": "photos",
+          "title": "Photographs & visual content",
+          "html": "<p>Photographs and related visual works in the gallery and elsewhere on the Site (including files under <code>images/</code>) are <strong>© {year} Tim G (GitHub @TGthms)</strong> unless a different credit is shown for a specific work.</p>\n<p>Those photographs are made available under the <a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noopener\">Creative Commons Attribution 4.0 International (CC BY 4.0)</a> license. In plain language, you may share and adapt the photos—including for commercial use—provided that you:</p>\n<ul>\n<li>Give appropriate credit to <strong>Tim G / @TGthms</strong>;</li>\n<li>Provide a link to the CC BY 4.0 license where practical;</li>\n<li>Indicate if changes were made; and</li>\n<li>Do not suggest that the author endorses you or your use.</li>\n</ul>\n<p>Suggested attribution: <em>“Photo © Tim G (@TGthms), licensed under CC BY 4.0.”</em></p>\n<p>Removing watermarks, false attribution, or using photos in a way that violates applicable law is not permitted. If you need rights beyond CC BY 4.0, contact us.</p>"
+        },
+        {
+          "id": "software",
+          "title": "Site software & code",
+          "html": "<p>Source code for the Site project may be published under an open-source license (for example the <a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">MIT License</a> accompanying the repository). Open-source licenses govern the software itself; they do <strong>not</strong> automatically place photographs under that same license. Photo rights remain as described in the section above unless a file’s notice states otherwise.</p>"
+        },
+        {
+          "id": "travel",
+          "title": "Travel information disclaimer",
+          "html": "<p>Content on the Site—including destinations, seasons, routes, tips, visa notes, costs, tools, and practical information—is provided for <strong>general informational and educational purposes</strong> only. It is not professional legal, immigration, medical, financial, or safety advice.</p>\n<ul>\n<li>Travel rules, prices, hours, road conditions, and requirements change frequently.</li>\n<li>Always verify critical details with official government sources, carriers, and local authorities before you travel.</li>\n<li>Interactive tools (currency, tip, drive cost, clocks) produce estimates only and may be incomplete or outdated.</li>\n<li>Outbound “helpful” or official tourism / transit / park links are provided as starting points only; schedules, fees, and policies on those sites can change without notice on this Site.</li>\n</ul>\n<p>You assume full responsibility for decisions you make based on the Site. We are not liable for losses arising from reliance on Site content.</p>"
+        },
+        {
+          "id": "acceptable-use",
+          "title": "Acceptable use",
+          "html": "<p>You agree not to:</p>\n<ul>\n<li>Use the Site for any unlawful purpose or in violation of these Terms;</li>\n<li>Attempt to gain unauthorized access to systems, accounts, or networks related to the Site;</li>\n<li>Probe, scan, or stress-test the Site in a way that degrades service for others;</li>\n<li>Scrape or bulk-download the Site in a manner that imposes unreasonable load or circumvents access controls, except as allowed by robots rules or an open license;</li>\n<li>Misrepresent affiliation with the Site or its author; or</li>\n<li>Use content in a way that infringes intellectual property or privacy rights of others.</li>\n</ul>"
+        },
+        {
+          "id": "third-party",
+          "title": "Third-party links & tools",
+          "html": "<p>The Site may link to third-party websites or call third-party APIs (for example exchange rates, weather data, or font delivery). Those services are not under our control.</p>\n<ul>\n<li><strong>Destination and travel links.</strong> City and destination cards may include “Helpful links” to official tourism sites, transit agencies, National Park Service pages, museums, and similar external resources. These links are provided solely for convenience and planning reference. They do <strong>not</strong> create a partnership, sponsorship, agency, or endorsement relationship with any linked organization unless we expressly say so in writing.</li>\n<li><strong>Tools APIs.</strong> Currency rates may come from third-party public APIs. U.S. weather forecasts and severe-weather alerts may come from the National Weather Service (api.weather.gov); world forecasts, enrichment fields, geocoding, and air quality may come from Open-Meteo (or a compatible provider). Values can be delayed, incomplete, or wrong. Weather and alerts are not substitutes for official emergency guidance.</li>\n<li><strong>No control or warranty.</strong> We do not operate, monitor, or guarantee the accuracy, safety, availability, or privacy practices of third-party sites or APIs. Content, URLs, branding, and policies on those sites may change or break without notice.</li>\n<li><strong>Your responsibility.</strong> When you leave the Site via an external link, you do so at your own risk and become subject to that third party’s terms and privacy policy. Verify critical travel, booking, or payment details directly with the official source.</li>\n</ul>\n<p>If a third-party link is broken, outdated, or inappropriate, you may contact us so we can consider an update; we are not obligated to maintain any particular external URL.</p>"
+        },
+        {
+          "id": "privacy",
+          "title": "Privacy",
+          "html": "<p>Our <a href=\"privacy.html\">Privacy Policy</a> explains how the Site handles information. It is incorporated into these Terms by reference. By using the Site, you also acknowledge that internet transmissions are never completely private or secure.</p>"
+        },
+        {
+          "id": "disclaimers",
+          "title": "Disclaimers",
+          "html": "<p>THE SITE AND ALL CONTENT ARE PROVIDED ON AN “AS IS” AND “AS AVAILABLE” BASIS. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SITE WILL BE UNINTERRUPTED, ERROR-FREE, OR FREE OF HARMFUL COMPONENTS, OR THAT ANY DEFECTS WILL BE CORRECTED.</p>\n<p>Information on the Site may change without notice. We have no obligation to update any particular page or tool.</p>"
+        },
+        {
+          "id": "liability",
+          "title": "Limitation of liability",
+          "html": "<p>To the fullest extent permitted by law, Tim G / TGthms and contributors to the Site will not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, data, or goodwill, arising out of or related to your use of (or inability to use) the Site—even if advised of the possibility of such damages.</p>"
+        },
+        {
+          "id": "changes",
+          "title": "Changes to the Site",
+          "html": "<p>We may modify, suspend, or discontinue any part of the Site at any time without notice, including for maintenance, redesign, or project direction. We are not obligated to continue hosting any particular feature or photo.</p>"
+        },
+        {
+          "id": "contact",
+          "title": "Contact",
+          "html": "<p>Questions about these Terms, photo licensing, or permissions:</p>\n<ul>\n<li><a href=\"mailto:contact.timg@icloud.com\">contact.timg@icloud.com</a></li>\n<li><a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">GitHub repository</a></li>\n</ul>\n<p class=\"legal-note\">These Terms are written for a personal travel-guide project and are not a substitute for legal advice.</p>"
+        }
+      ],
+      "footerNote": "© {year} USA Travel Guide · Tim G (TGthms). All rights reserved except where open licenses apply."
     },
-    es: {
-      title: 'Términos de uso',
-      eyebrow: 'Legal',
-      updatedLabel: 'Actualización',
-      updatedDate: '6 de agosto de 2026',
-      onThisPage: 'En esta página',
-      lead: 'Estos Términos de uso (“Términos”) regulan el acceso y el uso de <strong>América — Una Guía de Viaje</strong> (el “Sitio”), incluida la guía principal, la galería de fotos, las herramientas y las páginas relacionadas, operados por <strong>Tim G</strong> (GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>). Al utilizar el Sitio, aceptas estos Términos. Si no estás de acuerdo, te pedimos que no lo uses.',
-      toc: [
-        { id: 'agreement', label: 'Aceptación de los términos' },
-        { id: 'ownership', label: 'Titularidad del Sitio' },
-        { id: 'photos', label: 'Fotografías y contenido visual' },
-        { id: 'software', label: 'Software y código' },
-        { id: 'travel', label: 'Información de viaje' },
-        { id: 'acceptable-use', label: 'Uso permitido' },
-        { id: 'third-party', label: 'Enlaces y herramientas de terceros' },
-        { id: 'privacy', label: 'Privacidad' },
-        { id: 'disclaimers', label: 'Exención de garantías' },
-        { id: 'liability', label: 'Limitación de responsabilidad' },
-        { id: 'changes', label: 'Cambios en el Sitio' },
-        { id: 'contact', label: 'Contacto' }
-      ],
-      sections: [
+    "es": {
+      "title": "Términos de uso",
+      "eyebrow": "Legal",
+      "updatedLabel": "Actualizado",
+      "updatedDate": "August 6, 2026",
+      "onThisPage": "En esta página",
+      "lead": "Estos Términos de uso describen cómo puedes usar <strong>América — Una Guía de Viaje</strong> (el “Sitio”), incluida la guía, la galería, las herramientas y las páginas relacionadas. El Sitio lo mantiene <strong>Tim G</strong> (GitHub <a href=\"https://github.com/TGthms\" target=\"_blank\" rel=\"noopener\">@TGthms</a>). Al usarlo, aceptas estos Términos. Si no estás de acuerdo, no uses el Sitio.",
+      "toc": [
         {
-          id: 'agreement',
-          title: 'Aceptación de los términos',
-          html: `<p>Estos Términos se aplican al Sitio tal como se ofrece en línea (incluido cualquier espejo o alojamiento estático del proyecto). Podemos actualizarlos publicando una versión revisada en esta página y actualizando la fecha que figura arriba. Si sigues usando el Sitio después de un cambio, aceptas los Términos revisados.</p>
-<p>Mientras cumplas estos Términos, te concedemos un derecho personal, no exclusivo, intransferible y limitado para acceder y usar el Sitio con fines personales y no comerciales.</p>`
+          "id": "agreement",
+          "label": "Aceptación"
         },
         {
-          id: 'ownership',
-          title: 'Titularidad del Sitio',
-          html: `<p>El Sitio —incluido su texto, diseño, interfaz, logotipos, gráficos, la selección y disposición de contenidos, y el material editorial original— es propiedad de Tim G / TGthms o se usa bajo licencia, y está protegido por derechos de autor y otras normas de propiedad intelectual.</p>
-<p>Salvo lo que estos Términos permitan de forma expresa, o lo que indique una licencia abierta para un componente concreto, no puedes copiar, reproducir, republicar, cargar, publicar, exhibir en público, codificar, traducir, transmitir ni distribuir ninguna parte del Sitio con fines comerciales sin nuestro permiso previo por escrito.</p>`
+          "id": "ownership",
+          "label": "Derechos sobre el contenido"
         },
         {
-          id: 'photos',
-          title: 'Fotografías y contenido visual',
-          html: `<p>Las fotografías y obras visuales de la galería y del resto del Sitio (incluidos los archivos en <code>images/</code>) son <strong>© {year} Tim G (GitHub @TGthms)</strong>, salvo que una obra concreta indique otro crédito.</p>
-<p>Esas fotografías se ponen a disposición bajo la licencia <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons Atribución 4.0 Internacional (CC BY 4.0)</a>. En pocas palabras, puedes compartir y adaptar las fotos —también con fines comerciales— si:</p>
-<ul>
-<li>das el crédito adecuado a <strong>Tim G / @TGthms</strong>;</li>
-<li>incluyes un enlace a la licencia CC BY 4.0 cuando sea razonable;</li>
-<li>indicas si se hicieron cambios; y</li>
-<li>no das a entender que el autor te respalda a ti ni a tu uso.</li>
-</ul>
-<p>Atribución sugerida: <em>“Foto © Tim G (@TGthms), con licencia CC BY 4.0.”</em></p>
-<p>No está permitido eliminar marcas de agua, atribuir la autoría de forma falsa ni usar las fotos de un modo que infrinja la ley aplicable. Si necesitas derechos más amplios que CC BY 4.0, contáctanos.</p>`
+          "id": "photos",
+          "label": "Fotos y material visual"
         },
         {
-          id: 'software',
-          title: 'Software y código',
-          html: `<p>El código fuente del proyecto puede publicarse bajo una licencia de código abierto (por ejemplo, la <a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">licencia MIT</a> del repositorio). Esa licencia rige el software; <strong>no</strong> sitúa automáticamente las fotografías bajo la misma licencia. Los derechos de las fotos son los descritos en el apartado anterior, salvo que el aviso de un archivo concreto diga otra cosa.</p>`
+          "id": "software",
+          "label": "Software y código"
         },
         {
-          id: 'travel',
-          title: 'Información de viaje',
-          html: `<p>El contenido del Sitio —destinos, estaciones, rutas, consejos, notas sobre visados, costes, herramientas e información práctica— se ofrece solo con fines <strong>informativos y educativos generales</strong>. No constituye asesoramiento profesional de carácter legal, migratorio, médico, financiero ni de seguridad.</p>
-<ul>
-<li>Las normas de viaje, los precios, los horarios, el estado de las carreteras y los requisitos cambian con frecuencia.</li>
-<li>Antes de viajar, comprueba siempre los datos importantes en fuentes oficiales, con las compañías de transporte y con las autoridades locales.</li>
-<li>Las herramientas interactivas (divisas, propina, coste de desplazamiento, relojes) ofrecen solo estimaciones y pueden estar incompletas o desactualizadas.</li>
-<li>Los enlaces “útiles” o a sitios oficiales de turismo, transporte o parques son solo un punto de partida; horarios, tarifas y políticas en esos sitios pueden cambiar sin que este Sitio lo refleje de inmediato.</li>
-</ul>
-<p>Eres responsable de las decisiones que tomes basándote en el Sitio. No respondemos por pérdidas derivadas de confiar en su contenido.</p>`
+          "id": "travel",
+          "label": "Información de viaje"
         },
         {
-          id: 'acceptable-use',
-          title: 'Uso permitido',
-          html: `<p>Te comprometes a no:</p>
-<ul>
-<li>usar el Sitio con fines ilícitos o de forma contraria a estos Términos;</li>
-<li>intentar acceder sin autorización a sistemas, cuentas o redes relacionados con el Sitio;</li>
-<li>sondear, escanear o someter el Sitio a pruebas de carga de un modo que perjudique el servicio para otras personas;</li>
-<li>extraer o descargar el Sitio de forma masiva imponiendo una carga irrazonable o eludiendo controles de acceso, salvo lo permitido por las reglas de robots o por una licencia abierta;</li>
-<li>afirmar una relación falsa con el Sitio o con su autor; ni</li>
-<li>usar el contenido de forma que vulnere derechos de propiedad intelectual o de privacidad de terceros.</li>
-</ul>`
+          "id": "acceptable-use",
+          "label": "Uso permitido"
         },
         {
-          id: 'third-party',
-          title: 'Enlaces y herramientas de terceros',
-          html: `<p>El Sitio puede enlazar a sitios de terceros o invocar API de terceros (por ejemplo, tipos de cambio o entrega de fuentes). Esos servicios no están bajo nuestro control.</p>
-<ul>
-<li><strong>Enlaces de destinos y viaje.</strong> Las fichas de ciudades y destinos pueden incluir “Enlaces útiles” a sitios oficiales de turismo, transporte, páginas del National Park Service, museos y recursos similares. Se ofrecen solo por comodidad y como referencia de planificación. <strong>No</strong> crean por sí solos una relación de asociación, patrocinio, agencia o respaldo con la organización enlazada, salvo que lo indiquemos por escrito.</li>
-<li><strong>API de herramientas.</strong> Los tipos de cambio pueden provenir de API públicas de terceros. Las previsiones y avisos meteorológicos severos de EE. UU. pueden provenir del National Weather Service (api.weather.gov); las previsiones mundiales, campos complementarios, geocodificación y calidad del aire pueden provenir de Open-Meteo (o un proveedor compatible). Los valores pueden retrasarse, estar incompletos o ser incorrectos. El tiempo y los avisos no sustituyen la guía oficial de emergencias.</li>
-<li><strong>Sin control ni garantía.</strong> No operamos, supervisamos ni garantizamos la exactitud, seguridad, disponibilidad o prácticas de privacidad de sitios o API de terceros. Su contenido, URL, marca y políticas pueden cambiar o dejar de funcionar sin previo aviso.</li>
-<li><strong>Tu responsabilidad.</strong> Cuando abandonas el Sitio por un enlace externo, lo haces bajo tu propio riesgo y quedan aplicables los términos y la política de privacidad de ese tercero. Verifica los datos críticos de viaje, reservas o pagos directamente en la fuente oficial.</li>
-</ul>
-<p>Si un enlace está roto, desactualizado o resulta inadecuado, puedes avisarnos para que valoremos una corrección; no estamos obligados a mantener ninguna URL externa concreta.</p>`
+          "id": "third-party",
+          "label": "Enlaces y herramientas de terceros"
         },
         {
-          id: 'privacy',
-          title: 'Privacidad',
-          html: `<p>Nuestra <a href="privacy.html">Política de privacidad</a> describe cómo el Sitio trata la información y se incorpora a estos Términos por referencia. Al usar el Sitio, también reconoces que las transmisiones por internet nunca son del todo privadas ni seguras.</p>`
+          "id": "privacy",
+          "label": "Privacidad"
         },
         {
-          id: 'disclaimers',
-          title: 'Exención de garantías',
-          html: `<p>EL SITIO Y TODO SU CONTENIDO SE OFRECEN “TAL CUAL” Y “SEGÚN DISPONIBILIDAD”. EN LA MÁXIMA MEDIDA PERMITIDA POR LA LEY, RENUNCIAMOS A TODAS LAS GARANTÍAS, EXPRESAS O IMPLÍCITAS, INCLUIDAS LAS DE COMERCIABILIDAD, IDONEIDAD PARA UN FIN PARTICULAR, TITULARIDAD Y NO INFRACCIÓN. NO GARANTIZAMOS QUE EL SITIO SEA ININTERRUMPIDO, ESTÉ LIBRE DE ERRORES O DE COMPONENTES DAÑINOS, NI QUE SE CORRIJAN LOS DEFECTOS.</p>
-<p>La información del Sitio puede cambiar sin previo aviso. No tenemos la obligación de actualizar ninguna página o herramienta en concreto.</p>`
+          "id": "disclaimers",
+          "label": "Exención de garantías"
         },
         {
-          id: 'liability',
-          title: 'Limitación de responsabilidad',
-          html: `<p>En la máxima medida permitida por la ley, Tim G / TGthms y quienes contribuyan al Sitio no responderán por daños indirectos, incidentales, especiales, consecuentes o punitivos, ni por pérdida de beneficios, datos o clientela, derivados del uso del Sitio o de la imposibilidad de usarlo, incluso si se advirtió de la posibilidad de tales daños.</p>`
+          "id": "liability",
+          "label": "Límite de responsabilidad"
         },
         {
-          id: 'changes',
-          title: 'Cambios en el Sitio',
-          html: `<p>Podemos modificar, suspender o dejar de ofrecer cualquier parte del Sitio en cualquier momento y sin previo aviso —por mantenimiento, rediseño o evolución del proyecto—. No estamos obligados a seguir alojando una función o una fotografía concretas.</p>`
+          "id": "changes",
+          "label": "Cambios en el Sitio"
         },
         {
-          id: 'contact',
-          title: 'Contacto',
-          html: `<p>Para preguntas sobre estos Términos, la licencia de las fotos o permisos adicionales:</p>
-<ul>
-<li><a href="mailto:contact.timg@icloud.com">contact.timg@icloud.com</a></li>
-<li><a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">Repositorio en GitHub</a></li>
-</ul>
-<p class="legal-note">Estos Términos se redactan para un proyecto personal de guía de viaje y no sustituyen el asesoramiento jurídico.</p>`
+          "id": "contact",
+          "label": "Contacto"
         }
       ],
-      footerNote: '© {year} USA Travel Guide · Tim G (TGthms). Todos los derechos reservados, salvo donde se indiquen licencias abiertas.'
+      "sections": [
+        {
+          "id": "agreement",
+          "title": "Aceptación",
+          "html": "<p>Estos Términos se aplican al Sitio tal como se ofrece en línea (incluidos espejos o alojamiento estático). Podemos actualizarlos publicando una versión revisada en esta página y cambiando la fecha. Si sigues usando el Sitio después, aceptas la versión actualizada.</p>\n<p>Mientras cumplas estos Términos, te concedemos un derecho personal, no exclusivo e intransferible para usar el Sitio con fines <strong>personales y no comerciales</strong>.</p>"
+        },
+        {
+          "id": "ownership",
+          "title": "Derechos sobre el contenido",
+          "html": "<p>El texto, el diseño, la interfaz, los logotipos, los gráficos y el contenido editorial original del Sitio pertenecen a Tim G / TGthms o se usan con licencia, y están protegidos por derechos de autor y otras leyes de propiedad intelectual.</p>\n<p>Salvo lo que permitan estos Términos o una licencia abierta concreta, no copies, republices ni distribuyas partes del Sitio con fines comerciales sin permiso escrito previo.</p>"
+        },
+        {
+          "id": "photos",
+          "title": "Fotos y material visual",
+          "html": "<p>Las fotos y obras visuales de la galería y del resto del Sitio (incluido <code>images/</code>), salvo que se indique otro crédito, son <strong>© {year} Tim G (GitHub @TGthms)</strong>.</p>\n<p>Se ofrecen bajo <a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noopener\">Creative Commons Atribución 4.0 Internacional (CC BY 4.0)</a>. En la práctica, puedes compartir y adaptar las fotos (también con fines comerciales) si:</p>\n<ul>\n<li>das crédito a <strong>Tim G / @TGthms</strong>;</li>\n<li>enlazas a CC BY 4.0 cuando sea razonable;</li>\n<li>indicas si hiciste cambios; y</li>\n<li>no insinúas que el autor respalda tu uso.</li>\n</ul>\n<p>Crédito sugerido: <em>«Foto © Tim G (@TGthms), con licencia CC BY 4.0.»</em></p>\n<p>No quites marcas de agua, no atribuyas de forma falsa ni uses las fotos de forma ilegal. Si necesitas derechos más amplios que CC BY 4.0, contáctanos.</p>"
+        },
+        {
+          "id": "software",
+          "title": "Software y código",
+          "html": "<p>El código fuente del proyecto puede publicarse con una licencia de código abierto (por ejemplo <a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">MIT</a> en el repositorio). Esa licencia cubre el software, <strong>no</strong> convierte automáticamente las fotos en material bajo la misma licencia. Salvo indicación en un archivo concreto, las fotos se rigen por la sección anterior.</p>"
+        },
+        {
+          "id": "travel",
+          "title": "Información de viaje",
+          "html": "<p>El contenido del Sitio (destinos, estaciones, rutas, consejos, menciones de visados, costes, herramientas e información práctica) es solo de <strong>carácter general e informativo</strong>. No es asesoramiento jurídico, migratorio, médico, financiero ni de seguridad.</p>\n<ul>\n<li>Normas, precios, horarios, carreteras y requisitos de entrada cambian con frecuencia.</li>\n<li>Antes de viajar, verifica lo importante en fuentes oficiales, con el transportista y con las autoridades locales.</li>\n<li>Las herramientas (divisas, propinas, costes de viaje, reloj) son estimaciones y pueden estar incompletas o desactualizadas.</li>\n<li>Los “enlaces útiles” son solo un punto de partida; horarios, tarifas y políticas en sitios externos pueden cambiar sin aviso.</li>\n</ul>\n<p>Tú eres responsable de las decisiones que tomes con base en el Sitio. No respondemos por pérdidas derivadas de confiar en su contenido.</p>"
+        },
+        {
+          "id": "acceptable-use",
+          "title": "Uso permitido",
+          "html": "<p>Te comprometes a no:</p>\n<ul>\n<li>usar el Sitio con fines ilegales o en contra de estos Términos;</li>\n<li>intentar acceder sin autorización a sistemas, cuentas o redes relacionadas;</li>\n<li>probar, escanear o saturar el Sitio de forma que moleste a otros usuarios;</li>\n<li>hacer scraping o descargas masivas que generen carga irrazonable o eviten controles de acceso (salvo lo permitido por robots o licencias abiertas);</li>\n<li>fingir una relación con el Sitio o su autor; ni</li>\n<li>usar el contenido de forma que vulnere derechos de propiedad intelectual o privacidad de terceros.</li>\n</ul>"
+        },
+        {
+          "id": "third-party",
+          "title": "Enlaces y herramientas de terceros",
+          "html": "<p>El Sitio puede enlazar webs de terceros o llamar a APIs externas (tipos de cambio, fuentes, etc.). Esos servicios no están bajo nuestro control.</p>\n<ul>\n<li><strong>Enlaces de viaje.</strong> Las tarjetas de destino pueden incluir enlaces a turismo oficial, transporte, parques nacionales o museos, solo como ayuda para planificar. Salvo que digamos lo contrario por escrito, no implican asociación ni respaldo.</li>\n<li><strong>APIs de herramientas.</strong> Los tipos de cambio pueden venir de APIs públicas; el tiempo y los avisos severos de EE. UU., del National Weather Service; el pronóstico mundial, la geocodificación y la calidad del aire, de Open-Meteo. Los datos pueden retrasarse, estar incompletos o ser incorrectos. El tiempo no sustituye la orientación oficial de emergencia.</li>\n<li><strong>Sin garantías sobre terceros.</strong> No operamos ni garantizamos la exactitud, seguridad o privacidad de sitios o APIs de terceros. Su contenido y URLs pueden cambiar sin aviso.</li>\n<li><strong>Al salir del Sitio.</strong> Al seguir un enlace externo aceptas las reglas y la privacidad de ese tercero. Verifica siempre en fuentes oficiales lo crítico para reservas o pagos.</li>\n</ul>\n<p>Si encuentras un enlace roto o inadecuado, avísanos; lo revisaremos, sin obligación de mantener ningún enlace concreto de forma permanente.</p>"
+        },
+        {
+          "id": "privacy",
+          "title": "Privacidad",
+          "html": "<p>Nuestra <a href=\"privacy.html\">Política de privacidad</a> describe cómo el Sitio trata la información y forma parte de estos Términos. Ten en cuenta que las transmisiones por internet nunca son del todo privadas ni seguras.</p>"
+        },
+        {
+          "id": "disclaimers",
+          "title": "Exención de garantías",
+          "html": "<p>El Sitio y todo su contenido se ofrecen “tal cual” y “según disponibilidad”. En la medida permitida por la ley, no damos garantías expresas ni implícitas (incluida la de comerciabilidad, idoneidad para un fin concreto, titularidad o no infracción). No garantizamos que el Sitio sea ininterrumpido, esté libre de errores o de componentes dañinos, ni que se corrijan los defectos.</p>\n<p>La información puede cambiar sin previo aviso. No estamos obligados a actualizar cada página o herramienta.</p>"
+        },
+        {
+          "id": "liability",
+          "title": "Límite de responsabilidad",
+          "html": "<p>En la máxima medida permitida por la ley, Tim G / TGthms y quienes contribuyan al Sitio no responderán por daños indirectos, incidentales, especiales, consecuentes o punitivos, ni por pérdida de beneficios, datos o clientela, derivados del uso del Sitio o de la imposibilidad de usarlo, aunque se haya advertido de la posibilidad de tales daños.</p>"
+        },
+        {
+          "id": "changes",
+          "title": "Cambios en el Sitio",
+          "html": "<p>Podemos modificar, suspender o dejar de ofrecer cualquier parte del Sitio en cualquier momento y sin previo aviso —por mantenimiento, rediseño o evolución del proyecto—. No estamos obligados a seguir ofreciendo una función o una fotografía concretas.</p>"
+        },
+        {
+          "id": "contact",
+          "title": "Contacto",
+          "html": "<p>Para preguntas sobre estos Términos, la licencia de las fotos o permisos adicionales:</p>\n<ul>\n<li><a href=\"mailto:contact.timg@icloud.com\">contact.timg@icloud.com</a></li>\n<li><a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">Repositorio en GitHub</a></li>\n</ul>\n<p class=\"legal-note\">Estos Términos se redactan para un proyecto personal de guía de viaje y no sustituyen el asesoramiento jurídico.</p>"
+        }
+      ],
+      "footerNote": "© {year} USA Travel Guide · Tim G (TGthms). Todos los derechos reservados, salvo donde se indiquen licencias abiertas."
     },
-    zh: {
-      title: '使用条款',
-      eyebrow: '法律信息',
-      updatedLabel: '更新日期',
-      updatedDate: '2026年8月6日',
-      onThisPage: '本页内容',
-      lead: '本《使用条款》（以下简称“本条款”）规范你对<strong>美国 — 旅行指南</strong>（以下简称“本网站”）的访问与使用，包括主指南、相册、工具及相关页面。本网站由 <strong>Tim G</strong>（GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>）运营。使用本网站，即表示你同意本条款。若不同意，请勿使用本网站。',
-      toc: [
-        { id: 'agreement', label: '接受条款' },
-        { id: 'ownership', label: '网站权利归属' },
-        { id: 'photos', label: '照片与视觉内容' },
-        { id: 'software', label: '软件与代码' },
-        { id: 'travel', label: '旅行信息说明' },
-        { id: 'acceptable-use', label: '使用规范' },
-        { id: 'third-party', label: '第三方链接与工具' },
-        { id: 'privacy', label: '隐私' },
-        { id: 'disclaimers', label: '免责声明' },
-        { id: 'liability', label: '责任限制' },
-        { id: 'changes', label: '网站变更' },
-        { id: 'contact', label: '联系我们' }
-      ],
-      sections: [
+    "zh": {
+      "title": "使用条款",
+      "eyebrow": "法律信息",
+      "updatedLabel": "更新日期",
+      "updatedDate": "August 6, 2026",
+      "onThisPage": "本页目录",
+      "lead": "欢迎使用 <strong>美国 — 旅行指南</strong>（下称「本网站」）。本使用条款说明你可以如何使用本站（含指南、相册、工具及相关页面），以及双方的基本权利与责任。本站由 <strong>Tim G</strong>（GitHub <a href=\"https://github.com/TGthms\" target=\"_blank\" rel=\"noopener\">@TGthms</a>）维护。使用本站即表示你同意本条款；若不同意，请停止使用。",
+      "toc": [
         {
-          id: 'agreement',
-          title: '接受条款',
-          html: `<p>本条款适用于在线提供的本网站（包括项目的镜像站点或静态托管版本）。我们可能通过在本页发布修订版本并更新上述日期的方式更新本条款。更新后如你继续使用本网站，即表示你接受修订后的条款。</p>
-<p>在你遵守本条款的前提下，我们授予你一项个人、非独占、不可转让的有限权利，仅可出于个人、非商业目的访问和使用本网站。</p>`
+          "id": "agreement",
+          "label": "同意本条款"
         },
         {
-          id: 'ownership',
-          title: '网站权利归属',
-          html: `<p>本网站（包括文字、版式、设计、界面、标识、图形、内容编排，以及原创编辑内容）归 Tim G / TGthms 所有，或经合法许可使用，并受著作权及其他知识产权法律保护。</p>
-<p>除非本条款明确允许，或某组件另有开放许可说明，否则未经事先书面许可，你不得为商业目的复制、转载、上传、发布、公开展示、编码、翻译、传输或分发本网站的任何部分。</p>`
+          "id": "ownership",
+          "label": "网站内容归属"
         },
         {
-          id: 'photos',
-          title: '照片与视觉内容',
-          html: `<p>相册及本网站其他位置的照片与相关视觉作品（包括 <code>images/</code> 目录下的文件）版权归 <strong>© {year} Tim G（GitHub @TGthms）</strong>，除非某幅作品另有署名说明。</p>
-<p>上述照片依据 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">知识共享“署名”4.0 国际许可协议（CC BY 4.0）</a> 提供。简要而言，你可以分享与修改这些照片（包括用于商业用途），但须：</p>
-<ul>
-<li>向 <strong>Tim G / @TGthms</strong> 给予适当署名；</li>
-<li>在可行时提供 CC BY 4.0 许可协议链接；</li>
-<li>说明是否进行了修改；以及</li>
-<li>不得暗示作者认可你或你的使用方式。</li>
-</ul>
-<p>建议署名：<em>“照片 © Tim G (@TGthms)，采用 CC BY 4.0 许可。”</em></p>
-<p>不得去除水印、进行虚假署名，或以违反适用法律的方式使用照片。若你需要超出 CC BY 4.0 范围的权利，请与我们联系。</p>`
+          "id": "photos",
+          "label": "照片与视觉作品"
         },
         {
-          id: 'software',
-          title: '软件与代码',
-          html: `<p>本网站项目的源代码可能以开源许可发布（例如仓库中的 <a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">MIT 许可</a>）。开源许可仅适用于软件本身，<strong>不会</strong>自动使照片适用同一许可。除非某个文件另有说明，照片权利仍以上一节为准。</p>`
+          "id": "software",
+          "label": "软件与代码"
         },
         {
-          id: 'travel',
-          title: '旅行信息说明',
-          html: `<p>本网站内容（包括目的地、季节、路线、贴士、签证相关说明、费用、工具与实用信息）仅供<strong>一般性信息与教育用途</strong>，不构成专业法律、移民、医疗、财务或安全建议。</p>
-<ul>
-<li>旅行规定、价格、开放时间、路况与入境要求等经常变化。</li>
-<li>出行前，请务必向政府官方来源、承运人与地方当局核实关键信息。</li>
-<li>互动工具（货币、小费、自驾费用、时钟）仅提供估算，可能不完整或已过时。</li>
-<li>“实用链接”或指向官方旅游／交通／公园网站的外链仅供参考起点；那些网站上的时刻、费用与政策可能随时变更，本网站未必同步更新。</li>
-</ul>
-<p>你须对依据本网站所作决定自行承担责任。我们不对因依赖本网站内容而产生的损失负责。</p>`
+          "id": "travel",
+          "label": "旅行信息说明"
         },
         {
-          id: 'acceptable-use',
-          title: '使用规范',
-          html: `<p>你同意不得：</p>
-<ul>
-<li>将本网站用于任何非法目的，或以违反本条款的方式使用本网站；</li>
-<li>试图未经授权访问与本网站相关的系统、账户或网络；</li>
-<li>以影响他人正常使用的方式对本网站进行探测、扫描或压力测试；</li>
-<li>以造成不合理负载或规避访问控制的方式抓取或批量下载本网站（robots 规则或开放许可明确允许的除外）；</li>
-<li>虚假声称与本网站或其作者存在关联；或</li>
-<li>以侵犯他人知识产权或隐私权的方式使用内容。</li>
-</ul>`
+          "id": "acceptable-use",
+          "label": "请勿这样使用"
         },
         {
-          id: 'third-party',
-          title: '第三方链接与工具',
-          html: `<p>本网站可能链接第三方网站，或调用第三方接口（例如汇率查询、字体加载）。这些服务不在我们的控制范围内。</p>
-<ul>
-<li><strong>目的地与旅行相关链接。</strong>城市与目的地卡片可能提供指向官方旅游网站、公共交通机构、国家公园管理局页面、博物馆等的“实用链接”。其目的仅为便利与规划参考。除非我们另有书面说明，此类链接<strong>并不</strong>表示我们与被链接机构存在合伙、赞助、代理或背书关系。</li>
-<li><strong>工具相关接口。</strong>汇率可能来自第三方公开 API。美国天气预报与严重天气预警可能来自国家气象局 National Weather Service（api.weather.gov）；全球预报、补充字段、地理编码与空气质量可能来自 Open-Meteo（或兼容服务）。数据可能延迟、不完整或不准确。天气与预警不能替代官方应急指引。</li>
-<li><strong>无控制与无保证。</strong>我们不运营、不监控，也不保证第三方网站或接口的准确性、安全性、可用性或其隐私实践。其内容、链接地址、品牌与政策可能不经通知而变更或失效。</li>
-<li><strong>你的责任。</strong>通过外链离开本网站时，风险由你自行承担，并适用该第三方的条款与隐私政策。请直接向官方来源核实关键旅行、预订或支付信息。</li>
-</ul>
-<p>若你发现第三方链接失效、过时或不适当，欢迎告知我们，我们会考虑更新；但我们无义务维持任何特定外部链接长期有效。</p>`
+          "id": "third-party",
+          "label": "第三方链接与工具"
         },
         {
-          id: 'privacy',
-          title: '隐私',
-          html: `<p>我们的<a href="privacy.html">隐私政策</a>说明本网站如何处理信息，并构成本条款的一部分。使用本网站，即表示你亦知悉：互联网传输并非完全私密或绝对安全。</p>`
+          "id": "privacy",
+          "label": "隐私"
         },
         {
-          id: 'disclaimers',
-          title: '免责声明',
-          html: `<p>本网站及全部内容按“现状”和“可供使用”的基础提供。在法律允许的最大范围内，我们不作任何明示或默示保证，包括适销性、特定用途适用性、权属及不侵权。我们不保证本网站不会中断、没有错误、不含有害成分，也不保证缺陷一定会被修复。</p>
-<p>本网站信息可能不经通知而变更。我们没有义务更新任何特定页面或工具。</p>`
+          "id": "disclaimers",
+          "label": "免责声明"
         },
         {
-          id: 'liability',
-          title: '责任限制',
-          html: `<p>在法律允许的最大范围内，Tim G / TGthms 及本网站贡献者，不对因你使用（或无法使用）本网站而产生的任何间接、附带、特殊、后果性或惩罚性损害，或利润、数据、商誉损失承担责任——即使已被告知可能发生此类损害。</p>`
+          "id": "liability",
+          "label": "责任范围"
         },
         {
-          id: 'changes',
-          title: '网站变更',
-          html: `<p>我们可随时不经通知修改、暂停或终止本网站的任何部分，包括出于维护、改版或项目安排的需要。我们没有义务持续提供任何特定功能或照片。</p>`
+          "id": "changes",
+          "label": "网站变更"
         },
         {
-          id: 'contact',
-          title: '联系我们',
-          html: `<p>如对本条款、照片许可或额外授权有疑问，请联系：</p>
-<ul>
-<li><a href="mailto:contact.timg@icloud.com">contact.timg@icloud.com</a></li>
-<li><a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">GitHub 仓库</a></li>
-</ul>
-<p class="legal-note">本条款为个人旅行指南项目而撰写，不能替代法律意见。</p>`
+          "id": "contact",
+          "label": "联系我们"
         }
       ],
-      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)。除适用开放许可的部分外，保留所有权利。'
+      "sections": [
+        {
+          "id": "agreement",
+          "title": "同意本条款",
+          "html": "<p>本条款适用于在线访问的本站（含镜像或静态托管版本）。我们可能通过更新本页并修改日期的方式修订条款；修订后你继续使用本站，即表示接受新条款。</p>\n<p>在遵守本条款的前提下，我们允许你为<strong>个人、非商业</strong>目的访问和使用本站。该许可为个人、非独占、不可转让的有限权利。</p>"
+        },
+        {
+          "id": "ownership",
+          "title": "网站内容归属",
+          "html": "<p>本站的文字、版式、设计、界面、标识、图形与原创编辑内容，归 Tim G / TGthms 所有，或已获合法授权，并受著作权等法律保护。</p>\n<p>除本条款明确允许，或某个组件另有开放许可外，未经事先书面同意，请勿将本站任何部分用于商业复制、转载、公开展示或分发。</p>"
+        },
+        {
+          "id": "photos",
+          "title": "照片与视觉作品",
+          "html": "<p>相册及本站其他位置的照片与相关视觉作品（含 <code>images/</code> 目录），除非另有署名，版权均为 <strong>© {year} Tim G（GitHub @TGthms）</strong>。</p>\n<p>这些照片采用 <a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noopener\">知识共享 署名 4.0 国际（CC BY 4.0）</a> 许可。简单说：你可以分享、修改甚至用于商业用途，但需要：</p>\n<ul>\n<li>标明作者 <strong>Tim G / @TGthms</strong>；</li>\n<li>在可行时附上 CC BY 4.0 链接；</li>\n<li>说明是否做了修改；</li>\n<li>不要暗示作者认可你或你的用途。</li>\n</ul>\n<p>推荐署名示例：<em>「照片 © Tim G (@TGthms)，采用 CC BY 4.0 许可。」</em></p>\n<p>请勿去除水印、虚假署名，或以违法方式使用照片。若需要超出 CC BY 4.0 的授权，请联系我们。</p>"
+        },
+        {
+          "id": "software",
+          "title": "软件与代码",
+          "html": "<p>本站源代码可能以开源许可发布（例如仓库中的 <a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">MIT 许可</a>）。开源许可<strong>只覆盖软件代码</strong>，不会自动让照片也变成同一许可。除非文件另有说明，照片仍适用上一节。</p>"
+        },
+        {
+          "id": "travel",
+          "title": "旅行信息说明",
+          "html": "<p>本站内容（目的地介绍、季节、路线、贴士、签证相关说明、费用、工具与实用信息等）仅供<strong>一般了解与参考</strong>，不是法律、移民、医疗、财务或安全方面的专业建议。</p>\n<ul>\n<li>政策、价格、开放时间、路况与入境要求常有变化；</li>\n<li>出行前请向官方机构、承运人与当地部门核实关键信息；</li>\n<li>货币、小费、自驾费用、时钟等工具仅为估算，可能不完整或已过时；</li>\n<li>「实用链接」只是出发点；对方网站上的时刻、票价与政策可能随时变更。</li>\n</ul>\n<p>根据本站信息作出的决定，责任由你自行承担。我们不对因依赖本站内容造成的损失负责。</p>"
+        },
+        {
+          "id": "acceptable-use",
+          "title": "请勿这样使用",
+          "html": "<p>使用本站时，请不要：</p>\n<ul>\n<li>将本站用于违法目的，或违反本条款；</li>\n<li>试图未经授权访问相关系统、账号或网络；</li>\n<li>进行影响他人正常使用的探测、扫描或压力测试；</li>\n<li>以造成不合理负载或绕过访问限制的方式抓取、批量下载（robots 或开放许可明确允许的除外）；</li>\n<li>虚假声称与本站或作者存在合作关系；</li>\n<li>以侵犯他人知识产权或隐私的方式使用内容。</li>\n</ul>"
+        },
+        {
+          "id": "third-party",
+          "title": "第三方链接与工具",
+          "html": "<p>本站可能链接外部网站，或调用第三方接口（如汇率、字体）。这些服务不在我们控制范围内。</p>\n<ul>\n<li><strong>旅行相关链接。</strong>城市卡片可能提供官方旅游、公交、国家公园、博物馆等链接，仅供规划参考，除非另有书面说明，不代表合作或背书。</li>\n<li><strong>工具接口。</strong>汇率可能来自公开 API；美国天气与预警可能来自国家气象局；全球预报、地理编码与空气质量可能来自 Open-Meteo。数据可能延迟、不全或不准。天气信息不能替代官方应急指引。</li>\n<li><strong>我们无法保证。</strong>我们不运营、不监控第三方网站或接口，也不保证其准确性、安全性或隐私做法。对方内容与链接可能随时变更。</li>\n<li><strong>离开本站之后。</strong>点击外链即进入对方规则与隐私政策的适用范围，风险由你自行判断。重要预订与支付信息请以官方来源为准。</li>\n</ul>\n<p>若发现失效或不当链接，欢迎告知；我们会酌情更新，但不保证任何外链长期有效。</p>"
+        },
+        {
+          "id": "privacy",
+          "title": "隐私",
+          "html": "<p>我们的<a href=\"privacy.html\">隐私政策</a>说明本站如何处理信息，并构成本条款的一部分。请知悉：互联网传输无法保证绝对私密与安全。</p>"
+        },
+        {
+          "id": "disclaimers",
+          "title": "免责声明",
+          "html": "<p>本站及全部内容按「现状」提供，在法律允许范围内不作任何明示或默示保证（包括适销性、特定用途适用性、权利完整性与不侵权等）。我们不保证服务不中断、无错误、无有害成分，也不保证缺陷一定会被修复。</p>\n<p>本站信息可能不经通知而变更。我们没有义务持续更新每一个页面或工具。</p>"
+        },
+        {
+          "id": "liability",
+          "title": "责任范围",
+          "html": "<p>在法律允许的最大范围内，Tim G / TGthms 及本站贡献者，不对因使用或无法使用本站而产生的间接、附带、特殊、后果性或惩罚性损害，以及利润、数据或商誉损失承担责任——即使已被告知可能发生此类损害。</p>"
+        },
+        {
+          "id": "changes",
+          "title": "网站变更",
+          "html": "<p>我们可随时修改、暂停或下线本站的任何部分（含维护、改版或项目调整），无需事先通知。我们没有义务永久保留某一功能或某张照片。</p>"
+        },
+        {
+          "id": "contact",
+          "title": "联系我们",
+          "html": "<p>关于本条款、照片授权或额外许可，请联系：</p>\n<ul>\n<li><a href=\"mailto:contact.timg@icloud.com\">contact.timg@icloud.com</a></li>\n<li><a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">GitHub 项目仓库</a></li>\n</ul>\n<p class=\"legal-note\">本条款为个人旅行指南项目撰写，不能替代专业法律意见。</p>"
+        }
+      ],
+      "footerNote": "© {year} USA Travel Guide · Tim G (TGthms)。除适用开放许可的部分外，保留所有权利。"
     },
-    ja: {
-      title: '利用規約',
-      eyebrow: 'リーガル',
-      updatedLabel: '更新日',
-      updatedDate: '2026年8月6日',
-      onThisPage: 'このページの内容',
-      lead: '本利用規約（以下「本規約」）は、<strong>アメリカ — 旅行ガイド</strong>（以下「本サイト」）へのアクセスおよびご利用（メインガイド、フォトギャラリー、ツールおよび関連ページを含みます）について定めるものです。本サイトは <strong>Tim G</strong>（GitHub <a href="https://github.com/TGthms" target="_blank" rel="noopener">@TGthms</a>）が運営しています。本サイトをご利用いただくことにより、本規約に同意したものとみなします。同意いただけない場合は、ご利用をお控えください。',
-      toc: [
-        { id: 'agreement', label: '規約への同意' },
-        { id: 'ownership', label: '本サイトの権利' },
-        { id: 'photos', label: '写真・ビジュアル' },
-        { id: 'software', label: 'ソフトウェアとコード' },
-        { id: 'travel', label: '旅行情報について' },
-        { id: 'acceptable-use', label: '禁止事項' },
-        { id: 'third-party', label: '第三者リンクとツール' },
-        { id: 'privacy', label: 'プライバシー' },
-        { id: 'disclaimers', label: '免責事項' },
-        { id: 'liability', label: '責任の制限' },
-        { id: 'changes', label: '本サイトの変更' },
-        { id: 'contact', label: 'お問い合わせ' }
-      ],
-      sections: [
+    "ja": {
+      "title": "利用規約",
+      "eyebrow": "リーガル",
+      "updatedLabel": "更新日",
+      "updatedDate": "August 6, 2026",
+      "onThisPage": "このページの内容",
+      "lead": "<strong>アメリカ — 旅行ガイド</strong>（以下「本サイト」）をご利用いただきありがとうございます。本利用規約は、ガイド・ギャラリー・ツールなどを含む本サイトの使い方と、基本的な権利・責任を定めるものです。運営は <strong>Tim G</strong>（GitHub <a href=\"https://github.com/TGthms\" target=\"_blank\" rel=\"noopener\">@TGthms</a>）です。本サイトをご利用になることで、本規約に同意したものとみなします。同意できない場合はご利用をお控えください。",
+      "toc": [
         {
-          id: 'agreement',
-          title: '規約への同意',
-          html: `<p>本規約は、オンラインで提供される本サイト（プロジェクトのミラーや静的ホスティングを含みます）に適用されます。当方は、本ページに改訂版を掲載し、上記の日付を更新することにより、本規約を随時更新できます。変更後も本サイトを継続してご利用いただく場合、改訂後の規約に同意したものとみなします。</p>
-<p>本規約を遵守していただける限り、個人的かつ非商業的な目的で本サイトにアクセスし利用するための、個人的・非独占的・譲渡不能・限定的な権利を付与します。</p>`
+          "id": "agreement",
+          "label": "規約への同意"
         },
         {
-          id: 'ownership',
-          title: '本サイトの権利',
-          html: `<p>本サイト（テキスト、レイアウト、デザイン、ユーザーインターフェース、ロゴ、グラフィック、コンテンツの編集・構成、オリジナルの編集素材を含みます）は、Tim G / TGthms が所有するか、ライセンスに基づき使用しており、著作権その他の知的財産法により保護されています。</p>
-<p>本規約で明示的に許されている場合、または特定の構成要素について示されたオープンライセンスがある場合を除き、事前の書面による許可なく、商業目的で本サイトの一部を複製、再公開、アップロード、掲示、公に表示、符号化、翻訳、送信、配布してはなりません。</p>`
+          "id": "ownership",
+          "label": "コンテンツの権利"
         },
         {
-          id: 'photos',
-          title: '写真・ビジュアル',
-          html: `<p>ギャラリーその他本サイト上の写真および関連するビジュアル作品（<code>images/</code> 配下のファイルを含みます）は、個別に別のクレジットが示されていない限り、<strong>© {year} Tim G（GitHub @TGthms）</strong> です。</p>
-<p>これらの写真は、<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">クリエイティブ・コモンズ 表示 4.0 国際（CC BY 4.0）</a> に基づき提供されます。分かりやすく言うと、次の条件を満たせば、写真の共有や翻案（商用利用を含む）が可能です。</p>
-<ul>
-<li><strong>Tim G / @TGthms</strong> に適切なクレジットを付すこと</li>
-<li>実務上可能な場合は CC BY 4.0 へのリンクを示すこと</li>
-<li>変更を加えた場合はその旨を示すこと</li>
-<li>著者があなたやあなたの利用を推奨していると示唆しないこと</li>
-</ul>
-<p>推奨クレジット例：<em>「Photo © Tim G (@TGthms), licensed under CC BY 4.0.」</em></p>
-<p>透かしの除去、虚偽の帰属表示、適用法に違反する利用は禁止されています。CC BY 4.0 を超える権利が必要な場合は、ご連絡ください。</p>`
+          "id": "photos",
+          "label": "写真・ビジュアル"
         },
         {
-          id: 'software',
-          title: 'ソフトウェアとコード',
-          html: `<p>本サイトプロジェクトのソースコードは、オープンソースライセンス（例：リポジトリに付属する <a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">MIT ライセンス</a>）で公開される場合があります。オープンソースライセンスはソフトウェアに適用され、写真を自動的に同じライセンスの対象とするものでは<strong>ありません</strong>。ファイルに別段の表示がない限り、写真の権利は前項のとおりです。</p>`
+          "id": "software",
+          "label": "ソフトウェアとコード"
         },
         {
-          id: 'travel',
-          title: '旅行情報について',
-          html: `<p>本サイトのコンテンツ（目的地、季節、ルート、ヒント、ビザ関連の記載、費用、ツール、実用情報を含みます）は、<strong>一般的な情報提供および教育目的</strong>のみで提供されます。専門の法律・出入国管理・医療・金融・安全に関する助言ではありません。</p>
-<ul>
-<li>渡航規則、価格、営業時間、道路状況、各種要件は頻繁に変わります。</li>
-<li>ご出発前に、政府機関・運送事業者・現地当局の公式情報で重要事項を必ずご確認ください。</li>
-<li>インタラクティブなツール（通貨・チップ・移動費用・時計）は概算のみであり、不完全または古い場合があります。</li>
-<li>外部の「役立つリンク」や公式観光／交通／公園サイトへのリンクは出発点としてのみ提供します。それらのサイト上の時刻・料金・方針は、本サイトに予告なく変更されることがあります。</li>
-</ul>
-<p>本サイトに基づくご判断の責任は、すべてお客様にあります。本サイト内容への依拠により生じた損失について、当方は責任を負いません。</p>`
+          "id": "travel",
+          "label": "旅行情報について"
         },
         {
-          id: 'acceptable-use',
-          title: '禁止事項',
-          html: `<p>お客様は、次の行為を行わないことに同意するものとします。</p>
-<ul>
-<li>違法な目的、または本規約に反する本サイトの利用</li>
-<li>本サイトに関連するシステム・アカウント・ネットワークへの不正アクセスの試み</li>
-<li>他の利用者の利用を損なうプロービング、スキャン、負荷試験</li>
-<li>不合理な負荷を与える、またはアクセス制御を回避するスクレイピング／一括ダウンロード（robots やオープンライセンスで許される場合を除く）</li>
-<li>本サイトまたは著者との関係を偽ること</li>
-<li>他者の知的財産権またはプライバシーを侵害するコンテンツ利用</li>
-</ul>`
+          "id": "acceptable-use",
+          "label": "禁止事項"
         },
         {
-          id: 'third-party',
-          title: '第三者リンクとツール',
-          html: `<p>本サイトは、第三者のウェブサイトへリンクしたり、第三者 API（為替やフォント配信など）を呼び出したりする場合があります。これらは当方の管理下にありません。</p>
-<ul>
-<li><strong>目的地・旅行関連リンク。</strong>都市・目的地カードには、公式観光サイト、公共交通機関、National Park Service のページ、博物館などへの「役立つリンク」が含まれる場合があります。便宜および計画の参考のためにのみ提供され、書面で明示しない限り、リンク先組織との提携・スポンサーシップ・代理・推奨関係を<strong>意味しません</strong>。</li>
-<li><strong>ツール用 API。</strong>為替レートは第三者の公開 API から取得する場合があります。米国の天気予報および悪天候警報は National Weather Service（api.weather.gov）から、世界の予報・補完項目・ジオコーディング・大気質は Open-Meteo（または互換サービス）から取得する場合があります。値は遅延・不完全・誤りがあり得ます。天気と警報は公式の緊急案内の代わりにはなりません。</li>
-<li><strong>管理・保証なし。</strong>第三者サイトや API の正確性・安全性・可用性・プライバシー慣行について、当方は運営・監視・保証いたしません。内容、URL、ブランド、方針は、予告なく変更または無効になる場合があります。</li>
-<li><strong>お客様の責任。</strong>外部リンクにより本サイトを離れる場合は自己責任であり、当該第三者の利用規約およびプライバシーポリシーが適用されます。重要な旅行・予約・お支払いに関する情報は、公式の情報源で直接ご確認ください。</li>
-</ul>
-<p>第三者リンクが機能していない、古い、または不適切である場合はご連絡ください（更新を検討します）。特定の外部 URL を維持する義務は負いません。</p>`
+          "id": "third-party",
+          "label": "外部リンクとツール"
         },
         {
-          id: 'privacy',
-          title: 'プライバシー',
-          html: `<p>本サイトにおける情報の取り扱いは、<a href="privacy.html">プライバシーポリシー</a> に記載されており、参照により本規約の一部を構成します。本サイトのご利用により、インターネット通信が完全に私的・安全ではないこともご認識いただいたものとみなします。</p>`
+          "id": "privacy",
+          "label": "プライバシー"
         },
         {
-          id: 'disclaimers',
-          title: '免責事項',
-          html: `<p>本サイトおよびすべてのコンテンツは、「現状有姿」かつ「提供可能な範囲」で提供されます。法律で認められる最大限の範囲において、商品性、特定目的適合性、権原、非侵害を含む明示・黙示の保証をすべて否認します。本サイトが中断なく、誤りがなく、有害な要素がなく、欠陥が修正されることを保証するものではありません。</p>
-<p>本サイトの情報は予告なく変更される場合があります。特定のページやツールを更新する義務を負いません。</p>`
+          "id": "disclaimers",
+          "label": "免責"
         },
         {
-          id: 'liability',
-          title: '責任の制限',
-          html: `<p>法律で認められる最大限の範囲において、Tim G / TGthms および本サイトの貢献者は、本サイトの利用（または利用できないこと）に関連して生じた間接的・付随的・特別・結果的・懲罰的損害、または利益・データ・信用の損失について、たとえその可能性を知らされていたとしても、責任を負いません。</p>`
+          "id": "liability",
+          "label": "責任の範囲"
         },
         {
-          id: 'changes',
-          title: '本サイトの変更',
-          html: `<p>当方は、保守、再設計、プロジェクト方針などのため、予告なく本サイトの一部を変更・停止・終了することができます。特定の機能や写真の提供を継続する義務は負いません。</p>`
+          "id": "changes",
+          "label": "サイトの変更"
         },
         {
-          id: 'contact',
-          title: 'お問い合わせ',
-          html: `<p>本規約、写真のライセンス、追加の許諾に関するご質問は、次までご連絡ください。</p>
-<ul>
-<li><a href="mailto:contact.timg@icloud.com">contact.timg@icloud.com</a></li>
-<li><a href="https://github.com/TGthms/usa-travel-guide" target="_blank" rel="noopener">GitHub リポジトリ</a></li>
-</ul>
-<p class="legal-note">本規約は個人の旅行ガイドプロジェクト向けに作成されたものであり、法的助言に代わるものではありません。</p>`
+          "id": "contact",
+          "label": "お問い合わせ"
         }
       ],
-      footerNote: '© {year} USA Travel Guide · Tim G (TGthms)。オープンライセンスが適用される場合を除き、すべての権利を留保します。'
+      "sections": [
+        {
+          "id": "agreement",
+          "title": "規約への同意",
+          "html": "<p>本規約は、オンラインで提供される本サイト（ミラーや静的ホスティングを含みます）に適用されます。当方は本ページを改訂し日付を更新することで規約を変更できます。変更後もご利用を続けた場合、新しい規約に同意したものとみなします。</p>\n<p>本規約を守っていただける限り、<strong>個人的・非商業的</strong>な目的で本サイトを利用する、個人向け・非独占・譲渡不能・限定的な権利を付与します。</p>"
+        },
+        {
+          "id": "ownership",
+          "title": "コンテンツの権利",
+          "html": "<p>本サイトの文章、レイアウト、デザイン、UI、ロゴ、グラフィック、編集構成などは、Tim G / TGthms が権利を有するか適法に使用しており、著作権その他の法令で保護されています。</p>\n<p>本規約で明示されている場合や、部品ごとに示されたオープンライセンスがある場合を除き、事前の書面許可なく商業目的で複製・再公開・展示・配布しないでください。</p>"
+        },
+        {
+          "id": "photos",
+          "title": "写真・ビジュアル",
+          "html": "<p>ギャラリー等の写真・関連ビジュアル（<code>images/</code> 配下を含む）は、別クレジットがない限り <strong>© {year} Tim G（GitHub @TGthms）</strong> です。</p>\n<p><a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noopener\">クリエイティブ・コモンズ 表示 4.0 国際（CC BY 4.0）</a> で提供しています。要するに、次を守れば共有や改変（商用含む）が可能です。</p>\n<ul>\n<li><strong>Tim G / @TGthms</strong> に適切なクレジットを付ける</li>\n<li>可能なら CC BY 4.0 へのリンクを示す</li>\n<li>改変した場合はその旨を示す</li>\n<li>著者が利用を推奨していると誤解させない</li>\n</ul>\n<p>推奨クレジット例：<em>「Photo © Tim G (@TGthms), licensed under CC BY 4.0.」</em></p>\n<p>透かしの削除、偽の帰属、違法な利用は禁止です。CC BY 4.0 を超える権利が必要な場合はご連絡ください。</p>"
+        },
+        {
+          "id": "software",
+          "title": "ソフトウェアとコード",
+          "html": "<p>ソースコードはオープンソース（例：リポジトリの <a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">MIT ライセンス</a>）で公開される場合があります。これは<strong>ソフトウェアに限る</strong>もので、写真が自動的に同じライセンスになるわけではありません。ファイルに別記がない限り、写真は前項のとおりです。</p>"
+        },
+        {
+          "id": "travel",
+          "title": "旅行情報について",
+          "html": "<p>目的地、季節、ルート、ヒント、ビザ関連の記載、費用、ツールなどの情報は、<strong>一般的な参考・学習用</strong>です。法律・出入国・医療・金融・安全の専門助言ではありません。</p>\n<ul>\n<li>規則・料金・営業時間・道路状況・入国要件は頻繁に変わります</li>\n<li>出発前に、政府・運送事業者・現地当局の公式情報で必ず確認してください</li>\n<li>通貨・チップ・移動費用・時計ツールは概算であり、不完全・古い場合があります</li>\n<li>外部の「役立つリンク」は出発点にすぎません。先方の時刻・料金・方針は予告なく変わることがあります</li>\n</ul>\n<p>本サイトに基づく判断の責任はお客様にあります。内容への依拠により生じた損害について、当方は責任を負いません。</p>"
+        },
+        {
+          "id": "acceptable-use",
+          "title": "禁止事項",
+          "html": "<p>次の行為はお控えください。</p>\n<ul>\n<li>違法な目的、または本規約に反する利用</li>\n<li>関連システム・アカウント・ネットワークへの不正アクセスの試み</li>\n<li>他の利用者を妨げるプロービング、スキャン、負荷試験</li>\n<li>不当な負荷やアクセス制限の回避を伴うスクレイピング／一括ダウンロード（robots やオープンライセンスで許される場合を除く）</li>\n<li>本サイトや著者との関係を偽ること</li>\n<li>他者の知的財産権やプライバシーを侵害する利用</li>\n</ul>"
+        },
+        {
+          "id": "third-party",
+          "title": "外部リンクとツール",
+          "html": "<p>本サイトは外部サイトへリンクしたり、第三者 API（為替・フォント等）を呼び出したりすることがあります。これらは当方の管理下にありません。</p>\n<ul>\n<li><strong>旅行関連リンク。</strong>公式観光・交通・国立公園・博物館などへのリンクは計画の参考用です。書面で明示しない限り、提携や推奨を意味しません。</li>\n<li><strong>ツール用 API。</strong>為替は公開 API、米国内の天気・警報は NWS、世界予報・地名検索・大気質は Open-Meteo 等から取得する場合があります。遅延・欠落・誤りがあり得ます。天気情報は公式の緊急情報の代わりにはなりません。</li>\n<li><strong>保証なし。</strong>第三者サイト／API の正確性・安全性・プライバシー実務について、当方は運営も保証もしません。内容や URL は予告なく変わり得ます。</li>\n<li><strong>外部へ移ったあと。</strong>リンク先では相手の規約とプライバシーが適用されます。予約や支払いに関する重要情報は、必ず公式ソースで確認してください。</li>\n</ul>\n<p>壊れたリンクや不適切なリンクを見つけたらお知らせください。更新を検討しますが、特定リンクの維持義務はありません。</p>"
+        },
+        {
+          "id": "privacy",
+          "title": "プライバシー",
+          "html": "<p><a href=\"privacy.html\">プライバシーポリシー</a>は、本サイトでの情報の扱いを説明し、本規約の一部を構成します。インターネット通信は完全に非公開・安全とは限らない点もご理解ください。</p>"
+        },
+        {
+          "id": "disclaimers",
+          "title": "免責",
+          "html": "<p>本サイトおよびその内容は「現状有姿」で提供されます。法令で認められる範囲で、商品性・特定目的適合性・権利の完全性・非侵害などの保証を行いません。中断やエラーがないこと、有害な要素がないこと、不具合が必ず直ることも保証しません。</p>\n<p>情報は予告なく変わることがあります。個別のページやツールを更新し続ける義務はありません。</p>"
+        },
+        {
+          "id": "liability",
+          "title": "責任の範囲",
+          "html": "<p>法令で認められる最大限度において、Tim G / TGthms および本サイトの貢献者は、本サイトの利用または利用不能から生じる間接・付随・特別・結果的・懲罰的損害、ならびに利益・データ・のれんの損失について、たとえ可能性を知らされていた場合でも責任を負いません。</p>"
+        },
+        {
+          "id": "changes",
+          "title": "サイトの変更",
+          "html": "<p>保守、改修、プロジェクトの都合により、本サイトの一部をいつでも変更・停止・終了できます。特定の機能や写真を永続的に提供する義務はありません。</p>"
+        },
+        {
+          "id": "contact",
+          "title": "お問い合わせ",
+          "html": "<p>本規約、写真のライセンス、追加許諾については次までご連絡ください。</p>\n<ul>\n<li><a href=\"mailto:contact.timg@icloud.com\">contact.timg@icloud.com</a></li>\n<li><a href=\"https://github.com/TGthms/usa-travel-guide\" target=\"_blank\" rel=\"noopener\">GitHub リポジトリ</a></li>\n</ul>\n<p class=\"legal-note\">本規約は個人の旅行ガイドプロジェクト向けであり、法律アドバイスの代わりにはなりません。</p>"
+        }
+      ],
+      "footerNote": "© {year} USA Travel Guide · Tim G (TGthms)。オープンライセンスが適用される部分を除き、すべての権利を留保します。"
     }
   }
 };

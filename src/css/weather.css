@@ -162,8 +162,19 @@ html[data-motion-effective="reduced"] .weather-shell {
 .weather-hourly-item { flex: 0 0 auto; text-align: center; min-width: 48px; font-size: 12px; }
 .weather-hourly-item .t { font-family: var(--ff-display); font-size: 15px; margin-top: 4px; }
 .weather-daily { display: flex; flex-direction: column; gap: 8px; }
-.weather-daily-row { display: grid; grid-template-columns: 3rem 1.5rem 1fr 2.5rem 2.5rem; gap: 8px; align-items: center; font-size: 13px; }
-.weather-daily-bar { height: 4px; border-radius: 99px; background: linear-gradient(90deg, #6ec6ff, #ffd56a); opacity: .85; }
+.weather-daily-row {
+  display: grid;
+  grid-template-columns: 2.75rem 2rem 2.5rem minmax(0,1fr) 2.5rem;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+.weather-daily-bar {
+  height: 4px;
+  border-radius: 99px;
+  /* color from inline temp gradient in weather-app.css / JS */
+  background: linear-gradient(90deg, #70c8ff, #ffd56a);
+}
 
 .weather-sheet {
   position: fixed; inset: 0; z-index: 230;
@@ -197,7 +208,18 @@ html[data-motion-effective="reduced"] .weather-shell {
 .weather-units-row button.active { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.45); }
 .weather-error { color: #ffb4b4; font-size: 13px; padding: 12px; }
 .weather-empty { color: rgba(255,255,255,.75); font-size: 14px; padding: 24px; text-align: center; }
-.weather-attribution { font-size: 11px; color: var(--text-mute); text-align: center; margin: 16px 0 0; }
+.weather-attribution {
+  display: block;
+  width: 100%;
+  max-width: min(520px, 92%);
+  margin: 16px auto 0;
+  padding: 0 12px;
+  box-sizing: border-box;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-mute);
+  text-align: center;
+}
 @media (max-width: 540px) {
   .weather-modules { grid-template-columns: 1fr 1fr; gap: 8px; padding-left: 10px; padding-right: 10px; }
 }
