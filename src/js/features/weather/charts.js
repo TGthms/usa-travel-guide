@@ -377,18 +377,26 @@
       let max = dataMax;
       const padAmt = (max - min) * 0.14 || (nonNeg ? Math.max(max * 0.15, key === 'uv_index' ? 1 : 0.5) : 1);
       if (nonNeg) {
-        min = 0;
-        max = Math.max(max + padAmt, key === 'uv_index' ? 1 : (max > 0 ? max + padAmt : padAmt));
-        // Flat zero precip: small positive range so axis is 0 … 0.1 (not −0.1 … 0.1)
-        if (max <= 0) max = key === 'precipitation' ? 1 : 1;
+        // Humidity: 0–100 scale (readable). Precip/UV/wind: floor 0, headroom above max only.
+        if (key === 'relative_humidity_2m') {
+          min = 0;
+          max = 100;
+        } else if (key === 'uv_index') {
+          min = 0;
+          max = Math.max(11, dataMax + padAmt, 1);
+        } else {
+          min = 0;
+          max = Math.max(dataMax + padAmt, dataMax > 0 ? dataMax + padAmt : padAmt);
+          if (max <= 0) max = key === 'precipitation' ? 1 : 1;
+        }
       } else {
         min = dataMin - padAmt;
         max = dataMax + padAmt;
       }
       const span = (max - min) || 1;
 
-      // Room for Y labels without clipping (pressure “1005”, precip “0.0”)
-      const W = 360, H = 176, padL = 52, padR = 12, padT = 14, padB = 28;
+      // Wide viewBox so the chart uses sheet width; padL fits compact Y labels
+      const W = 400, H = 200, padL = 44, padR = 10, padT = 12, padB = 26;
       const plotW = W - padL - padR, plotH = H - padT - padB;
       const pts = vals.map(function (d, idx) {
         const x = padL + (idx / (vals.length - 1)) * plotW;
@@ -396,39 +404,61 @@
         return { x: x, y: y, i: d.i, t: d.t, v: d.v };
       });
 
-      // “Now” in the *location* timezone (wall-clock hours), not browser parse of bare ISO
+      // “Now” in the *location* timezone (wall-clock hours), not browser parse of bare ISO.
+      // Prefer the latest sample at-or-before now — never wrap 23:00 → 00:00 on the right.
       const nowH = nowLocalHour(tz);
       const todayKey = localDateKey(Date.now(), tz);
       let midIdx = 0;
       let midBest = Infinity;
+      let foundAtOrBefore = false;
       for (let mi = 0; mi < pts.length; mi++) {
         const day = stampDateKey(pts[mi].t, tz);
-        // Prefer samples on location’s calendar today; still allow if series is only today
-        const dayPenalty = (day && todayKey && day !== todayKey) ? 24 : 0;
-        const d = Math.abs(stampLocalHour(pts[mi].t) - nowH) + dayPenalty;
+        const ph = stampLocalHour(pts[mi].t);
+        // Wrong calendar day (e.g. next-day 00:00 left in the series) — heavy penalty
+        const dayPenalty = (day && todayKey && day !== todayKey) ? 100 : 0;
+        // Prefer at-or-before now so 23:00 wins over 00:00 when local time is 23:xx
+        let d;
+        if (ph <= nowH + 1 / 120) {
+          d = nowH - ph; // smaller = closer from the past
+          foundAtOrBefore = true;
+        } else {
+          d = (ph - nowH) + 0.25; // slight penalty for future hours
+        }
+        // Late evening: do not snap across midnight to 00:00
+        if (nowH >= 18 && ph < 6) d += 50;
+        // Early morning: do not snap back to yesterday evening
+        if (nowH < 6 && ph > 18) d += 50;
+        d += dayPenalty;
         if (d < midBest) { midBest = d; midIdx = mi; }
       }
+      // If every sample is still “future” (clock skew), keep earliest
+      if (!foundAtOrBefore && pts.length) midIdx = 0;
       const mid = pts[midIdx];
 
-      // Split past / future at “now” (Apple: muted dashed past, solid future)
+      // Split past / future at “now” (Apple: muted dashed past, solid future).
+      // CRITICAL: never fall back to a full solid path when future is short (e.g. 11 PM) —
+      // that painted over the dashed past and made the cursor look stuck at the right edge.
       const pastPts = pts.slice(0, midIdx + 1);
       const futurePts = pts.slice(midIdx);
       const pastLine = pastPts.length >= 2 ? pathThrough(pastPts) : '';
-      const futureLine = futurePts.length >= 2 ? pathThrough(futurePts) : (pastPts.length === 1 && futurePts.length === 1 ? pathThrough(pts) : '');
+      const futureLine = futurePts.length >= 2 ? pathThrough(futurePts) : '';
       const fullLine = pathThrough(pts);
       const last = pts[pts.length - 1];
       const first = pts[0];
+      // Soft fill under the whole day (muted); future gets a stronger fill when present
       const area = fullLine
         + ' L' + last.x.toFixed(1) + ',' + (H - padB).toFixed(1)
         + ' L' + first.x.toFixed(1) + ',' + (H - padB).toFixed(1)
         + ' Z';
-      // Future-only area (stronger); past stays in muted line only
       let futureArea = '';
       if (futurePts.length >= 2) {
         futureArea = pathThrough(futurePts)
           + ' L' + last.x.toFixed(1) + ',' + (H - padB).toFixed(1)
           + ' L' + mid.x.toFixed(1) + ',' + (H - padB).toFixed(1)
           + ' Z';
+      } else if (pastPts.length >= 2) {
+        // Evening: almost all day is past — fill under the dashed region lightly
+        futureArea = '';
       }
 
       const id = 'wxChart' + Math.random().toString(36).slice(2, 8);
@@ -483,17 +513,29 @@
         labels += '<text class="wx-chart-axis" x="' + p.x.toFixed(1) + '" y="' + (H - 8) + '" fill="rgba(255,255,255,.48)" font-size="11" font-weight="500" letter-spacing="0.02em" text-anchor="' + anchor + '" font-family="system-ui,-apple-system,BlinkMacSystemFont,sans-serif" font-variant-numeric="tabular-nums">' + escapeHtml(lab) + '</text>';
       });
 
+      // Past = dashed (always when we have history). Future = solid only for remaining hours.
+      // If now is the last sample (e.g. 11 PM), draw the whole day as dashed past — no solid overlay.
       const pastPath = pastLine
-        ? '<path d="' + pastLine + '" fill="none" stroke="rgba(255,255,255,.38)" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5 5"/>'
+        ? '<path d="' + pastLine + '" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5 5"/>'
         : '';
-      const futurePath = futureLine
-        ? '<path d="' + futureLine + '" fill="none" stroke="rgba(255,255,255,.95)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
-        : '<path d="' + fullLine + '" fill="none" stroke="rgba(255,255,255,.95)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+      let futurePath = '';
+      if (futureLine) {
+        futurePath = '<path d="' + futureLine + '" fill="none" stroke="rgba(255,255,255,.95)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+      } else if (!pastLine && fullLine) {
+        // Only when we have no split at all (e.g. 2 points) draw a single solid line
+        futurePath = '<path d="' + fullLine + '" fill="none" stroke="rgba(255,255,255,.95)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+      }
+      // Fill: prefer whole-day soft fill when past dominates (evening); stronger future fill midday
+      const fillPath = futureArea
+        ? '<path d="' + futureArea + '" fill="url(#' + id + 'g)"/>' +
+          (pastLine ? '<path d="' + pathThrough(pastPts) + ' L' + mid.x.toFixed(1) + ',' + (H - padB).toFixed(1) + ' L' + first.x.toFixed(1) + ',' + (H - padB).toFixed(1) + ' Z" fill="url(#' + id + 'gpast)"/>' : '')
+        : '<path d="' + area + '" fill="url(#' + id + (pastLine && !futureLine ? 'gpast' : 'g') + ')"/>';
 
       return '<div class="weather-chart-wrap weather-chart-card" data-chart="' + id + '" data-pts=\'' + JSON.stringify(payload).replace(/'/g, '&#39;') + '\' data-kind="' + key + '" data-tz="' + escapeHtml(tz || '') + '" data-now-idx="' + midIdx + '" data-vw="' + W + '" data-vh="' + H + '" data-padt="' + padT + '" data-padb="' + padB + '" data-padl="' + padL + '">' +
         '<div class="weather-chart-readout" data-readout>' + escapeHtml(unitFmt(mid.v)) + '</div>' +
         '<div class="weather-chart-sub" data-sub>' + escapeHtml(formatClock(mid.t)) + '</div>' +
-        '<svg class="weather-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img">' +
+        // preserveAspectRatio=none: CSS size maps 1:1 to viewBox → scrub X/Y stay aligned
+        '<svg class="weather-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img">' +
           '<defs>' +
             '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="0" y2="1">' +
               '<stop offset="0%" stop-color="#ffffff" stop-opacity="0.38"/>' +
@@ -501,12 +543,12 @@
               '<stop offset="100%" stop-color="#3a7ab8" stop-opacity="0.02"/>' +
             '</linearGradient>' +
             '<linearGradient id="' + id + 'gpast" x1="0" y1="0" x2="0" y2="1">' +
-              '<stop offset="0%" stop-color="#ffffff" stop-opacity="0.12"/>' +
-              '<stop offset="100%" stop-color="#3a7ab8" stop-opacity="0.01"/>' +
+              '<stop offset="0%" stop-color="#ffffff" stop-opacity="0.14"/>' +
+              '<stop offset="100%" stop-color="#3a7ab8" stop-opacity="0.02"/>' +
             '</linearGradient>' +
           '</defs>' +
           grids +
-          (futureArea ? '<path d="' + futureArea + '" fill="url(#' + id + 'g)"/>' : '<path d="' + area + '" fill="url(#' + id + 'g)"/>') +
+          fillPath +
           pastPath +
           futurePath +
           '<line data-guide x1="' + mid.x + '" y1="' + padT + '" x2="' + mid.x + '" y2="' + (H - padB) + '" stroke="rgba(255,255,255,.75)" stroke-width="1.25" stroke-dasharray="4 4"/>' +
@@ -531,11 +573,11 @@
         const sub = wrap.querySelector('[data-sub]');
         const hit = wrap.querySelector('[data-hit]');
         if (!svg || !hit) return;
-        const vw = Number(wrap.getAttribute('data-vw')) || 360;
+        const vw = Number(wrap.getAttribute('data-vw')) || 400;
         const padT = Number(wrap.getAttribute('data-padt')) || 12;
         const padB = Number(wrap.getAttribute('data-padb')) || 26;
-        const vh = Number(wrap.getAttribute('data-vh')) || 176;
-        // Default = “now” in location TZ (data-now-idx from build, or recompute wall-clock)
+        const vh = Number(wrap.getAttribute('data-vh')) || 200;
+        // Default = “now” in location TZ (same rules as buildTempChart — no wrap to 00:00)
         let idxNow = Number(wrap.getAttribute('data-now-idx'));
         if (!Number.isFinite(idxNow) || idxNow < 0 || idxNow >= pts.length) {
           const tz = wrap.getAttribute('data-tz') || undefined;
@@ -543,7 +585,10 @@
           idxNow = 0;
           let bestNow = Infinity;
           for (let i = 0; i < pts.length; i++) {
-            const d = Math.abs(stampLocalHour(pts[i].t) - nowH);
+            const ph = stampLocalHour(pts[i].t);
+            let d = ph <= nowH + 1 / 120 ? (nowH - ph) : (ph - nowH) + 0.25;
+            if (nowH >= 18 && ph < 6) d += 50;
+            if (nowH < 6 && ph > 18) d += 50;
             if (d < bestNow) { bestNow = d; idxNow = i; }
           }
         }
@@ -615,10 +660,36 @@
           paintImmediate(defaultPt.x, defaultPt.y, defaultPt, true);
         };
         paintImmediate(defaultPt.x, defaultPt.y, defaultPt, false);
-        const scrub = (clientX) => {
+
+        /** Map pointer → SVG viewBox coords (handles CSS scale; requires none or CTM). */
+        function clientToViewBox(clientX, clientY) {
+          try {
+            if (svg.createSVGPoint && svg.getScreenCTM) {
+              const pt = svg.createSVGPoint();
+              pt.x = clientX;
+              pt.y = clientY;
+              const ctm = svg.getScreenCTM();
+              if (ctm) {
+                const p = pt.matrixTransform(ctm.inverse());
+                return { x: p.x, y: p.y };
+              }
+            }
+          } catch (e) { /* fall through */ }
           const rect = svg.getBoundingClientRect();
-          if (!rect.width) return;
-          const x = ((clientX - rect.left) / rect.width) * vw;
+          if (!rect.width || !rect.height) return null;
+          return {
+            x: ((clientX - rect.left) / rect.width) * vw,
+            y: ((clientY - rect.top) / rect.height) * vh
+          };
+        }
+
+        const padLHit = Number(wrap.getAttribute('data-padl')) || 44;
+        const padRHit = 10;
+        const scrub = (clientX, clientY) => {
+          const vb = clientToViewBox(clientX, clientY == null ? 0 : clientY);
+          if (!vb) return;
+          // Clamp to plot band so hovering Y labels still targets first/last hour
+          const x = Math.max(padLHit, Math.min(vw - padRHit, vb.x));
           let best = pts[0], bestD = Infinity;
           for (let i = 0; i < pts.length; i++) {
             const d = Math.abs(pts[i].x - x);
@@ -632,42 +703,38 @@
           const a = pts[i0], b = pts[Math.min(i0 + 1, pts.length - 1)];
           const sp = (b.x - a.x) || 1;
           const u = Math.max(0, Math.min(1, (x - a.x) / sp));
+          // Snap cursor to the curve (X along pointer, Y on the line between samples)
           const px = a.x + (b.x - a.x) * u;
           const py = a.y + (b.y - a.y) * u;
-          // Animate number only when hour sample changes (Apple-like)
           const hourChanged = !curPt || curPt.t !== best.t;
           paintImmediate(px, py, best, hourChanged);
         };
-        let scrubRaf = 0;
-        let pendingX = null;
+        // Immediate scrub (no rAF lag) so the guide stays under the pointer
         const onMove = (e) => {
           const cx = e.clientX != null ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX);
+          const cy = e.clientY != null ? e.clientY : (e.touches && e.touches[0] && e.touches[0].clientY);
           if (cx == null) return;
           if (e.cancelable) e.preventDefault();
-          pendingX = cx;
-          if (!scrubRaf) {
-            scrubRaf = requestAnimationFrame(function () {
-              scrubRaf = 0;
-              if (pendingX != null) scrub(pendingX);
-            });
-          }
+          scrub(cx, cy);
         };
         hit.style.touchAction = 'none';
         hit.style.cursor = 'ew-resize';
-        hit.addEventListener('pointerdown', (e) => {
-          hit.setPointerCapture && hit.setPointerCapture(e.pointerId);
+        // Bind to SVG (not only hit rect) so axis padding still scrubs
+        const target = svg;
+        target.style.touchAction = 'none';
+        target.style.cursor = 'ew-resize';
+        target.addEventListener('pointerdown', (e) => {
+          try { target.setPointerCapture && target.setPointerCapture(e.pointerId); } catch (err) {}
           onMove(e);
         });
-        hit.addEventListener('pointermove', onMove);
-        hit.addEventListener('pointerenter', onMove);
-        hit.addEventListener('pointerup', resetToNow);
-        hit.addEventListener('pointercancel', resetToNow);
-        hit.addEventListener('pointerleave', resetToNow);
-        hit.addEventListener('lostpointercapture', resetToNow);
-        svg.addEventListener('pointermove', onMove);
-        svg.addEventListener('mousemove', onMove);
-        svg.addEventListener('pointerleave', resetToNow);
-        svg.addEventListener('mouseleave', resetToNow);
+        target.addEventListener('pointermove', onMove);
+        target.addEventListener('pointerup', resetToNow);
+        target.addEventListener('pointercancel', resetToNow);
+        target.addEventListener('pointerleave', resetToNow);
+        target.addEventListener('lostpointercapture', resetToNow);
+        // Desktop hover scrub (no press required)
+        target.addEventListener('mousemove', onMove);
+        target.addEventListener('mouseleave', resetToNow);
       });
     }
 

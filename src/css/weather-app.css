@@ -757,14 +757,21 @@ button.weather-mod:focus-visible { outline: 2px solid #fff; outline-offset: 2px;
 .wx-sheet-surface {
   position: relative;
   z-index: 1;
-  max-height: min(74vh, 640px);
+  max-height: min(80vh, 720px);
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 0 18px max(28px, env(safe-area-inset-bottom));
+  /* Slightly tighter side pad so charts use more horizontal space */
+  padding: 0 14px max(24px, env(safe-area-inset-bottom));
   box-sizing: border-box;
   max-width: 100%;
+}
+@media (min-width: 480px) {
+  .wx-sheet-surface {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
 }
 .weather-sheet-panel h3 { margin: 0 0 10px; font-family: var(--ff-display); font-size: 1.2rem; }
 .weather-sheet-panel p { margin: 0 0 10px; font-size: 14px; line-height: 1.55; color: rgba(255,255,255,.88); }
@@ -3214,51 +3221,52 @@ html[data-theme="glass"] .weather-page-sky {
   font-variant-numeric: tabular-nums;
 }
 
-/* Apple-style weather charts */
+/* Apple-style weather charts — full sheet width, tall plot, 1:1 scrub mapping */
 .weather-chart-card,
 .weather-chart-wrap {
   background: transparent !important;
   border: none !important;
-  padding: 4px 0 8px !important;
-  margin: 4px 0 8px !important;
+  padding: 2px 0 6px !important;
+  margin: 2px 0 10px !important;
   max-width: 100% !important;
   width: 100% !important;
   box-sizing: border-box !important;
-  /* visible so Y-axis labels in SVG pad aren’t clipped */
   overflow: visible !important;
   min-width: 0 !important;
 }
 .wx-sheet-surface .weather-chart-wrap {
-  /* slight inset so end-anchored axis text isn’t flush to the sheet edge */
-  margin-left: 2px !important;
-  margin-right: 2px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 .weather-chart-wrap .weather-chart-readout {
   font-family: var(--ff-display);
-  font-size: clamp(2.6rem, 11vw, 3.4rem) !important;
+  font-size: clamp(2.75rem, 12vw, 3.6rem) !important;
   font-weight: 300 !important;
   letter-spacing: -0.03em;
-  line-height: 1.05;
+  line-height: 1.02;
   margin: 0 0 2px !important;
   font-variant-numeric: tabular-nums;
 }
 .weather-chart-wrap .weather-chart-sub {
   font-size: 13px;
-  opacity: .7;
-  margin-bottom: 10px !important;
+  opacity: .72;
+  margin-bottom: 8px !important;
 }
 .weather-chart {
-  width: 100%;
-  height: 176px !important;
+  width: 100% !important;
+  /* Match viewBox 400×200 — keeps scrub coords + text from non-uniform stretch */
+  aspect-ratio: 400 / 200;
+  height: auto !important;
+  min-height: 180px;
+  max-height: min(248px, 34vh);
   display: block;
   touch-action: none;
   cursor: ew-resize;
   overflow: visible;
 }
 .weather-chart text.wx-chart-axis-y {
-  /* keep axis readable against sheet background */
   paint-order: stroke fill;
-  stroke: rgba(10, 16, 28, 0.45);
+  stroke: rgba(10, 16, 28, 0.5);
   stroke-width: 2.5px;
   stroke-linejoin: round;
 }
@@ -3267,7 +3275,15 @@ html[data-theme="glass"] .weather-page-sky {
 }
 .weather-chart [data-guide],
 .weather-chart [data-dot] {
-  transition: none !important; /* instant scrub — no CSS lag */
+  transition: none !important;
+}
+/* Units row under charts — compact, not stealing vertical space from the plot */
+.wx-sheet-surface .weather-units-row {
+  margin: 6px 0 10px !important;
+  gap: 6px !important;
+}
+.wx-sheet-surface .wx-sheet-about {
+  margin-top: 12px !important;
 }
 .wx-sheet-context {
   margin: 0 0 4px;
