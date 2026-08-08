@@ -995,7 +995,20 @@ html.has-fine-pointer .region-card:hover .region-desc {
 .weather-row-icon { width: 22px; height: 22px; }
 .weather-star-sf { width: 18px; height: 18px; }
 .weather-row-loc { display: inline-flex; margin-right: 6px; vertical-align: -2px; }
-.weather-loc-sf { width: 16px; height: 16px; color: #7ec8ff; }
+/* White pin + shadow so it stays visible on pale daytime sky cards (not only dark nights) */
+.weather-loc-sf {
+  width: 16px;
+  height: 16px;
+  color: #fff !important;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+.weather-loc-sf path {
+  fill: currentColor;
+}
+/* Keep the center “hole” of the pin readable on light blues */
+.weather-loc-sf circle {
+  stroke: rgba(0, 0, 0, 0.4) !important;
+}
 .weather-row--myloc { box-shadow: 0 10px 28px rgba(0,0,0,.28), 0 0 0 1px rgba(126,200,255,.25); }
 .weather-mod-label {
   display: flex !important;
