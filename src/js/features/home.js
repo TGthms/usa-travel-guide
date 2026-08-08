@@ -259,15 +259,43 @@ document.querySelectorAll('.prac-card, .season-card, .culture-tile, .dest-card, 
 });
 
 
-function buildDestLinksHtml(destId) {
-  const links = DEST_TRAVEL_LINKS[destId];
+function buildLinksListHtml(links) {
   if (!links || !links.length) return '';
-  const heading = DEST_LINKS_HEADING[currentLang] || DEST_LINKS_HEADING.en;
+  const heading = (typeof DEST_LINKS_HEADING !== 'undefined' && (DEST_LINKS_HEADING[currentLang] || DEST_LINKS_HEADING.en))
+    || 'Helpful links';
   const items = links.map((l) => {
     const label = (l.label && (l.label[currentLang] || l.label.en)) || l.url;
-    return `<li><a href="${l.url}" target="_blank" rel="noopener noreferrer">${label}</a></li>`;
+    const internal = !!l.internal || (typeof l.url === 'string' && !/^https?:\/\//i.test(l.url));
+    const attrs = internal
+      ? `href="${l.url}"`
+      : `href="${l.url}" target="_blank" rel="noopener noreferrer"`;
+    return `<li><a ${attrs}>${label}</a></li>`;
   }).join('');
   return `<div class="modal-links"><div class="modal-links-label">${heading}</div><ul class="modal-links-list">${items}</ul></div>`;
+}
+
+function buildDestLinksHtml(destId) {
+  const links = (typeof DEST_TRAVEL_LINKS !== 'undefined' && DEST_TRAVEL_LINKS[destId]) || null;
+  let html = buildLinksListHtml(links);
+  // Deep-link into the weather mini-app for this city
+  if (typeof DEST_WEATHER_CITIES !== 'undefined' && DEST_WEATHER_CITIES[destId]) {
+    const wxLabels = {
+      en: 'Live weather for this city →',
+      es: 'Tiempo en vivo de esta ciudad →',
+      zh: '查看该城市实时天气 →',
+      ja: 'この都市の天気を見る →'
+    };
+    const wxLab = wxLabels[currentLang] || wxLabels.en;
+    const wxBlock =
+      `<p class="modal-tool-cta"><a class="guide-tool-link" href="tools-weather.html?city=${encodeURIComponent(destId)}">${wxLab}</a></p>`;
+    html = wxBlock + html;
+  }
+  return html;
+}
+
+function buildSectionLinksHtml(modalKey) {
+  if (!modalKey || typeof GUIDE_SECTION_LINKS === 'undefined') return '';
+  return buildLinksListHtml(GUIDE_SECTION_LINKS[modalKey]);
 }
 
 function getModalData(key) {
@@ -276,15 +304,25 @@ function getModalData(key) {
   const localized = i18nPack && i18nPack[key];
   const base = localized || ((typeof MODAL_DATA !== 'undefined' && MODAL_DATA[key]) || null);
   if (!base) return null;
-  // Attach city travel links when expanding a destination card
+
+  let body = base.body || '';
+  // Avoid duplicate link blocks when English/i18n HTML already embeds .modal-links
+  // (e.g. prac_transport, tip_parks). Section links still append for keys that lack them.
+  const hasInlineLinks = /class=["']modal-links["']/.test(body);
+
   if (key && key.indexOf('dest_') === 0) {
     const destId = key.slice(5);
-    const linksHtml = buildDestLinksHtml(destId);
-    if (linksHtml) {
-      return { tag: base.tag, title: base.title, body: (base.body || '') + linksHtml };
+    body += buildDestLinksHtml(destId);
+  } else if (!hasInlineLinks) {
+    // Strip duplicate tool-only CTAs when we inject a richer link list that includes the same tools
+    const sectionHtml = buildSectionLinksHtml(key);
+    if (sectionHtml) {
+      body = body.replace(/<p class=["']modal-tool-cta["']>[\s\S]*?<\/p>/g, '');
+      body += sectionHtml;
     }
   }
-  return base;
+
+  return { tag: base.tag, title: base.title, body: body };
 }
 
 // Tool / external links inside tip & practical cards must not open the modal

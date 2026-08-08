@@ -178,6 +178,7 @@
   function popReturnOnBack(targetHref) {
     var ret = readReturn();
     var destFile = fileOf(targetHref).toLowerCase();
+    var destPath = pathOf(targetHref);
 
     // Prefer popping when Back href matches current stamp target
     if (ret && ret.href && String(ret.href).toLowerCase() === destFile) {
@@ -189,6 +190,17 @@
           return;
         }
       }
+      // Guide → Weather → Back: keep scrollY so index can restore position
+      if (ret.label === 'guide' && typeof ret.scrollY === 'number' && ret.scrollY > 0) {
+        writeReturn({
+          label: 'guide',
+          href: ret.href || 'index.html',
+          scrollY: ret.scrollY,
+          ts: Date.now(),
+          pendingScrollRestore: true
+        });
+        return;
+      }
       clearReturn();
       return;
     }
@@ -197,10 +209,26 @@
     if (ret && ret.parent && ret.parent.label) {
       var p2 = cloneAsParent(ret.parent, 0);
       if (p2) {
+        // If the Back target is the guide and the parent is the guide stamp, keep its scrollY
+        if (isGuidePath(destPath) && p2.label === 'guide' && typeof p2.scrollY === 'number' && p2.scrollY > 0) {
+          p2.pendingScrollRestore = true;
+        }
         p2.ts = Date.now();
         writeReturn(p2);
         return;
       }
+    }
+    // Footer / non-chrome “Guide” link: preserve guide scroll if still stamped
+    if (ret && ret.label === 'guide' && isGuidePath(destPath)
+        && typeof ret.scrollY === 'number' && ret.scrollY > 0) {
+      writeReturn({
+        label: 'guide',
+        href: ret.href || 'index.html',
+        scrollY: ret.scrollY,
+        ts: Date.now(),
+        pendingScrollRestore: true
+      });
+      return;
     }
     clearReturn();
   }
@@ -219,8 +247,15 @@
     // Tools hub → Guide: leaving tools tree
     if (from.label === 'tools' && isGuidePath(dest)) return;
 
-    // Don't re-stamp if navigating to the current stamp target (edge cases)
     var prev = readReturn();
+
+    // Returning to the Guide while a guide stamp (with scrollY) is active —
+    // do not overwrite with the mini-app as origin (footer “Guide” links, etc.)
+    if (isGuidePath(dest) && prev && prev.label === 'guide') {
+      return;
+    }
+
+    // Don't re-stamp if navigating to the current stamp target (edge cases)
     if (prev && prev.href && String(prev.href).toLowerCase() === fileOf(dest).toLowerCase()
         && prev.label === from.label && String(prev.href).toLowerCase() === String(from.href).toLowerCase()) {
       return;
@@ -444,17 +479,24 @@
     } catch (e) {}
     var y = ret.scrollY;
     try {
+      // Consume one-shot restore so later in-page reloads don't jump
       ret.scrollY = 0;
+      delete ret.pendingScrollRestore;
       writeReturn(ret);
     } catch (e2) {}
     var apply = function () {
-      window.scrollTo(0, y);
+      try { window.scrollTo(0, y); } catch (e3) {}
     };
     requestAnimationFrame(function () {
       requestAnimationFrame(apply);
     });
-    window.addEventListener('load', function () {
-      window.scrollTo(0, y);
+    // Late layout (fonts, images, deferred UI) — re-apply a few times
+    setTimeout(apply, 0);
+    setTimeout(apply, 120);
+    setTimeout(apply, 400);
+    window.addEventListener('load', apply, { once: true });
+    window.addEventListener('pageshow', function (ev) {
+      if (ev && ev.persisted) apply();
     }, { once: true });
   }
 

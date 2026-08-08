@@ -199,12 +199,88 @@
   font-family: var(--ff-body); font-size: var(--fs-btn); font-weight: 600;
   letter-spacing: .14em; text-transform: uppercase; text-decoration: none;
   border: 1px solid transparent; cursor: pointer;
-  transition: background .28s ease, color .28s ease, transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+  transition: background .28s ease, color .28s ease, transform .28s ease, box-shadow .28s ease, border-color .28s ease, filter .2s ease;
   border-radius: 2px; position: relative; overflow: hidden;
   max-width: 100%;
 }
 .btn-primary:hover { background: var(--accent-1-lt); color: var(--text-inv); transform: translateY(-2px); box-shadow: 0 12px 28px color-mix(in srgb, var(--accent-1) 28%, transparent); }
 .btn-primary:active { transform: translateY(0); }
+
+/* Hero primary — single magnetic CTA (no secondary ghost) */
+.hero-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 999px;
+  padding: clamp(0.95rem, 0.85rem + 0.35vw, 1.1rem) clamp(1.5rem, 1.2rem + 1.1vw, 2.15rem)
+    clamp(0.95rem, 0.85rem + 0.35vw, 1.1rem) clamp(1.65rem, 1.35rem + 1.1vw, 2.35rem);
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  background: linear-gradient(
+    135deg,
+    var(--accent-1) 0%,
+    color-mix(in srgb, var(--accent-1) 78%, #fff 22%) 55%,
+    color-mix(in srgb, var(--accent-1) 88%, #fff 12%) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--accent-1) 70%, #fff 30%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.32) inset,
+    0 12px 32px color-mix(in srgb, var(--accent-1) 38%, transparent),
+    0 2px 8px rgba(0, 0, 0, 0.14);
+}
+.hero-cta-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, transparent 48%);
+  pointer-events: none;
+}
+.hero-cta-primary-text {
+  position: relative;
+  z-index: 1;
+}
+.hero-cta-primary-arrow {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.25s ease;
+}
+.hero-cta-primary-arrow svg {
+  display: block;
+}
+.hero-cta-primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-3px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.38) inset,
+    0 18px 40px color-mix(in srgb, var(--accent-1) 48%, transparent),
+    0 4px 14px rgba(0, 0, 0, 0.16);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-1) 92%, #fff 8%) 0%,
+    color-mix(in srgb, var(--accent-1) 70%, #fff 30%) 100%
+  );
+}
+.hero-cta-primary:hover .hero-cta-primary-arrow {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateX(3px);
+}
+.hero-cta-primary:active {
+  transform: translateY(-1px);
+  filter: brightness(0.98);
+}
+.hero-cta-primary:focus-visible {
+  outline: 2px solid var(--accent-1);
+  outline-offset: 4px;
+}
 .btn-ghost {
   font-size: var(--fs-btn); letter-spacing: .14em; text-transform: uppercase; font-weight: 500; color: var(--text-dim);
   text-decoration: none; display: inline-flex; align-items: center; gap: 10px;
@@ -833,6 +909,82 @@ html[data-theme="elegant"] .region-svg {
 .dest-meta-item { display: flex; flex-direction: column; gap: 4px; }
 .dest-meta-label { font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
 .dest-meta-val { font-size: 11px; font-weight: 600; color: #fff; }
+
+/* Live weather chip on destination cards (homepage) */
+.dest-weather {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  position: relative;
+  z-index: 3;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.dest-weather:hover {
+  background: rgba(0, 0, 0, 0.52);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+.dest-weather:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.dest-weather-icon {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.dest-weather-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.dest-weather-temp {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.dest-weather-hl {
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.78;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dest-weather-fallback {
+  display: none;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.82;
+  letter-spacing: 0.01em;
+}
+.dest-weather.is-fallback .dest-weather-main,
+.dest-weather.is-fallback .dest-weather-icon {
+  display: none;
+}
+.dest-weather.is-fallback .dest-weather-fallback {
+  display: inline;
+}
+.dest-weather.is-loading {
+  opacity: 0.65;
+}
+.dest-weather.is-loading .dest-weather-hl {
+  display: none;
+}
 .dest-arrow { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; transition: all .3s; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); }
 .dest-card:hover .dest-arrow { background: var(--accent-1); color: var(--text-inv); border-color: var(--accent-1); transform: rotate(45deg) scale(1.1); }
 .dest-fav-btn { position: absolute; top: 14px; left: 14px; width: 42px; height: 42px; z-index: 5; border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); cursor: pointer; transition: all .25s cubic-bezier(0.2,0.8,0.2,1); }
@@ -937,15 +1089,17 @@ html[data-theme="elegant"] .region-svg {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.24);
   color: inherit;
   flex-shrink: 0;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
 }
 .seasons-weather-cta-icon svg {
   display: block;
+  overflow: visible;
 }
 .seasons-weather-cta-text {
   flex: 1 1 auto;
@@ -1057,6 +1211,12 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
 .culture-tile:hover .culture-tile-icon { transform: none; opacity: 1; }
 .culture-tile-name { font-family: var(--ff-display); font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px; letter-spacing: -.01em; }
 .culture-tile-desc { font-size: 12px; color: var(--text-dim); line-height: 1.65; max-width: 28ch; }
+.culture-tile .culture-tile-link {
+  position: relative;
+  z-index: 2;
+  margin-top: 10px;
+  font-size: 12px;
+}
 
 /* ═══ MARQUEE ═══ */
 .marquee-section { border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); overflow: hidden; background: var(--bg-card); position: relative; z-index: 10;}
@@ -1086,6 +1246,13 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
 .route-duration { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-1); background: var(--bg-card); padding: 6px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--border-light); transition: all .3s; }
 .route-card:hover .route-duration { background: var(--accent-1); border-color: var(--accent-1); color: var(--text-inv); }
 .route-body { padding: 24px 28px; }
+.route-card .route-card-link {
+  position: relative;
+  z-index: 2;
+  margin-top: 14px;
+  margin-right: 12px;
+  font-size: 12px;
+}
 .route-desc { font-size: 14px; color: var(--text-dim); line-height: 1.8; margin-bottom: 24px; }
 .route-stops { display: flex; flex-direction: column; gap: 0; }
 .route-stop { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--text-dim); padding: 10px 0; border-bottom: 1px solid var(--border-light); transition: all .3s; position: relative; }

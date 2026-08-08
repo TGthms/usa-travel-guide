@@ -94,6 +94,10 @@ section[id], footer[id] { scroll-margin-top: 90px; }
     letter-spacing: .1em;
     min-height: 48px;
   }
+  .hero-cta .hero-cta-primary {
+    border-radius: 999px;
+    min-height: 52px;
+  }
   .hero-scroll {
     bottom: max(18px, env(safe-area-inset-bottom, 0px));
   }
@@ -218,7 +222,8 @@ section[id], footer[id] { scroll-margin-top: 90px; }
 }
 @media (max-width: 400px) {
   .hero-cta { width: 100%; flex-direction: column; align-items: stretch; }
-  .hero-cta .btn-primary, .hero-cta .btn-ghost {
+  .hero-cta .btn-primary, .hero-cta .btn-ghost,
+  .hero-cta .hero-cta-primary {
     flex: 1 1 auto; justify-content: center; width: 100%; text-align: center;
   }
   #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, footer,

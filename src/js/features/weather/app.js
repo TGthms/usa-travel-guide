@@ -1433,6 +1433,9 @@
           const fresh = cache.get(cityKey(openCity.city));
           if (fresh && fresh.weather) openDetail(fresh);
         }
+
+        // Homepage / share deep link: tools-weather.html?city=nyc
+        tryOpenWeatherDeepLink();
       } catch (e) {
         if (e && e.name === 'AbortError') {
           // Superseded by a newer refresh — leave UI to the winner
@@ -3047,6 +3050,77 @@
     }, 400);
   })();
 
+  /** Deep link from homepage cards / shared URLs: ?city=nyc | ?lat=&lon= */
+  var weatherDeepLink = null;
+  var weatherDeepLinkDone = false;
+  function parseWeatherDeepLink() {
+    try {
+      var p = new URLSearchParams(location.search || '');
+      var slug = (p.get('city') || p.get('dest') || '').toLowerCase().trim();
+      var lat = parseFloat(p.get('lat'));
+      var lon = parseFloat(p.get('lon'));
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        return {
+          lat: lat,
+          lon: lon,
+          name: p.get('name') || '',
+          admin1: p.get('admin1') || '',
+          tz: p.get('tz') || undefined
+        };
+      }
+      if (slug && typeof DEST_WEATHER_CITIES !== 'undefined' && DEST_WEATHER_CITIES[slug]) {
+        var c = DEST_WEATHER_CITIES[slug];
+        return { lat: c.lat, lon: c.lon, name: c.name, admin1: c.admin1 || '', tz: c.tz };
+      }
+      // Fallback: match major city by name fragment
+      if (slug) {
+        var hit = MAJOR.find(function (m) {
+          return String(m.name).toLowerCase().replace(/\s+/g, '') === slug.replace(/\s+/g, '')
+            || String(m.name).toLowerCase().indexOf(slug) === 0;
+        });
+        if (hit) return { lat: hit.lat, lon: hit.lon, name: hit.name, admin1: hit.admin1 || '', tz: hit.tz };
+      }
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+  function tryOpenWeatherDeepLink() {
+    if (weatherDeepLinkDone) return;
+    if (!weatherDeepLink) weatherDeepLink = parseWeatherDeepLink();
+    if (!weatherDeepLink) {
+      weatherDeepLinkDone = true;
+      return;
+    }
+    var target = weatherDeepLink;
+    var pack = null;
+    cache.forEach(function (p) {
+      if (!p || !p.city || !p.weather) return;
+      if (Math.abs(Number(p.city.lat) - Number(target.lat)) < 0.08
+          && Math.abs(Number(p.city.lon) - Number(target.lon)) < 0.08) {
+        pack = p;
+      }
+    });
+    if (pack) {
+      weatherDeepLinkDone = true;
+      try { openDetail(pack); } catch (e) { /* ignore */ }
+      return;
+    }
+    // Not in cache yet — fetch this city alone and open
+    weatherDeepLinkDone = true;
+    var city = {
+      name: target.name || 'Location',
+      admin1: target.admin1 || '',
+      lat: Number(target.lat),
+      lon: Number(target.lon),
+      tz: target.tz
+    };
+    loadMany([city], { quiet: true, forceFetch: true })
+      .then(function () {
+        var fresh = cache.get(cityKey(city));
+        if (fresh && fresh.weather) openDetail(fresh);
+      })
+      .catch(function () { /* soft fail — list still usable */ });
+  }
+
   // Kick off — clear any stuck full-screen PE from a prior session / bfcache
   myLocationCity = loadMyLocation();
   loadNameCacheFromSession();
@@ -3057,6 +3131,7 @@
     try { detailEl.hidden = true; } catch (e2) { /* ignore */ }
   }
   applyAmbientPageSky();
+  weatherDeepLink = parseWeatherDeepLink();
   refresh(true, { quiet: false, reason: 'boot' });
   scheduleAutoRefresh();
   clearTimeout(nameFetchTimer);

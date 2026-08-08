@@ -262,6 +262,10 @@ function applyUnits() {
   // Road-trip tool: unit-aware labels + math.
   if (typeof updateDriveUnitLabels === 'function') updateDriveUnitLabels();
   if (typeof updateDriveCost === 'function') updateDriveCost();
+  // Homepage destination weather chips (temp unit + language labels)
+  if (typeof window.paintDestWeather === 'function') {
+    try { window.paintDestWeather(); } catch (e) { /* ignore */ }
+  }
 }
 
 /* ── SAFE STORAGE ──
