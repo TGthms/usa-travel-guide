@@ -751,25 +751,99 @@
     }
 
     /**
+     * Convert a wall-clock ISO (Open-Meteo local, no Z) to UTC ms in `timeZone`.
+     * Offset-bearing strings use Date.parse.
+     */
+    function wallClockInZoneToUtcMs(iso, timeZone) {
+      const s = String(iso || '');
+      if (!s) return NaN;
+      if (/[zZ]$/.test(s) || /[+-]\d{2}:\d{2}$/.test(s)) {
+        const t = new Date(s).getTime();
+        return Number.isFinite(t) ? t : NaN;
+      }
+      const m = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+      if (!m) {
+        const t = new Date(s).getTime();
+        return Number.isFinite(t) ? t : NaN;
+      }
+      const y = Number(m[1]);
+      const mo = Number(m[2]);
+      const d = Number(m[3]);
+      const h = Number(m[4]);
+      const mi = Number(m[5]);
+      const se = Number(m[6] || 0);
+      const tz = timeZone || 'UTC';
+      let guess = Date.UTC(y, mo - 1, d, h, mi, se);
+      for (let iter = 0; iter < 4; iter++) {
+        const parts = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hourCycle: 'h23'
+        }).formatToParts(new Date(guess));
+        const get = function (type) {
+          for (let i = 0; i < parts.length; i++) {
+            if (parts[i].type === type) return Number(parts[i].value);
+          }
+          return 0;
+        };
+        let hh = get('hour');
+        if (hh === 24) hh = 0;
+        const asUtc = Date.UTC(get('year'), get('month') - 1, get('day'), hh, get('minute'), get('second'));
+        const want = Date.UTC(y, mo - 1, d, h, mi, se);
+        guess += want - asUtc;
+      }
+      return guess;
+    }
+
+    /** UTC ms of 00:00 on the calendar day of `ms` in `timeZone`. */
+    function startOfLocalDayUtcMs(ms, timeZone) {
+      try {
+        const parts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: timeZone || undefined,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).formatToParts(new Date(ms));
+        const get = function (type) {
+          for (let i = 0; i < parts.length; i++) {
+            if (parts[i].type === type) return parts[i].value;
+          }
+          return '01';
+        };
+        const ymd = get('year') + '-' + get('month') + '-' + get('day') + 'T00:00:00';
+        return wallClockInZoneToUtcMs(ymd, timeZone);
+      } catch (e) {
+        const d = new Date(ms);
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      }
+    }
+
+    /**
      * Apple Weather–style sun path: full day sine over horizon.
      * Dot tracks current elevation; curve peaks at solar noon.
+     * `timeZone` = city IANA zone so rise/set wall-clock ISO map correctly.
      */
-    function sunPathGeometry(sunriseIso, sunsetIso, W, H, padL, padR, padT, padB) {
+    function sunPathGeometry(sunriseIso, sunsetIso, W, H, padL, padR, padT, padB, timeZone) {
       const now = Date.now();
-      let rise = sunriseIso ? new Date(sunriseIso).getTime() : now;
-      let set = sunsetIso ? new Date(sunsetIso).getTime() : now + 12 * 3600000;
+      const tz = timeZone || undefined;
+      let rise = sunriseIso ? wallClockInZoneToUtcMs(sunriseIso, tz) : NaN;
+      let set = sunsetIso ? wallClockInZoneToUtcMs(sunsetIso, tz) : NaN;
+      if (!Number.isFinite(rise)) rise = now - 6 * 3600000;
+      if (!Number.isFinite(set)) set = rise + 12 * 3600000;
       if (set <= rise) set = rise + 12 * 3600000;
       const plotW = W - padL - padR;
       const plotH = H - padT - padB;
-      // Midnight of the sunrise calendar day (viewer-local; good enough for path shape)
-      let day0 = rise;
-      try {
-        const d = new Date(rise);
-        day0 = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-      } catch (e) {
-        day0 = rise - 6 * 3600000;
-      }
+      // Midnight (city-local) of the sunrise calendar day
+      let day0 = startOfLocalDayUtcMs(rise, tz);
+      if (!Number.isFinite(day0)) day0 = rise - 6 * 3600000;
       const dayMs = 24 * 3600000;
+      // If "now" is after local midnight following this rise/set day, still plot that day
+      // but clamp the sun marker to the day range for position.
       const elevAt = function (tms) {
         if (tms >= rise && tms <= set) {
           const u = (tms - rise) / (set - rise);
@@ -795,14 +869,55 @@
         });
       }
       const horizonY = elevToY(0);
-      const frac = Math.max(0, Math.min(1, (now - day0) / dayMs));
+      // Position “now” on this civil day; if after midnight next day, use next day0
+      let plotNow = now;
+      let plotDay0 = day0;
+      if (now >= day0 + dayMs) {
+        // Past the sunrise’s civil day — advance day0 so evening/night still maps
+        plotDay0 = startOfLocalDayUtcMs(now, tz);
+        if (!Number.isFinite(plotDay0)) plotDay0 = day0 + dayMs;
+      }
+      // Rebuild path relative to plotDay0 when it differs (same shape shifted by solar times)
+      // Keep rise/set absolute; x-axis is always 00–24 of plotDay0.
+      const frac = Math.max(0, Math.min(1, (plotNow - plotDay0) / dayMs));
       const curX = padL + frac * plotW;
-      const curElev = elevAt(now);
+      // When day0 for path geometry is the rise day, map rise/set onto plotDay0 axis
+      // If plotDay0 is a different day, recompute path for “today” using shifted solar times
+      let pathDay0 = day0;
+      let pathRise = rise;
+      let pathSet = set;
+      let elevForPath = elevAt;
+      if (plotDay0 !== day0) {
+        const shift = plotDay0 - day0;
+        pathDay0 = plotDay0;
+        pathRise = rise + shift;
+        pathSet = set + shift;
+        elevForPath = function (tms) {
+          if (tms >= pathRise && tms <= pathSet) {
+            const u = (tms - pathRise) / (pathSet - pathRise);
+            return Math.sin(u * Math.PI);
+          }
+          if (tms < pathRise) return -0.12 * Math.min(1, (pathRise - tms) / (4 * 3600000));
+          return -0.12 * Math.min(1, (tms - pathSet) / (4 * 3600000));
+        };
+        pts.length = 0;
+        for (let i = 0; i <= 48; i++) {
+          const tms = pathDay0 + (i / 48) * dayMs;
+          const elev = elevForPath(tms);
+          pts.push({
+            x: padL + (i / 48) * plotW,
+            y: elevToY(elev),
+            tms: tms,
+            elev: elev
+          });
+        }
+      }
+      const curElev = elevForPath(plotNow);
       const curY = elevToY(curElev);
       const line = smoothLinePath(pts);
       // Day fill between rise–set above horizon
-      const riseX = padL + Math.max(0, Math.min(1, (rise - day0) / dayMs)) * plotW;
-      const setX = padL + Math.max(0, Math.min(1, (set - day0) / dayMs)) * plotW;
+      const riseX = padL + Math.max(0, Math.min(1, (pathRise - pathDay0) / dayMs)) * plotW;
+      const setX = padL + Math.max(0, Math.min(1, (pathSet - pathDay0) / dayMs)) * plotW;
       let area = '';
       pts.forEach(function (p) {
         if (p.x < riseX - 0.5 || p.x > setX + 0.5) return;
@@ -815,8 +930,13 @@
       const beforeRise = now < rise;
       const afterSet = now > set;
       const isDay = !beforeRise && !afterSet;
+      // Next sunrise for “until sunrise” after set (handle overnight)
+      let nextRise = rise;
+      if (afterSet) nextRise = rise + dayMs;
+      else if (beforeRise) nextRise = rise;
       return {
-        now: now, rise: rise, set: set, day0: day0, dayMs: dayMs,
+        now: now, rise: rise, set: set, nextRise: nextRise,
+        day0: pathDay0, dayMs: dayMs,
         pts: pts, line: line, area: area, horizonY: horizonY,
         curX: curX, curY: curY, curElev: curElev,
         isDay: isDay, beforeRise: beforeRise, afterSet: afterSet,
@@ -825,10 +945,10 @@
     }
 
     /** Compact module tile — Apple style: hero next event + path + secondary time */
-    function sunArcSvg(sunriseIso, sunsetIso, compact) {
+    function sunArcSvg(sunriseIso, sunsetIso, compact, timeZone) {
       const W = compact ? 300 : 320;
       const H = compact ? 72 : 100;
-      const g = sunPathGeometry(sunriseIso, sunsetIso, W, H, 8, 8, 10, 8);
+      const g = sunPathGeometry(sunriseIso, sunsetIso, W, H, 8, 8, 10, 8, timeZone);
       // Apple: during day emphasize SUNSET; at night emphasize SUNRISE
       const heroIsSunset = g.isDay;
       const heroIso = heroIsSunset ? sunsetIso : sunriseIso;
@@ -872,9 +992,9 @@
     }
 
     /** Full-day sun path chart + metrics (Apple-inspired). No Y-axis — path is symbolic. */
-    function buildSunDaySheet(sunriseIso, sunsetIso) {
+    function buildSunDaySheet(sunriseIso, sunsetIso, timeZone) {
       const W = 340, H = 160, padL = 10, padR = 10, padT = 14, padB = 28;
-      const g = sunPathGeometry(sunriseIso, sunsetIso, W, H, padL, padR, padT, padB);
+      const g = sunPathGeometry(sunriseIso, sunsetIso, W, H, padL, padR, padT, padB, timeZone);
       const TW = 35 * 60 * 1000;
       const firstLight = g.rise - TW;
       const lastLight = g.set + TW;
@@ -889,13 +1009,13 @@
       let remainVal = formatDurationMs(Math.max(0, g.set - g.now));
       if (g.beforeRise) {
         remainLab = t('weather.untilSunrise', 'Until sunrise');
-        remainVal = formatDurationMs(g.rise - g.now);
+        remainVal = formatDurationMs(Math.max(0, g.rise - g.now));
       } else if (g.afterSet) {
         remainLab = t('weather.untilSunrise', 'Until sunrise');
-        remainVal = formatDurationMs(g.rise + 24 * 3600000 - g.now);
+        remainVal = formatDurationMs(Math.max(0, (g.nextRise || (g.rise + 24 * 3600000)) - g.now));
       } else {
         remainLab = t('weather.untilSunset', 'Until sunset');
-        remainVal = formatDurationMs(g.set - g.now);
+        remainVal = formatDurationMs(Math.max(0, g.set - g.now));
       }
       const hourLabs = [
         { f: 0, lab: '00' }, { f: 0.25, lab: '06' }, { f: 0.5, lab: '12' }, { f: 0.75, lab: '18' }, { f: 1, lab: '24' }

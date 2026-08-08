@@ -1730,12 +1730,16 @@
 
     const sr = daily.sunrise && daily.sunrise[0];
     const ss = daily.sunset && daily.sunset[0];
-    const sunViz = sunArcSvg(sr, ss, true);
+    const sunTz = (pack.weather && pack.weather.timezone) || (c && c.tz) || undefined;
+    const sunViz = sunArcSvg(sr, ss, true, sunTz);
     const sunTitle = (function () {
-      const now = Date.now();
-      const rise = sr ? new Date(sr).getTime() : 0;
-      const set = ss ? new Date(ss).getTime() : 0;
-      if (rise && set && now >= rise && now <= set) return t('weather.sunset', 'Sunset');
+      // Use city-local wall clock for day/night (same as sheet path)
+      try {
+        if (chartsApi && typeof chartsApi.sunPathGeometry === 'function') {
+          const g = chartsApi.sunPathGeometry(sr, ss, 100, 40, 0, 0, 0, 0, sunTz);
+          if (g && g.isDay) return t('weather.sunset', 'Sunset');
+        }
+      } catch (eSun) { /* fall through */ }
       return t('weather.sunrise', 'Sunrise');
     })();
     mods.push(modHtml('sun', sunTitle, '', sunViz, true, true));
@@ -2141,7 +2145,7 @@
     } else if (kind === 'sun') {
       const sr = daily.sunrise && daily.sunrise[0];
       const ss = daily.sunset && daily.sunset[0];
-      body += buildSunDaySheet(sr, ss);
+      body += buildSunDaySheet(sr, ss, chartTz);
     } else if (kind === 'vis') {
       body += `<div class="wx-sheet-hero">
         <div class="weather-chart-readout">${escapeHtml(fmtVis(cur.visibility))}</div>
@@ -2272,13 +2276,27 @@
     try { sheetEl.inert = false; } catch (e) { /* older browsers */ }
     sheetEl.setAttribute('aria-hidden', 'false');
     sheetEl.style.pointerEvents = 'auto';
+    // Always full dim when opening (drag may have left --wx-sheet-backdrop at 0)
+    try {
+      sheetEl.style.removeProperty('--wx-sheet-backdrop');
+      sheetEl.style.opacity = '';
+      sheetEl.style.visibility = '';
+      sheetEl.style.background = '';
+    } catch (eBg) { /* ignore */ }
     // Force start below, then pop up next frames (snappy open)
     sheetPanel.style.transition = 'none';
     sheetPanel.style.transform = 'translate3d(0,100%,0)';
     sheetEl.classList.add('open');
+    // Scroll body to top so About section isn’t half-hidden from a prior sheet
+    try {
+      if (sheetBody) sheetBody.scrollTop = 0;
+    } catch (eScr) { /* ignore */ }
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         if (gen !== sheetGen) return;
+        // Re-assert open + dim (mobile WebKit can drop opacity mid-frame)
+        sheetEl.classList.add('open');
+        try { sheetEl.style.removeProperty('--wx-sheet-backdrop'); } catch (e2) { /* ignore */ }
         const reduce = sheetReduceMotion();
         if (reduce) {
           sheetPanel.style.transition = '';

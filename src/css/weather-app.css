@@ -644,10 +644,12 @@ button.weather-mod:focus-visible { outline: 2px solid #fff; outline-offset: 2px;
   overflow: hidden;
 }
 .weather-sheet.open {
-  opacity: 1;
-  visibility: visible;
+  opacity: 1 !important;
+  visibility: visible !important;
   pointer-events: auto !important;
-  z-index: 10150; /* above .weather-detail (10050) */
+  z-index: 10150 !important; /* above .weather-detail (10050) */
+  /* Explicit dim so mobile never “forgets” backdrop when CSS var is 0/empty */
+  background: rgba(0, 0, 0, calc(0.48 * var(--wx-sheet-backdrop, 1))) !important;
 }
 .weather-sheet:not(.open) {
   pointer-events: none !important;
@@ -657,9 +659,12 @@ button.weather-mod:focus-visible { outline: 2px solid #fff; outline-offset: 2px;
 .weather-sheet-panel {
   --sheet-radius: 22px;
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: min(480px, 100%);
-  max-height: min(82vh, 720px);
-  overflow: visible; /* ::after extension under drag */
+  max-height: min(88vh, 760px);
+  /* Contain children so surface can scroll; ::after still paints below for drag rubber-band */
+  overflow: hidden;
   border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
   background: linear-gradient(180deg, rgba(36, 44, 62, 0.98), rgba(18, 24, 38, 0.99));
   border: 1px solid rgba(255,255,255,.14);
@@ -757,13 +762,15 @@ button.weather-mod:focus-visible { outline: 2px solid #fff; outline-offset: 2px;
 .wx-sheet-surface {
   position: relative;
   z-index: 1;
-  max-height: min(80vh, 720px);
+  flex: 1 1 auto;
+  min-height: 0; /* critical: allow flex child to scroll inside max-height panel */
+  max-height: none;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  /* Slightly tighter side pad so charts use more horizontal space */
-  padding: 0 14px max(24px, env(safe-area-inset-bottom));
+  /* Bottom pad so last About line isn’t clipped under home indicator / panel edge */
+  padding: 0 14px max(40px, calc(16px + env(safe-area-inset-bottom, 0px)));
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -772,6 +779,13 @@ button.weather-mod:focus-visible { outline: 2px solid #fff; outline-offset: 2px;
     padding-left: 18px;
     padding-right: 18px;
   }
+}
+.wx-sheet-surface .wx-sheet-about {
+  padding-bottom: 8px;
+}
+.wx-sheet-surface .wx-sheet-about p {
+  /* Avoid last-line clip from tight overflow + subpixel rounding */
+  padding-bottom: 2px;
 }
 .weather-sheet-panel h3 { margin: 0 0 10px; font-family: var(--ff-display); font-size: 1.2rem; }
 .weather-sheet-panel p { margin: 0 0 10px; font-size: 14px; line-height: 1.55; color: rgba(255,255,255,.88); }
