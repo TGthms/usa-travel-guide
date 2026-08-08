@@ -62,6 +62,167 @@ async function blockLiveWeatherApis(page) {
   });
 }
 
+/**
+ * Fixture weather APIs so list rows paint with real pack.weather and openDetail can run
+ * without hitting live NWS/Open-Meteo (and without the prior openDetail ReferenceError path).
+ */
+async function fixtureWeatherApis(page) {
+  const now = Date.now();
+  const isoHour = (h) => new Date(now + h * 3600000).toISOString();
+  const dayIso = (d) => {
+    const t = new Date(now + d * 86400000);
+    return t.toISOString().slice(0, 10);
+  };
+  const nwsHourlyPeriods = Array.from({ length: 24 }, (_, i) => ({
+    startTime: isoHour(i),
+    endTime: isoHour(i + 1),
+    isDaytime: i % 24 < 18,
+    temperature: 70 + (i % 5),
+    temperatureUnit: 'F',
+    windSpeed: '8 mph',
+    windDirection: 'SW',
+    shortForecast: i % 3 === 0 ? 'Partly Cloudy' : 'Sunny',
+    probabilityOfPrecipitation: { value: 10 },
+  }));
+  const nwsDayPeriods = [];
+  for (let d = 0; d < 7; d++) {
+    nwsDayPeriods.push({
+      startTime: dayIso(d) + 'T12:00:00-04:00',
+      isDaytime: true,
+      temperature: 78,
+      temperatureUnit: 'F',
+      shortForecast: 'Sunny',
+    });
+    nwsDayPeriods.push({
+      startTime: dayIso(d) + 'T00:00:00-04:00',
+      isDaytime: false,
+      temperature: 58,
+      temperatureUnit: 'F',
+      shortForecast: 'Clear',
+    });
+  }
+  const omCurrent = {
+    time: isoHour(0),
+    temperature_2m: 22,
+    relative_humidity_2m: 55,
+    apparent_temperature: 21,
+    weather_code: 2,
+    wind_speed_10m: 3.5,
+    wind_direction_10m: 220,
+    surface_pressure: 1012,
+    visibility: 10000,
+    precipitation: 0,
+  };
+  const omHourly = {
+    time: Array.from({ length: 24 }, (_, i) => isoHour(i)),
+    temperature_2m: Array.from({ length: 24 }, (_, i) => 18 + (i % 6)),
+    apparent_temperature: Array.from({ length: 24 }, (_, i) => 17 + (i % 6)),
+    weather_code: Array.from({ length: 24 }, () => 2),
+    precipitation_probability: Array.from({ length: 24 }, () => 12),
+    precipitation: Array.from({ length: 24 }, () => 0),
+    wind_speed_10m: Array.from({ length: 24 }, () => 3),
+    wind_direction_10m: Array.from({ length: 24 }, () => 200),
+    relative_humidity_2m: Array.from({ length: 24 }, () => 50),
+    surface_pressure: Array.from({ length: 24 }, () => 1012),
+    uv_index: Array.from({ length: 24 }, () => 3),
+  };
+  const omDaily = {
+    time: Array.from({ length: 10 }, (_, d) => dayIso(d)),
+    weather_code: Array.from({ length: 10 }, () => 2),
+    temperature_2m_max: Array.from({ length: 10 }, () => 26),
+    temperature_2m_min: Array.from({ length: 10 }, () => 14),
+    sunrise: Array.from({ length: 10 }, (_, d) => dayIso(d) + 'T10:30:00Z'),
+    sunset: Array.from({ length: 10 }, (_, d) => dayIso(d) + 'T00:15:00Z'),
+    uv_index_max: Array.from({ length: 10 }, () => 6),
+    precipitation_sum: Array.from({ length: 10 }, () => 0),
+    precipitation_probability_max: Array.from({ length: 10 }, () => 20),
+  };
+  const omPack = {
+    latitude: 40.71,
+    longitude: -74.01,
+    timezone: 'America/New_York',
+    current: omCurrent,
+    hourly: omHourly,
+    daily: omDaily,
+  };
+
+  await page.route(/api\.weather\.gov\/points\//, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/geo+json',
+      body: JSON.stringify({
+        properties: {
+          gridId: 'OKX',
+          gridX: 33,
+          gridY: 37,
+          timeZone: 'America/New_York',
+          forecast: 'https://api.weather.gov/gridpoints/OKX/33,37/forecast',
+          forecastHourly: 'https://api.weather.gov/gridpoints/OKX/33,37/forecast/hourly',
+        },
+      }),
+    });
+  });
+  await page.route(/api\.weather\.gov\/gridpoints\/.+\/forecast(\/hourly)?/, async (route) => {
+    const hourly = /\/hourly/.test(route.request().url());
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/geo+json',
+      body: JSON.stringify({
+        properties: {
+          periods: hourly ? nwsHourlyPeriods : nwsDayPeriods,
+        },
+      }),
+    });
+  });
+  await page.route(/api\.weather\.gov\/alerts/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/geo+json',
+      body: JSON.stringify({ features: [] }),
+    });
+  });
+  await page.route(/api\.open-meteo\.com\/v1\/forecast/, async (route) => {
+    const url = route.request().url();
+    // Batch requests use comma-separated lats — return array of packs
+    if (/latitude=[^&]*,/.test(url)) {
+      const n = (url.match(/latitude=([^&]+)/) || [])[1].split(',').length;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(Array.from({ length: n }, () => omPack)),
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(omPack),
+    });
+  });
+  await page.route(/air-quality-api\.open-meteo\.com/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        current: { us_aqi: 42, pm2_5: 8, pm10: 12, european_aqi: 30 },
+      }),
+    });
+  });
+  await page.route(/geocoding-api\.open-meteo\.com/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        results: [{
+          id: 1, name: 'Boston', latitude: 42.36, longitude: -71.06,
+          admin1: 'Massachusetts', country: 'United States', country_code: 'US',
+          timezone: 'America/New_York',
+        }],
+      }),
+    });
+  });
+}
+
 test.describe('USA Travel Guide smoke', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/index.html');
@@ -337,7 +498,7 @@ test.describe('USA Travel Guide smoke', () => {
     // Static source check — class-based open/close, no native details
     const fs = require('fs');
     const path = require('path');
-    const weatherJs = fs.readFileSync(path.join(__dirname, '../src/js/features/weather.js'), 'utf8');
+    const weatherJs = fs.readFileSync(path.join(__dirname, '../src/js/features/weather/alerts.js'), 'utf8');
     expect(weatherJs).toMatch(/class="weather-alert/);
     expect(weatherJs).toMatch(/weather-alert-summary/);
     expect(weatherJs).toMatch(/is-open/);
@@ -423,13 +584,86 @@ test.describe('USA Travel Guide smoke', () => {
       return btn && !btn.disabled;
     }, null, { timeout: 45_000 });
     await expect(refresh).toBeEnabled();
+
+    // List rows must be hit-testable (ghost detail/sheet PE regression)
+    await page.waitForFunction(() => {
+      return document.querySelectorAll('#weatherList .weather-row').length > 0;
+    }, null, { timeout: 45_000 });
+    const hitOk = await page.evaluate(() => {
+      const r = document.querySelector('#weatherList .weather-row');
+      if (!r) return false;
+      const rect = r.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + Math.min(rect.height / 2, 20);
+      const el = document.elementFromPoint(cx, cy);
+      if (!el) return false;
+      return !!(el.closest && el.closest('.weather-row'));
+    });
+    expect(hitOk).toBeTruthy();
+    // PE on closed detail shell
+    const detailPe = await page.locator('#weatherDetail').evaluate((el) => getComputedStyle(el).pointerEvents);
+    expect(detailPe).toBe('none');
+    // Closed detail children must not steal hits either
+    const barPe = await page.evaluate(() => {
+      const bar = document.querySelector('#weatherDetail .weather-detail-bar');
+      return bar ? getComputedStyle(bar).pointerEvents : 'none';
+    });
+    expect(barPe).toBe('none');
+  });
+
+  test('weather city row click opens detail and Done returns to list', async ({ page }) => {
+    // Real open path (regression: openDetail threw "w is not defined" mid-render)
+    await fixtureWeatherApis(page);
+    const pageErrors = [];
+    page.on('pageerror', (e) => pageErrors.push(e.message));
+    await page.goto('/tools-weather.html');
+    await waitLoaderGone(page);
+    await page.waitForFunction(() => {
+      return document.querySelectorAll('#weatherList .weather-row:not(.weather-row--error)').length > 0;
+    }, null, { timeout: 45_000 });
+
+    await page.locator('#weatherList .weather-row:not(.weather-row--error)').first().click();
+    await expect(page.locator('#weatherDetail')).toHaveClass(/open/, { timeout: 10_000 });
+    await expect(page.locator('#weatherDetail')).toHaveAttribute('aria-hidden', 'false');
+    await expect(page.locator('#weatherDetailHero')).not.toBeEmpty();
+    // Daily module must render (where the split bug used timezone)
+    await expect(page.locator('#weatherModules .weather-mod-wide').first()).toBeVisible();
+
+    await page.locator('#weatherDetailBack').click();
+    await expect(page.locator('#weatherDetail')).not.toHaveClass(/open/, { timeout: 5_000 });
+    const listHit = await page.evaluate(() => {
+      const r = document.querySelector('#weatherList .weather-row');
+      if (!r) return false;
+      const rect = r.getBoundingClientRect();
+      const el = document.elementFromPoint(rect.left + rect.width / 2, rect.top + 16);
+      return !!(el && el.closest && el.closest('.weather-row'));
+    });
+    expect(listHit).toBeTruthy();
+
+    // Second open (another city) still works
+    await page.locator('#weatherList .weather-row:not(.weather-row--error)').nth(1).click();
+    await expect(page.locator('#weatherDetail')).toHaveClass(/open/, { timeout: 10_000 });
+    expect(pageErrors.filter((m) => /is not defined/i.test(m))).toEqual([]);
+
+    // Detail module tiles must open sheets (split deps regression: wind/pressure/precip/sun)
+    for (const kind of ['wind', 'pressure', 'precip', 'sun', 'feels']) {
+      const tile = page.locator(`#weatherModules [data-sheet="${kind}"]`).first();
+      if (!(await tile.count())) continue;
+      await tile.scrollIntoViewIfNeeded();
+      await tile.click();
+      await expect(page.locator('#weatherSheet')).toHaveClass(/open/, { timeout: 5_000 });
+      await expect(page.locator('#weatherSheetBody')).not.toBeEmpty();
+      await page.keyboard.press('Escape');
+      await expect(page.locator('#weatherSheet')).not.toHaveClass(/open/, { timeout: 5_000 });
+    }
+    expect(pageErrors.filter((m) => /is not defined/i.test(m))).toEqual([]);
   });
 
   test('weather auto-refresh is 10 minutes and pauses when document hidden', async ({ page }) => {
     // Static contract check + runtime pause behavior (no live APIs)
     const fs = require('fs');
     const path = require('path');
-    const src = fs.readFileSync(path.join(process.cwd(), 'src/js/features/weather.js'), 'utf8');
+    const src = fs.readFileSync(path.join(process.cwd(), 'src/js/features/weather/app.js'), 'utf8');
     expect(src).toMatch(/REFRESH_MS\s*=\s*10\s*\*\s*60\s*\*\s*1000/);
     expect(src).toMatch(/scheduleAutoRefresh/);
     expect(src).toMatch(/clearAutoRefresh/);

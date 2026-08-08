@@ -176,6 +176,16 @@ html[data-motion-effective="off"] .weather-row:active { transform: none; }
   color: #fff;
 }
 .weather-row-hl { font-size: 12px; color: rgba(255,255,255,.82); margin-top: 4px; }
+.weather-row-updated {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.58);
+  margin-top: 4px;
+  letter-spacing: 0.01em;
+}
+.weather-row-updated--fail {
+  color: rgba(255, 200, 160, 0.88);
+}
 .weather-row-star {
   grid-column: 3;
   grid-row: 1 / span 2;
@@ -2137,13 +2147,30 @@ html[data-motion-effective="off"] .weather-list li {
 }
 /* Mini compass lives in .weather-mod-foot via .weather-compass--mini */
 
-.weather-detail-bar {
+/* Interactive PE only when detail is OPEN — closed shell must never steal list taps.
+   Nuclear: kill the entire closed subtree (children default to PE:auto and can steal hits). */
+.weather-detail:not(.open),
+.weather-detail:not(.open) * {
+  pointer-events: none !important;
+}
+.weather-sheet:not(.open),
+.weather-sheet:not(.open) * {
+  pointer-events: none !important;
+}
+.weather-detail:not(.open) .weather-detail-bar,
+.weather-detail:not(.open) .weather-detail-bar .weather-btn,
+.weather-detail:not(.open) .weather-detail-scroll,
+.weather-detail:not(.open) .weather-modules,
+.weather-detail:not(.open) .weather-mod {
+  pointer-events: none !important;
+}
+.weather-detail.open .weather-detail-bar {
   position: sticky !important;
   top: 0 !important;
   z-index: 5 !important;
   pointer-events: auto !important;
 }
-.weather-detail-bar .weather-btn {
+.weather-detail.open .weather-detail-bar .weather-btn {
   pointer-events: auto !important;
   position: relative;
   z-index: 6;
@@ -2609,14 +2636,36 @@ body.weather-detail-open {
   overscroll-behavior-y: auto; /* bounce restored */
   background: transparent !important;
   border-radius: 0 !important;
+  /* Default none — only open detail enables interaction (avoids ghost layer over list) */
+  pointer-events: none !important;
+}
+.weather-detail.open .weather-detail-scroll {
   pointer-events: auto !important;
 }
 /* Modules must always receive taps when detail is open */
 .weather-detail.open .weather-modules,
 .weather-detail.open .weather-mod,
+.weather-detail.open .weather-mod *,
 .weather-detail.open .weather-detail-bar,
-.weather-detail.open .weather-detail-bar .weather-btn {
+.weather-detail.open .weather-detail-bar .weather-btn,
+.weather-detail.open .weather-detail-hero,
+.weather-detail.open .weather-detail-scroll {
   pointer-events: auto !important;
+}
+/* Decorative foot viz should not swallow taps from the parent button */
+.weather-detail.open .weather-mod-foot,
+.weather-detail.open .weather-mod-viz,
+.weather-detail.open .weather-compass,
+.weather-detail.open .weather-mod-foot * {
+  pointer-events: none !important;
+}
+/* Tappable tiles are buttons — keep cursor honest */
+.weather-detail.open button.weather-mod.is-tappable {
+  cursor: pointer !important;
+}
+/* 10-day block is display-only (not a sheet) — do not look clickable */
+.weather-detail.open .weather-mod-wide:not([data-sheet]):not(button) {
+  cursor: default !important;
 }
 .weather-detail-bar {
   position: sticky !important;
@@ -2631,16 +2680,19 @@ body.weather-detail-open {
   margin: 0 !important;
   padding: max(12px, env(safe-area-inset-top)) 16px 12px !important;
   background: linear-gradient(to bottom, rgba(0,0,0,.45) 0%, rgba(0,0,0,.2) 70%, transparent) !important;
-  pointer-events: auto !important;
+  pointer-events: none !important;
   flex-shrink: 0 !important;
   border-radius: 0 !important;
   box-sizing: border-box !important;
+}
+.weather-detail.open .weather-detail-bar {
+  pointer-events: auto !important;
 }
 .weather-detail-bar .weather-btn,
 .weather-detail-bar .weather-btn-pill {
   position: relative !important;
   z-index: 31 !important;
-  pointer-events: auto !important;
+  pointer-events: none !important;
   min-height: 40px !important;
   padding: 8px 16px !important;
   border-radius: 999px !important;
@@ -2652,6 +2704,10 @@ body.weather-detail-open {
   box-shadow: 0 2px 10px rgba(0,0,0,.15) !important;
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+.weather-detail.open .weather-detail-bar .weather-btn,
+.weather-detail.open .weather-detail-bar .weather-btn-pill {
+  pointer-events: auto !important;
 }
 .weather-detail-bar #weatherDetailBack,
 .weather-detail-bar .weather-btn-done {
@@ -3168,8 +3224,14 @@ html[data-theme="glass"] .weather-page-sky {
   max-width: 100% !important;
   width: 100% !important;
   box-sizing: border-box !important;
-  overflow: hidden !important;
+  /* visible so Y-axis labels in SVG pad aren’t clipped */
+  overflow: visible !important;
   min-width: 0 !important;
+}
+.wx-sheet-surface .weather-chart-wrap {
+  /* slight inset so end-anchored axis text isn’t flush to the sheet edge */
+  margin-left: 2px !important;
+  margin-right: 2px !important;
 }
 .weather-chart-wrap .weather-chart-readout {
   font-family: var(--ff-display);
@@ -3191,6 +3253,14 @@ html[data-theme="glass"] .weather-page-sky {
   display: block;
   touch-action: none;
   cursor: ew-resize;
+  overflow: visible;
+}
+.weather-chart text.wx-chart-axis-y {
+  /* keep axis readable against sheet background */
+  paint-order: stroke fill;
+  stroke: rgba(10, 16, 28, 0.45);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
 }
 .weather-chart [data-hit] {
   cursor: ew-resize;

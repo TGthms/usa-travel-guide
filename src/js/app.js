@@ -18,7 +18,7 @@
    1. core/env.js
    2. core/runtime.js      prefs · i18n · chrome · settings
    3. features/tools.js    (tools hub + currency/clock/tip/drive/emergency)
-   4. features/weather.js  (tools-weather only — registers refreshWeatherUi)
+   4. features/weather/*   (tools-weather only — ns/sky/charts/alerts/data/app)
    5. features/home.js     (index)
    6. features/legal.js    (privacy / terms)
    7. features/gallery.js  (gallery page)

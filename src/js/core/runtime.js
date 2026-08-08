@@ -494,14 +494,27 @@ function detectRegionFromTimeZone() {
   return '';
 }
 
+/**
+ * UK (and similar) use °C with miles — not full US imperial.
+ * Temp °F regions ≈ classic imperial set; dist mi includes UK.
+ */
+const TEMP_F_REGIONS = new Set(['US', 'LR', 'MM', 'BS', 'BZ', 'KY', 'PW', 'FM', 'MH', 'GU', 'AS', 'MP', 'VI', 'PR']);
+const DIST_MI_REGIONS = new Set([
+  'US', 'LR', 'MM', 'BS', 'BZ', 'KY', 'PW', 'FM', 'MH', 'GU', 'AS', 'MP', 'VI', 'PR',
+  'GB', 'UK' // United Kingdom: °C + miles
+]);
+
 function unitsFromRegion(region) {
   if (!region) return null;
   if (region === 'EU') return { temp: 'c', dist: 'km', source: 'timezone:EU' };
-  const imperial = IMPERIAL_REGIONS.has(region);
+  // Normalize UK code
+  const r = region === 'UK' ? 'GB' : region;
+  const tempF = TEMP_F_REGIONS.has(r) || TEMP_F_REGIONS.has(region);
+  const distMi = DIST_MI_REGIONS.has(r) || DIST_MI_REGIONS.has(region);
   return {
-    temp: imperial ? 'f' : 'c',
-    dist: imperial ? 'mi' : 'km',
-    source: 'region:' + region
+    temp: tempF ? 'f' : 'c',
+    dist: distMi ? 'mi' : 'km',
+    source: 'region:' + r
   };
 }
 
@@ -1058,6 +1071,19 @@ updateUnitUI();
 // Ensure guide unit spans match Auto detection on first paint
 applyUnits();
 updateUnitsResolvedHint();
+
+/** Shared public namespace — prefer this over loose globals going forward. */
+window.USATravel = Object.assign(window.USATravel || {}, {
+  getTempUnitPreference: window.getTempUnitPreference,
+  setTempUnitPreference: window.setTempUnitPreference,
+  getDistUnitPreference: window.getDistUnitPreference,
+  setDistUnitPreference: window.setDistUnitPreference,
+  getEffectiveTempUnit: window.getEffectiveTempUnit,
+  getEffectiveDistUnit: window.getEffectiveDistUnit,
+  detectUnits: detectUnits,
+  resolveUnitsFromPrefs: resolveUnitsFromPrefs,
+  debugUnits: window.__usaTravelUnits
+});
 
 /* ── ACCESSIBILITY PILLS (Animations: full / reduced / off · Cursor Effect) ── */
 const motionPills = document.querySelectorAll('#motionPillGroup .pill-btn');

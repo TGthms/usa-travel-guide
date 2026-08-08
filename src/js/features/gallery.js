@@ -126,6 +126,16 @@ function initGalleryItem(item, index) {
   const img = item.querySelector('img');
   if (img) {
     img.setAttribute('decoding', 'async');
+    // Prefer WebP thumbs when present (JPEG remains on data-thumb / data-full for HDR Full)
+    const thumbWebp = img.getAttribute('data-thumb-webp');
+    if (thumbWebp && img.getAttribute('src') !== thumbWebp) {
+      img.setAttribute('src', thumbWebp);
+    }
+    // Prefer descriptive alt already in markup; fall back to caption for a11y
+    if (!(img.getAttribute('alt') || '').trim()) {
+      const cap = item.querySelector('.gallery-caption');
+      if (cap) img.setAttribute('alt', cap.textContent.trim());
+    }
     // Eager-load the first few above-the-fold tiles on the dedicated gallery page.
     // On constrained viewports only warm the first tile (memory budget).
     const eagerCount = ENV.constrained ? 1 : 4;
@@ -629,10 +639,16 @@ function galleryFullSrc(img) {
 }
 function galleryThumbSrc(img) {
   if (!img) return '';
+  // Prefer WebP thumb when present (grid / progressive load)
+  const webp = img.getAttribute('data-thumb-webp');
+  if (webp) return webp;
   return img.getAttribute('data-thumb') || img.currentSrc || img.src || '';
 }
 function galleryMediumSrc(img) {
   if (!img) return '';
+  // WebP medium for lightbox (Full quality stays original JPEG — HDR-safe)
+  const webp = img.getAttribute('data-medium-webp');
+  if (webp) return webp;
   return img.getAttribute('data-medium') || '';
 }
 

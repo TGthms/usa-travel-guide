@@ -437,6 +437,87 @@ def find_object_block(src: str, open_brace_index: int) -> tuple[int, int]:
     raise RuntimeError("Unbalanced braces while scanning i18n.js language block")
 
 
+def describe_alt(
+    caption: str,
+    location: str = "",
+    category: str = "",
+    date: str = "",
+) -> str:
+    """
+    Build a VoiceOver-friendly description (not a bare title).
+    Example: "Photograph of Golden Gate Bridge in San Francisco, California — landmark, May 23, 2026"
+    """
+    cat_phrase = {
+        "landmarks": "landmark",
+        "coast": "coastal scene",
+        "nature": "nature landscape",
+        "roads": "road trip view",
+        "cities": "city scene",
+        "food": "food photo",
+        "parks": "park scene",
+        "desert": "desert landscape",
+        "nightlife": "night scene",
+        "hotels": "hotel exterior",
+        "attractions": "attraction",
+        "lasvegas": "Las Vegas scene",
+        "california": "California travel photo",
+    }
+    subject = (caption or "Travel photograph").strip()
+    loc = (location or "").strip()
+    if loc.endswith(", CA"):
+        loc_full = loc.replace(", CA", ", California")
+    elif loc.endswith(", NV"):
+        loc_full = loc.replace(", NV", ", Nevada")
+    elif loc.endswith(", UT"):
+        loc_full = loc.replace(", UT", ", Utah")
+    else:
+        loc_full = loc
+    kind = cat_phrase.get((category or "").strip().lower(), "travel photograph")
+    if loc_full:
+        loc_key = loc_full.split(",")[0].strip().lower()
+        alt = f"Photograph of {subject}"
+        if loc_key and loc_key not in subject.lower():
+            alt += f" in {loc_full}"
+        elif loc_full and loc_full.lower() not in subject.lower():
+            alt += f", {loc_full}"
+        alt += f" — {kind}"
+    else:
+        alt = f"Photograph of {subject} — {kind}"
+    if (date or "").strip():
+        alt += f", {date.strip()}"
+    alt = re.sub(r"\s+", " ", alt).strip()
+    if len(alt) > 180:
+        alt = alt[:177].rsplit(" ", 1)[0] + "…"
+    return alt
+
+
+def write_webp_from_jpeg(jpeg_path: Path, webp_path: Path, quality: int = 82) -> bool:
+    """
+    Encode a WebP beside a JPEG (thumbs / medium only — never Full/HDR originals).
+    Uses Pillow when available. Returns True on success.
+    """
+    try:
+        from PIL import Image  # type: ignore
+    except ImportError:
+        return False
+    try:
+        jpeg_path = Path(jpeg_path)
+        webp_path = Path(webp_path)
+        if not jpeg_path.is_file():
+            return False
+        webp_path.parent.mkdir(parents=True, exist_ok=True)
+        with Image.open(jpeg_path) as im:
+            # Flatten alpha for web gallery photos
+            if im.mode in ("RGBA", "P"):
+                im = im.convert("RGB")
+            elif im.mode != "RGB":
+                im = im.convert("RGB")
+            im.save(webp_path, "WEBP", quality=int(quality), method=4)
+        return webp_path.is_file() and webp_path.stat().st_size > 32
+    except Exception:
+        return False
+
+
 def caption_from_filename(name: str) -> str:
     stem = Path(name).stem
     stem = re.sub(r"[_\-]+", " ", stem)
@@ -1346,17 +1427,25 @@ def html_item_block(
     th: int,
     filename: str,
     video_filename: str | None = None,
+    thumb_webp: bool = False,
+    medium_webp: bool = False,
 ) -> str:
-    alt_esc = html.escape(alt or caption, quote=True)
+    alt_esc = html.escape(alt or describe_alt(caption, location, category, date), quote=True)
     loc_esc = html.escape(location, quote=True)
     date_esc = html.escape(date, quote=True)
     cat_esc = html.escape(category, quote=True)
     file_esc = html.escape(filename, quote=True)
+    stem = Path(filename).stem
     city, state = parse_location_parts(location)
     city_esc = html.escape(city, quote=True)
     state_esc = html.escape(state, quote=True)
     media_attr = ' data-media="video"' if video_filename else ""
     video_attr = ""
+    webp_attrs = ""
+    if thumb_webp:
+        webp_attrs += f' data-thumb-webp="images/gallery/thumbs/{html.escape(stem, quote=True)}.webp"'
+    if medium_webp:
+        webp_attrs += f' data-medium-webp="images/gallery/medium/{html.escape(stem, quote=True)}.webp"'
     if video_filename:
         v_esc = html.escape(video_filename, quote=True)
         video_attr = f' data-video="images/gallery/videos/{v_esc}"'
@@ -1375,7 +1464,7 @@ def html_item_block(
         f'      <img src="images/gallery/thumbs/{file_esc}" '
         f'data-thumb="images/gallery/thumbs/{file_esc}" '
         f'data-medium="images/gallery/medium/{file_esc}" '
-        f'data-full="images/gallery/{file_esc}"{video_attr} '
+        f'data-full="images/gallery/{file_esc}"{webp_attrs}{video_attr} '
         f'width="{tw}" height="{th}" alt="{alt_esc}" loading="lazy" decoding="async">\n'
         f"{badge}"
         f'      <div class="gallery-caption" data-i18n="gallery.item.{slug}.caption">'
@@ -1601,7 +1690,10 @@ def process_one(
         None if is_temp_or_generic_stem(Path(src.name).stem) else src.name
     )
     cap = (caption or caption_from_filename(name_for_caption or "Untitled")).strip()
-    alt_text = (alt or cap).strip()
+    # Explicit alt wins; otherwise build a descriptive VoiceOver sentence (not bare title)
+    alt_text = (alt or "").strip()
+    if not alt_text:
+        alt_text = describe_alt(cap, location or "", category or "", date or "")
 
     is_video = is_video_path(src, original_name)
     # Auto-fill empty/placeholder date/location from EXIF/GPS when possible.
@@ -1723,9 +1815,17 @@ def process_one(
                         fw, fh = mw, mh
             else:
                 # Thumbs: small for the grid. Medium: default lightbox. Full: optional HD.
+                # Full stays original JPEG byte-for-byte (HDR-safe). WebP only for thumb/medium.
                 tw, th = sips_export(src, thumb_path, THUMB_MAX, THUMB_QUALITY)
                 mw, mh = sips_export(src, medium_path, MEDIUM_MAX, MEDIUM_QUALITY)
                 fw, fh, full_mode = export_full_image(src, full_path)
+
+            thumb_webp_ok = write_webp_from_jpeg(
+                thumb_path, thumb_path.with_suffix(".webp"), quality=80
+            )
+            medium_webp_ok = write_webp_from_jpeg(
+                medium_path, medium_path.with_suffix(".webp"), quality=82
+            )
 
             block = html_item_block(
                 slug=slug,
@@ -1738,6 +1838,8 @@ def process_one(
                 th=th,
                 filename=filename,
                 video_filename=video_filename,
+                thumb_webp=thumb_webp_ok,
+                medium_webp=medium_webp_ok,
             )
             insert_gallery_html(block)
             i18n_n = insert_i18n(slug, cap)
@@ -2145,7 +2247,12 @@ def update_one(
     date = date if date is not None else item["date"]
     old_caption = (item.get("caption") or "").strip()
     caption = (caption if caption is not None else old_caption).strip()
-    alt = (alt if alt is not None else caption).strip()
+    if alt is None:
+        alt = (item.get("alt") or "").strip()
+    else:
+        alt = (alt or "").strip()
+    if not alt:
+        alt = describe_alt(caption, location or "", category or "", date or "")
     if category not in CATEGORIES:
         raise ValueError(f"Invalid category '{category}'")
     location = _abbreviate_location_state((location or "").strip())
@@ -2543,6 +2650,8 @@ function renderQueue() {
       <div class="fields">
         <div class="name">${escAttr(item.file.name)}${isVid ? ' · <span class="badge-warn">VIDEO</span>' : ''}${item.warn ? ' · <span class="badge-warn">'+escAttr(item.warn)+'</span>' : ''}</div>
         <label>Caption <input data-k="caption" data-i="${i}" value="${escAttr(item.caption)}"></label>
+        <label>VoiceOver / alt text <span class="hint" style="display:inline;margin:0">(optional — leave blank to auto-describe)</span>
+          <input data-k="alt" data-i="${i}" value="${escAttr(item.alt||'')}" placeholder="Auto from caption + location if empty"></label>
         <div class="grid3">
           <label>Category <select data-k="category" data-i="${i}">${catOptions(item.category)}</select></label>
           <label>Date <input type="date" data-k="date" data-i="${i}" value="${escAttr(toPickerISO(item.date))}"></label>
@@ -2758,6 +2867,7 @@ function renderLibrary() {
       <img src="/site/${item.thumb}?t=${Date.now()}" alt="">
       <div class="fields">
         <label>Caption <input data-f="caption" value="${escAttr(item.caption)}"></label>
+        <label>VoiceOver / alt text <input data-f="alt" value="${escAttr(item.alt||'')}" placeholder="Screen reader description"></label>
         <div class="grid3">
           <label>Category <select data-f="category">${catOptions(item.category)}</select></label>
           <label>Date <input type="date" data-f="date" value="${escAttr(toPickerISO(item.date))}"></label>
@@ -2793,6 +2903,7 @@ async function saveExisting(card, item) {
     slug: item.slug,
     filename: item.filename,
     caption: $('[data-f=caption]', card).value.trim(),
+    alt: $('[data-f=alt]', card).value.trim(),
     category: $('[data-f=category]', card).value,
     date: dateVal,
     location: $('[data-f=location]', card).value.trim(),
@@ -2863,6 +2974,7 @@ uploadBtn.addEventListener('click', async () => {
     fd.append('file', item.file);
     if (item.coverFile) fd.append('cover', item.coverFile);
     fd.append('category', item.category);
+    if ((item.alt || '').trim()) fd.append('alt', item.alt.trim());
     // Send current values. Generic "United States" is a known placeholder on the
     // server — if EXIF/GPS exists it still overrides; otherwise it stays.
     fd.append('location', (item.location || '').trim() || fallbackLocation());
@@ -3044,6 +3156,7 @@ class Handler(BaseHTTPRequestHandler):
             location = (fields.get("location") or ["United States"])[0]
             date = (fields.get("date") or [""])[0]
             caption = (fields.get("caption") or [None])[0]
+            alt_field = (fields.get("alt") or [None])[0]
             # Original client filename is the only reliable source for the
             # gallery slug / i18n key. process_one used to slugify the
             # NamedTemporaryFile path (tmpXXXX) which produced broken keys.
@@ -3052,6 +3165,8 @@ class Handler(BaseHTTPRequestHandler):
                 caption = caption_from_filename(original_name)
             # ISO from native picker or English display → normalize inside process_one
             date = (date or "").strip()
+            # Empty alt → process_one builds a descriptive VoiceOver string
+            alt_val = (alt_field or "").strip() or None
 
             cover_tmp = None
             with tempfile.NamedTemporaryFile(suffix=Path(original_name).suffix or ".jpg", delete=False) as tmp:
@@ -3072,7 +3187,7 @@ class Handler(BaseHTTPRequestHandler):
                     location=location,
                     date=date,
                     caption=caption,
-                    alt=caption,
+                    alt=alt_val,
                     original_name=original_name,
                     cover_path=cover_tmp,
                 )

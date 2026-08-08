@@ -1,3 +1,38 @@
+# Maintainer tools
+
+Local-only utilities. **Strip `tools/` from public deploys** (Cloudflare / GitHub Pages).
+
+---
+
+## Legal markdown builder
+
+Privacy Policy and Terms of Use live as editable markdown under `docs/legal/`:
+
+```
+docs/legal/{en,es,zh,ja}/{privacy,terms}.md
+```
+
+Each file has YAML frontmatter (`title`, `lead`, …) and sections:
+
+```markdown
+## Section Title {#section-id}
+
+<p>HTML body (links, lists, emphasis)…</p>
+```
+
+Regenerate the runtime pack after any edit:
+
+```bash
+node tools/build-legal.js
+# → src/js/data/legal-i18n.js
+```
+
+Or: `npm run build:legal`
+
+Do **not** hand-edit `legal-i18n.js` — it is generated. English is the legal source of meaning; es/zh/ja are natural product-policy voice (same structure).
+
+---
+
 # Gallery Manager
 
 Local mini-app for bulk-adding trip **photos and videos** to this site — **no hand-editing HTML**, no manual thumbnails.
@@ -135,3 +170,11 @@ HTML attributes per item: `data-category`, `data-location`, `data-city`, `data-s
 plus `data-thumb` / `data-medium` / `data-full` on the `<img>`.
 
 `data-date` uses **Month D, YYYY** when a day is known (e.g. `June 1, 2026`), otherwise month-only (`July 2026`).
+
+## Gallery media notes (v5+)
+
+- **Full** images stay original JPEG (byte-for-byte) so Apple HDR gain maps are preserved.
+- **Thumbs + medium** also get WebP siblings (via Pillow) for faster grids/lightbox.
+- **Alt / VoiceOver**: optional field in Gallery Manager; blank → auto descriptive sentence (not bare title).
+  Rebuild descriptive alts: re-save items, or re-run the backfill script used at ship time.
+- WebP encode needs **Pillow** (`pip3 install pillow`). `cwebp` optional; not required when Pillow works.
