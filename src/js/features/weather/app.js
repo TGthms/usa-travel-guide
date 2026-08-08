@@ -1769,13 +1769,10 @@
       inertSheet();
     }
 
-    // Un-hide before open animation so opacity transition can run
-    try { detailEl.hidden = false; } catch (eHid) { /* ignore */ }
-    try { detailEl.inert = false; } catch (eInert) { /* older browsers */ }
-    detailEl.setAttribute('aria-hidden', 'false');
+    // Un-hide + a11y before open animation (re-assert when .open is applied)
+    markDetailInteractive();
     detailEl.style.transform = 'none';
     detailEl.style.animation = '';
-    detailEl.style.pointerEvents = '';
     lockDetailPage();
 
     // Scroll reset only when opening/switching cities — not on unit re-render
@@ -1792,6 +1789,7 @@
     if (!wasOpen) {
       const reversing = isClosing;
       if (!reversing) {
+        // Keep .open absent only for the opacity prep frame — re-mark interactive after
         detailEl.classList.remove('open', 'wx-detail-enter');
         detailEl.style.transition = 'none';
         detailEl.style.opacity = '0';
@@ -1807,6 +1805,8 @@
         window.requestAnimationFrame(function () {
           if (motionGen !== detailMotionGen) return;
           detailEl.classList.add('open', 'wx-detail-enter');
+          // Re-assert after rAF window so list-paint races cannot leave inert/hidden open
+          markDetailInteractive();
           if (detailEnterTimer) window.clearTimeout(detailEnterTimer);
           detailEnterTimer = window.setTimeout(function () {
             if (motionGen !== detailMotionGen) return;
@@ -1818,6 +1818,7 @@
     } else {
       detailEl.classList.add('open');
       detailEl.classList.remove('wx-detail-enter');
+      markDetailInteractive();
     }
 
     if (!wasOpen && detailBack && typeof detailBack.focus === 'function') {
@@ -2527,28 +2528,40 @@
   /**
    * Ensure list is tappable: clear stuck body lock + ghost detail/sheet PE.
    * Call when list is shown and detail is not open (boot, after close, list paint).
+   * IMPORTANT: never clobber mid-open — openDetail sets openCity before .open lands
+   * (enter uses double rAF). Racing list paints used to leave .open + aria-hidden=true + inert.
    */
   function ensureListTappable() {
+    // Detail open, opening, or closing — leave it alone
+    if (isDetailVisible()) return;
+    if (openCity && detailEl && !detailEl.classList.contains('is-closing')) return;
+    if (detailEl && detailEl.classList.contains('is-closing')) return;
+
     // Stuck body lock without a visible detail = list dead to taps
-    if (document.body.classList.contains('weather-detail-open') && !isDetailVisible()) {
+    if (document.body.classList.contains('weather-detail-open')) {
       unlockDetailPage();
     }
-    if (isDetailVisible()) return;
     try {
       if (detailEl) {
-        if (!detailEl.classList.contains('is-closing')) {
-          detailEl.classList.remove('open', 'wx-detail-enter');
-        }
+        detailEl.classList.remove('open', 'wx-detail-enter');
         detailEl.setAttribute('aria-hidden', 'true');
         detailEl.style.pointerEvents = 'none';
         try { detailEl.inert = true; } catch (eInert) { /* older browsers */ }
-        // Keep in DOM for transitions; hidden after finishDetailClose
       }
     } catch (e) { /* ignore */ }
     unlockDetailPage();
     if (!isSheetOpen()) {
       try { inertSheet(); } catch (e2) { /* ignore */ }
     }
+  }
+
+  /** Apply interactive a11y state for an open detail (idempotent). */
+  function markDetailInteractive() {
+    if (!detailEl) return;
+    try { detailEl.hidden = false; } catch (eHid) { /* ignore */ }
+    try { detailEl.inert = false; } catch (eInert) { /* older browsers */ }
+    detailEl.setAttribute('aria-hidden', 'false');
+    detailEl.style.pointerEvents = '';
   }
 
   function finishDetailClose() {

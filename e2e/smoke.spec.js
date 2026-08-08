@@ -225,11 +225,12 @@ async function fixtureWeatherApis(page) {
 
 test.describe('USA Travel Guide smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/index.html');
+    // Prefer goto over reload — python http.server can ERR_CONNECTION_RESET under reload races
+    await page.goto('/index.html', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       try { localStorage.clear(); } catch (_) { /* ignore */ }
     });
-    await page.reload();
+    await page.goto('/index.html', { waitUntil: 'domcontentloaded' });
     await waitAppReady(page);
   });
 
@@ -623,22 +624,30 @@ test.describe('USA Travel Guide smoke', () => {
     }, null, { timeout: 45_000 });
 
     await page.locator('#weatherList .weather-row:not(.weather-row--error)').first().click();
-    await expect(page.locator('#weatherDetail')).toHaveClass(/open/, { timeout: 10_000 });
-    await expect(page.locator('#weatherDetail')).toHaveAttribute('aria-hidden', 'false');
+    // Open + a11y after double-rAF enter (must not stay inert/aria-hidden from list-paint race)
+    await page.waitForFunction(() => {
+      const d = document.getElementById('weatherDetail');
+      return !!(d && d.classList.contains('open')
+        && d.getAttribute('aria-hidden') === 'false'
+        && !d.inert
+        && !d.hidden);
+    }, null, { timeout: 10_000 });
     await expect(page.locator('#weatherDetailHero')).not.toBeEmpty();
     // Daily module must render (where the split bug used timezone)
     await expect(page.locator('#weatherModules .weather-mod-wide').first()).toBeVisible();
 
     await page.locator('#weatherDetailBack').click();
-    await expect(page.locator('#weatherDetail')).not.toHaveClass(/open/, { timeout: 5_000 });
-    const listHit = await page.evaluate(() => {
+    await expect(page.locator('#weatherDetail')).not.toHaveClass(/open/, { timeout: 8_000 });
+    // After close, list must be hit-testable (wait for finishDetailClose + PE restore)
+    await page.waitForFunction(() => {
+      const d = document.getElementById('weatherDetail');
       const r = document.querySelector('#weatherList .weather-row');
-      if (!r) return false;
+      if (!d || !r || d.classList.contains('open')) return false;
       const rect = r.getBoundingClientRect();
+      if (rect.width < 4 || rect.height < 4) return false;
       const el = document.elementFromPoint(rect.left + rect.width / 2, rect.top + 16);
       return !!(el && el.closest && el.closest('.weather-row'));
-    });
-    expect(listHit).toBeTruthy();
+    }, null, { timeout: 10_000 });
 
     // Second open (another city) still works
     await page.locator('#weatherList .weather-row:not(.weather-row--error)').nth(1).click();
