@@ -795,10 +795,15 @@ const prefersReducedMotionMQ = safeMatchMedia('(prefers-reduced-motion: reduce)'
  * - full: standard experience
  */
 function getEffectiveMotionMode() {
+  // Tiny / wearable webviews: always off (GPU + battery budget)
   if (ENV.constrained) return 'off';
+  // Explicit user choice always wins (Settings “Full” must re-enable motion
+  // even when OS prefers-reduced-motion is on — user opted in)
   if (motionMode === 'off') return 'off';
-  // OS “prefers reduced motion” never upgrades past reduced
-  if (motionMode === 'reduced' || prefersReducedMotionMQ.matches) return 'reduced';
+  if (motionMode === 'full') return 'full';
+  if (motionMode === 'reduced') return 'reduced';
+  // Unset / unexpected: fall back to OS preference
+  if (prefersReducedMotionMQ.matches) return 'reduced';
   return 'full';
 }
 
@@ -828,10 +833,10 @@ function applyMotionModeToDom() {
 
 applyMotionModeToDom();
 
-/** Instant anchors when motion is reduced/off or on mobile (smoother under load). */
+/** Instant anchors when motion is reduced/off; smooth when Full (incl. mobile). */
 function scrollBehaviorPref() {
   const mode = getEffectiveMotionMode();
-  if (mode !== 'full' || ENV.mobile) return 'auto';
+  if (mode !== 'full') return 'auto';
   return 'smooth';
 }
 

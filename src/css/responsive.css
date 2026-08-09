@@ -690,13 +690,9 @@ html[lang="ja"] .modal-title {
 
 html[data-lang="zh"] .nav-mobile a,
 html[data-lang="ja"] .nav-mobile a,
-html[data-lang="zh"] .nav-mobile-settings,
-html[data-lang="ja"] .nav-mobile-settings,
 html[lang^="zh"] .nav-mobile a,
-html[lang="ja"] .nav-mobile a,
-html[lang^="zh"] .nav-mobile-settings,
-html[lang="ja"] .nav-mobile-settings {
-  font-size: clamp(1.35rem, 5.5vw, 1.9rem);
+html[lang="ja"] .nav-mobile a {
+  font-size: clamp(1.3rem, 5.2vw, 1.85rem);
   font-style: normal;
   line-height: 1.35;
   letter-spacing: 0;

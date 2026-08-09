@@ -68,12 +68,19 @@
   display: block;
 }
 
-/* Phase 4 keepers: practical cards only (not seasons/culture/tips/routes) */
+/* Phase 4 keepers: practical + seasons/culture/tips card icons */
 .prac-icon .sf-icon--prac {
   width: 2.25rem;
   height: 2.25rem;
   display: block;
   color: currentColor;
+}
+.sf-icon--season,
+.sf-icon--culture,
+.sf-icon--tip {
+  display: block;
+  color: currentColor;
+  stroke-width: 1.75;
 }
 .tools-hub-icon svg {
   width: 28px;
