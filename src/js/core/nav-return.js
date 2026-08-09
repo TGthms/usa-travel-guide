@@ -453,6 +453,15 @@
 
     if (isToolMiniAppPath(here)) {
       if (applyStampChrome(back, footer, ret, {})) return;
+      // Fallback when stamp was lost (private mode / race): if we arrived from
+      // the guide, prefer Back to Guide over the mini-app’s default Tools hub.
+      try {
+        var refPath = document.referrer ? pathOf(document.referrer) : '';
+        if (refPath && isGuidePath(refPath)) {
+          applyGuideChrome(back, footer);
+          return;
+        }
+      } catch (eRef) { /* ignore */ }
       applyToolsChrome(back, footer);
       return;
     }

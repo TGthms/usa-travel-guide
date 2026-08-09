@@ -104,6 +104,15 @@
           '<span class="dest-weather-hl"></span>' +
         '</span>' +
         '<span class="dest-weather-fallback">' + (OPEN_LABEL[lang()] || OPEN_LABEL.en) + '</span>';
+      // Don't open the destination modal; ensure guide return stamp is set
+      a.addEventListener('click', function (e) {
+        e.stopPropagation();
+        try {
+          if (window.__usaTravelNavReturn && typeof window.__usaTravelNavReturn.stamp === 'function') {
+            window.__usaTravelNavReturn.stamp(a.getAttribute('href') || a.href);
+          }
+        } catch (err) { /* ignore */ }
+      });
       content.appendChild(a);
     });
   }

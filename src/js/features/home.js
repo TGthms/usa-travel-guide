@@ -127,44 +127,47 @@ function scrollToGuideSection(id, behavior) {
   }
 }
 
-/** Quick iMessage-style confetti burst from an element’s center. */
-function celebrateFromElement(originEl) {
+/**
+ * iMessage-style celebration: small colorful paper strips fall from near the
+ * top of the viewport (not a burst around the button).
+ */
+function celebrateConfettiRain() {
   if (typeof motionIsOff === 'function' && motionIsOff()) return;
-  if (!originEl || !document.body) return;
-  const rect = originEl.getBoundingClientRect();
-  const ox = rect.left + rect.width * 0.5;
-  const oy = rect.top + rect.height * 0.45;
+  if (!document.body) return;
   const layer = document.createElement('div');
   layer.className = 'hero-celebrate';
   layer.setAttribute('aria-hidden', 'true');
-  const colors = ['#0071e3', '#34c759', '#ff9f0a', '#ff375f', '#af52de', '#5ac8fa', '#ffd60a', '#ff6482'];
-  const count = (typeof motionIsReduced === 'function' && motionIsReduced()) ? 22 : 48;
+  const colors = ['#0071e3', '#34c759', '#ff9f0a', '#ff375f', '#af52de', '#5ac8fa', '#ffd60a', '#ff6482', '#bf5af2'];
+  const count = (typeof motionIsReduced === 'function' && motionIsReduced()) ? 28 : 56;
+  const vw = window.innerWidth || 400;
   for (let i = 0; i < count; i++) {
     const p = document.createElement('span');
     p.className = 'hero-celebrate-piece';
-    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.45;
-    const dist = 90 + Math.random() * 160;
-    const dx = Math.cos(angle) * dist;
-    const dy = Math.sin(angle) * dist * 0.75 - (40 + Math.random() * 80);
-    const w = 5 + Math.random() * 7;
-    const h = 8 + Math.random() * 10;
-    p.style.setProperty('--ox', ox + 'px');
-    p.style.setProperty('--oy', oy + 'px');
+    // Spawn across the upper band of the screen
+    const ox = vw * (0.08 + Math.random() * 0.84);
+    const oy = -12 + Math.random() * 36;
+    // Fall downward with a little horizontal drift
+    const dx = (Math.random() - 0.5) * 100;
+    const dy = 280 + Math.random() * 420;
+    const w = 4 + Math.random() * 5;
+    const h = 10 + Math.random() * 12;
+    p.style.setProperty('--ox', ox.toFixed(1) + 'px');
+    p.style.setProperty('--oy', oy.toFixed(1) + 'px');
     p.style.setProperty('--dx', dx.toFixed(1) + 'px');
     p.style.setProperty('--dy', dy.toFixed(1) + 'px');
-    p.style.setProperty('--rot', (Math.random() * 520 - 260).toFixed(0) + 'deg');
+    p.style.setProperty('--rot', (120 + Math.random() * 400).toFixed(0) + 'deg');
     p.style.setProperty('--w', w.toFixed(1) + 'px');
     p.style.setProperty('--h', h.toFixed(1) + 'px');
-    p.style.setProperty('--r', Math.random() > 0.55 ? '50%' : '2px');
+    p.style.setProperty('--r', Math.random() > 0.7 ? '1px' : '2px');
     p.style.setProperty('--c', colors[i % colors.length]);
-    p.style.setProperty('--dur', (0.75 + Math.random() * 0.45).toFixed(2) + 's');
-    p.style.setProperty('--delay', (Math.random() * 0.08).toFixed(3) + 's');
+    p.style.setProperty('--dur', (0.85 + Math.random() * 0.55).toFixed(2) + 's');
+    p.style.setProperty('--delay', (Math.random() * 0.12).toFixed(3) + 's');
     layer.appendChild(p);
   }
   document.body.appendChild(layer);
   window.setTimeout(() => {
     try { layer.remove(); } catch (e) { /* ignore */ }
-  }, 1400);
+  }, 1600);
 }
 
 /* ── HERO SCROLL CLICK ── */
@@ -175,22 +178,19 @@ if (heroScrollBtn) {
   });
 }
 
-/* ── BEGIN EXPLORING: celebrate + scroll to About (no hero peek) ── */
+/* ── BEGIN EXPLORING: confetti rain + immediate smooth scroll to About ── */
 const heroExploreBtn = document.getElementById('heroExploreBtn');
 if (heroExploreBtn) {
   heroExploreBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    celebrateFromElement(heroExploreBtn);
-    // Brief beat so confetti is visible before the page moves
-    const delay = (typeof motionIsOff === 'function' && motionIsOff()) ? 0 : 120;
-    window.setTimeout(() => {
-      scrollToGuideSection('intro');
-      try {
-        if (history && history.replaceState) {
-          history.replaceState(null, '', '#intro');
-        }
-      } catch (err) { /* ignore */ }
-    }, delay);
+    // Confetti is independent of scroll — no artificial delay (avoids “stuck” mobile scroll)
+    celebrateConfettiRain();
+    scrollToGuideSection('intro', 'smooth');
+    try {
+      if (history && history.replaceState) {
+        history.replaceState(null, '', '#intro');
+      }
+    } catch (err) { /* ignore */ }
   });
 }
 
@@ -240,7 +240,7 @@ document.querySelectorAll('.nav-links a[href^="#"], .nav-mobile-link[href^="#"]'
         break;
       }
     }
-  }, { threshold: 0.22, rootMargin: '0px 0px -8% 0px' });
+  }, { threshold: 0.08, rootMargin: '40px 0px 0px 0px' });
   io.observe(facts);
 })();
 
@@ -799,14 +799,28 @@ function getModalData(key) {
   return { tag: base.tag, title: base.title, body: body };
 }
 
-// Tool / external links inside tip & practical cards must not open the modal
-document.querySelectorAll('.guide-tool-link').forEach((link) => {
-  link.addEventListener('click', (e) => { e.stopPropagation(); });
-});
+// Tool / external links inside tip & practical cards must not open the modal.
+// Also cover dynamically injected modal links (dest weather, section tools).
+document.addEventListener('click', (e) => {
+  const t = e.target && e.target.closest
+    ? e.target.closest('.guide-tool-link, .dest-weather, a[href^="tools-"]')
+    : null;
+  if (!t) return;
+  // Only stop bubbling into card/modal hosts — don’t prevent navigation
+  e.stopPropagation();
+  // Explicit guide stamp for homepage → tool deep links (weather, drive, etc.)
+  if (document.getElementById('hero') && window.__usaTravelNavReturn
+      && typeof window.__usaTravelNavReturn.stamp === 'function') {
+    try {
+      window.__usaTravelNavReturn.stamp(t.getAttribute('href') || t.href);
+    } catch (err) { /* ignore */ }
+  }
+}, true);
 
 document.querySelectorAll('[data-modal]').forEach(el => {
   el.addEventListener('click', (e) => {
-    if (e.target && e.target.closest && e.target.closest('.guide-tool-link')) return;
+    // Weather chips + guide tool CTAs: navigate only (don't open the dest modal)
+    if (e.target && e.target.closest && e.target.closest('.guide-tool-link, .dest-weather, a[href^="tools-"]')) return;
     const type = el.dataset.modal;
     let key = '';
     if (type === 'region')  key = `region_${el.dataset.region}`;
