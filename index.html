@@ -85,13 +85,14 @@
   <ul class="nav-links">
     <li><a href="#intro"        data-section="intro" data-i18n="nav.about">About</a></li>
     <li><a href="#regions"      data-section="regions" data-i18n="nav.regions">Regions</a></li>
-    <li><a href="gallery.html"  data-section="gallery" data-i18n="nav.gallery">Gallery</a></li>
+    <li><a href="#gallery"      data-section="gallery" data-i18n="nav.gallery">Gallery</a></li>
     <li><a href="#destinations" data-section="destinations" data-i18n="nav.destinations">Destinations</a></li>
     <li><a href="#practical"    data-section="practical" data-i18n="nav.practical">Essentials</a></li>
     <li><a href="#seasons"      data-section="seasons" data-i18n="nav.seasons">Seasons</a></li>
     <li><a href="#culture"      data-section="culture" data-i18n="nav.culture">Culture</a></li>
     <li><a href="#routes"       data-section="routes" data-i18n="nav.routes">Trips</a></li>
     <li><a href="#tips"         data-section="tips" data-i18n="nav.tips">Tips</a></li>
+    <li><a href="#fun-facts"    data-section="fun-facts" data-i18n="nav.funFacts">Fun Facts</a></li>
   </ul>
   <div class="nav-actions">
     <a href="gallery.html" class="nav-tool-btn" data-i18n-aria="nav.gallery" aria-label="Photo gallery" title="Gallery"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></a>
@@ -105,7 +106,7 @@
 <nav class="nav-mobile" id="navMobile">
   <a href="#intro"        class="nav-mobile-link" data-i18n="nav.about">About</a>
   <a href="#regions"      class="nav-mobile-link" data-i18n="nav.regions">Regions</a>
-  <a href="gallery.html"  class="nav-mobile-link" data-i18n="nav.gallery">Gallery</a>
+  <a href="#gallery"      class="nav-mobile-link" data-i18n="nav.gallery">Gallery</a>
   <a href="#destinations" class="nav-mobile-link" data-i18n="nav.destinations">Destinations</a>
   <a href="#practical"    class="nav-mobile-link" data-i18n="nav.practical">Essentials</a>
   <a href="#seasons"      class="nav-mobile-link" data-i18n="nav.seasons">Seasons</a>
@@ -136,10 +137,10 @@
       From Atlantic shores to Pacific sunsets — one country, endless stories.
     </p>
     <div class="hero-cta">
-      <a href="#intro" class="btn-primary hero-cta-primary">
-        <span class="hero-cta-primary-text" data-i18n-html="hero.ctaPrimary">Begin&nbsp;Exploring</span>
-        <span class="hero-cta-primary-arrow" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      <a href="#intro" class="hero-explore-btn" id="heroExploreBtn">
+        <span class="hero-explore-btn-label" data-i18n-html="hero.ctaPrimary">Begin&nbsp;Exploring</span>
+        <span class="hero-explore-btn-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </span>
       </a>
     </div>
@@ -154,7 +155,6 @@
 <section id="intro">
   <div class="intro-grid">
     <div class="intro-left reveal-left">
-      <span class="section-eyebrow" data-i18n="intro.eyebrow">About the United States</span>
       <h2 data-i18n-html="intro.heading">A Nation That<br><em>Defies Description</em></h2>
       <blockquote class="intro-pull" data-i18n="intro.quote">
         "America is not just a country. It is a mosaic of worlds — each state its own nation,
@@ -320,18 +320,24 @@
 </section>
 
 <section id="gallery" class="gallery-teaser-section">
-  <a href="gallery.html" class="gallery-teaser reveal" data-i18n-aria="gallery.teaserAria" aria-label="Open the full photo gallery">
+  <div class="gallery-teaser">
     <div class="gallery-teaser-bg" aria-hidden="true"></div>
+    <div class="gallery-teaser-veil" aria-hidden="true"></div>
     <div class="gallery-teaser-content">
       <span class="section-eyebrow" data-i18n="gallery.eyebrow">Photo Gallery</span>
       <h2 data-i18n-html="gallery.heading">Moments From<br><em>The Road</em></h2>
       <p data-i18n="gallery.teaserBody">Coastlines, bridges, overlooks, and open highway — a living photo journal from the journey across America.</p>
-      <span class="gallery-teaser-cta">
-        <span data-i18n="gallery.viewAll">View Full Gallery</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </span>
+      <a href="gallery.html" class="gallery-enter-btn" data-i18n-aria="gallery.teaserAria" aria-label="Open the full photo gallery">
+        <span class="gallery-enter-btn-label" data-i18n="gallery.viewAll">View Full Gallery</span>
+        <span class="gallery-enter-btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/></svg>
+        </span>
+      </a>
     </div>
-  </a>
+    <span class="gallery-teaser-hint" aria-hidden="true">
+      <span class="gallery-teaser-hint-line"></span>
+    </span>
+  </div>
 </section>
 
 

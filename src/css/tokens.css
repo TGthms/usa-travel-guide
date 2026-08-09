@@ -328,7 +328,8 @@ p, .intro-body, .hero-desc, .tips-header p, .fun-facts-header p,
 /* Primary CTAs stay one unit when possible — wrap as a whole block, not mid-phrase */
 .btn-primary,
 .btn-ghost,
-.gallery-teaser-cta {
+.hero-explore-btn,
+.gallery-enter-btn {
   white-space: nowrap;
   hyphens: none;
   -webkit-hyphens: none;

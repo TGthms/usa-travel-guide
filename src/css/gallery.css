@@ -605,73 +605,242 @@ html[data-theme="elegant"] .tool-seg-btn.active { color: #fff; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-1); }
 ::selection { background: var(--accent-1); color: var(--text-inv); }
 
-/* ═══ GALLERY SECTION ═══ */
-#gallery { padding: var(--section-y) var(--section-x); position: relative; }
-
-/* Homepage teaser — single editorial card linking to the full gallery */
-.gallery-teaser-section { padding: var(--section-y) var(--section-x); }
+/* ═══ GALLERY SECTION (homepage immersive entrance) ═══ */
+/*
+  True full-viewport stage — same language as #hero, not an enlarged card.
+  Breaks out of any content gutters via 100vw centering trick.
+*/
+#gallery.gallery-teaser-section,
+.gallery-teaser-section {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  overflow: clip;
+  background: #0a1018; /* no white band if the photo layer lags */
+  /* Flush under fixed nav when linked from #gallery (hero-like) */
+  scroll-margin-top: 0;
+}
 .gallery-teaser {
-  position: relative; display: block; max-width: var(--content-max); margin: 0 auto;
-  min-height: clamp(280px, 42vw, 420px); border-radius: var(--radius-lg);
-  overflow: hidden; text-decoration: none; color: #fff;
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-card);
-  transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, border-color .3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  /* Full viewport — reads as its own “screen”, not a banner card */
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  border-radius: 0;
+  overflow: hidden;
+  color: #fff;
+  border: 0;
+  box-shadow: none;
   isolation: isolate;
+  /* Stage is not a link — only .gallery-enter-btn navigates */
+  cursor: default;
 }
-.gallery-teaser:hover,
-.gallery-teaser:focus-visible {
-  transform: translateY(-4px);
-  border-color: var(--border-med);
-  box-shadow: 0 28px 56px rgba(0,0,0,.32);
-  outline: none;
+.gallery-enter-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
 }
-.gallery-teaser:focus-visible {
-  box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-1), 0 28px 56px rgba(0,0,0,.32);
-}
+/* Photo layer — full bleed cover */
 .gallery-teaser-bg {
-  position: absolute; inset: 0; z-index: 0;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   background:
-    linear-gradient(120deg, rgba(7,16,28,.88) 0%, rgba(7,16,28,.45) 48%, rgba(7,16,28,.7) 100%),
-    url('../../images/gallery/thumbs/SFgolden_gate_bridge.jpeg') center / cover no-repeat,
-    linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
-  transform: scale(1.02);
-  transition: transform .7s cubic-bezier(.22,1,.36,1);
+    url('../../images/gallery/medium/SFgolden_gate_bridge.webp') center 42% / cover no-repeat,
+    url('../../images/gallery/thumbs/SFgolden_gate_bridge.jpeg') center 42% / cover no-repeat,
+    #0a1018;
+  transform: scale(1.06);
+  transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 .gallery-teaser:hover .gallery-teaser-bg,
-.gallery-teaser:focus-visible .gallery-teaser-bg { transform: scale(1.06); }
+.gallery-teaser:focus-visible .gallery-teaser-bg {
+  transform: scale(1.12);
+}
+/* Separate cinematic veil (not baked into bg so zoom stays clean) */
+.gallery-teaser-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to top,
+      rgba(4, 8, 16, 0.92) 0%,
+      rgba(4, 8, 16, 0.55) 28%,
+      rgba(4, 8, 16, 0.18) 55%,
+      rgba(4, 8, 16, 0.28) 100%
+    ),
+    linear-gradient(
+      100deg,
+      rgba(4, 8, 16, 0.62) 0%,
+      rgba(4, 8, 16, 0.15) 48%,
+      transparent 70%
+    );
+}
 .gallery-teaser-content {
-  position: relative; z-index: 1;
-  display: flex; flex-direction: column; justify-content: flex-end;
-  gap: 12px; min-height: inherit;
-  padding: clamp(28px, 5vw, 52px);
-  max-width: 560px;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: clamp(12px, 1.6vw, 18px);
+  width: 100%;
+  max-width: min(42rem, 100%);
+  margin: 0;
+  padding:
+    max(5.5rem, calc(4.5rem + env(safe-area-inset-top, 0px)))
+    var(--section-x)
+    max(4.5rem, calc(3.5rem + env(safe-area-inset-bottom, 0px)));
+  box-sizing: border-box;
 }
-.gallery-teaser-content .section-eyebrow { color: var(--accent-1-lt); margin-bottom: 4px; }
-.gallery-teaser-content .section-eyebrow::after { background: var(--accent-1-lt); }
+.gallery-teaser-content .section-eyebrow {
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 2px;
+  letter-spacing: 0.22em;
+}
+.gallery-teaser-content .section-eyebrow::after {
+  background: rgba(255, 255, 255, 0.45);
+  max-width: 56px;
+}
 .gallery-teaser-content h2 {
-  font-family: var(--ff-display); font-size: var(--fs-display);
-  font-weight: 700; line-height: 1.12; letter-spacing: -.025em; color: #fff; margin: 0;
+  font-family: var(--ff-display);
+  font-size: clamp(2.75rem, 1.5rem + 4.2vw, 5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -.035em;
+  color: #fff;
+  margin: 0;
+  text-shadow:
+    0 2px 40px rgba(0, 0, 0, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.4);
 }
-.gallery-teaser-content h2 em { font-style: italic; color: var(--accent-1-lt); font-weight: 400; }
+.gallery-teaser-content h2 em {
+  display: block;
+  font-style: italic;
+  color: #fff;
+  font-weight: 400;
+  text-shadow:
+    0 2px 32px rgba(0, 0, 0, 0.55),
+    0 0 48px color-mix(in srgb, var(--accent-1) 40%, transparent);
+}
 .gallery-teaser-content p {
-  margin: 0; font-size: var(--fs-small); line-height: 1.7; color: rgba(255,255,255,.82);
-  max-width: var(--prose-max);
+  margin: 0;
+  font-size: clamp(0.95rem, 0.88rem + 0.35vw, 1.08rem);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: min(32rem, 100%);
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.4);
 }
-.gallery-teaser-cta {
-  display: inline-flex; align-items: center; gap: 10px; margin-top: 10px; align-self: flex-start;
-  padding: 12px 18px; border-radius: 2px;
-  background: var(--accent-1); color: var(--text-inv);
-  font-size: 11.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
-  transition: background .25s ease, transform .25s ease;
+/*
+  Gallery enter CTA — white outline frame with grid/plus mark
+  (distinct from hero luminous capsule).
+*/
+.gallery-enter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  align-self: flex-start;
+  padding: 1rem 1.2rem 1rem 1.4rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s ease;
 }
-.gallery-teaser-cta svg { width: 16px; height: 16px; transition: transform .25s ease; }
-.gallery-teaser:hover .gallery-teaser-cta { background: var(--accent-1-lt); }
-.gallery-teaser:hover .gallery-teaser-cta svg { transform: translateX(4px); }
-html[data-theme="minimal"] .gallery-teaser-cta,
-html[data-theme="elegant"] .gallery-teaser-cta { color: #fff; }
+.gallery-enter-btn-label { white-space: nowrap; }
+.gallery-enter-btn-icon {
+  display: inline-flex;
+  opacity: 0.9;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+}
+.gallery-enter-btn-icon svg { display: block; }
+.gallery-enter-btn:hover,
+.gallery-enter-btn:focus-visible {
+  background: #fff;
+  color: #0a0a0c;
+  border-color: #fff;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.32);
+  transform: translateY(-2px);
+}
+.gallery-enter-btn:hover .gallery-enter-btn-icon,
+.gallery-enter-btn:focus-visible .gallery-enter-btn-icon {
+  transform: translateX(3px) scale(1.05);
+  opacity: 1;
+}
+/* Subtle bottom cue — reinforces “full stage”, not a card edge */
+.gallery-teaser-hint {
+  position: absolute;
+  left: 50%;
+  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  z-index: 2;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.55;
+}
+.gallery-teaser-hint-line {
+  display: block;
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.75));
+}
+.gallery-teaser-cta { display: none; }
+
+html[data-motion-effective="reduced"] .gallery-teaser-bg,
+html[data-motion-effective="off"] .gallery-teaser-bg {
+  transition: none;
+  transform: none;
+}
+html[data-motion-effective="reduced"] .gallery-teaser:hover .gallery-teaser-bg,
+html[data-motion-effective="off"] .gallery-teaser:hover .gallery-teaser-bg {
+  transform: none;
+}
+
+@media (max-width: 860px) {
+  .gallery-teaser-content {
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: max(3.75rem, calc(3rem + env(safe-area-inset-bottom, 0px)));
+    max-width: 100%;
+  }
+}
 @media (max-width: 540px) {
-  .gallery-teaser { min-height: 300px; }
-  .gallery-teaser-content { padding: 24px 20px; }
+  .gallery-teaser-content h2 {
+    font-size: clamp(2.35rem, 10.5vw, 3rem);
+  }
+  .gallery-enter-btn {
+    padding: 0.9rem 1.05rem 0.9rem 1.2rem;
+    letter-spacing: 0.12em;
+  }
+  .gallery-teaser-hint { display: none; }
+}
+@media (max-height: 520px) and (min-width: 600px) {
+  .gallery-teaser {
+    min-height: 100dvh;
+    height: auto;
+  }
 }
 

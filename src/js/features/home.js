@@ -111,14 +111,113 @@ syncHeroBackground();
   }, 2200);
 })();
 
+/* ── Scroll to a guide section flush under the fixed nav (no previous-section peek) ── */
+function scrollToGuideSection(id, behavior) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const nav = document.getElementById('navbar');
+  const navH = nav ? Math.ceil(nav.getBoundingClientRect().height) : 60;
+  // +1 avoids subpixel seams of the prior section showing under the bar
+  const y = Math.max(0, Math.round(el.getBoundingClientRect().top + (window.scrollY || 0) - navH + 1));
+  const beh = behavior != null ? behavior : (typeof scrollBehaviorPref === 'function' ? scrollBehaviorPref() : 'smooth');
+  try {
+    window.scrollTo({ top: y, left: 0, behavior: beh });
+  } catch (e) {
+    window.scrollTo(0, y);
+  }
+}
+
+/** Quick iMessage-style confetti burst from an element’s center. */
+function celebrateFromElement(originEl) {
+  if (typeof motionIsOff === 'function' && motionIsOff()) return;
+  if (!originEl || !document.body) return;
+  const rect = originEl.getBoundingClientRect();
+  const ox = rect.left + rect.width * 0.5;
+  const oy = rect.top + rect.height * 0.45;
+  const layer = document.createElement('div');
+  layer.className = 'hero-celebrate';
+  layer.setAttribute('aria-hidden', 'true');
+  const colors = ['#0071e3', '#34c759', '#ff9f0a', '#ff375f', '#af52de', '#5ac8fa', '#ffd60a', '#ff6482'];
+  const count = (typeof motionIsReduced === 'function' && motionIsReduced()) ? 22 : 48;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('span');
+    p.className = 'hero-celebrate-piece';
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.45;
+    const dist = 90 + Math.random() * 160;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist * 0.75 - (40 + Math.random() * 80);
+    const w = 5 + Math.random() * 7;
+    const h = 8 + Math.random() * 10;
+    p.style.setProperty('--ox', ox + 'px');
+    p.style.setProperty('--oy', oy + 'px');
+    p.style.setProperty('--dx', dx.toFixed(1) + 'px');
+    p.style.setProperty('--dy', dy.toFixed(1) + 'px');
+    p.style.setProperty('--rot', (Math.random() * 520 - 260).toFixed(0) + 'deg');
+    p.style.setProperty('--w', w.toFixed(1) + 'px');
+    p.style.setProperty('--h', h.toFixed(1) + 'px');
+    p.style.setProperty('--r', Math.random() > 0.55 ? '50%' : '2px');
+    p.style.setProperty('--c', colors[i % colors.length]);
+    p.style.setProperty('--dur', (0.75 + Math.random() * 0.45).toFixed(2) + 's');
+    p.style.setProperty('--delay', (Math.random() * 0.08).toFixed(3) + 's');
+    layer.appendChild(p);
+  }
+  document.body.appendChild(layer);
+  window.setTimeout(() => {
+    try { layer.remove(); } catch (e) { /* ignore */ }
+  }, 1400);
+}
+
 /* ── HERO SCROLL CLICK ── */
 const heroScrollBtn = document.getElementById('heroScroll');
 if (heroScrollBtn) {
   heroScrollBtn.addEventListener('click', () => {
-    const intro = document.getElementById('intro');
-    if (intro) intro.scrollIntoView({ behavior: scrollBehaviorPref() });
+    scrollToGuideSection('intro');
   });
 }
+
+/* ── BEGIN EXPLORING: celebrate + scroll to About (no hero peek) ── */
+const heroExploreBtn = document.getElementById('heroExploreBtn');
+if (heroExploreBtn) {
+  heroExploreBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    celebrateFromElement(heroExploreBtn);
+    // Brief beat so confetti is visible before the page moves
+    const delay = (typeof motionIsOff === 'function' && motionIsOff()) ? 0 : 120;
+    window.setTimeout(() => {
+      scrollToGuideSection('intro');
+      try {
+        if (history && history.replaceState) {
+          history.replaceState(null, '', '#intro');
+        }
+      } catch (err) { /* ignore */ }
+    }, delay);
+  });
+}
+
+/* Nav section links: same flush-under-nav scroll (About, etc.) */
+document.querySelectorAll('.nav-links a[href^="#"], .nav-mobile-link[href^="#"]').forEach((a) => {
+  a.addEventListener('click', (e) => {
+    const href = a.getAttribute('href') || '';
+    if (!href || href === '#' || href.length < 2) return;
+    const id = href.slice(1);
+    if (!document.getElementById(id)) return;
+    // Gallery immersive stage: use native (scroll-margin: 0)
+    if (id === 'gallery' || id === 'hero') return;
+    e.preventDefault();
+    scrollToGuideSection(id);
+    try {
+      if (history && history.replaceState) history.replaceState(null, '', href);
+    } catch (err) { /* ignore */ }
+    // Close mobile drawer if open
+    const hamburger = document.getElementById('hamburger');
+    const navMobile = document.getElementById('navMobile');
+    if (hamburger && navMobile && hamburger.classList.contains('open')) {
+      hamburger.classList.remove('open');
+      navMobile.classList.remove('open');
+      if (typeof unlockBodyScroll === 'function') unlockBodyScroll();
+    }
+  });
+});
 
 /* ── INTRO FACT CARDS: staggered entrance on first reveal ── */
 (function initIntroFactEntrance() {
@@ -336,7 +435,14 @@ if (heroScrollBtn) {
         return;
       }
     }
-    window.location.href = q ? ('gallery.html?photo=' + q) : 'gallery.html';
+    // Programmatic nav bypasses the click stamp — preserve guide scroll for Back.
+    const dest = q ? ('gallery.html?photo=' + q) : 'gallery.html';
+    try {
+      if (window.__usaTravelNavReturn && typeof window.__usaTravelNavReturn.stamp === 'function') {
+        window.__usaTravelNavReturn.stamp(dest);
+      }
+    } catch (e) { /* ignore */ }
+    window.location.href = dest;
   }
 
   slots.forEach((slot) => {

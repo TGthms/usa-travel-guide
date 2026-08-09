@@ -75,15 +75,34 @@ function watchImageLoad(img) {
       }
     }
   };
+  /** WebP can fail on some constrained webviews (e.g. watchOS Safari) — fall back to JPEG once. */
+  const tryJpegFallbackOrError = () => {
+    if (!img || !item) return;
+    if (img.dataset.webpFallbackTried === '1') {
+      showLoadError(item);
+      return;
+    }
+    const jpeg = img.getAttribute('data-thumb') || '';
+    const cur = img.getAttribute('src') || '';
+    if (jpeg && cur !== jpeg && /\.webp(\?|$)/i.test(cur)) {
+      img.dataset.webpFallbackTried = '1';
+      img.classList.remove('loaded');
+      img.addEventListener('load', onOk, { once: true });
+      img.addEventListener('error', () => showLoadError(item), { once: true });
+      img.setAttribute('src', jpeg);
+      return;
+    }
+    showLoadError(item);
+  };
   if (img.complete && img.naturalWidth > 0) {
     onOk();
   } else if (img.complete) {
     // .complete is true even for failed loads once the browser gives up, so
     // naturalWidth === 0 here means "tried and failed", not "still loading".
-    showLoadError(item);
+    tryJpegFallbackOrError();
   } else {
     img.addEventListener('load', onOk, { once: true });
-    img.addEventListener('error', () => showLoadError(item), { once: true });
+    img.addEventListener('error', tryJpegFallbackOrError, { once: true });
   }
 }
 function showLoadError(item) {
@@ -126,10 +145,20 @@ function initGalleryItem(item, index) {
   const img = item.querySelector('img');
   if (img) {
     img.setAttribute('decoding', 'async');
-    // Prefer WebP thumbs when present (JPEG remains on data-thumb / data-full for HDR Full)
-    const thumbWebp = img.getAttribute('data-thumb-webp');
-    if (thumbWebp && img.getAttribute('src') !== thumbWebp) {
-      img.setAttribute('src', thumbWebp);
+    // Prefer WebP thumbs when present — but not on constrained / wearable webviews
+    // (watchOS Safari has historically flaky WebP; JPEG thumbs are reliable + smaller decode path).
+    // JPEG remains on data-thumb / data-full for HDR Full elsewhere.
+    if (!ENV.constrained) {
+      const thumbWebp = img.getAttribute('data-thumb-webp');
+      if (thumbWebp && img.getAttribute('src') !== thumbWebp) {
+        img.setAttribute('src', thumbWebp);
+      }
+    } else {
+      // Force JPEG thumb path on constrained (src may already be JPEG from markup).
+      const jpeg = img.getAttribute('data-thumb');
+      if (jpeg && img.getAttribute('src') !== jpeg) {
+        img.setAttribute('src', jpeg);
+      }
     }
     // Prefer descriptive alt already in markup; fall back to caption for a11y
     if (!(img.getAttribute('alt') || '').trim()) {
@@ -137,11 +166,14 @@ function initGalleryItem(item, index) {
       if (cap) img.setAttribute('alt', cap.textContent.trim());
     }
     // Eager-load the first few above-the-fold tiles on the dedicated gallery page.
-    // On constrained viewports only warm the first tile (memory budget).
-    const eagerCount = ENV.constrained ? 1 : 4;
+    // Constrained: warm a few JPEGs so watch users see real photos, not a wall of placeholders.
+    const eagerCount = ENV.constrained ? 6 : 4;
     if (document.body.classList.contains('page-gallery') && index < eagerCount) {
       img.loading = 'eager';
       try { img.fetchPriority = 'high'; } catch (e) { /* ignore */ }
+    } else if (ENV.constrained) {
+      // Lazy still OK for the rest; JPEG is cheaper than WebP fail storms on watch.
+      img.loading = 'lazy';
     }
   }
   watchImageLoad(img);

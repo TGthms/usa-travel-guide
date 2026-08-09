@@ -473,11 +473,13 @@
     if (!isGuidePath(pathOf(location.href))) return;
     var ret = readReturn();
     if (!ret || ret.label !== 'guide' || typeof ret.scrollY !== 'number') return;
-    if (!ret.scrollY) return;
+    // Allow restore when scrollY is set (including pending flag from Back chrome)
+    if (!ret.scrollY && !ret.pendingScrollRestore) return;
     try {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     } catch (e) {}
-    var y = ret.scrollY;
+    var y = ret.scrollY || 0;
+    if (!y) return;
     try {
       // Consume one-shot restore so later in-page reloads don't jump
       ret.scrollY = 0;
@@ -494,6 +496,7 @@
     setTimeout(apply, 0);
     setTimeout(apply, 120);
     setTimeout(apply, 400);
+    setTimeout(apply, 900);
     window.addEventListener('load', apply, { once: true });
     window.addEventListener('pageshow', function (ev) {
       if (ev && ev.persisted) apply();

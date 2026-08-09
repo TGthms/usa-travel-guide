@@ -12,9 +12,18 @@
 }
 h1, h2, h3, .hero-desc, .intro-body, .intro-pull, p { overflow-wrap: break-word; }
 
-/* Fixed nav is ~90px tall at rest; offset anchor targets so headings
-   never land underneath it, whether scrolled via JS or a plain # link. */
-section[id], footer[id] { scroll-margin-top: 90px; }
+/* Fixed nav offset for in-page anchors.
+   Keep this tight to the scrolled bar height so the previous section
+   doesn’t peek under the nav (e.g. hero strip above About). */
+section[id], footer[id] { scroll-margin-top: 64px; }
+/* Immersive full-viewport stages: no extra offset */
+#hero,
+#gallery { scroll-margin-top: 0; }
+/* About: solid stage so nothing from hero shows through */
+#intro {
+  scroll-margin-top: 60px;
+  background: var(--bg-base);
+}
 
 /* ═══ RESPONSIVE ═══
    Breakpoints cover: large tablet/small laptop (1100), tablet portrait &
@@ -67,27 +76,30 @@ section[id], footer[id] { scroll-margin-top: 90px; }
     min-height: 100dvh;
     min-height: 100svh;
   }
-  /* Extra legibility over bright coastal photos on small screens */
+  /*
+    Mobile Modern light: show a clearer photo (less dim / less milky scrim).
+    Type still sits on a light bottom falloff — not a heavy wash over the image.
+  */
   html[data-theme="minimal"] .hero-bg::after {
     background:
-      linear-gradient(to top, rgba(245, 245, 247, 0.94) 0%, rgba(245, 245, 247, 0.5) 42%, transparent 64%),
-      linear-gradient(105deg, rgba(245, 245, 247, 0.62) 0%, transparent 55%),
-      linear-gradient(to bottom, rgba(0, 0, 0, 0.22) 0%, transparent 30%);
+      linear-gradient(to top, rgba(245, 245, 247, 0.72) 0%, rgba(245, 245, 247, 0.22) 36%, transparent 58%),
+      linear-gradient(105deg, rgba(245, 245, 247, 0.18) 0%, transparent 50%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 0%, transparent 24%);
   }
   html[data-theme="elegant"] .hero-bg::after {
     background:
-      linear-gradient(to top, rgba(246, 241, 232, 0.95) 0%, rgba(246, 241, 232, 0.55) 44%, transparent 66%),
-      linear-gradient(105deg, rgba(246, 241, 232, 0.65) 0%, transparent 56%),
-      linear-gradient(to bottom, rgba(40, 28, 18, 0.28) 0%, transparent 32%);
+      linear-gradient(to top, rgba(246, 241, 232, 0.75) 0%, rgba(246, 241, 232, 0.28) 38%, transparent 60%),
+      linear-gradient(105deg, rgba(246, 241, 232, 0.22) 0%, transparent 52%),
+      linear-gradient(to bottom, rgba(40, 28, 18, 0.12) 0%, transparent 26%);
   }
   html[data-theme="minimal"] .hero-bg-photo {
-    filter: brightness(0.74) saturate(0.94) contrast(1.05);
+    filter: brightness(0.96) saturate(1.03) contrast(1.01);
   }
   html[data-theme="elegant"] .hero-bg-photo {
-    filter: brightness(0.76) saturate(0.98) contrast(1.04);
+    filter: brightness(0.93) saturate(1.02) contrast(1.01);
   }
-  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, #fun-facts, .site-footer,
-  .gallery-teaser-section { padding-left: 24px; padding-right: 24px; }
+  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #fun-facts, .site-footer { padding-left: 24px; padding-right: 24px; }
+  /* Gallery teaser is full-bleed — do not inset the section */
   .hero-content {
     padding:
       0
@@ -114,9 +126,9 @@ section[id], footer[id] { scroll-margin-top: 90px; }
     letter-spacing: .1em;
     min-height: 48px;
   }
-  .hero-cta .hero-cta-primary {
-    border-radius: 999px;
-    min-height: 52px;
+  .hero-explore-btn {
+    min-height: 54px;
+    width: auto;
   }
   .hero-scroll {
     bottom: max(18px, env(safe-area-inset-bottom, 0px));
@@ -243,11 +255,10 @@ section[id], footer[id] { scroll-margin-top: 90px; }
 @media (max-width: 400px) {
   .hero-cta { width: 100%; flex-direction: column; align-items: stretch; }
   .hero-cta .btn-primary, .hero-cta .btn-ghost,
-  .hero-cta .hero-cta-primary {
+  .hero-explore-btn {
     flex: 1 1 auto; justify-content: center; width: 100%; text-align: center;
   }
-  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, footer,
-  .gallery-teaser-section { padding-left: 16px; padding-right: 16px; }
+  #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, footer { padding-left: 16px; padding-right: 16px; }
   /* Mini-app pages keep the roomier gallery-style gutters (not the 16px guide squeeze) */
   body.page-gallery #gallery,
   body.page-tools #tools.tools-page {
@@ -316,7 +327,7 @@ section[id], footer[id] { scroll-margin-top: 90px; }
 @media (min-width: 1920px) {
   .hero-content { max-width: 1100px; padding-bottom: 120px; }
   .hero-h1 { font-size: clamp(5rem, 7vw, 9rem); }
-  #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery {
+  #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips {
     padding-left: clamp(60px, 6vw, 120px);
     padding-right: clamp(60px, 6vw, 120px);
   }
@@ -457,12 +468,12 @@ html[data-theme="minimal"] .btn-primary {
 html[data-theme="minimal"] .btn-ghost {
   border-radius: 980px;
 }
-/* Frosted bar only after scroll — stay transparent over immersive hero (like Classic) */
+/* Frosted bar only after scroll; over hero use soft top fade (see home.css) — not a solid bar */
 html[data-theme="minimal"] #navbar.scrolled {
   border-bottom: 1px solid var(--border-light);
 }
 html[data-theme="minimal"] #navbar:not(.scrolled) {
-  background: transparent;
+  /* Soft gradient from home.css; do not force a solid frosted panel */
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border-bottom-color: transparent;
@@ -475,7 +486,7 @@ html[data-theme="glass"] .btn-primary,
 html[data-theme="glass"] .tool-seg-btn.active,
 html[data-theme="glass"] .dest-filter-btn.active,
 html[data-theme="glass"] .gallery-filter.active,
-html[data-theme="glass"] .gallery-teaser-cta {
+html[data-theme="glass"] .gallery-enter-btn {
   color: #fff;
 }
 html[data-theme="glass"] .btn-primary {

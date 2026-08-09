@@ -206,19 +206,59 @@ html[data-theme="luxury"] .hero-bg-photo,
 html[data-theme="nature"] .hero-bg-photo {
   filter: brightness(0.72) saturate(1.06) contrast(1.02);
 }
-/* Modern light (minimal): cool the over-bright GG sky so type stays crisp */
+/* Modern light (minimal): keep the photo clear; type uses a soft bottom falloff only */
 html[data-theme="minimal"] .hero-bg-photo {
-  filter: brightness(0.78) saturate(0.96) contrast(1.04);
+  filter: brightness(0.94) saturate(1.02) contrast(1.01);
+}
+/*
+  Unscrolled nav over bright immersive photo (Modern light):
+  Soft top fade + calm slate labels — no heavy black type / white glow halo.
+*/
+html[data-theme="minimal"] #navbar:not(.scrolled) {
+  background: linear-gradient(
+    to bottom,
+    rgba(245, 245, 247, 0.42) 0%,
+    rgba(245, 245, 247, 0.12) 55%,
+    transparent 100%
+  );
+}
+html[data-theme="minimal"] #navbar:not(.scrolled) .nav-links a {
+  color: #6e6e73;
+  font-weight: 600;
+  text-shadow: none;
+}
+html[data-theme="minimal"] #navbar:not(.scrolled) .nav-links a:hover,
+html[data-theme="minimal"] #navbar:not(.scrolled) .nav-links a.active-link {
+  color: #1d1d1f;
+}
+html[data-theme="minimal"] #navbar:not(.scrolled) .nav-logo {
+  text-shadow: none;
+}
+html[data-theme="minimal"] #navbar:not(.scrolled) .nav-settings-btn,
+html[data-theme="minimal"] #navbar:not(.scrolled) .nav-tool-btn {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #424245;
+  box-shadow: none;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+html[data-theme="minimal"] #navbar:not(.scrolled) .nav-settings-btn:hover,
+html[data-theme="minimal"] #navbar:not(.scrolled) .nav-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 113, 227, 0.35);
+  color: var(--accent-1);
 }
 /* Classic light (elegant): warmer paper feel, still readable over misty coast */
 html[data-theme="elegant"] .hero-bg-photo {
-  filter: brightness(0.82) saturate(1.0) contrast(1.03);
+  filter: brightness(0.88) saturate(1.02) contrast(1.02);
 }
 html[data-theme="minimal"] .hero-bg::after {
+  /* Light bottom vignette only — leave most of the photo clear */
   background:
-    linear-gradient(to top, rgba(245, 245, 247, 0.88) 0%, rgba(245, 245, 247, 0.35) 38%, transparent 58%),
-    linear-gradient(105deg, rgba(245, 245, 247, 0.55) 0%, transparent 52%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.18) 0%, transparent 32%);
+    linear-gradient(to top, rgba(245, 245, 247, 0.62) 0%, rgba(245, 245, 247, 0.18) 32%, transparent 52%),
+    linear-gradient(105deg, rgba(245, 245, 247, 0.22) 0%, transparent 48%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 0%, transparent 22%);
 }
 html[data-theme="elegant"] .hero-bg::after {
   background:
@@ -231,16 +271,41 @@ html[data-theme="minimal"] .hero-h1,
 html[data-theme="elegant"] .hero-h1 {
   color: #0a0a0c;
   text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.35),
-    0 2px 24px rgba(255, 255, 255, 0.55),
-    0 8px 40px rgba(0, 0, 0, 0.12);
+    0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 20px rgba(255, 255, 255, 0.55),
+    0 6px 32px rgba(0, 0, 0, 0.1);
+}
+/* “Endless Wonder” — deeper accent so it doesn’t wash out on pale water/sky */
+html[data-theme="minimal"] .hero-h1 em {
+  color: #0058b0;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85),
+    0 0 1px rgba(0, 40, 90, 0.25),
+    0 4px 28px rgba(255, 255, 255, 0.7),
+    0 2px 12px rgba(0, 60, 120, 0.18);
+}
+html[data-theme="elegant"] .hero-h1 em {
+  color: #7a2e2e;
+  text-shadow:
+    0 1px 0 rgba(255, 253, 248, 0.9),
+    0 4px 24px rgba(255, 253, 248, 0.65),
+    0 2px 10px rgba(80, 30, 30, 0.15);
 }
 html[data-theme="minimal"] .hero-desc,
 html[data-theme="elegant"] .hero-desc {
-  color: rgba(29, 29, 31, 0.88);
+  color: rgba(29, 29, 31, 0.9);
   text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.45),
-    0 2px 18px rgba(255, 255, 255, 0.65);
+    0 1px 0 rgba(255, 255, 255, 0.55),
+    0 2px 16px rgba(255, 255, 255, 0.7);
+}
+/* Dark themes: keep accent, add depth so em never floats into the photo */
+html[data-theme="default"] .hero-h1 em,
+html[data-theme="glass"] .hero-h1 em,
+html[data-theme="luxury"] .hero-h1 em,
+html[data-theme="nature"] .hero-h1 em {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.45),
+    0 4px 24px rgba(0, 0, 0, 0.35);
 }
 /* Continuous property tracks — each eases start→end with no mid plateau */
 @keyframes heroPhotoFade {
@@ -322,90 +387,169 @@ html[data-theme="elegant"] .hero-desc {
 .btn-primary:hover { background: var(--accent-1-lt); color: var(--text-inv); transform: translateY(-2px); box-shadow: 0 12px 28px color-mix(in srgb, var(--accent-1) 28%, transparent); }
 .btn-primary:active { transform: translateY(0); }
 
-/* Hero primary — single magnetic CTA (no secondary ghost) */
-.hero-cta-primary {
+/*
+  Hero explore CTA — simple, unique, signature.
+  Soft rounded “lozenge” with an inset light edge and a sliding fill reveal.
+  One line of type + arrow; no multi-panel chrome.
+*/
+.hero-explore-btn {
+  --hero-cta-accent: var(--accent-1);
+  position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  border-radius: 999px;
-  padding: clamp(0.95rem, 0.85rem + 0.35vw, 1.1rem) clamp(1.5rem, 1.2rem + 1.1vw, 2.15rem)
-    clamp(0.95rem, 0.85rem + 0.35vw, 1.1rem) clamp(1.65rem, 1.35rem + 1.1vw, 2.35rem);
-  letter-spacing: 0.12em;
+  gap: 0.85rem;
+  padding: 0.95rem 1.15rem 0.95rem 1.55rem;
+  text-decoration: none;
+  color: #fff;
+  font-family: var(--ff-body);
+  font-size: clamp(0.78rem, 0.72rem + 0.25vw, 0.88rem);
   font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--accent-1) 0%,
-    color-mix(in srgb, var(--accent-1) 78%, #fff 22%) 55%,
-    color-mix(in srgb, var(--accent-1) 88%, #fff 12%) 100%
-  );
-  border: 1px solid color-mix(in srgb, var(--accent-1) 70%, #fff 30%);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--hero-cta-accent) 55%, #fff 45%);
+  background: var(--hero-cta-accent);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.32) inset,
-    0 12px 32px color-mix(in srgb, var(--accent-1) 38%, transparent),
-    0 2px 8px rgba(0, 0, 0, 0.14);
+    0 1px 0 rgba(255, 255, 255, 0.28) inset,
+    0 10px 28px color-mix(in srgb, var(--hero-cta-accent) 38%, transparent),
+    0 2px 8px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  isolation: isolate;
+  max-width: 100%;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.25s ease,
+    filter 0.25s ease;
 }
-.hero-cta-primary::before {
+/* Soft sheen that drifts once on hover */
+.hero-explore-btn::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, transparent 48%);
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.28) 48%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
+  z-index: 0;
 }
-.hero-cta-primary-text {
+.hero-explore-btn-label {
   position: relative;
   z-index: 1;
+  white-space: nowrap;
 }
-.hero-cta-primary-arrow {
+.hero-explore-btn-arrow {
   position: relative;
   z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.25s ease;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.25s ease;
 }
-.hero-cta-primary-arrow svg {
-  display: block;
-}
-.hero-cta-primary:hover {
-  filter: brightness(1.05);
+.hero-explore-btn-arrow svg { display: block; }
+.hero-explore-btn:hover {
   transform: translateY(-3px);
+  filter: brightness(1.05) saturate(1.05);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.38) inset,
-    0 18px 40px color-mix(in srgb, var(--accent-1) 48%, transparent),
-    0 4px 14px rgba(0, 0, 0, 0.16);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--accent-1) 92%, #fff 8%) 0%,
-    color-mix(in srgb, var(--accent-1) 70%, #fff 30%) 100%
-  );
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 16px 36px color-mix(in srgb, var(--hero-cta-accent) 45%, transparent),
+    0 4px 12px rgba(0, 0, 0, 0.14);
 }
-.hero-cta-primary:hover .hero-cta-primary-arrow {
-  background: rgba(255, 255, 255, 0.28);
+.hero-explore-btn:hover::before {
+  transform: translateX(120%);
+}
+.hero-explore-btn:hover .hero-explore-btn-arrow {
   transform: translateX(3px);
+  background: rgba(255, 255, 255, 0.28);
 }
-.hero-cta-primary:active {
+.hero-explore-btn:active {
   transform: translateY(-1px) scale(0.985);
   filter: brightness(0.98);
 }
-.hero-cta-primary:focus-visible {
-  outline: 2px solid var(--accent-1);
+.hero-explore-btn:focus-visible {
+  outline: 2px solid var(--hero-cta-accent);
   outline-offset: 4px;
 }
-/* Touch: hover never fires — keep a clear press response */
+html[data-theme="elegant"] .hero-explore-btn {
+  --hero-cta-accent: #8b3a3a;
+}
+/* Light frosted variant over pale hero photos (minimal) */
+html[data-theme="minimal"] .hero-explore-btn {
+  color: #0a1a33;
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 12px 32px rgba(0, 70, 160, 0.16),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+}
+html[data-theme="minimal"] .hero-explore-btn-arrow {
+  color: #fff;
+  background: var(--accent-1);
+}
+html[data-theme="minimal"] .hero-explore-btn:hover {
+  background: #fff;
+  box-shadow:
+    0 1px 0 #fff inset,
+    0 18px 40px rgba(0, 90, 200, 0.22),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+}
+html[data-motion-effective="reduced"] .hero-explore-btn::before,
+html[data-motion-effective="off"] .hero-explore-btn::before {
+  display: none;
+}
 @media (hover: none) {
-  .hero-cta-primary:active {
+  .hero-explore-btn:active {
     transform: scale(0.97);
-    filter: brightness(0.96);
   }
-  .hero-cta-primary:active .hero-cta-primary-arrow {
+  .hero-explore-btn:active .hero-explore-btn-arrow {
     transform: translateX(2px);
-    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* iMessage-style confetti burst (Begin Exploring) */
+.hero-celebrate {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9500;
+  overflow: hidden;
+}
+.hero-celebrate-piece {
+  position: absolute;
+  left: var(--ox, 50%);
+  top: var(--oy, 50%);
+  width: var(--w, 8px);
+  height: var(--h, 12px);
+  background: var(--c, #0071e3);
+  border-radius: var(--r, 2px);
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: heroCelebrateFly var(--dur, 0.95s) cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes heroCelebrateFly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -120px)))
+      rotate(var(--rot, 180deg))
+      scale(0.7);
   }
 }
 .btn-ghost {
@@ -450,7 +594,15 @@ html[data-theme="elegant"] .hero-desc {
 @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
 
 /* ═══ INTRO ═══ */
-#intro { padding: var(--section-y) var(--section-x); position: relative; }
+#intro {
+  padding: var(--section-y) var(--section-x);
+  position: relative;
+  background: var(--bg-base);
+}
+/* Slightly tighter top when landing from hero so the first line isn’t far under nav */
+#intro .intro-grid {
+  scroll-margin-top: 0;
+}
 .intro-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(40px, 6vw, 80px); max-width: var(--content-max); margin: 0 auto; align-items: center; }
 .section-eyebrow {
   font-family: var(--ff-serif); font-size: var(--fs-micro); font-weight: 400;
