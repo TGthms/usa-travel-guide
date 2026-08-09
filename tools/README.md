@@ -107,15 +107,24 @@ python3 tools/gallery_manager.py --backfill-dates
 python3 tools/gallery_manager.py --backfill-dates --apply
 ```
 
-## Rebuild medium assets
+## Rebuild media (orientation + thumbs + medium + WebP)
 
-If you upgrade the tool or need to regenerate viewer-size images:
+Full pass after upgrading the tool, fixing sideways photos, or refreshing derivatives:
 
 ```bash
 python3 tools/gallery_manager.py --rebuild-media
 ```
 
-Creates/refreshes `images/gallery/medium/*` and patches `data-medium` / `data-city` / `data-state` on existing items.
+For every gallery photo this will:
+
+1. **Bake EXIF orientation** into the full JPEG when Orientation ≠ 1 (Pillow). Upright originals stay untouched.
+2. Rebuild **medium** (long edge ≤ 1920) and **thumb** (≤ 900) from the upright full.
+3. Refresh **WebP** sidecars for medium + thumb.
+4. Patch `gallery.html` `width`/`height` (and city/state attrs) so masonry aspect ratios stay stable.
+
+Requires **Pillow** (`python3 -m pip install Pillow`) and macOS `sips`.
+
+Safe to re-run.
 
 ## Remove photos
 
@@ -146,13 +155,19 @@ python3 tools/gallery_manager.py --remove richmondbay sfgoldengate
 | `--cli FOLDER` | Import every image in that folder |
 | `--remove SLUG…` | Fully delete photo(s) by slug/filename |
 | `--list` | Show current gallery entries |
-| `--rebuild-media` | Rebuild medium assets + patch HTML |
+| `--rebuild-media` | Bake orientation if needed; rebuild medium/thumb/WebP; patch HTML attrs |
 | `--backfill-dates` | Upgrade dates from EXIF (dry-run unless `--apply`) |
 | `--apply` | With `--backfill-dates`: write `gallery.html` |
 | `--category` | `cityscapes` · `landmarks` · `nature` · `coast` · `food-culture` · `roads` |
 | `--location` | Lightbox meta (omit → auto from GPS) |
 | `--date` | e.g. `July 4, 2026` (omit → auto from EXIF) |
 | `--dry-run` | Import only: parse only, write nothing |
+
+## Dependencies
+
+- Python 3.9+
+- macOS `sips` (preinstalled)
+- **Pillow** — EXIF orientation bake (`python3 -m pip install Pillow`)
 
 ## What it writes
 

@@ -10,6 +10,7 @@
    Companion data (load before these runtime scripts):
    · src/js/data/i18n.js          → window.I18N          (all pages)
    · src/js/data/fun-facts.js     → window.FUN_FACTS     (index)
+   · src/js/data/intro-gallery.js → window.INTRO_GALLERY_PHOTOS (index)
    · src/js/data/modal-content.js → window.MODAL_DATA*   (index)
    · src/js/data/dest-links.js    → window.DEST_*        (index)
    · src/js/data/legal-i18n.js    → window.LEGAL_I18N    (privacy/terms)

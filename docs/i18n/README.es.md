@@ -25,16 +25,18 @@
 | | |
 |---|---|
 | 🌍 **Cobertura completa** | Los 50 estados, organizados por regiones (Noreste, Sur, Medio Oeste, Oeste, Suroeste). |
-| 🏙️ **Ciudades recomendadas** | Doce ciudades con tarjetas, valoraciones y detalle. |
-| 🔗 **Enlaces útiles** | Turismo oficial, transporte, parques y museos. |
+| 🏙️ **Ciudades recomendadas** | Doce ciudades con tarjetas, valoraciones, detalle y **clima en vivo** hacia la herramienta del tiempo. |
+| 🔗 **Enlaces útiles** | Turismo oficial, transporte, parques y museos; enlaces selectivos en secciones de la guía. |
 | 🖼️ **Galería de fotos** | Galería filtrable: búsqueda, orden, calidad (miniatura / media / original). *Compatible con HDR* |
+| 🌄 **Hero inmersivo** | Fondo a pantalla completa por estilo (Clásico / Moderno), con veladuras claro/oscuro. |
+| 🎞️ **Collage «Acerca de»** | Tres miniaturas de la galería en rotación (prioriza naturaleza y monumentos); clic abre la galería. |
 | 🧰 **Herramientas de viaje** | Divisas, reloj mundial, propina e impuestos (50 estados), gasolina/EV, emergencias y **tiempo en vivo**. |
 | 🌦️ **Temporadas, cultura y rutas** | Cuándo viajar, cultura y road trips clásicos. |
 | 🎲 **Datos curiosos de América** | Un dato al azar cada vez; multilingüe. |
 | 🌐 **Multilingüe** | EN / ES / ZH / JA (incluye páginas legales). |
-| ⚙️ **Personalización** | Temas, idioma, °F/°C y mi/km, calidad de galería — en el dispositivo. |
-| ♿️ **Accesibilidad** | Tres niveles de animación: completa, reducida u off. En escritorio, el rastro del cursor se controla aparte. |
-| 📱 **Móvil** | Inicio ligero, scroll táctil y optimización de rendimiento. |
+| ⚙️ **Personalización** | Apariencia (sistema / claro / oscuro) × estilo (Clásico / Moderno), idioma, unidades y calidad de galería. |
+| ♿️ **Accesibilidad** | Tres niveles de animación: completa, reducida u off. **«Completa» en Ajustes gana** sobre «reducir movimiento» del SO. |
+| 📱 **Móvil** | Barra transparente sobre el hero, layout inferior y restauración de scroll al volver a la guía. |
 | 🔒 **Privacidad y términos** | [Política de privacidad](https://travelusa.pages.dev/privacy.html) y [Términos de uso](https://travelusa.pages.dev/terms.html), con aviso de enlaces externos. (Las traducciones legales son orientativas; prevalece la versión en inglés.) |
 
 ---

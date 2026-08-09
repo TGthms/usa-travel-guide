@@ -35,7 +35,11 @@
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: nowrap;
   gap: 10px;
-  transition: background .4s ease, padding .4s ease, box-shadow .4s ease, border-color .4s ease;
+  /* Over immersive hero: fully clear chrome until the user scrolls */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: background .4s ease, padding .4s ease, box-shadow .4s ease, border-color .4s ease, backdrop-filter .4s ease;
   border-bottom: 1px solid transparent;
 }
 #navbar.scrolled {
@@ -137,19 +141,119 @@
 }
 .hero-bg {
   position: absolute; inset: 0;
-  /* Layered depth: soft gold wash + deep navy falloff + bottom vignette for type */
-  background:
-    radial-gradient(ellipse 90% 70% at 18% 28%, color-mix(in srgb, var(--accent-1) 14%, transparent) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 55% at 78% 72%, color-mix(in srgb, var(--border-light) 55%, transparent) 0%, transparent 60%),
-    radial-gradient(ellipse 100% 80% at 40% 100%, rgba(0, 0, 0, .35) 0%, transparent 55%),
-    linear-gradient(165deg, var(--bg-surface) 0%, var(--bg-base) 42%, var(--bg-surface-2) 100%);
-  /* Static — continuous bg breathe + will-change was a free GPU tax on every visit */
+  background: var(--bg-base);
+  /* Photo layer + scrims for type legibility across light/dark */
 }
+/* Theme brightness lives on the wrapper so the img can animate blur freely */
+.hero-bg-photo {
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
+.hero-bg-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center 48%;
+  display: block;
+  /* Resting state until JS adds .is-hero-enter (after loader / decode) */
+  transform: scale(1.09);
+  opacity: 0;
+  filter: blur(20px);
+}
+/*
+  Luxury enter as three continuous tracks (not multi-stop keyframes):
+  fade + deblur finish first; zoom keeps moving so nothing “sticks” mid-way.
+*/
+.hero-bg-img.is-hero-enter {
+  animation:
+    heroPhotoFade 0.65s cubic-bezier(0.33, 0, 0.2, 1) forwards,
+    heroPhotoBlur 0.85s cubic-bezier(0.33, 0, 0.2, 1) forwards,
+    heroPhotoZoom 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+/* Modern hero (GG + pelican): bias down so the pelican’s body reads, not empty sky */
+.hero-bg-img--modern {
+  object-position: center 82%;
+}
+/* Classic hero: keep a balanced landscape frame */
+.hero-bg-img--classic {
+  object-position: center 42%;
+}
+/* Soft ambient wash (theme accent) over the photo */
+.hero-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 70% at 18% 28%, color-mix(in srgb, var(--accent-1) 16%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 55% at 78% 72%, rgba(0, 0, 0, 0.12) 0%, transparent 60%);
+}
+/* Bottom/left vignette so headline + CTA stay readable */
 .hero-bg::after {
   content: '';
   position: absolute; inset: 0;
+  z-index: 2;
   pointer-events: none;
-  background: linear-gradient(to top, color-mix(in srgb, var(--bg-base) 72%, transparent) 0%, transparent 42%);
+  background:
+    linear-gradient(to top, color-mix(in srgb, var(--bg-base) 82%, transparent) 0%, transparent 52%),
+    linear-gradient(105deg, color-mix(in srgb, var(--bg-base) 58%, transparent) 0%, transparent 55%),
+    linear-gradient(to bottom, color-mix(in srgb, var(--bg-base) 38%, transparent) 0%, transparent 28%);
+}
+/* Dark themes: slightly dim the photo so type & chrome feel premium */
+html[data-theme="default"] .hero-bg-photo,
+html[data-theme="glass"] .hero-bg-photo,
+html[data-theme="luxury"] .hero-bg-photo,
+html[data-theme="nature"] .hero-bg-photo {
+  filter: brightness(0.72) saturate(1.06) contrast(1.02);
+}
+/* Modern light (minimal): cool the over-bright GG sky so type stays crisp */
+html[data-theme="minimal"] .hero-bg-photo {
+  filter: brightness(0.78) saturate(0.96) contrast(1.04);
+}
+/* Classic light (elegant): warmer paper feel, still readable over misty coast */
+html[data-theme="elegant"] .hero-bg-photo {
+  filter: brightness(0.82) saturate(1.0) contrast(1.03);
+}
+html[data-theme="minimal"] .hero-bg::after {
+  background:
+    linear-gradient(to top, rgba(245, 245, 247, 0.88) 0%, rgba(245, 245, 247, 0.35) 38%, transparent 58%),
+    linear-gradient(105deg, rgba(245, 245, 247, 0.55) 0%, transparent 52%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.18) 0%, transparent 32%);
+}
+html[data-theme="elegant"] .hero-bg::after {
+  background:
+    linear-gradient(to top, rgba(246, 241, 232, 0.9) 0%, rgba(246, 241, 232, 0.42) 40%, transparent 60%),
+    linear-gradient(105deg, rgba(246, 241, 232, 0.58) 0%, transparent 54%),
+    linear-gradient(to bottom, rgba(40, 28, 18, 0.22) 0%, transparent 34%);
+}
+/* Stronger type contrast over photo (especially light themes) */
+html[data-theme="minimal"] .hero-h1,
+html[data-theme="elegant"] .hero-h1 {
+  color: #0a0a0c;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35),
+    0 2px 24px rgba(255, 255, 255, 0.55),
+    0 8px 40px rgba(0, 0, 0, 0.12);
+}
+html[data-theme="minimal"] .hero-desc,
+html[data-theme="elegant"] .hero-desc {
+  color: rgba(29, 29, 31, 0.88);
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 18px rgba(255, 255, 255, 0.65);
+}
+/* Continuous property tracks — each eases start→end with no mid plateau */
+@keyframes heroPhotoFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes heroPhotoBlur {
+  from { filter: blur(20px); }
+  to   { filter: blur(0); }
+}
+@keyframes heroPhotoZoom {
+  from { transform: scale(1.09); }
+  to   { transform: scale(1.0); }
 }
 /* Full-viewport overlay for the particle trail. Explicit width/height keep
    CSS pixels aligned with the JS DPR-scaled drawing buffer (without this,
@@ -167,15 +271,6 @@
   max-width: min(57.5rem, 100%);
   min-width: 0; width: 100%;
 }
-.hero-eyebrow {
-  font-family: var(--ff-serif);
-  font-size: var(--fs-micro);
-  letter-spacing: .2em; text-transform: uppercase; font-weight: 400;
-  color: var(--accent-1); margin-bottom: 22px; opacity: 0;
-  animation: slideUp .7s .15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  display: flex; align-items: center; gap: 14px;
-}
-.hero-eyebrow::before { content:''; display:inline-block; width: 36px; height: 1px; background: var(--accent-1); opacity: .85; }
 .hero-h1 {
   font-family: var(--ff-display);
   font-size: var(--fs-hero);
@@ -184,9 +279,10 @@
   letter-spacing: -.03em;
   margin-bottom: clamp(1rem, 0.8rem + 0.8vw, 1.75rem);
   opacity: 0;
-  animation: slideUp .75s .25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: slideUp .75s .2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   /* Fluid until min size, then whole lines wrap as units (no mid-word splits) */
   max-width: 18ch;
+  text-shadow: 0 2px 28px color-mix(in srgb, var(--bg-base) 55%, transparent);
 }
 /* Editorial italic emphasis — solid accent color, no animated gradient text */
 .hero-h1 em {
@@ -196,12 +292,18 @@
 }
 .hero-desc {
   font-size: var(--fs-lead);
-  line-height: 1.65;
+  line-height: 1.55;
   color: var(--text-dim);
-  max-width: var(--prose-max);
+  max-width: min(32rem, var(--prose-max));
   margin-bottom: clamp(1.5rem, 1.2rem + 1vw, 2.5rem);
   font-weight: 400; opacity: 0;
   animation: slideUp .75s .38s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  text-shadow: 0 1px 18px color-mix(in srgb, var(--bg-base) 45%, transparent);
+}
+.hero-desc-teaser {
+  font-size: clamp(1rem, 0.95rem + 0.35vw, 1.2rem);
+  letter-spacing: -0.01em;
+  max-width: 28rem;
 }
 .hero-cta {
   display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center;
@@ -386,36 +488,122 @@
 .img-card-tall { height: clamp(320px, 38vw, 400px); }
 .img-card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .img-card-sm { height: clamp(180px, 22vw, 220px); border-radius: 6px; overflow: hidden; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
-.img-scene { width: 100%; height: 100%; position: relative; overflow: hidden; }
-.scene-label {
-  position: absolute; bottom: 16px; left: 16px; z-index: 2;
+
+/* Shuffle slots (gallery medium WebP, dual-layer crossfade) */
+.intro-photo-slot {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  cursor: pointer;
+  background: var(--bg-surface-2, #1a1a1e);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+}
+.intro-photo-slot:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+}
+.intro-photo-slot:focus-visible {
+  outline: 2px solid var(--accent-1);
+  outline-offset: 3px;
+}
+.intro-photo-slot:active { transform: translateY(-1px) scale(0.995); }
+.intro-photo-layers {
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
+.intro-photo-layer {
+  position: absolute; inset: 0;
+  background-color: #1a1a1e;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.06);
+  transition:
+    opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 6.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.intro-photo-layer.is-active {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 1;
+}
+.intro-photo-layer.is-exit {
+  opacity: 0;
+  transform: scale(1.03);
+  z-index: 0;
+}
+.scene-label,
+.intro-photo-label {
+  position: absolute; bottom: 14px; left: 14px; z-index: 2;
   font-family: var(--ff-serif); font-size: 10px; font-weight: 400;
-  letter-spacing: .14em; text-transform: uppercase; color: #fff;
-  background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+  letter-spacing: .1em; text-transform: uppercase; color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
   padding: 6px 10px; border-radius: 4px;
+  max-width: calc(100% - 28px);
+  /* Prefer full place names; ellipsis only when the chip truly overflows */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transform-origin: left bottom;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  /*
+    Single transition path only:
+    add .is-swapping → ease out; remove it (after text swap) → ease in once.
+    (A separate enter keyframe used to stack on this and look like a double anim.)
+  */
+  transition:
+    opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.scene-canyon {
-  /* Photo + gradient fallback so the card never goes blank if the file is missing. */
-  background-image:
-    url('../../images/SFgolden_gate_bridge_with_pelican-by_timg.jpeg'),
-    linear-gradient(180deg, #9fb6c9 0%, #e6a866 34%, #c05a3c 56%, #6e3548 76%, #241f33 100%);
-  background-size: cover, cover;
-  background-position: center, center;
+.img-card-sm .intro-photo-label {
+  bottom: 10px; left: 10px;
+  font-size: 9px;
+  letter-spacing: .08em;
+  padding: 5px 8px;
+  max-width: calc(100% - 16px);
 }
-/* Real trip photos (fallbacks keep the card filled if a path fails) */
-.scene-nyc {
-  background-image:
-    url('../../images/harbor_blvd.jpg'),
-    linear-gradient(180deg, #1a3040 0%, #0d1820 100%);
-  background-size: cover, cover;
-  background-position: center, center;
+/* Exit pose — enter is just returning to the base state above (one motion) */
+.intro-photo-label.is-swapping {
+  opacity: 0;
+  transform: translateY(7px) scale(0.95);
+  filter: blur(4px);
+  /* Slightly snappier out so the in-feel reads as the polished beat */
+  transition:
+    opacity 0.15s cubic-bezier(0.4, 0, 1, 1),
+    transform 0.15s cubic-bezier(0.4, 0, 1, 1),
+    filter 0.15s ease;
 }
-.scene-yellow {
-  background-image:
-    url('../../images/mirage-apple.jpg'),
-    linear-gradient(160deg, #2a2a2e 0%, #121216 100%);
-  background-size: cover, cover;
-  background-position: center, center;
+
+/* Intro fact cards — Apple-like staggered entrance when first revealed */
+.intro-facts.is-entered .fact-card {
+  animation: factCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.intro-facts.is-entered .fact-card:nth-child(1) { animation-delay: 0.04s; }
+.intro-facts.is-entered .fact-card:nth-child(2) { animation-delay: 0.1s; }
+.intro-facts.is-entered .fact-card:nth-child(3) { animation-delay: 0.16s; }
+.intro-facts.is-entered .fact-card:nth-child(4) { animation-delay: 0.22s; }
+.intro-facts.is-entered .fact-card:nth-child(5) { animation-delay: 0.28s; }
+.intro-facts.is-entered .fact-card:nth-child(6) { animation-delay: 0.34s; }
+@keyframes factCardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ═══ DIVIDER ═══ */

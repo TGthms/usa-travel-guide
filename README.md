@@ -25,16 +25,18 @@
 | | |
 |---|---|
 | 🌍 **Comprehensive coverage** | All 50 U.S. states, organized by major regions (Northeast, South, Midwest, West, Southwest). |
-| 🏙️ **Destination cities** | Twelve featured cities with unique CSS card art (no photo required), ratings, and expandable detail modals. |
-| 🔗 **Helpful city links** | Official tourism sites, transit, parks, and museums open from each city modal. |
-| 🖼️ **Photo gallery** | Filterable travel photography with search, sort, quality tiers (thumbnail / medium / full), lightbox, and optional video. *HDR supported* |
+| 🏙️ **Destination cities** | Twelve featured cities with unique CSS card art, ratings, expandable modals, and **live weather chips** (Open-Meteo) that deep-link into the weather tool. |
+| 🔗 **Helpful links** | Tourism, transit, parks, and museums from city modals — plus selective guide-section links (regions, essentials, culture, routes, tips). |
+| 🖼️ **Photo gallery** | Filterable travel photography with search, sort, quality tiers (thumbnail / medium / full), lightbox, optional video, and EXIF-upright media pipeline. *HDR supported on full JPEG copies when already upright.* |
+| 🌄 **Immersive homepage hero** | Full-bleed photo background by style (**Classic** / **Modern**), light/dark scrims, luxury enter motion, and bottom-weighted mobile layout. |
+| 🎞️ **About photo collage** | Three-slot shuffle of real gallery thumbs (weighted toward nature, landmarks, coast, cities) with soft transitions; click opens the gallery. |
 | 🧰 **Travel tools** | Hub plus mini-apps: currency, world clock, tip & sales tax (all 50 states), gas/EV road-trip cost, U.S. emergency numbers, and **live weather** (NWS for U.S. + Open-Meteo for world/enrich). |
 | 🌦️ **Seasons, culture & routes** | When to go, cultural highlights, and classic road-trip ideas. |
 | 🎲 **America Fun Facts** | One shuffled fact at a time — 250+ trivia items in every language. |
 | 🌐 **Multi-language** | English, Spanish, Chinese, and Japanese for the full guide (including legal pages). |
-| ⚙️ **Personalization** | Themes, language, °F/°C and mi/km units, gallery photo quality — saved on your device. |
-| ♿️ **Animations: Full / Reduced / Off** | Accessibility-first motion levels: full effects, calm minimal fades, or no decorative animation. Cursor trail can be toggled separately. Respects OS “prefers reduced motion.” |
-| 📱 **Mobile-ready** | Lightweight hero (no particle canvas), instant scroll on touch devices, and performance safeguards for smoother browsing. |
+| ⚙️ **Personalization** | Appearance (system / light / dark) × style (**Classic** / **Modern**), language, °F/°C and mi/km units, gallery photo quality — saved on your device. |
+| ♿️ **Animations: Full / Reduced / Off** | Accessibility-first motion: full effects, calm minimal fades, or no decorative animation. **Settings “Full” wins** even when the OS prefers reduced motion. Cursor trail can be toggled separately. |
+| 📱 **Mobile-ready** | Transparent nav over the hero until scroll, performance safeguards, and guide scroll restore when returning from tools. |
 | 🔒 **Privacy & terms** | On-site [Privacy Policy](https://travelusa.pages.dev/privacy.html) and [Terms of Use](https://travelusa.pages.dev/terms.html), including external-link disclosures. |
 
 ---
@@ -50,12 +52,12 @@ Main pages: `index.html` · `gallery.html` · `tools.html` · tool mini-apps · 
 | `*.html` (repo root) | Site entrypoints (static hosting) |
 | `src/css/` | Design system split by domain; `styles.css` is the ordered entry barrel |
 | `src/js/app.js` | Boot only (applies saved prefs after feature scripts load) |
-| `src/js/core/` | Shared shell: env, prefs, i18n, settings chrome |
-| `src/js/features/` | Page features: home, gallery, tools, weather, legal |
-| `src/js/data/` | Content packs (i18n, modals, fun facts, legal copy, dest links) |
-| `images/` | Photos (gallery tiers + site imagery) |
+| `src/js/core/` | Shared shell: env, prefs, i18n, settings chrome, nav-return |
+| `src/js/features/` | Page features: home, gallery, tools, weather, dest-weather, legal |
+| `src/js/data/` | Content packs (i18n, modals, fun facts, legal copy, dest links, intro-gallery catalog) |
+| `images/` | Hero assets (`main-classic.webp`, `main-modern.webp`) + gallery tiers |
 | `tools/` | Local **Gallery Manager** (tracked in git; stripped from public deploy) |
-| `docs/` | Architecture + translated READMEs |
+| `docs/` | Architecture + translated READMEs + legal markdown sources |
 | `.github/workflows/static.yml` | Deploy mirror to GitHub Pages on push to `main` |
 
 See [docs/architecture.md](docs/architecture.md) for script load order and maintainer notes.

@@ -116,18 +116,24 @@
 </nav>
 
 <main id="main" tabindex="-1">
-<section id="hero">
-  <div class="hero-bg" id="heroBg"></div>
+<section id="hero" class="hero-immersive">
+  <div class="hero-bg" id="heroBg" aria-hidden="true">
+    <div class="hero-bg-photo">
+      <img class="hero-bg-img hero-bg-img--modern" id="heroBgImg"
+           src="images/main-modern.webp"
+           alt=""
+           width="4032" height="3024"
+           decoding="async" fetchpriority="high">
+    </div>
+  </div>
 
   <div class="hero-content">
-    <p class="hero-eyebrow" data-i18n="hero.eyebrow">The Ultimate Travel Guide</p>
     <h1 class="hero-h1" data-i18n-html="hero.headline">
       Land of<br>
       <em>Endless&nbsp;Wonder</em>
     </h1>
-    <p class="hero-desc" data-i18n="hero.desc">
-      From the Atlantic's crashing shores to Pacific sunsets, from Arctic tundra to subtropical keys —
-      the United States holds more landscapes, cultures, and stories than any single journey could capture.
+    <p class="hero-desc hero-desc-teaser" data-i18n="hero.desc">
+      From Atlantic shores to Pacific sunsets — one country, endless stories.
     </p>
     <div class="hero-cta">
       <a href="#intro" class="btn-primary hero-cta-primary">
@@ -136,24 +142,6 @@
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </span>
       </a>
-    </div>
-  </div>
-
-  <div class="hero-stats">
-    <div class="stat-item">
-      <div class="stat-num">50</div>
-      <div class="stat-label" data-i18n="hero.statStates">Unique States</div>
-      <div class="stat-bar"><div class="stat-bar-fill"></div></div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">63</div>
-      <div class="stat-label" data-i18n="hero.statParks">National Parks</div>
-      <div class="stat-bar"><div class="stat-bar-fill"></div></div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">3.8M</div>
-      <div class="stat-label" data-i18n="hero.statMiles">Square Miles</div>
-      <div class="stat-bar"><div class="stat-bar-fill"></div></div>
     </div>
   </div>
 
@@ -211,23 +199,29 @@
       </div>
     </div>
 
-    <div class="intro-right reveal-right">
-      <div class="img-card img-card-tall">
-        <div class="img-scene scene-canyon">
-          <span class="scene-label" data-i18n="intro.sceneCanyon">San Francisco, California</span>
+    <div class="intro-right reveal-right" id="introGallery">
+      <button type="button" class="img-card img-card-tall intro-photo-slot" data-intro-slot="tall" aria-label="Open gallery photo">
+        <div class="intro-photo-layers" aria-hidden="true">
+          <div class="intro-photo-layer is-active"></div>
+          <div class="intro-photo-layer"></div>
         </div>
-      </div>
+        <span class="scene-label intro-photo-label">—</span>
+      </button>
       <div class="img-card-row">
-        <div class="img-card-sm">
-          <div class="img-scene scene-nyc">
-            <span class="scene-label" data-i18n="intro.sceneNyc">Los Angeles</span>
+        <button type="button" class="img-card-sm intro-photo-slot" data-intro-slot="small-a" aria-label="Open gallery photo">
+          <div class="intro-photo-layers" aria-hidden="true">
+            <div class="intro-photo-layer is-active"></div>
+            <div class="intro-photo-layer"></div>
           </div>
-        </div>
-        <div class="img-card-sm">
-          <div class="img-scene scene-yellow">
-            <span class="scene-label" data-i18n="intro.sceneYellow">Cupertino</span>
+          <span class="scene-label intro-photo-label">—</span>
+        </button>
+        <button type="button" class="img-card-sm intro-photo-slot" data-intro-slot="small-b" aria-label="Open gallery photo">
+          <div class="intro-photo-layers" aria-hidden="true">
+            <div class="intro-photo-layer is-active"></div>
+            <div class="intro-photo-layer"></div>
           </div>
-        </div>
+          <span class="scene-label intro-photo-label">—</span>
+        </button>
       </div>
     </div>
   </div>
@@ -1058,6 +1052,7 @@
 
 <script src="src/js/data/i18n.js" defer></script>
 <script src="src/js/data/fun-facts.js" defer></script>
+<script src="src/js/data/intro-gallery.js" defer></script>
 <script src="src/js/data/modal-content.js" defer></script>
 <script src="src/js/data/dest-links.js" defer></script>
 <script src="src/js/data/dest-weather-cities.js" defer></script>

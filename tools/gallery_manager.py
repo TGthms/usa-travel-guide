@@ -7,8 +7,10 @@ HTML or making thumbnails yourself.
 
 What it does for each photo (add):
   1. Saves the full photo              → images/gallery/
-     JPEG originals are copied byte-for-byte (HDR/color intact);
-     other formats convert at quality 100 with no resize.
+     JPEG originals are copied byte-for-byte when already upright;
+     EXIF Orientation ≠ 1 is baked into pixels (Pillow) so browsers,
+     thumbs, and width/height attrs always match the visual image.
+     Other formats convert at quality 100 with no resize.
   2. Saves a medium lightbox asset     → images/gallery/medium/
      (long edge ≤ 1920px — quality + performance balance)
   3. Saves a grid thumbnail            → images/gallery/thumbs/
@@ -40,6 +42,8 @@ Usage — CLI batch from a folder:
 
 Usage — rebuild medium assets for existing gallery photos:
   python3 tools/gallery_manager.py --rebuild-media
+  # Also bakes EXIF orientation into full files when needed, refreshes
+  # thumbs/webp, and patches gallery.html width/height for stable masonry.
 
 Usage — backfill precise dates from EXIF (month-only → Month D, YYYY):
   python3 tools/gallery_manager.py --backfill-dates          # dry-run
@@ -48,7 +52,8 @@ Usage — backfill precise dates from EXIF (month-only → Month D, YYYY):
 Usage — CLI remove:
   python3 tools/gallery_manager.py --remove sfgoldengate richmondbay
 
-Requires: Python 3.9+ and macOS `sips` (preinstalled). No pip packages needed.
+Requires: Python 3.9+, macOS `sips` (preinstalled), and Pillow (for EXIF
+orientation bake). Install with: python3 -m pip install Pillow
 """
 
 from __future__ import annotations
@@ -95,13 +100,16 @@ CATEGORIES = [
 ]
 
 # Full lightbox assets: keep the *real* photo for optional HD upgrade.
-# JPEG originals are copied byte-for-byte (no re-encode → color/HDR gain maps
-# stay intact). Other formats convert without resizing at max JPEG quality.
+# JPEG originals are copied byte-for-byte when upright (no re-encode → color/HDR
+# gain maps stay intact). Photos with EXIF Orientation ≠ 1 are re-encoded once
+# so pixels match the visual orientation (stable thumbs + masonry aspect).
+# Other formats convert without resizing at max JPEG quality.
 # Medium is the default viewer size; thumbs stay small for the masonry grid.
 FULL_MAX = None  # None = do not resize (preserve original size)
 MEDIUM_MAX = 1920
 THUMB_MAX = 900
 FULL_QUALITY = 100  # only used when format conversion is required (HEIC/PNG/…)
+FULL_ORIENT_QUALITY = 95  # re-encode quality when baking EXIF orientation
 MEDIUM_QUALITY = 82
 THUMB_QUALITY = 72
 PORT = 8791
@@ -1325,6 +1333,99 @@ def extract_photo_metadata(path: Path) -> dict:
     return result
 
 
+def _exif_orientation(path: Path) -> int | None:
+    """Return EXIF Orientation tag (1–8) or None if missing / unreadable."""
+    try:
+        from PIL import Image
+
+        with Image.open(path) as im:
+            exif = im.getexif()
+            if not exif:
+                return None
+            o = exif.get(274)  # Orientation
+            return int(o) if o is not None else None
+    except Exception:
+        return None
+
+
+def needs_orientation_bake(path: Path) -> bool:
+    """True when EXIF Orientation is present and not upright (1)."""
+    o = _exif_orientation(path)
+    return o is not None and o != 1
+
+
+def bake_orientation_to_path(
+    src: Path,
+    dest: Path,
+    *,
+    quality: int = FULL_ORIENT_QUALITY,
+) -> tuple[int, int, bool]:
+    """
+    Write an upright JPEG to dest with EXIF orientation applied to pixels.
+
+    Returns (width, height, changed). If no bake was needed, dest is a copy of
+    src when paths differ (or left as-is when same); changed=False.
+    Requires Pillow. Falls back to a plain copy if Pillow fails.
+    """
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        from PIL import Image, ImageOps, ImageFile
+
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
+        with Image.open(src) as im:
+            orient = None
+            try:
+                exif = im.getexif()
+                if exif:
+                    orient = exif.get(274)
+            except Exception:
+                orient = None
+            if orient is None or int(orient) == 1:
+                if src.resolve() != dest.resolve():
+                    shutil.copy2(src, dest)
+                return im.size[0], im.size[1], False
+
+            icc = im.info.get("icc_profile")
+            fixed = ImageOps.exif_transpose(im)
+            if fixed is None:
+                fixed = im
+            if fixed.mode not in ("RGB", "L"):
+                fixed = fixed.convert("RGB")
+            elif fixed.mode == "L":
+                fixed = fixed.convert("RGB")
+
+            tmp_dir = Path(tempfile.mkdtemp(prefix="gm-orient-"))
+            tmp_path = tmp_dir / "out.jpeg"
+            try:
+                save_kw: dict = {
+                    "format": "JPEG",
+                    "quality": int(quality),
+                    "optimize": True,
+                    "subsampling": 0,
+                }
+                if icc:
+                    save_kw["icc_profile"] = icc
+                fixed.save(tmp_path, **save_kw)
+                shutil.move(str(tmp_path), str(dest))
+                return fixed.size[0], fixed.size[1], True
+            finally:
+                shutil.rmtree(tmp_dir, ignore_errors=True)
+    except Exception as e:
+        sys.stderr.write(f"[gallery_manager] orientation bake failed for {src.name}: {e}\n")
+        if src.resolve() != dest.resolve():
+            shutil.copy2(src, dest)
+        return (*sips_size(dest), False)
+
+
+def bake_orientation_inplace(
+    path: Path, *, quality: int = FULL_ORIENT_QUALITY
+) -> tuple[int, int, bool]:
+    """Bake EXIF orientation into path in place. Returns (w, h, changed)."""
+    if not needs_orientation_bake(path):
+        return (*sips_size(path), False)
+    return bake_orientation_to_path(path, path, quality=quality)
+
+
 def sips_export(
     src: Path,
     dest: Path,
@@ -1335,10 +1436,19 @@ def sips_export(
     Export via macOS sips as JPEG.
     - max_edge set: downscale so the long edge is at most max_edge (thumbs).
     - max_edge None/0: keep original pixel dimensions.
+    Always auto-orients first when EXIF Orientation ≠ 1 so thumb/medium
+    pixels match the visual image (stable masonry width/height attrs).
     Re-encoding always risks losing HDR gain maps / subtle color — prefer
-    export_full_image() for lightbox assets so JPEGs are copied verbatim.
+    export_full_image() for lightbox assets so upright JPEGs are copied.
     """
     dest.parent.mkdir(parents=True, exist_ok=True)
+    work_src = src
+    orient_tmp_dir: Path | None = None
+    if needs_orientation_bake(src):
+        orient_tmp_dir = Path(tempfile.mkdtemp(prefix="gm-sips-orient-"))
+        work_src = orient_tmp_dir / "upright.jpeg"
+        bake_orientation_to_path(src, work_src)
+
     # Do not pre-create the temp file: sips can fail or write a broken JPEG when
     # targeting an already-opened/empty path on some macOS versions.
     tmp_path = Path(tempfile.mkdtemp(prefix="gm-sips-")) / "out.jpeg"
@@ -1349,7 +1459,7 @@ def sips_export(
         cmd += [
             "-s", "format", "jpeg",
             "-s", "formatOptions", str(quality),
-            str(src),
+            str(work_src),
             "--out", str(tmp_path),
         ]
         try:
@@ -1366,6 +1476,8 @@ def sips_export(
                 shutil.rmtree(tmp_path.parent, ignore_errors=True)
         except OSError:
             pass
+        if orient_tmp_dir is not None:
+            shutil.rmtree(orient_tmp_dir, ignore_errors=True)
     return sips_size(dest)
 
 
@@ -1384,22 +1496,28 @@ def export_full_image(src: Path, dest: Path) -> tuple[int, int, str]:
     """
     Save the lightbox / full-size asset with maximum fidelity.
 
-    - Already JPEG → byte-for-byte copy (keeps original quality, ICC profile,
-      EXIF, and any HDR gain-map metadata the camera/app embedded).
+    - Already JPEG and upright → byte-for-byte copy (keeps original quality,
+      ICC profile, EXIF, and any HDR gain-map metadata).
+    - Already JPEG but EXIF Orientation ≠ 1 → bake pixels upright once
+      (required for correct thumbs + masonry aspect; mode "orient").
     - HEIC / PNG / WebP / etc. → convert to JPEG at quality 100, no resize
       (web gallery uses .jpeg paths; true HDR gain maps may still be lost
       on HEIC→JPEG — export JPEG from Photos when you need that).
 
-    Returns (width, height, mode) where mode is "copy" or "convert".
+    Returns (width, height, mode) where mode is "copy", "orient", or "convert".
     """
     dest.parent.mkdir(parents=True, exist_ok=True)
     if _looks_like_jpeg(src):
-        # Exact original file — never re-encode.
+        if needs_orientation_bake(src):
+            w, h, _ = bake_orientation_to_path(src, dest, quality=FULL_ORIENT_QUALITY)
+            return w, h, "orient"
+        # Exact original file — never re-encode when already upright.
         if src.resolve() != dest.resolve():
             shutil.copy2(src, dest)
         return (*sips_size(dest), "copy")
 
     # Format conversion required for the site's .jpeg URLs — no downscale.
+    # sips_export already auto-orients when needed.
     sips_export(src, dest, max_edge=None, quality=FULL_QUALITY)
     return (*sips_size(dest), "convert")
 
@@ -1814,11 +1932,11 @@ def process_one(
                     except Exception:
                         fw, fh = mw, mh
             else:
-                # Thumbs: small for the grid. Medium: default lightbox. Full: optional HD.
-                # Full stays original JPEG byte-for-byte (HDR-safe). WebP only for thumb/medium.
-                tw, th = sips_export(src, thumb_path, THUMB_MAX, THUMB_QUALITY)
-                mw, mh = sips_export(src, medium_path, MEDIUM_MAX, MEDIUM_QUALITY)
+                # Full first (upright / HDR-safe copy), then derive medium + thumb from it
+                # so width/height attrs always match visual orientation.
                 fw, fh, full_mode = export_full_image(src, full_path)
+                tw, th = sips_export(full_path, thumb_path, THUMB_MAX, THUMB_QUALITY)
+                mw, mh = sips_export(full_path, medium_path, MEDIUM_MAX, MEDIUM_QUALITY)
 
             thumb_webp_ok = write_webp_from_jpeg(
                 thumb_path, thumb_path.with_suffix(".webp"), quality=80
@@ -2085,13 +2203,19 @@ def remove_one(slug: str, filename: str | None = None) -> dict:
 
 def rebuild_media_for_existing(*, patch_html: bool = True) -> dict:
     """
-    Ensure every gallery full-size photo has a medium (+ refresh HTML attrs).
+    Full media pass for every gallery photo:
+      1. Bake EXIF Orientation into full JPEGs when needed (pixels upright).
+      2. Rebuild medium + thumb from the upright full.
+      3. Refresh medium/thumb WebP sidecars.
+      4. Patch gallery.html width/height (+ city/state attrs) for stable masonry.
+
     Safe to re-run. Used after upgrading the tool or for --rebuild-media.
     """
     ensure_layout()
     photos = list_photos()
     built = []
     missing_full = []
+    oriented = []
     for item in photos:
         fname = item["filename"]
         full_path = GALLERY_DIR / fname
@@ -2100,17 +2224,36 @@ def rebuild_media_for_existing(*, patch_html: bool = True) -> dict:
             continue
         medium_path = MEDIUM_DIR / fname
         thumb_path = THUMBS_DIR / fname
-        # Always refresh medium from full for consistent quality.
+        # Bake orientation first so all derivatives match visual upright pixels.
+        fw, fh, changed = bake_orientation_inplace(full_path)
+        if changed:
+            oriented.append(fname)
+        # Always refresh medium + thumb from full for consistent quality/aspect.
         mw, mh = sips_export(full_path, medium_path, MEDIUM_MAX, MEDIUM_QUALITY)
-        # Ensure thumb exists (don't rebuild if present — cheaper)
-        if not thumb_path.is_file():
-            sips_export(full_path, thumb_path, THUMB_MAX, THUMB_QUALITY)
-        built.append({"filename": fname, "medium_size": f"{mw}x{mh}"})
+        tw, th = sips_export(full_path, thumb_path, THUMB_MAX, THUMB_QUALITY)
+        write_webp_from_jpeg(thumb_path, thumb_path.with_suffix(".webp"), quality=80)
+        write_webp_from_jpeg(medium_path, medium_path.with_suffix(".webp"), quality=82)
+        built.append({
+            "filename": fname,
+            "full_size": f"{fw}x{fh}",
+            "medium_size": f"{mw}x{mh}",
+            "thumb_size": f"{tw}x{th}",
+            "oriented": changed,
+        })
 
     html_patched = 0
     if patch_html and GALLERY_HTML.is_file():
         text = GALLERY_HTML.read_text(encoding="utf-8")
         original = text
+        # thumb size cache for width/height attrs
+        thumb_sizes: dict[str, tuple[int, int]] = {}
+        for b in built:
+            parts = b["thumb_size"].split("x")
+            if len(parts) == 2:
+                try:
+                    thumb_sizes[b["filename"]] = (int(parts[0]), int(parts[1]))
+                except ValueError:
+                    pass
 
         def patch_item(match: re.Match) -> str:
             nonlocal html_patched
@@ -2161,11 +2304,27 @@ def rebuild_media_for_existing(*, patch_html: bool = True) -> dict:
                 block,
                 count=1,
             )
+            # Patch width/height from actual thumb display size (post-orientation).
+            size = thumb_sizes.get(fname)
+            if size is None:
+                tpath = THUMBS_DIR / fname
+                if tpath.is_file():
+                    size = sips_size(tpath)
+            if size:
+                tw, th = size
+                if re.search(r'\bwidth="\d+"', block):
+                    block = re.sub(r'\bwidth="\d+"', f'width="{tw}"', block, count=1)
+                else:
+                    block = re.sub(r'(<img\b)', rf'\1 width="{tw}"', block, count=1)
+                if re.search(r'\bheight="\d+"', block):
+                    block = re.sub(r'\bheight="\d+"', f'height="{th}"', block, count=1)
+                else:
+                    block = re.sub(r'(<img\b[^>]*\bwidth="\d+")', rf'\1 height="{th}"', block, count=1)
             html_patched += 1
             return block
 
         text = re.sub(
-            r'<div class="gallery-item"[^>]*>\s*<img[^>]*>\s*'
+            r'<div class="gallery-item"[^>]*>[\s\S]*?<img[^>]*>[\s\S]*?'
             r'<div class="gallery-caption"[^>]*>[\s\S]*?</div>\s*</div>',
             patch_item,
             text,
@@ -2176,6 +2335,7 @@ def rebuild_media_for_existing(*, patch_html: bool = True) -> dict:
     return {
         "built": built,
         "missing_full": missing_full,
+        "oriented": oriented,
         "html_items_patched": html_patched,
         "status": "ok",
     }
@@ -3513,9 +3673,19 @@ def main() -> None:
     if args.rebuild_media:
         ensure_layout()
         r = rebuild_media_for_existing()
-        print(f"Rebuilt medium for {len(r['built'])} photo(s); HTML items patched: {r['html_items_patched']}")
+        oriented = r.get("oriented") or []
+        print(
+            f"Rebuilt media for {len(r['built'])} photo(s); "
+            f"oriented {len(oriented)}; HTML items patched: {r['html_items_patched']}"
+        )
         for b in r["built"]:
-            print(f"  · {b['filename']}  medium={b['medium_size']}")
+            flag = "  [oriented]" if b.get("oriented") else ""
+            print(
+                f"  · {b['filename']}  full={b.get('full_size','?')}  "
+                f"medium={b['medium_size']}  thumb={b.get('thumb_size','?')}{flag}"
+            )
+        if oriented:
+            print("Orientation baked:", ", ".join(oriented))
         if r["missing_full"]:
             print("Missing full files:", ", ".join(r["missing_full"]))
         return

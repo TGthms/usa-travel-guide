@@ -769,6 +769,9 @@ function recomputeAutoPrefs({ paint = true } = {}) {
     document.documentElement.setAttribute('data-theme', currentTheme);
     applyThemeChrome(currentTheme);
     if (typeof updateAppearanceStyleUI === 'function') updateAppearanceStyleUI();
+    if (typeof window.syncHeroBackground === 'function') {
+      try { window.syncHeroBackground(); } catch (e) {}
+    }
     if (typeof window.refreshWeatherUi === 'function') {
       try { window.refreshWeatherUi(); } catch (e) {}
     }
@@ -888,6 +891,9 @@ function applyAppearanceStyle({ persist = false } = {}) {
   document.documentElement.setAttribute('data-theme', currentTheme);
   applyThemeChrome(currentTheme);
   updateAppearanceStyleUI();
+  if (typeof window.syncHeroBackground === 'function') {
+    try { window.syncHeroBackground(); } catch (e) {}
+  }
   if (typeof window.refreshWeatherUi === 'function') {
     try { window.refreshWeatherUi(); } catch (e) {}
   }

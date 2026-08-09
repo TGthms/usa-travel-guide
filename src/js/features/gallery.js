@@ -1547,3 +1547,46 @@ function refreshGalleryLanguageChrome() {
 
 // Mark gallery UI ready last so language switches can safely refresh chrome.
 galleryUiReady = true;
+
+/* Deep link from homepage intro shuffle: gallery.html?photo=filename-or-slug */
+(function openGalleryFromQuery() {
+  if (!document.body.classList.contains('page-gallery')) return;
+  if (!lightbox) return;
+  let param = '';
+  try {
+    param = new URLSearchParams(window.location.search).get('photo') || '';
+  } catch (e) { param = ''; }
+  if (!param) return;
+  const needle = param.trim().toLowerCase();
+  if (!needle) return;
+  const items = document.querySelectorAll('.gallery-item');
+  let match = null;
+  items.forEach((item) => {
+    if (match) return;
+    const img = item.querySelector('img');
+    const full = (img && (img.getAttribute('data-full') || '')) || '';
+    const file = full.split('/').pop() || '';
+    const stem = file.replace(/\.[^.]+$/, '');
+    const cap = item.querySelector('.gallery-caption');
+    const i18n = cap && cap.getAttribute('data-i18n');
+    const slug = i18n ? i18n.replace(/^gallery\.item\./, '').replace(/\.caption$/, '') : '';
+    if (
+      file.toLowerCase() === needle ||
+      stem.toLowerCase() === needle ||
+      slug.toLowerCase() === needle ||
+      full.toLowerCase().endsWith('/' + needle)
+    ) {
+      match = item;
+    }
+  });
+  if (!match) return;
+  // Let layout settle (masonry + fonts) before opening.
+  const open = () => {
+    try { openGalleryItem(match); } catch (e) { /* ignore */ }
+  };
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(() => setTimeout(open, 80));
+  } else {
+    setTimeout(open, 120);
+  }
+})();

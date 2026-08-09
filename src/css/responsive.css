@@ -60,21 +60,41 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .nav-logo span { display: none; }
   .nav-logo { font-size: 22px; padding: 4px 2px; }
 
-  /* Mobile hero: fill the screen with balanced vertical centering, less empty void */
+  /* Mobile hero: bottom-weighted (not vertically centered) — more polished native feel */
   #hero {
-    align-items: center;
+    align-items: flex-end;
+    justify-content: flex-end;
     min-height: 100dvh;
     min-height: 100svh;
+  }
+  /* Extra legibility over bright coastal photos on small screens */
+  html[data-theme="minimal"] .hero-bg::after {
+    background:
+      linear-gradient(to top, rgba(245, 245, 247, 0.94) 0%, rgba(245, 245, 247, 0.5) 42%, transparent 64%),
+      linear-gradient(105deg, rgba(245, 245, 247, 0.62) 0%, transparent 55%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.22) 0%, transparent 30%);
+  }
+  html[data-theme="elegant"] .hero-bg::after {
+    background:
+      linear-gradient(to top, rgba(246, 241, 232, 0.95) 0%, rgba(246, 241, 232, 0.55) 44%, transparent 66%),
+      linear-gradient(105deg, rgba(246, 241, 232, 0.65) 0%, transparent 56%),
+      linear-gradient(to bottom, rgba(40, 28, 18, 0.28) 0%, transparent 32%);
+  }
+  html[data-theme="minimal"] .hero-bg-photo {
+    filter: brightness(0.74) saturate(0.94) contrast(1.05);
+  }
+  html[data-theme="elegant"] .hero-bg-photo {
+    filter: brightness(0.76) saturate(0.98) contrast(1.04);
   }
   #hero, #intro, #regions, #destinations, #practical, #seasons, #culture, #routes, #tips, #gallery, #fun-facts, .site-footer,
   .gallery-teaser-section { padding-left: 24px; padding-right: 24px; }
   .hero-content {
-    padding: max(5.5rem, calc(4.5rem + env(safe-area-inset-top, 0px))) 24px max(5rem, calc(3.5rem + env(safe-area-inset-bottom, 0px)));
+    padding:
+      0
+      24px
+      max(6.25rem, calc(5rem + env(safe-area-inset-bottom, 0px)));
     max-width: 36rem;
-  }
-  .hero-eyebrow {
-    margin-bottom: 16px;
-    letter-spacing: .18em;
+    width: 100%;
   }
   .hero-h1 {
     max-width: 12ch;
@@ -238,8 +258,8 @@ section[id], footer[id] { scroll-margin-top: 90px; }
   .hero-content {
     padding-left: 16px;
     padding-right: 16px;
-    padding-top: max(5rem, calc(4rem + env(safe-area-inset-top, 0px)));
-    padding-bottom: max(4.25rem, calc(3rem + env(safe-area-inset-bottom, 0px)));
+    padding-top: 0;
+    padding-bottom: max(5.5rem, calc(4.25rem + env(safe-area-inset-bottom, 0px)));
   }
   .hero-h1 { font-size: clamp(2.55rem, 12.5vw, 3.35rem); letter-spacing: -.035em; }
   .hero-desc { font-size: 0.98rem; }
@@ -395,11 +415,8 @@ html[data-theme="minimal"] .gallery-filter.active,
 html[data-theme="elegant"] .gallery-filter.active {
   color: #fff;
 }
-html[data-theme="minimal"] .hero-bg {
-  background:
-    radial-gradient(ellipse 70% 55% at 28% 48%, rgba(0, 113, 227, 0.06) 0%, transparent 70%),
-    linear-gradient(180deg, #ffffff 0%, #f5f5f7 55%, #e8e8ed 100%);
-}
+/* Immersive hero photo: theme-specific solid fills no longer override .hero-bg.
+   Scrims + image filters live in home.css. */
 /* Daylight type: product-page clarity (tighter tracking, less “magazine serif”) */
 html[data-theme="minimal"] .hero-h1,
 html[data-theme="minimal"] .section-header h2,
@@ -440,14 +457,18 @@ html[data-theme="minimal"] .btn-primary {
 html[data-theme="minimal"] .btn-ghost {
   border-radius: 980px;
 }
-html[data-theme="minimal"] #navbar {
+/* Frosted bar only after scroll — stay transparent over immersive hero (like Classic) */
+html[data-theme="minimal"] #navbar.scrolled {
   border-bottom: 1px solid var(--border-light);
 }
-html[data-theme="elegant"] .hero-bg {
-  background:
-    radial-gradient(ellipse 70% 55% at 28% 48%, rgba(122, 46, 46, 0.07) 0%, transparent 70%),
-    linear-gradient(165deg, #fffdf8 0%, #f6f1e8 45%, #e4d9c8 100%);
+html[data-theme="minimal"] #navbar:not(.scrolled) {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+  box-shadow: none;
 }
+
 /* Twilight Glass finish — Apple dark product page (pair with Gallery Daylight) */
 html[data-theme="glass"] { color-scheme: dark; }
 html[data-theme="glass"] .btn-primary,
@@ -492,16 +513,20 @@ html[data-theme="glass"] .hero-eyebrow::before {
   background: var(--border-med);
   opacity: 1;
 }
-html[data-theme="glass"] #navbar {
+/* Glass nav material only when scrolled — transparent over the hero photo */
+html[data-theme="glass"] #navbar:not(.scrolled) {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+html[data-theme="glass"] #navbar.scrolled {
   border-bottom: 1px solid var(--border-light);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
-html[data-theme="glass"] .hero-bg {
-  background:
-    radial-gradient(ellipse 70% 55% at 28% 48%, rgba(10, 132, 255, 0.12) 0%, transparent 70%),
-    linear-gradient(180deg, #000000 0%, #0a0a0c 50%, #1d1d1f 100%);
-}
+
 html[data-theme="glass"] body::before {
   opacity: 0.03;
   mix-blend-mode: soft-light;

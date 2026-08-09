@@ -29,19 +29,26 @@ usa-travel-guide/
 │       │   ├── legal-i18n.js
 │       │   ├── modal-content.js
 │       │   ├── fun-facts.js
-│       │   └── dest-links.js
+│       │   ├── dest-links.js
+│       │   ├── dest-weather-cities.js  # lat/lon for homepage dest weather chips
+│       │   └── intro-gallery.js        # catalog for About 3-slot photo shuffle
 │       ├── core/          # Shared shell
 │       │   ├── env.js     # ENV, raf, loader, observers
 │       │   ├── nav-return.js # sessionStorage stamp, contextual Back, guide scroll restore
 │       │   └── runtime.js # prefs, i18n engine, settings, nav chrome
 │       ├── features/      # Page behavior (safe no-op if DOM missing)
-│       │   ├── home.js
+│       │   ├── home.js    # immersive hero, intro shuffle, carousels, favorites
+│       │   ├── dest-weather.js # homepage destination live weather chips
 │       │   ├── gallery.js
 │       │   ├── tools.js   # currency, clock, tip/tax, drive, emergency
-│       │   ├── weather.js # Hybrid NWS (US) + Open-Meteo (world / enrich / fallback)
+│       │   ├── weather/   # Hybrid NWS (US) + Open-Meteo (world / enrich / fallback)
+│       │   ├── weather.js # thin entry for tools-weather
 │       │   └── legal.js
 │       └── app.js         # Boot: applyLanguage / applyUnits / legal first paint
-├── images/gallery/        # full + medium/ + thumbs/ + videos/
+├── images/
+│   ├── main-classic.webp  # Hero photo (Classic style)
+│   ├── main-modern.webp   # Hero photo (Modern style)
+│   └── gallery/           # full + medium/ + thumbs/ + videos/
 ├── e2e/                   # Playwright smoke
 ├── docs/                  # Maintainer docs
 └── tools/                 # Gallery Manager (in git; stripped on public deploy)
@@ -65,11 +72,11 @@ Core load order on every page: `env.js` → **`nav-return.js`** → `runtime.js`
 
 | Page | Scripts |
 |------|---------|
-| **index** | data (i18n, fun-facts, modal, dest-links) → core (env, nav-return, runtime) → features (tools, home, legal, gallery) → app |
+| **index** | data (i18n, fun-facts, intro-gallery, modal, dest-links, dest-weather-cities) → core (env, nav-return, runtime) → features (tools, home, dest-weather, legal, gallery) → app |
 | **gallery** | i18n → core → gallery → app |
 | **tools.html** (hub) | i18n → core → tools → app |
 | **tools-currency / clock / tip-tax / drive / emergency** | i18n → core → tools → app |
-| **tools-weather** | i18n → core → **weather** → app |
+| **tools-weather** | i18n → dest-weather-cities (optional deep-link helpers) → core → **weather/** modules → app |
 | **privacy / terms** | legal-i18n (sync) → i18n → core → legal → app |
 
 `app.js` runs last so feature functions (`initFunFacts`, `renderLegalPage`, gallery chrome, weather hooks) already exist.
@@ -105,12 +112,31 @@ Core load order on every page: `env.js` → **`nav-return.js`** → `runtime.js`
 
 Pages always load **only** `src/css/styles.css`. That file imports domain sheets in cascade order — **do not reorder imports** without re-checking specificity and later overrides (`motion-levels.css` and `weather-app.css` intentionally come after `responsive.css`).
 
+## Homepage hero & intro collage
+
+- **Hero photos:** `images/main-classic.webp` (Classic style) and `images/main-modern.webp` (Modern style). Appearance (light/dark/system) only changes scrims/dimming, not the file.
+- **Enter motion:** `home.js` starts blur→clear + zoom after the splash loader so the motion is visible; respects Full / Reduced / Off.
+- **Intro shuffle:** `intro-gallery.js` is a static catalog derived from `gallery.html`. Weighted categories favor nature / landmarks / coast / cities; food-culture is de-emphasized. Uses **thumb WebP** for performance. Phase-staggered 6s cadence (one slot at a time). Click → `gallery.html?photo=…` (deep-opens lightbox on the gallery page).
+- After bulk gallery adds, regenerate the catalog (or re-run the small Python parser used in maintainers’ workflow) so the collage stays in sync.
+
+## Motion policy
+
+`getEffectiveMotionMode()` in `runtime.js`:
+
+- **User Full always wins** over OS `prefers-reduced-motion` (explicit opt-in).
+- User Reduced / Off always win.
+- Constrained / wearable webviews force Off.
+
 ## Gallery Manager
 
 Local tool at `tools/gallery_manager.py` (**tracked in git**, stripped from public deploys). It mutates:
 
 - `gallery.html` (items + `<!-- GALLERY_MANAGER_INSERT -->` inside `#galleryGrid`)
-- `images/gallery/**` (full, medium, thumbs; videos → `images/gallery/videos/`)
+- `images/gallery/**` (full, medium, thumbs, WebP sidecars; videos → `images/gallery/videos/`)
 - `src/js/data/i18n.js` (es/zh/ja caption keys)
+
+**Orientation:** EXIF Orientation ≠ 1 is baked into pixels (Pillow) so thumbs/medium/width×height always match the visual image. Upright JPEGs still copy byte-for-byte (HDR-safe).
+
+**Rebuild:** `python3 tools/gallery_manager.py --rebuild-media` re-orients when needed, rebuilds medium + thumb + WebP, and patches `width`/`height` for stable masonry.
 
 See `tools/README.md` for CLI and browser UI (`python3 tools/gallery_manager.py` → port 8791).

@@ -12,8 +12,104 @@
    block is skipped there instead of throwing on missing elements. */
 if (document.getElementById('hero')) {
 
-/* ── PARALLAX removed — caused scroll jank and layer promotion cost on many GPUs.
-   Hero background is a static gradient (see .hero-bg). */
+/* ── IMMERSIVE HERO PHOTO ──
+   Classic style → images/main-classic.webp
+   Modern style  → images/main-modern.webp
+   Light/dark is handled with CSS scrims + brightness filters. */
+const HERO_PHOTO = {
+  classic: { src: 'images/main-classic.webp', w: 8064, h: 6048 },
+  modern:  { src: 'images/main-modern.webp',  w: 4032, h: 3024 }
+};
+function playHeroEnterMotion(force) {
+  const img = document.getElementById('heroBgImg');
+  if (!img) return;
+  // Reduced / off: show sharp photo immediately
+  if (typeof motionIsOff === 'function' && motionIsOff()) {
+    img.classList.remove('is-hero-enter');
+    img.style.opacity = '1';
+    img.style.filter = 'none';
+    img.style.transform = 'none';
+    return;
+  }
+  if (typeof motionIsReduced === 'function' && motionIsReduced()) {
+    img.classList.add('is-hero-enter');
+    return;
+  }
+  // Restart CSS animation (class remove → reflow → add)
+  img.classList.remove('is-hero-enter');
+  // Clear any inline rest state from prior reduced/off
+  img.style.opacity = '';
+  img.style.filter = '';
+  img.style.transform = '';
+  void img.offsetWidth;
+  img.classList.add('is-hero-enter');
+}
+
+function syncHeroBackground() {
+  const img = document.getElementById('heroBgImg');
+  if (!img) return;
+  const style = (typeof prefStyle === 'string' && prefStyle === 'classic') ? 'classic' : 'modern';
+  const next = HERO_PHOTO[style] || HERO_PHOTO.modern;
+  img.classList.toggle('hero-bg-img--classic', style === 'classic');
+  img.classList.toggle('hero-bg-img--modern', style === 'modern');
+  const changed = img.getAttribute('src') !== next.src;
+  if (changed) {
+    img.setAttribute('width', String(next.w));
+    img.setAttribute('height', String(next.h));
+    img.src = next.src;
+  }
+  // Replay enter when the photo asset changes (Classic ↔ Modern)
+  if (changed) {
+    const run = () => playHeroEnterMotion(true);
+    if (img.complete && img.naturalWidth > 0) run();
+    else img.addEventListener('load', run, { once: true });
+  }
+}
+window.syncHeroBackground = syncHeroBackground;
+window.playHeroEnterMotion = playHeroEnterMotion;
+syncHeroBackground();
+
+/* Start luxury enter after the splash so blur→clear is actually visible */
+(function scheduleHeroEnter() {
+  const img = document.getElementById('heroBgImg');
+  if (!img) return;
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+    // Wait for decode when possible so first frame is sharp enough to blur from
+    const kick = () => playHeroEnterMotion(false);
+    if (img.decode) {
+      img.decode().then(kick).catch(kick);
+    } else if (img.complete) {
+      kick();
+    } else {
+      img.addEventListener('load', kick, { once: true });
+      // Never leave a blank hero if load stalls
+      setTimeout(kick, 1600);
+    }
+  };
+  const loader = document.getElementById('loader');
+  if (!loader || loader.classList.contains('gone')) {
+    // Slight delay so paint lands after splash paint on mobile (instant gone)
+    requestAnimationFrame(() => setTimeout(start, 40));
+  } else {
+    const mo = new MutationObserver(() => {
+      if (loader.classList.contains('gone')) {
+        mo.disconnect();
+        // Brief beat after splash fades so the motion is the first thing you see
+        setTimeout(start, 80);
+      }
+    });
+    mo.observe(loader, { attributes: true, attributeFilter: ['class'] });
+    // Fallback if observer never fires
+    window.addEventListener('load', () => setTimeout(start, 900), { once: true });
+  }
+  // Hard fallback: never stuck at opacity 0
+  setTimeout(() => {
+    if (!img.classList.contains('is-hero-enter')) start();
+  }, 2200);
+})();
 
 /* ── HERO SCROLL CLICK ── */
 const heroScrollBtn = document.getElementById('heroScroll');
@@ -23,6 +119,278 @@ if (heroScrollBtn) {
     if (intro) intro.scrollIntoView({ behavior: scrollBehaviorPref() });
   });
 }
+
+/* ── INTRO FACT CARDS: staggered entrance on first reveal ── */
+(function initIntroFactEntrance() {
+  const facts = document.querySelector('.intro-facts');
+  if (!facts) return;
+  const mark = () => facts.classList.add('is-entered');
+  if (typeof motionIsOff === 'function' && motionIsOff()) {
+    mark();
+    return;
+  }
+  if (!('IntersectionObserver' in window)) {
+    mark();
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        mark();
+        io.disconnect();
+        break;
+      }
+    }
+  }, { threshold: 0.22, rootMargin: '0px 0px -8% 0px' });
+  io.observe(facts);
+})();
+
+/* ── INTRO PHOTO SHUFFLE ──
+   3-slot collage cycling weighted gallery THUMB WebPs.
+   All slots refresh every 6s, phase-staggered by 2s so only one swaps at a time
+   (avoids the three cards “fighting”). Click → gallery.html?photo= */
+(function initIntroPhotoShuffle() {
+  const root = document.getElementById('introGallery');
+  if (!root) return;
+  const catalog = (typeof window.INTRO_GALLERY_PHOTOS !== 'undefined' && Array.isArray(window.INTRO_GALLERY_PHOTOS))
+    ? window.INTRO_GALLERY_PHOTOS
+    : [];
+  if (!catalog.length) return;
+
+  const WEIGHTS = {
+    nature: 4.2,
+    landmarks: 4.0,
+    coast: 4.0,
+    cityscapes: 3.2,
+    roads: 1.6,
+    'food-culture': 0.45
+  };
+  // Same cadence for all three; phase offset keeps swaps sequential.
+  const SLOT_MS = 6000;
+  const PHASE_MS = 2000; // 0s / 2s / 4s → one change every 2s, each slot every 6s
+
+  function photoUrl(p) {
+    if (!p) return '';
+    return p.thumbWebp || p.thumb || p.mediumWebp || '';
+  }
+  function weightOf(p) {
+    const w = WEIGHTS[p.category];
+    return typeof w === 'number' ? w : 1;
+  }
+  function pickWeighted(list, excludeFiles) {
+    const ex = excludeFiles || new Set();
+    const pool = list.filter((p) => p && photoUrl(p) && !ex.has(p.file));
+    const use = pool.length ? pool : list.filter((p) => p && photoUrl(p));
+    if (!use.length) return null;
+    let total = 0;
+    const weights = use.map((p) => {
+      const w = weightOf(p);
+      total += w;
+      return w;
+    });
+    let r = Math.random() * total;
+    for (let i = 0; i < use.length; i++) {
+      r -= weights[i];
+      if (r <= 0) return use[i];
+    }
+    return use[use.length - 1];
+  }
+  /** Prefer full location name; only shorten when truly too long for the chip. */
+  function captionFor(photo, mode) {
+    if (!photo) return '';
+    const city = (photo.city || '').trim();
+    const state = (photo.state || '').trim();
+    const loc = (photo.location || '').trim();
+    // Full location first (e.g. "San Francisco, CA")
+    const full = loc || (city && state ? city + ', ' + state : (city || state || photo.caption || ''));
+    const max = mode === 'small' ? 36 : 48;
+    if (!full) return '';
+    if (full.length <= max) return full;
+    // Too long: fall back to city, then state, then hard ellipsis
+    if (city && city.length <= max) return city;
+    if (state && state.length <= max) return state;
+    return full.slice(0, Math.max(0, max - 1)) + '…';
+  }
+  function preload(url) {
+    return new Promise((resolve) => {
+      if (!url) { resolve(false); return; }
+      const im = new Image();
+      im.onload = () => resolve(true);
+      im.onerror = () => resolve(false);
+      im.src = url;
+    });
+  }
+
+  const slots = [
+    { el: root.querySelector('[data-intro-slot="tall"]'), mode: 'tall', photo: null },
+    { el: root.querySelector('[data-intro-slot="small-a"]'), mode: 'small', photo: null },
+    { el: root.querySelector('[data-intro-slot="small-b"]'), mode: 'small', photo: null }
+  ].filter((s) => s.el);
+
+  function activeFiles() {
+    const s = new Set();
+    slots.forEach((slot) => { if (slot.photo && slot.photo.file) s.add(slot.photo.file); });
+    return s;
+  }
+
+  function applyPhoto(slot, photo, { animate }) {
+    if (!slot || !photo || !slot.el) return;
+    const layers = slot.el.querySelectorAll('.intro-photo-layer');
+    const label = slot.el.querySelector('.intro-photo-label');
+    if (!layers.length) return;
+    const active = slot.el.querySelector('.intro-photo-layer.is-active') || layers[0];
+    const next = active === layers[0] ? layers[1] || layers[0] : layers[0];
+    const url = photoUrl(photo);
+    const cap = captionFor(photo, slot.mode);
+
+    const finishPhoto = () => {
+      slot.photo = photo;
+      slot.el.dataset.photoFile = photo.file || '';
+      slot.el.dataset.photoSlug = photo.slug || '';
+      const aria = cap ? ('Open gallery — ' + cap) : 'Open gallery photo';
+      slot.el.setAttribute('aria-label', aria);
+    };
+    /**
+     * Soft exit → swap text → single ease-in (CSS transition only).
+     * Do NOT also run a keyframe enter — that stacked and looked like a double anim.
+     */
+    const showCaption = (withMotion) => {
+      if (!label) return;
+      // Cancel any pending caption timer from a prior swap on this slot
+      if (slot._capTimer) {
+        clearTimeout(slot._capTimer);
+        slot._capTimer = 0;
+      }
+      if (!withMotion || (typeof motionIsOff === 'function' && motionIsOff())) {
+        label.classList.remove('is-swapping');
+        label.textContent = cap || '—';
+        return;
+      }
+      // Same text — skip motion entirely
+      if ((label.textContent || '') === (cap || '—') && !label.classList.contains('is-swapping')) {
+        return;
+      }
+      label.classList.add('is-swapping');
+      slot._capTimer = window.setTimeout(() => {
+        slot._capTimer = 0;
+        label.textContent = cap || '—';
+        // One enter only: removing is-swapping transitions back to the rest pose
+        label.classList.remove('is-swapping');
+      }, 160);
+    };
+
+    if (!animate || layers.length < 2 || (typeof motionIsOff === 'function' && motionIsOff())) {
+      active.style.backgroundImage = url ? 'url("' + url + '")' : '';
+      active.classList.add('is-active');
+      active.classList.remove('is-exit');
+      if (layers[1] && layers[1] !== active) {
+        layers[1].classList.remove('is-active', 'is-exit');
+        layers[1].style.backgroundImage = '';
+      }
+      finishPhoto();
+      showCaption(false);
+      return;
+    }
+
+    // Caption animates on its own quick timeline; photo crossfade stays longer.
+    showCaption(true);
+
+    next.style.backgroundImage = url ? 'url("' + url + '")' : '';
+    // Force reflow so transform/opacity transitions run
+    void next.offsetWidth;
+    next.classList.add('is-active');
+    next.classList.remove('is-exit');
+    active.classList.remove('is-active');
+    active.classList.add('is-exit');
+    window.setTimeout(() => {
+      active.classList.remove('is-exit');
+      active.style.backgroundImage = '';
+      finishPhoto();
+    }, (typeof motionIsReduced === 'function' && motionIsReduced()) ? 360 : 1100);
+  }
+
+  async function showNext(slot, animate) {
+    const photo = pickWeighted(catalog, activeFiles());
+    if (!photo) return;
+    const ok = await preload(photoUrl(photo));
+    if (!ok) return;
+    applyPhoto(slot, photo, { animate: !!animate });
+  }
+
+  function openPhoto(slot) {
+    const file = (slot.photo && slot.photo.file) || slot.el.dataset.photoFile || '';
+    const slug = (slot.photo && slot.photo.slug) || slot.el.dataset.photoSlug || '';
+    const q = file ? encodeURIComponent(file) : (slug ? encodeURIComponent(slug) : '');
+    // Prefer in-page lightbox only when gallery grid + lightbox exist (gallery page).
+    if (typeof openLightbox === 'function' && document.getElementById('galleryGrid') && document.getElementById('lightbox')) {
+      const items = document.querySelectorAll('.gallery-item');
+      let idx = -1;
+      items.forEach((item, i) => {
+        const img = item.querySelector('img');
+        const full = img && img.getAttribute('data-full');
+        if (full && file && full.endsWith(file)) idx = i;
+      });
+      if (idx >= 0) {
+        if (typeof openGalleryItem === 'function') openGalleryItem(items[idx]);
+        else openLightbox(idx);
+        return;
+      }
+    }
+    window.location.href = q ? ('gallery.html?photo=' + q) : 'gallery.html';
+  }
+
+  slots.forEach((slot) => {
+    slot.el.addEventListener('click', () => openPhoto(slot));
+    slot.el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openPhoto(slot);
+      }
+    });
+  });
+
+  // Seed distinct photos, then one shared scheduler (phase-staggered 6s cadence).
+  (async function start() {
+    for (let i = 0; i < slots.length; i++) {
+      await showNext(slots[i], false);
+    }
+    const reduced = typeof motionIsOff === 'function' && (motionIsOff() || (typeof motionIsReduced === 'function' && motionIsReduced()));
+    if (reduced) return; // static first frame only
+
+    let timers = [];
+    let phaseTimeouts = [];
+    const clearTimers = () => {
+      timers.forEach((t) => clearInterval(t));
+      phaseTimeouts.forEach((t) => clearTimeout(t));
+      timers = [];
+      phaseTimeouts = [];
+    };
+    const startTimers = () => {
+      clearTimers();
+      slots.forEach((slot, i) => {
+        // Even phases: only one slot swaps at a time (0s / 2s / 4s), then every 6s.
+        const phase = i * PHASE_MS;
+        const tid = window.setTimeout(() => {
+          if (document.hidden) return;
+          showNext(slot, true);
+          const id = window.setInterval(() => {
+            if (document.hidden) return;
+            const rect = root.getBoundingClientRect();
+            if (rect.bottom < -80 || rect.top > window.innerHeight + 80) return;
+            showNext(slot, true);
+          }, SLOT_MS);
+          timers.push(id);
+        }, phase);
+        phaseTimeouts.push(tid);
+      });
+    };
+    startTimers();
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) clearTimers();
+      else startTimers();
+    });
+  })();
+})();
 
 /* ── REGIONS CAROUSEL (mirrors destinations pattern; grid on desktop, carousel below 1100px) ── */
 const regionsTrack = document.getElementById('regionsTrack');
