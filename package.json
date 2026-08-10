@@ -5,7 +5,8 @@
   "description": "America — A Travel Guide: static multi-page site for GitHub Pages",
   "scripts": {
     "serve": "node tools/dev-serve.js",
-    "serve:static": "python3 -m http.server 8000",
+    "serve:static": "node tools/static-server.js 8000",
+    "serve:python": "python3 -m http.server 8000",
     "serve:node": "npx --yes serve -l 8000 .",
     "build:legal": "node tools/build-legal.js",
     "pretest": "node tools/build-legal.js",

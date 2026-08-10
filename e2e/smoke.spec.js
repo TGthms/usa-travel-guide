@@ -20,6 +20,11 @@ const TOOL_PAGES = [
   '/tools-weather.html',
 ];
 
+/** Prefer domcontentloaded — gallery/tools load many assets; full "load" is flaky in CI. */
+async function gotoPage(page, path, opts = {}) {
+  return page.goto(path, { waitUntil: 'domcontentloaded', timeout: 25_000, ...opts });
+}
+
 async function openSettings(page) {
   await page.locator('#settingsOpen').click();
   await expect(page.locator('#settingsOverlay')).toHaveClass(/open/);
@@ -32,7 +37,6 @@ async function closeSettings(page) {
 
 async function waitAppReady(page) {
   await page.waitForFunction(() => {
-    // Home exposes toggleFavorite; mini-apps expose body page class + runtime.
     return typeof window.applyLanguage === 'function'
       || typeof window.toggleFavorite === 'function'
       || document.body.classList.contains('page-tools')
@@ -46,6 +50,14 @@ async function waitLoaderGone(page) {
     const loader = document.getElementById('loader');
     return !loader || loader.classList.contains('gone') || getComputedStyle(loader).opacity === '0';
   }, null, { timeout: 20_000 }).catch(() => {});
+}
+
+/** Ignore benign noise; surface real page script failures. */
+function isBenignConsoleError(text) {
+  const t = String(text || '');
+  if (/favicon/i.test(t)) return true;
+  if (/Failed to load resource/i.test(t) && /net::ERR_/i.test(t)) return true;
+  return false;
 }
 
 /**
@@ -225,18 +237,26 @@ async function fixtureWeatherApis(page) {
 
 test.describe('USA Travel Guide smoke', () => {
   test.beforeEach(async ({ page }) => {
-    // Prefer goto over reload — python http.server can ERR_CONNECTION_RESET under reload races
-    await page.goto('/index.html', { waitUntil: 'domcontentloaded' });
-    await page.evaluate(() => {
-      try { localStorage.clear(); } catch (_) { /* ignore */ }
+    // Clear storage once per test context (not on every navigation — favorites/return stamps must persist)
+    await page.addInitScript(() => {
+      try {
+        if (sessionStorage.getItem('__e2e_inited') === '1') return;
+        localStorage.clear();
+        sessionStorage.clear();
+        sessionStorage.setItem('__e2e_inited', '1');
+      } catch (_) { /* ignore */ }
     });
-    await page.goto('/index.html', { waitUntil: 'domcontentloaded' });
+    await gotoPage(page, '/index.html');
     await waitAppReady(page);
   });
 
   test('loads main + tool pages without console page errors', async ({ page }) => {
-    // Block live weather fan-out when tools-weather is visited in this loop
+    test.setTimeout(90_000);
     await blockLiveWeatherApis(page);
+    const pageErrors = [];
+    page.on('pageerror', (err) => {
+      pageErrors.push(err && err.message ? err.message : String(err));
+    });
     const paths = [
       '/index.html',
       '/gallery.html',
@@ -246,13 +266,16 @@ test.describe('USA Travel Guide smoke', () => {
       '/terms.html',
     ];
     for (const path of paths) {
-      const res = await page.goto(path);
+      const res = await gotoPage(page, path);
       expect(res && res.ok(), `${path} should return OK`).toBeTruthy();
       await expect(page.locator('link[href="src/css/styles.css"]')).toHaveCount(1);
       await expect(page.locator('script[src="src/js/core/env.js"]')).toHaveCount(1);
       await expect(page.locator('script[src="src/js/core/runtime.js"]')).toHaveCount(1);
       await expect(page.locator('script[src="src/js/app.js"]')).toHaveCount(1);
+      await waitAppReady(page);
     }
+    const real = pageErrors.filter((m) => !isBenignConsoleError(m));
+    expect(real, real.join('\n')).toEqual([]);
   });
 
   test('cycles appearance × style theme matrix', async ({ page }) => {
@@ -297,7 +320,8 @@ test.describe('USA Travel Guide smoke', () => {
     const stored = await page.evaluate(() => localStorage.getItem('usa-travel-favorites'));
     expect(stored).toContain('nyc');
 
-    await page.reload();
+    // goto (not reload) — more stable against static-server keep-alive races
+    await gotoPage(page, '/index.html');
     await waitAppReady(page);
     await expect(page.locator('.dest-card[data-dest="nyc"] .dest-fav-btn')).toHaveClass(/active/);
 
@@ -324,7 +348,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('gallery page filters and chrome are visible', async ({ page }) => {
-    await page.goto('/gallery.html');
+    await gotoPage(page, '/gallery.html');
     await waitLoaderGone(page);
     await expect(page.locator('#galleryGrid .gallery-item').first()).toBeVisible();
     await page.locator('.gallery-filter[data-filter="coast"]').click();
@@ -335,7 +359,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('gallery lightbox opens and navigates', async ({ page }) => {
-    await page.goto('/gallery.html');
+    await gotoPage(page, '/gallery.html');
     await page.waitForFunction(() => {
       const loader = document.getElementById('loader');
       const ready = !loader || loader.classList.contains('gone');
@@ -358,7 +382,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('gallery masonry does not reparent tiles while scrolling', async ({ page }) => {
-    await page.goto('/gallery.html');
+    await gotoPage(page, '/gallery.html');
     await page.waitForFunction(() => {
       const loader = document.getElementById('loader');
       const ready = !loader || loader.classList.contains('gone');
@@ -386,7 +410,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('tools hub lists all tools and navigates', async ({ page }) => {
-    await page.goto('/tools.html');
+    await gotoPage(page, '/tools.html');
     await waitLoaderGone(page);
     await expect(page.locator('.tools-hub-card')).toHaveCount(6);
     await expect(page.locator('a.tools-hub-card[href="tools-currency.html"]')).toBeVisible();
@@ -397,7 +421,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('currency tool localizes names and swap works', async ({ page }) => {
-    await page.goto('/tools-currency.html');
+    await gotoPage(page, '/tools-currency.html');
     await page.waitForFunction(() => document.querySelectorAll('#currencyFrom option').length >= 5);
     await expect(page.locator('#currencyFrom option[value="USD"]')).toContainText(/Dollar|USD/);
     await openSettings(page);
@@ -412,7 +436,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('currency meta shows rate and last-updated stamp', async ({ page }) => {
-    await page.goto('/tools-currency.html');
+    await gotoPage(page, '/tools-currency.html');
     await waitLoaderGone(page);
     // Ensure different currencies so a network rate is fetched
     await page.locator('#currencyFrom').selectOption('USD');
@@ -441,7 +465,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('tip-tax state selector localizes on language change', async ({ page }) => {
-    await page.goto('/tools-tip-tax.html');
+    await gotoPage(page, '/tools-tip-tax.html');
     await page.waitForFunction(() => document.querySelectorAll('#salesTaxState option').length > 10);
     await openSettings(page);
     await page.locator('#langPillGroup .pill-btn[data-lang-val="zh"]').click();
@@ -451,7 +475,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('drive fields convert when distance unit changes', async ({ page }) => {
-    await page.goto('/tools-drive.html');
+    await gotoPage(page, '/tools-drive.html');
     await expect(page.locator('#driveDist')).toBeVisible();
     await openSettings(page);
     await page.locator('#unitDistGroup .pill-btn[data-unit-val="mi"]').click();
@@ -471,7 +495,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('Auto units resolve live and paint data-temp-unit', async ({ page }) => {
-    await page.goto('/index.html');
+    await gotoPage(page, '/index.html');
     await openSettings(page);
     // Explicit °C first
     await page.locator('#unitTempGroup .pill-btn[data-unit-val="c"]').click();
@@ -512,7 +536,7 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('world clock renders cities', async ({ page }) => {
-    await page.goto('/tools-clock.html');
+    await gotoPage(page, '/tools-clock.html');
     await page.waitForFunction(() => {
       const list = document.getElementById('worldClockList');
       return list && list.children.length >= 3;
@@ -521,14 +545,14 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('emergency numbers page shows 911', async ({ page }) => {
-    await page.goto('/tools-emergency.html');
+    await gotoPage(page, '/tools-emergency.html');
     await expect(page.locator('#tools')).toContainText('911');
   });
 
   test('weather page chrome works without live weather APIs', async ({ page }) => {
-    // Never hit NWS / Open-Meteo in CI — protects rate limits. Real browser use still hits live APIs.
+    test.setTimeout(90_000);
     await blockLiveWeatherApis(page);
-    await page.goto('/tools-weather.html');
+    await gotoPage(page, '/tools-weather.html');
     await waitLoaderGone(page);
     await expect(page.locator('#weatherSearch')).toBeVisible();
     await expect(page.locator('#weatherUnitsBtn')).toBeVisible();
@@ -613,11 +637,11 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('weather city row click opens detail and Done returns to list', async ({ page }) => {
-    // Real open path (regression: openDetail threw "w is not defined" mid-render)
+    test.setTimeout(90_000);
     await fixtureWeatherApis(page);
     const pageErrors = [];
     page.on('pageerror', (e) => pageErrors.push(e.message));
-    await page.goto('/tools-weather.html');
+    await gotoPage(page, '/tools-weather.html');
     await waitLoaderGone(page);
     await page.waitForFunction(() => {
       return document.querySelectorAll('#weatherList .weather-row:not(.weather-row--error)').length > 0;
@@ -682,19 +706,67 @@ test.describe('USA Travel Guide smoke', () => {
     expect(src).not.toMatch(/refreshBtn\.disabled\s*=\s*true/);
 
     await blockLiveWeatherApis(page);
-    await page.goto('/tools-weather.html');
+    await gotoPage(page, '/tools-weather.html');
     await waitLoaderGone(page);
     await expect(page.locator('#weatherRefresh')).toBeEnabled();
     await expect(page.locator('#weatherDetailRefresh')).toBeAttached();
   });
 
   test('legal pages load i18n packs', async ({ page }) => {
-    await page.goto('/privacy.html');
+    await gotoPage(page, '/privacy.html');
     await page.waitForFunction(() => window.LEGAL_I18N && window.LEGAL_I18N.privacy);
     await expect(page.locator('#legalDoc, .legal-doc, article').first()).toBeVisible({ timeout: 10_000 });
-    // Weather / NWS / Open-Meteo should appear in privacy (en)
     const body = await page.locator('main, #legalDoc, .legal-doc').first().innerText();
     expect(body.toLowerCase()).toMatch(/open-meteo|weather\.gov|national weather|weather|tiempo|天气|天気|frankfurter/);
+  });
+
+  test('legal pages render sections and switch language', async ({ page }) => {
+    await gotoPage(page, '/privacy.html');
+    await waitAppReady(page);
+    await page.waitForFunction(() => {
+      const root = document.getElementById('legalDoc');
+      return root && root.querySelectorAll('.legal-section, section[id]').length >= 3;
+    });
+    await expect(page.locator('#legalDoc h1, .legal-doc-header h1').first()).toBeVisible();
+    await expect(page.locator('#legalDoc .legal-section, #legalDoc section[id]').first()).toBeVisible();
+
+    // Language switcher on legal chrome
+    const zhBtn = page.locator('#legalLangSwitch [data-lang-val="zh"], [data-lang-val="zh"]').first();
+    if (await zhBtn.count()) {
+      await zhBtn.click();
+      await expect(page.locator('html')).toHaveAttribute('data-lang', 'zh');
+      const body = await page.locator('#legalDoc').innerText();
+      expect(body).toMatch(/隐私|个人信息|本网站/);
+    }
+
+    await gotoPage(page, '/terms.html');
+    await waitAppReady(page);
+    await page.waitForFunction(() => window.LEGAL_I18N && window.LEGAL_I18N.terms);
+    const termsBody = await page.locator('#legalDoc, main').first().innerText();
+    expect(termsBody.toLowerCase()).toMatch(/terms|条件|条款|términos|規約|creative commons|cc by/);
+  });
+
+  test('intro collage seeds from gallery catalog', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await page.waitForFunction(() => {
+      return Array.isArray(window.INTRO_GALLERY_PHOTOS) && window.INTRO_GALLERY_PHOTOS.length > 20;
+    });
+    const root = page.locator('#introGallery');
+    await root.scrollIntoViewIfNeeded();
+    await expect(root).toBeVisible();
+    const slots = root.locator('[data-intro-slot]');
+    await expect(slots).toHaveCount(3);
+    // Seeded layers should have background images after init
+    await page.waitForFunction(() => {
+      const layers = document.querySelectorAll('#introGallery .intro-photo-layer.is-active');
+      let withBg = 0;
+      layers.forEach((el) => {
+        const bg = getComputedStyle(el).backgroundImage || '';
+        if (bg && bg !== 'none') withBg += 1;
+      });
+      return withBg >= 2;
+    }, null, { timeout: 10_000 });
   });
 
   test.describe('nav-return chrome', () => {
@@ -707,8 +779,7 @@ test.describe('USA Travel Guide smoke', () => {
     }
 
     test('tools hub always says Back to the Guide', async ({ page }) => {
-      // Poison session with a leftover mini-app "tools" stamp (previous bug)
-      await page.goto('/tools.html');
+      await gotoPage(page, '/tools.html');
       await page.evaluate(() => {
         sessionStorage.setItem('usa-travel-return-v1', JSON.stringify({
           from: '/tools.html',
@@ -719,7 +790,7 @@ test.describe('USA Travel Guide smoke', () => {
           to: '/tools-currency.html',
         }));
       });
-      await page.reload();
+      await gotoPage(page, '/tools.html');
       await waitLoaderGone(page);
       await waitAppReady(page);
       const { href, label } = await backChrome(page);
@@ -729,7 +800,7 @@ test.describe('USA Travel Guide smoke', () => {
     });
 
     test('guide deep-link → mini-app Back to Guide', async ({ page }) => {
-      await page.goto('/index.html');
+      await gotoPage(page, '/index.html');
       await waitLoaderGone(page);
       await waitAppReady(page);
       const link = page.locator('a.guide-tool-link[href="tools-currency.html"]').first();
@@ -743,7 +814,7 @@ test.describe('USA Travel Guide smoke', () => {
     });
 
     test('tools hub → mini-app Back to Tools', async ({ page }) => {
-      await page.goto('/tools.html');
+      await gotoPage(page, '/tools.html');
       await waitLoaderGone(page);
       await waitAppReady(page);
       // Hub itself must be Guide first
@@ -766,7 +837,7 @@ test.describe('USA Travel Guide smoke', () => {
     });
 
     test('guide → tools hub → Back to Guide', async ({ page }) => {
-      await page.goto('/index.html');
+      await gotoPage(page, '/index.html');
       await waitLoaderGone(page);
       await waitAppReady(page);
       await page.locator('a[href="tools.html"]').first().click();
@@ -779,7 +850,7 @@ test.describe('USA Travel Guide smoke', () => {
 
     test('tool mini-app → Gallery → Back to that tool', async ({ page }) => {
       await blockLiveWeatherApis(page);
-      await page.goto('/tools-weather.html');
+      await gotoPage(page, '/tools-weather.html');
       await waitLoaderGone(page);
       await waitAppReady(page);
       // Jump to Gallery via app-bar
@@ -794,8 +865,7 @@ test.describe('USA Travel Guide smoke', () => {
 
     test('Guide → Weather → Gallery → Back does not loop', async ({ page }) => {
       await blockLiveWeatherApis(page);
-      // Guide deep-link to weather
-      await page.goto('/index.html');
+      await gotoPage(page, '/index.html');
       await waitLoaderGone(page);
       await waitAppReady(page);
       const wxLink = page.locator('a.guide-tool-link[href="tools-weather.html"], a.seasons-weather-cta[href="tools-weather.html"]').first();
@@ -837,7 +907,7 @@ test.describe('USA Travel Guide smoke', () => {
     });
 
     test('tools hub → Gallery → Back to Tools', async ({ page }) => {
-      await page.goto('/tools.html');
+      await gotoPage(page, '/tools.html');
       await waitLoaderGone(page);
       await waitAppReady(page);
       await page.locator('a[href="gallery.html"]').first().click();
@@ -849,7 +919,7 @@ test.describe('USA Travel Guide smoke', () => {
     });
 
     test('gallery → tools hub → Back to Gallery', async ({ page }) => {
-      await page.goto('/gallery.html');
+      await gotoPage(page, '/gallery.html');
       await waitLoaderGone(page);
       await waitAppReady(page);
       await page.locator('a[href="tools.html"]').first().click();
@@ -874,7 +944,7 @@ test.describe('USA Travel Guide smoke', () => {
   test('tools and gallery have comfortable side inset on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     for (const path of ['/tools.html', '/tools-currency.html', '/gallery.html']) {
-      await page.goto(path);
+      await gotoPage(page, path);
       const pad = await page.evaluate((p) => {
         const el = p.includes('gallery')
           ? document.querySelector('#gallery')
@@ -887,7 +957,6 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('tool splash words are meaningful', async ({ page }) => {
-    // Weather page would otherwise fire live forecast fan-out on load
     await blockLiveWeatherApis(page);
     const checks = [
       ['/tools-currency.html', 'Currency'],
@@ -898,14 +967,15 @@ test.describe('USA Travel Guide smoke', () => {
       ['/tools-weather.html', 'Weather'],
     ];
     for (const [path, word] of checks) {
-      await page.goto(path);
+      await gotoPage(page, path);
       await expect(page.locator('#loader .loader-text')).toHaveText(word);
     }
   });
 
   test('weather search keeps majors without live geocode', async ({ page }) => {
+    test.setTimeout(90_000);
     await blockLiveWeatherApis(page);
-    await page.goto('/tools-weather.html');
+    await gotoPage(page, '/tools-weather.html');
     await waitLoaderGone(page);
     await page.waitForFunction(() => {
       const list = document.getElementById('weatherList');
@@ -921,10 +991,31 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('sitemap references new tool pages', async ({ page }) => {
-    const res = await page.goto('/sitemap.xml');
+    const res = await gotoPage(page, '/sitemap.xml');
     expect(res && res.ok()).toBeTruthy();
     const xml = await page.content();
     expect(xml).toContain('tools-weather.html');
     expect(xml).toContain('tools-currency.html');
+  });
+
+  test('progress bar and nav scroll chrome update on scroll', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await waitLoaderGone(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(50);
+    // Scroll past hero so nav gains .scrolled and progress advances
+    await page.evaluate(() => window.scrollTo(0, Math.min(document.body.scrollHeight * 0.35, 1200)));
+    await page.waitForFunction(() => {
+      const nav = document.getElementById('navbar');
+      const bar = document.getElementById('progress-bar');
+      if (!nav || !bar) return false;
+      const scrolled = nav.classList.contains('scrolled');
+      const t = getComputedStyle(bar).transform || '';
+      // scaleX applied as matrix(a, 0, 0, 1, 0, 0) with a > 0
+      const m = t.match(/matrix\(([^,]+)/);
+      const scale = m ? parseFloat(m[1]) : 0;
+      return scrolled && scale > 0.01;
+    }, null, { timeout: 10_000 });
   });
 });

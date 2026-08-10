@@ -9,20 +9,23 @@ const { defineConfig, devices } = require('@playwright/test');
  */
 module.exports = defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  // Local: few workers + 1 retry — python http.server can reset under heavy parallel gallery load.
-  retries: 1,
-  workers: process.env.CI ? 1 : 2,
+  retries: process.env.CI ? 2 : 1,
+  workers: 1,
   reporter: process.env.CI ? 'github' : 'list',
-  timeout: 30_000,
+  timeout: process.env.CI ? 60_000 : 45_000,
+  expect: { timeout: 12_000 },
   use: {
     baseURL: 'http://127.0.0.1:4173',
     trace: 'on-first-retry',
+    navigationTimeout: 25_000,
+    actionTimeout: 12_000,
     ...devices['Desktop Chrome'],
   },
   webServer: {
-    command: 'python3 -m http.server 4173',
+    // Node static server: handles keep-alive + broken clients better than python -m http.server
+    command: 'node tools/static-server.js 4173',
     url: 'http://127.0.0.1:4173/index.html',
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
