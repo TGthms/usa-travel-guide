@@ -6,32 +6,30 @@ Local-only utilities. **Strip `tools/` from public deploys** (Cloudflare / GitHu
 
 ## Legal markdown builder
 
-Privacy Policy and Terms of Use live as editable markdown under `docs/legal/`:
+Privacy Policy and Terms of Use sources:
 
 ```
 docs/legal/{en,es,zh,ja}/{privacy,terms}.md
 ```
 
-Each file has YAML frontmatter (`title`, `lead`, …) and sections:
+YAML frontmatter (`title`, `lead`, …) plus Markdown sections:
 
 ```markdown
 ## Section Title {#section-id}
 
-<p>HTML body (links, lists, emphasis)…</p>
+Paragraph with **bold**, *italic*, `code`, and [links](https://example.com).
+
+- List item one
+
+<p class="legal-note">Optional raw HTML for styled notes.</p>
 ```
 
-Regenerate the runtime pack after any edit:
+| Command | Behavior |
+|---|---|
+| `npm run serve` | Serve site; rebuild `legal-i18n.js` when legal sources change |
+| `npm run build:legal` | One-shot rebuild → `src/js/data/legal-i18n.js` |
 
-```bash
-node tools/build-legal.js
-# → src/js/data/legal-i18n.js
-```
-
-Or: `npm run build:legal`
-
-Do **not** hand-edit `legal-i18n.js` — it is generated. English is the legal source of meaning; es/zh/ja are natural product-policy voice (same structure).
-
----
+Commit both the `.md` sources and generated `legal-i18n.js`. Do not hand-edit `legal-i18n.js`. English is the legal source of meaning; es/zh/ja keep the same structure in natural voice.---
 
 # Gallery Manager
 

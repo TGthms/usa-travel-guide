@@ -4,9 +4,11 @@
   "private": true,
   "description": "America — A Travel Guide: static multi-page site for GitHub Pages",
   "scripts": {
-    "serve": "python3 -m http.server 8000",
+    "serve": "node tools/dev-serve.js",
+    "serve:static": "python3 -m http.server 8000",
     "serve:node": "npx --yes serve -l 8000 .",
     "build:legal": "node tools/build-legal.js",
+    "pretest": "node tools/build-legal.js",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed"

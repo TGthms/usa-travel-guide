@@ -1,7 +1,5 @@
 'use strict';
-/* Auto-derived catalog for homepage intro photo shuffle.
-   Prefer nature / landmarks / cities / coast; food-culture de-weighted at runtime.
-   Uses thumb WebP for the collage (performance). */
+/* Catalog for homepage intro photo shuffle (thumb WebP paths). */
 window.INTRO_GALLERY_PHOTOS = [
   {
     "slug": "sfgoldengate",

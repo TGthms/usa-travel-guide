@@ -60,7 +60,7 @@ section[id], footer[id] { scroll-margin-top: 64px; }
   .dest-card { flex: 0 0 min(320px, 78vw); }
 }
 @media (max-width: 860px) {
-  #navbar { padding: 20px 24px; }
+  #navbar,
   #navbar.scrolled { padding: 14px 24px; }
   .nav-links { display: none; }
   .nav-actions { margin-left: auto; gap: 8px; flex-shrink: 0; }

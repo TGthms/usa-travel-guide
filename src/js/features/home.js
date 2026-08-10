@@ -245,9 +245,8 @@ document.querySelectorAll('.nav-links a[href^="#"], .nav-mobile-link[href^="#"]'
 })();
 
 /* ── INTRO PHOTO SHUFFLE ──
-   3-slot collage cycling weighted gallery THUMB WebPs.
-   All slots refresh every 6s, phase-staggered by 2s so only one swaps at a time
-   (avoids the three cards “fighting”). Click → gallery.html?photo= */
+   3-slot collage over the full gallery catalog (thumb WebP).
+   Phase-staggered 6s cadence; click → gallery.html?photo= */
 (function initIntroPhotoShuffle() {
   const root = document.getElementById('introGallery');
   if (!root) return;
@@ -256,14 +255,6 @@ document.querySelectorAll('.nav-links a[href^="#"], .nav-mobile-link[href^="#"]'
     : [];
   if (!catalog.length) return;
 
-  const WEIGHTS = {
-    nature: 4.2,
-    landmarks: 4.0,
-    coast: 4.0,
-    cityscapes: 3.2,
-    roads: 1.6,
-    'food-culture': 0.45
-  };
   // Same cadence for all three; phase offset keeps swaps sequential.
   const SLOT_MS = 6000;
   const PHASE_MS = 2000; // 0s / 2s / 4s → one change every 2s, each slot every 6s
@@ -272,27 +263,12 @@ document.querySelectorAll('.nav-links a[href^="#"], .nav-mobile-link[href^="#"]'
     if (!p) return '';
     return p.thumbWebp || p.thumb || p.mediumWebp || '';
   }
-  function weightOf(p) {
-    const w = WEIGHTS[p.category];
-    return typeof w === 'number' ? w : 1;
-  }
-  function pickWeighted(list, excludeFiles) {
+  function pickRandom(list, excludeFiles) {
     const ex = excludeFiles || new Set();
     const pool = list.filter((p) => p && photoUrl(p) && !ex.has(p.file));
     const use = pool.length ? pool : list.filter((p) => p && photoUrl(p));
     if (!use.length) return null;
-    let total = 0;
-    const weights = use.map((p) => {
-      const w = weightOf(p);
-      total += w;
-      return w;
-    });
-    let r = Math.random() * total;
-    for (let i = 0; i < use.length; i++) {
-      r -= weights[i];
-      if (r <= 0) return use[i];
-    }
-    return use[use.length - 1];
+    return use[Math.floor(Math.random() * use.length)];
   }
   /** Prefer full location name; only shorten when truly too long for the chip. */
   function captionFor(photo, mode) {
@@ -409,7 +385,7 @@ document.querySelectorAll('.nav-links a[href^="#"], .nav-mobile-link[href^="#"]'
   }
 
   async function showNext(slot, animate) {
-    const photo = pickWeighted(catalog, activeFiles());
+    const photo = pickRandom(catalog, activeFiles());
     if (!photo) return;
     const ok = await preload(photoUrl(photo));
     if (!ok) return;

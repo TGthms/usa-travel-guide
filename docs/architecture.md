@@ -116,8 +116,14 @@ Pages always load **only** `src/css/styles.css`. That file imports domain sheets
 
 - **Hero photos:** `images/main-classic.webp` (Classic style) and `images/main-modern.webp` (Modern style). Appearance (light/dark/system) only changes scrims/dimming, not the file.
 - **Enter motion:** `home.js` starts blur→clear + zoom after the splash loader so the motion is visible; respects Full / Reduced / Off.
-- **Intro shuffle:** `intro-gallery.js` is a static catalog derived from `gallery.html`. Weighted categories favor nature / landmarks / coast / cities; food-culture is de-emphasized. Uses **thumb WebP** for performance. Phase-staggered 6s cadence (one slot at a time). Click → `gallery.html?photo=…` (deep-opens lightbox on the gallery page).
-- After bulk gallery adds, regenerate the catalog (or re-run the small Python parser used in maintainers’ workflow) so the collage stays in sync.
+- **Intro shuffle:** `intro-gallery.js` catalogs the full gallery (from `gallery.html`). Runtime picks random thumb WebPs; phase-staggered 6s cadence. Click → `gallery.html?photo=…`.
+- After bulk gallery adds, regenerate the catalog so the collage stays in sync.
+
+## Legal copy
+
+- **Sources:** `docs/legal/{en,es,zh,ja}/{privacy,terms}.md` (YAML frontmatter + `## Title {#id}` Markdown).
+- **Build:** `npm run build:legal` → `src/js/data/legal-i18n.js`. `npm run serve` watches and rebuilds on save.
+- Do not hand-edit `legal-i18n.js`.
 
 ## Motion policy
 

@@ -1228,16 +1228,38 @@ function onResizeRAF(fn) {
 /* ── SCROLL UI (progress + nav) — one rAF-throttled handler ── */
 const progressBar = document.getElementById('progress-bar');
 let scrollUiPending = false;
+let lastProgressScale = -1;
+let scrollMax = 0;
+let scrollMaxDirty = true;
+function invalidateScrollMax() { scrollMaxDirty = true; }
+function ensureScrollMax() {
+  if (!scrollMaxDirty) return;
+  const h = document.documentElement;
+  scrollMax = Math.max(0, (h.scrollHeight || 0) - (h.clientHeight || 0));
+  scrollMaxDirty = false;
+}
+try {
+  window.addEventListener('resize', invalidateScrollMax, { passive: true });
+  window.addEventListener('orientationchange', invalidateScrollMax, { passive: true });
+  window.addEventListener('load', invalidateScrollMax, { passive: true });
+  if (typeof ResizeObserver === 'function' && document.body) {
+    const ro = new ResizeObserver(() => { invalidateScrollMax(); });
+    ro.observe(document.body);
+  }
+} catch (e) { /* ignore */ }
+
 function updateScrollUi() {
   scrollUiPending = false;
   const y = window.scrollY || document.documentElement.scrollTop || 0;
   if (progressBar) {
-    const h = document.documentElement;
-    const scrollable = h.scrollHeight - h.clientHeight;
-    const pct = scrollable > 0 ? (h.scrollTop / scrollable) * 100 : 0;
-    progressBar.style.width = pct + '%';
+    ensureScrollMax();
+    const pct = scrollMax > 0 ? Math.min(1, Math.max(0, y / scrollMax)) : 0;
+    const q = Math.round(pct * 1000) / 1000;
+    if (q !== lastProgressScale) {
+      lastProgressScale = q;
+      progressBar.style.transform = 'scaleX(' + q + ')';
+    }
   }
-  // Navbar / section spy live in handlers registered below; fire a shared hook.
   if (typeof onPageScroll === 'function') onPageScroll(y);
 }
 window.addEventListener('scroll', () => {
@@ -1424,14 +1446,36 @@ try {
   }
 } catch (e) { /* ignore */ }
 
+/* Nav scrolled + section spy: only write DOM when state changes.
+   Scroll thresholds use a small hysteresis band to avoid flicker. */
+let navIsScrolled = false;
+const NAV_SCROLL_ON = 72;
+const NAV_SCROLL_OFF = 40;
+let lastActiveSection = null;
+
+function setNavScrolled(on) {
+  if (!navbar || on === navIsScrolled) return;
+  navIsScrolled = on;
+  navbar.classList.toggle('scrolled', on);
+}
+
+function setActiveNavSection(current) {
+  if (current === lastActiveSection) return;
+  lastActiveSection = current;
+  navLinks.forEach((a) => {
+    a.classList.toggle('active-link', a.dataset.section === current);
+  });
+}
+
 function onPageScroll(y) {
-  if (navbar) navbar.classList.toggle('scrolled', y > 60);
+  if (navbar) {
+    if (!navIsScrolled && y > NAV_SCROLL_ON) setNavScrolled(true);
+    else if (navIsScrolled && y < NAV_SCROLL_OFF) setNavScrolled(false);
+  }
 
   // Mini-apps use their own chrome (no section spy on guide nav links).
   if (isMiniAppPage) {
-    if (isGalleryPage) {
-      navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === 'gallery'));
-    }
+    if (isGalleryPage) setActiveNavSection('gallery');
     return;
   }
 
@@ -1442,13 +1486,17 @@ function onPageScroll(y) {
     if (threshold >= sectionTopsCache[i].top) current = sectionTopsCache[i].id;
   }
   // Homepage teaser uses id="gallery" — highlight Gallery while it's in view.
-  navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === current));
+  setActiveNavSection(current);
 }
 
-// Initial paint (e.g. gallery page load, deep-linked homepage section)
-if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 60);
-if (isGalleryPage) {
-  navLinks.forEach(a => a.classList.toggle('active-link', a.dataset.section === 'gallery'));
+// Initial paint (gallery load, deep-linked homepage section)
+{
+  const y0 = window.scrollY || 0;
+  setNavScrolled(y0 > NAV_SCROLL_ON);
+  if (isGalleryPage) setActiveNavSection('gallery');
+  else if (!isMiniAppPage) {
+    try { onPageScroll(y0); } catch (e) { /* ignore */ }
+  }
 }
 
 /* ── HAMBURGER (main guide only — gallery mini-app has no mobile drawer) ── */

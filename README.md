@@ -29,7 +29,7 @@
 | 🔗 **Helpful links** | Tourism, transit, parks, and museums from city modals — plus selective guide-section links (regions, essentials, culture, routes, tips). |
 | 🖼️ **Photo gallery** | Filterable travel photography with search, sort, quality tiers (thumbnail / medium / full), lightbox, optional video, and EXIF-upright media pipeline. *HDR supported on full JPEG copies when already upright.* |
 | 🌄 **Immersive homepage hero** | Full-bleed photo background by style (**Classic** / **Modern**), light/dark scrims, luxury enter motion, and bottom-weighted mobile layout. |
-| 🎞️ **About photo collage** | Three-slot shuffle of real gallery thumbs (weighted toward nature, landmarks, coast, cities) with soft transitions; click opens the gallery. |
+| 🎞️ **About photo collage** | Three-slot shuffle of gallery thumbs with soft transitions; click opens the gallery. |
 | 🧰 **Travel tools** | Hub plus mini-apps: currency, world clock, tip & sales tax (all 50 states), gas/EV road-trip cost, U.S. emergency numbers, and **live weather** (NWS for U.S. + Open-Meteo for world/enrich). |
 | 🌦️ **Seasons, culture & routes** | When to go, cultural highlights, and classic road-trip ideas. |
 | 🎲 **America Fun Facts** | One shuffled fact at a time — 250+ trivia items in every language. |
@@ -68,6 +68,8 @@ Local preview from the repo root:
 npm run serve
 # → http://127.0.0.1:8000/
 ```
+
+Legal copy lives under `docs/legal/` (Markdown). `npm run serve` rebuilds `legal-i18n.js` on save; or run `npm run build:legal`.
 
 Gallery Manager (add photos/videos locally):
 
