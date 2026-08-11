@@ -720,6 +720,27 @@ test.describe('USA Travel Guide smoke', () => {
     expect(body.toLowerCase()).toMatch(/open-meteo|weather\.gov|national weather|weather|tiempo|天气|天気|frankfurter/);
   });
 
+  test('footer Privacy link opens policy at the top', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    // Simulate a prior mid-doc privacy visit that browsers would restore
+    await gotoPage(page, '/privacy.html');
+    await page.waitForFunction(() => document.querySelector('#legalDoc h1'));
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(100);
+    // Leave and re-enter via guide footer (the regression path)
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.locator('.footer-legal-links a[href="privacy.html"]').click();
+    await page.waitForURL(/privacy\.html/);
+    await page.waitForFunction(() => document.querySelector('#legalDoc h1'));
+    await page.waitForTimeout(300);
+    const y = await page.evaluate(() => window.scrollY || document.documentElement.scrollTop || 0);
+    expect(y).toBeLessThan(80);
+    await expect(page.locator('#legalDoc h1')).toBeInViewport();
+  });
+
   test('legal pages render sections and switch language', async ({ page }) => {
     await gotoPage(page, '/privacy.html');
     await waitAppReady(page);

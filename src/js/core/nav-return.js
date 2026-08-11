@@ -545,6 +545,12 @@
   }
 
   function restoreGuideScroll() {
+    // Never apply guide scrollY on mini-apps / legal (would clamp to doc end).
+    if (document.body.classList.contains('page-legal')
+      || document.body.classList.contains('page-gallery')
+      || document.body.classList.contains('page-tools')) {
+      return;
+    }
     if (!isGuidePath(pathOf(location.href))) return;
     var ret = readReturn();
     if (!ret || ret.label !== 'guide' || typeof ret.scrollY !== 'number') return;

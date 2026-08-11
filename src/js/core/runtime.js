@@ -197,7 +197,8 @@ function applyLanguage(lang) {
       };
   document.title = titles[lang] || titles.en;
   applyUnits(); // re-stamp unit spans that may have been inside translated HTML
-  if (typeof renderLegalPage === 'function') renderLegalPage(lang);
+  // Language switch: re-render copy but keep scroll position
+  if (typeof renderLegalPage === 'function') renderLegalPage(lang, { scrollTop: false });
   if (typeof updateLegalLangSwitch === 'function') updateLegalLangSwitch(lang);
   if (currentModalKey && typeof getModalData === 'function' && typeof openModal === 'function') {
     const d = getModalData(currentModalKey);

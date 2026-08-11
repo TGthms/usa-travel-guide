@@ -35,8 +35,8 @@ if (typeof initFunFacts === 'function') initFunFacts();
 if (typeof applyLanguage === 'function') applyLanguage(currentLang);
 if (typeof applyUnits === 'function') applyUnits();
 
-// Legal body depends on LEGAL_I18N (loaded before runtime) — ensure first paint
+// Legal body depends on LEGAL_I18N (loaded before runtime) — ensure first paint at top
 if (document.body.classList.contains('page-legal')) {
-  if (typeof renderLegalPage === 'function') renderLegalPage(currentLang);
+  if (typeof renderLegalPage === 'function') renderLegalPage(currentLang, { scrollTop: true });
   if (typeof updateLegalLangSwitch === 'function') updateLegalLangSwitch(currentLang);
 }

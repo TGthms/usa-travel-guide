@@ -13,7 +13,24 @@ function getLegalPageKind() {
   return 'privacy';
 }
 
-function renderLegalPage(lang) {
+function scrollLegalPageToTop() {
+  try {
+    const html = document.documentElement;
+    const prev = html.style.scrollBehavior;
+    html.style.scrollBehavior = 'auto';
+    html.classList.add('scroll-instant');
+    if (typeof window.scrollTo === 'function') {
+      try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
+      catch (e1) { window.scrollTo(0, 0); }
+    }
+    html.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+    html.style.scrollBehavior = prev;
+    html.classList.remove('scroll-instant');
+  } catch (e) { /* ignore */ }
+}
+
+function renderLegalPage(lang, opts) {
   const kind = getLegalPageKind();
   const root = document.getElementById('legalDoc');
   if (!kind || !root) return;
@@ -21,8 +38,10 @@ function renderLegalPage(lang) {
   if (!pack) return;
   const data = pack[lang] || pack.en;
   if (!data) return;
-  // Stamp © years at render time so legal copy never needs a manual year edit.
   const y = (s) => withCopyrightYear(s);
+  // Keep place when switching language mid-read; only pin top on first paint / forced.
+  const pinTop = !opts || opts.scrollTop !== false;
+  const prevY = pinTop ? 0 : (window.scrollY || document.documentElement.scrollTop || 0);
 
   const topTitle = document.getElementById('legalTopTitle');
   if (topTitle) topTitle.textContent = data.title;
@@ -65,7 +84,28 @@ function renderLegalPage(lang) {
       <p class="legal-copy">${y(data.footerNote || '')}</p>
     </footer>
   `;
+
+  if (pinTop) {
+    scrollLegalPageToTop();
+    requestAnimationFrame(scrollLegalPageToTop);
+  } else if (prevY > 0) {
+    try { window.scrollTo(0, prevY); } catch (e) { /* ignore */ }
+  }
 }
+
+// Footer / history must not reopen Privacy/Terms mid-document.
+(function initLegalPageScroll() {
+  if (!document.body.classList.contains('page-legal')) return;
+  try {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  } catch (e) { /* ignore */ }
+  scrollLegalPageToTop();
+  window.addEventListener('load', scrollLegalPageToTop, { once: true });
+  window.addEventListener('pageshow', function (ev) {
+    // bfcache restore can re-apply an old scroll offset
+    if (ev && ev.persisted) scrollLegalPageToTop();
+  });
+})();
 
 function updateLegalLangSwitch(lang) {
   document.querySelectorAll('#legalLangSwitch .legal-lang-btn, #legalLangSwitch [data-lang-val]').forEach((btn) => {
