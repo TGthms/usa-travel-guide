@@ -485,8 +485,7 @@ html[data-theme="glass"] { color-scheme: dark; }
 html[data-theme="glass"] .btn-primary,
 html[data-theme="glass"] .tool-seg-btn.active,
 html[data-theme="glass"] .dest-filter-btn.active,
-html[data-theme="glass"] .gallery-filter.active,
-html[data-theme="glass"] .gallery-enter-btn {
+html[data-theme="glass"] .gallery-filter.active {
   color: #fff;
 }
 html[data-theme="glass"] .btn-primary {
