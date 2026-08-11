@@ -813,6 +813,37 @@ test.describe('USA Travel Guide smoke', () => {
       expect(label).toMatch(/guide|guía|指南|ガイド/i);
     });
 
+    test('Travel Essentials road-trip link backs to Guide not Tools', async ({ page }) => {
+      await gotoPage(page, '/index.html');
+      await waitLoaderGone(page);
+      await waitAppReady(page);
+      // Residual tools stamp (prior hub visit / incomplete pop) must not win over guide origin
+      await page.evaluate(() => {
+        try {
+          sessionStorage.setItem('usa-travel-return-v1', JSON.stringify({
+            label: 'tools', href: 'tools.html', ts: Date.now()
+          }));
+        } catch (_) { /* ignore */ }
+      });
+      const link = page.locator('#practical a.guide-tool-link[href="tools-drive.html"]').first();
+      await link.scrollIntoViewIfNeeded();
+      await link.click();
+      await page.waitForURL(/tools-drive\.html/);
+      await waitLoaderGone(page);
+      const { href, label } = await backChrome(page);
+      expect(href).toMatch(/index\.html/i);
+      expect(label).toMatch(/guide|guía|指南|ガイド/i);
+      const stamp = await page.evaluate(() => {
+        try { return JSON.parse(sessionStorage.getItem('usa-travel-return-v1') || 'null'); }
+        catch (_) { return null; }
+      });
+      expect(stamp && stamp.label).toBe('guide');
+      expect(stamp && stamp.parent).toBeFalsy();
+      await page.locator('a.gallery-app-back').first().click();
+      await page.waitForURL(/index\.html|\/(#|$)/);
+      expect(page.url()).not.toMatch(/tools\.html/);
+    });
+
     test('tools hub → mini-app Back to Tools', async ({ page }) => {
       await gotoPage(page, '/tools.html');
       await waitLoaderGone(page);

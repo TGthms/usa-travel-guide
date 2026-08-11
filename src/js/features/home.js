@@ -716,8 +716,10 @@ function buildLinksListHtml(links) {
   const items = links.map((l) => {
     const label = (l.label && (l.label[currentLang] || l.label.en)) || l.url;
     const internal = !!l.internal || (typeof l.url === 'string' && !/^https?:\/\//i.test(l.url));
+    // Internal tool links use guide-tool-link so capture handlers stamp Guide return
+    const cls = internal && /^tools-/i.test(String(l.url || '')) ? ' class="guide-tool-link"' : '';
     const attrs = internal
-      ? `href="${l.url}"`
+      ? `href="${l.url}"${cls}`
       : `href="${l.url}" target="_blank" rel="noopener noreferrer"`;
     return `<li><a ${attrs}>${label}</a></li>`;
   }).join('');

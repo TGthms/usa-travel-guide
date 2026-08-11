@@ -48,11 +48,6 @@
     return parts.length ? parts[parts.length - 1] : '';
   }
 
-  function isGuidePath(p) {
-    p = p || '';
-    return /\/index\.html$/i.test(p) || p === '/' || /\/$/.test(p);
-  }
-
   function isToolsHubPath(p) {
     return /\/tools\.html$/i.test(p || '') || fileOf(p).toLowerCase() === 'tools.html';
   }
@@ -67,6 +62,22 @@
 
   function isLegalPath(p) {
     return /\/(privacy|terms)\.html$/i.test(p || '');
+  }
+
+  /**
+   * Guide homepage: index.html, `/`, trailing slash, or a directory-style path
+   * without a .html file (e.g. GitHub Pages project root without trailing slash).
+   */
+  function isGuidePath(p) {
+    p = pathOf(p || '');
+    if (!p || p === '/') return true;
+    if (/\/index\.html$/i.test(p)) return true;
+    if (/\/$/.test(p)) return true;
+    if (isToolsHubPath(p) || isToolMiniAppPath(p) || isGalleryPath(p) || isLegalPath(p)) return false;
+    var f = fileOf(p);
+    // No .html segment → treat as site/app root (project Pages base path)
+    if (f && !/\.html?$/i.test(f)) return true;
+    return false;
   }
 
   function isAppChromePage(p) {
@@ -171,6 +182,21 @@
       || a.classList.contains('gallery-app-footer-home');
   }
 
+  /** Keep only scroll-restore payload when returning to the guide (never leave tools/tool as active stamp). */
+  function writeGuideScrollRestore(ret) {
+    if (ret && ret.label === 'guide' && typeof ret.scrollY === 'number' && ret.scrollY > 0) {
+      writeReturn({
+        label: 'guide',
+        href: ret.href || 'index.html',
+        scrollY: ret.scrollY,
+        ts: Date.now(),
+        pendingScrollRestore: true
+      });
+      return;
+    }
+    clearReturn();
+  }
+
   /**
    * Following the Back control: pop the stack so the destination keeps its
    * original parent (Guide → Weather → Gallery → Back → Weather shows Guide).
@@ -179,6 +205,21 @@
     var ret = readReturn();
     var destFile = fileOf(targetHref).toLowerCase();
     var destPath = pathOf(targetHref);
+
+    // Returning to the Guide: restore scroll only — do not promote a tools/tool parent
+    // (that left a stale tools stamp on the guide and broke later “Back to the Guide” hops).
+    if (isGuidePath(destPath)) {
+      if (ret && ret.label === 'guide') {
+        writeGuideScrollRestore(ret);
+        return;
+      }
+      if (ret && ret.parent && ret.parent.label === 'guide') {
+        writeGuideScrollRestore(ret.parent);
+        return;
+      }
+      clearReturn();
+      return;
+    }
 
     // Prefer popping when Back href matches current stamp target
     if (ret && ret.href && String(ret.href).toLowerCase() === destFile) {
@@ -190,17 +231,6 @@
           return;
         }
       }
-      // Guide → Weather → Back: keep scrollY so index can restore position
-      if (ret.label === 'guide' && typeof ret.scrollY === 'number' && ret.scrollY > 0) {
-        writeReturn({
-          label: 'guide',
-          href: ret.href || 'index.html',
-          scrollY: ret.scrollY,
-          ts: Date.now(),
-          pendingScrollRestore: true
-        });
-        return;
-      }
       clearReturn();
       return;
     }
@@ -209,26 +239,10 @@
     if (ret && ret.parent && ret.parent.label) {
       var p2 = cloneAsParent(ret.parent, 0);
       if (p2) {
-        // If the Back target is the guide and the parent is the guide stamp, keep its scrollY
-        if (isGuidePath(destPath) && p2.label === 'guide' && typeof p2.scrollY === 'number' && p2.scrollY > 0) {
-          p2.pendingScrollRestore = true;
-        }
         p2.ts = Date.now();
         writeReturn(p2);
         return;
       }
-    }
-    // Footer / non-chrome “Guide” link: preserve guide scroll if still stamped
-    if (ret && ret.label === 'guide' && isGuidePath(destPath)
-        && typeof ret.scrollY === 'number' && ret.scrollY > 0) {
-      writeReturn({
-        label: 'guide',
-        href: ret.href || 'index.html',
-        scrollY: ret.scrollY,
-        ts: Date.now(),
-        pendingScrollRestore: true
-      });
-      return;
     }
     clearReturn();
   }
@@ -244,14 +258,32 @@
     // Mini-app → Tools hub: keep prior parent (Guide/Gallery)
     if (from.label === 'tool' && isToolsHubPath(dest)) return;
 
-    // Tools hub → Guide: leaving tools tree
-    if (from.label === 'tools' && isGuidePath(dest)) return;
+    // Tools hub → Guide: clear tools-tree stamps (guide has no Back chrome)
+    if (from.label === 'tools' && isGuidePath(dest)) {
+      clearReturn();
+      return;
+    }
 
     var prev = readReturn();
 
     // Returning to the Guide while a guide stamp (with scrollY) is active —
     // do not overwrite with the mini-app as origin (footer “Guide” links, etc.)
     if (isGuidePath(dest) && prev && prev.label === 'guide') {
+      return;
+    }
+
+    // Guide → anywhere: always a clean guide stamp (never nest stale tools/tool parents)
+    if (from.label === 'guide') {
+      writeReturn({
+        from: here,
+        href: 'index.html',
+        scrollY: Math.round(window.scrollY || window.pageYOffset || 0),
+        label: 'guide',
+        toolId: '',
+        parent: null,
+        ts: Date.now(),
+        to: dest
+      });
       return;
     }
 
@@ -264,13 +296,11 @@
     // Nest previous stamp as parent so Back can restore it
     var parent = null;
     if (prev && prev.label) {
-      // Avoid pointless self-parent (same origin)
       var sameOrigin = prev.label === from.label
         && String(prev.href || '').toLowerCase() === String(from.href || '').toLowerCase();
       if (!sameOrigin) {
         parent = cloneAsParent(prev, 0);
       } else if (prev.parent) {
-        // Same surface re-exit: keep existing parent chain
         parent = cloneAsParent(prev.parent, 0);
       }
     }
@@ -430,12 +460,37 @@
     }
   }
 
+  /** Drop irrelevant stamps while sitting on the guide homepage. */
+  function cleanStampOnGuide() {
+    if (!isGuidePath(pathOf(location.href))) return;
+    var ret = readReturn();
+    if (!ret) return;
+    if (ret.label === 'guide' && (ret.pendingScrollRestore || (typeof ret.scrollY === 'number' && ret.scrollY > 0))) {
+      return;
+    }
+    // tools/tool/gallery leftovers confuse the next deep-link out of Essentials/etc.
+    clearReturn();
+  }
+
+  function referrerIsGuide() {
+    try {
+      var refPath = document.referrer ? pathOf(document.referrer) : '';
+      return !!(refPath && isGuidePath(refPath));
+    } catch (e) {
+      return false;
+    }
+  }
+
   function applyReturnChrome() {
     var back = document.querySelector('a.gallery-app-back');
     var footer = document.querySelector('a.gallery-app-footer-home');
-    if (!back && !footer) return;
+    if (!back && !footer) {
+      cleanStampOnGuide();
+      return;
+    }
 
     normalizeStampForCurrentPage();
+    cleanStampOnGuide();
 
     var here = pathOf(location.href);
     var ret = readReturn();
@@ -452,16 +507,27 @@
     }
 
     if (isToolMiniAppPath(here)) {
+      // Stale bare tools stamp (or missing stamp) while document.referrer is the guide —
+      // typical after browser-back left a tools stamp, then user deep-linked from Essentials.
+      // Do NOT override a tools stamp that has a parent (real Tools hub → mini-app hop).
+      var staleTools = ret && ret.label === 'tools' && !ret.parent;
+      if (referrerIsGuide() && (!ret || staleTools)) {
+        writeReturn({
+          label: 'guide',
+          href: 'index.html',
+          scrollY: 0,
+          parent: null,
+          ts: Date.now(),
+          to: here
+        });
+        applyGuideChrome(back, footer);
+        return;
+      }
       if (applyStampChrome(back, footer, ret, {})) return;
-      // Fallback when stamp was lost (private mode / race): if we arrived from
-      // the guide, prefer Back to Guide over the mini-app’s default Tools hub.
-      try {
-        var refPath = document.referrer ? pathOf(document.referrer) : '';
-        if (refPath && isGuidePath(refPath)) {
-          applyGuideChrome(back, footer);
-          return;
-        }
-      } catch (eRef) { /* ignore */ }
+      if (referrerIsGuide()) {
+        applyGuideChrome(back, footer);
+        return;
+      }
       applyToolsChrome(back, footer);
       return;
     }
