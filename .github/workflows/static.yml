@@ -36,13 +36,9 @@ jobs:
           # workflow_run default SHA is latest default branch — use the commit that passed E2E
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Strip internal / non-public files
-        # Gallery Manager lives in the repo for maintainers, but must never ship
-        # on the public static site (GitHub Pages mirror). Cloudflare deploy
-        # should apply the same strip if it publishes from this tree.
-        run: |
-          rm -rf tools "Add Photos.command"
-          find . -name '__pycache__' -type d -prune -exec rm -rf {} +
-          find . -name '.DS_Store' -delete
+        # Gallery Manager and test/docs internals stay in git for maintainers
+        # but must never ship on the public static site.
+        run: bash tools/strip-public.sh
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Upload artifact

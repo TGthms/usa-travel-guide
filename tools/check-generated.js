@@ -98,6 +98,40 @@ if (!gallery.includes('<!-- GALLERY_MANAGER_INSERT -->')) {
   die('gallery.html is missing <!-- GALLERY_MANAGER_INSERT -->');
 }
 
+(function checkGalleryOrphans() {
+  const live = new Set();
+  const slugRe = /gallery\.item\.([a-z0-9]+)\.caption/g;
+  const fileRe = /data-(?:full|medium|thumb|thumb-webp|medium-webp|video)="images\/gallery\/(?:(?:medium|thumbs|videos)\/)?([^"]+)"/g;
+  let m;
+  while ((m = slugRe.exec(gallery))) live.add(m[1]);
+  while ((m = fileRe.exec(gallery))) {
+    live.add(path.parse(m[1]).name.toLowerCase().replace(/[^a-z0-9]/g, ''));
+  }
+  const dirs = [
+    'images/gallery',
+    'images/gallery/medium',
+    'images/gallery/thumbs',
+    'images/gallery/videos',
+  ];
+  const orphans = [];
+  dirs.forEach((rel) => {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs)) return;
+    fs.readdirSync(abs, { withFileTypes: true }).forEach((ent) => {
+      if (!ent.isFile() || ent.name.startsWith('.')) return;
+      const stem = path.parse(ent.name).name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!live.has(stem)) orphans.push(rel + '/' + ent.name);
+    });
+  });
+  if (orphans.length) {
+    die(
+      'orphan gallery media (not in gallery.html): ' +
+        orphans.join(', ') +
+        ' — delete them or run python3 tools/gallery_manager.py --sweep-orphans'
+    );
+  }
+})();
+
 const i18nSrc = read('src/js/data/i18n.js');
 const galleryI18nSrc = exists('src/js/data/gallery-i18n.js')
   ? read('src/js/data/gallery-i18n.js')

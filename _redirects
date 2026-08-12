@@ -1,0 +1,11 @@
+# Cloudflare Pages: do not serve maintainer internals.
+# GitHub Pages strips these files in static.yml; this is the CF fallback
+# when the project is published from the git root with no build command.
+/tools/*           /404.html  404
+/e2e/*             /404.html  404
+/docs/*            /404.html  404
+/.github/*         /404.html  404
+/package.json      /404.html  404
+/package-lock.json /404.html  404
+/playwright.config.js /404.html  404
+/Add Photos.command /404.html  404

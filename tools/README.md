@@ -143,7 +143,8 @@ Confirms first, then deletes **everything** for that photo:
 - Medium (`images/gallery/medium/…`)
 - Thumbnail (`images/gallery/thumbs/…`)
 - HTML block in `gallery.html`
-- Caption keys in `src/js/data/i18n.js` (es / zh / ja)
+- Caption keys in `src/js/data/gallery-i18n.js` (es / zh / ja)
+- Video file in `images/gallery/videos/` when the item is a video
 
 ### CLI
 
@@ -153,6 +154,9 @@ python3 tools/gallery_manager.py --list
 
 # Remove one or more (slug or filename)
 python3 tools/gallery_manager.py --remove richmondbay sfgoldengate
+
+# Delete leftover media not referenced by gallery.html
+python3 tools/gallery_manager.py --sweep-orphans
 ```
 
 ## Options
@@ -160,7 +164,8 @@ python3 tools/gallery_manager.py --remove richmondbay sfgoldengate
 | Flag | Meaning |
 |------|---------|
 | `--cli FOLDER` | Import every image in that folder |
-| `--remove SLUG…` | Fully delete photo(s) by slug/filename |
+| `--remove SLUG…` | Fully delete photo(s) by slug/filename (JPEG, WebP, video) |
+| `--sweep-orphans` | Delete media files not referenced by `gallery.html` |
 | `--list` | Show current gallery entries |
 | `--rebuild-media` | Bake orientation if needed; rebuild medium/thumb/WebP; patch HTML attrs |
 | `--rebuild-intro` | Rewrite `src/js/data/intro-gallery.js` from current `gallery.html` |
@@ -169,7 +174,7 @@ python3 tools/gallery_manager.py --remove richmondbay sfgoldengate
 | `--category` | `cityscapes` · `landmarks` · `nature` · `coast` · `food-culture` · `roads` |
 | `--location` | Lightbox meta (omit → auto from GPS) |
 | `--date` | e.g. `July 4, 2026` (omit → auto from EXIF) |
-| `--dry-run` | Import only: parse only, write nothing |
+| `--dry-run` | Parse-only import, or preview `--sweep-orphans` |
 
 ## Dependencies
 

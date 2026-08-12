@@ -27,9 +27,11 @@ What it does for each photo (add):
   month-only is kept when no day is known (never invent day 1).
 
 What it does on remove (clears ALL of the above):
-  · Deletes full + medium + thumb
+  · Deletes full + medium + thumb (JPEG and WebP sidecars)
+  · Deletes the video file under images/gallery/videos/ when present
   · Removes the HTML block from gallery.html
   · Removes caption keys from src/js/data/gallery-i18n.js (all languages)
+  · Sweeps leftover media for that slug (covers failed partial deletes)
 
 Usage — browser UI (recommended after a long trip):
   cd /path/to/usa-travel-guide
@@ -52,6 +54,10 @@ Usage — backfill precise dates from EXIF (month-only → Month D, YYYY):
 
 Usage — CLI remove:
   python3 tools/gallery_manager.py --remove sfgoldengate richmondbay
+
+Usage — delete leftover media not referenced by gallery.html:
+  python3 tools/gallery_manager.py --sweep-orphans
+  python3 tools/gallery_manager.py --sweep-orphans --dry-run
 
 Requires: Python 3.9+, macOS `sips` (preinstalled), and Pillow (for EXIF
 orientation bake). Install with: python3 -m pip install Pillow
@@ -379,6 +385,14 @@ def slug_base_from_sources(
     return f"photo{int(time.time())}"
 
 
+def _media_dirs() -> tuple[Path, ...]:
+    return (GALLERY_DIR, MEDIUM_DIR, THUMBS_DIR, VIDEOS_DIR)
+
+
+def _stem_slug(name: str) -> str:
+    return slugify(Path(name).stem)
+
+
 def unique_slug(base: str) -> str:
     """Avoid colliding with existing i18n keys / filenames."""
     base = re.sub(r"[^a-z0-9]", "", (base or "").lower()) or f"photo{int(time.time())}"
@@ -390,13 +404,16 @@ def unique_slug(base: str) -> str:
     # From HTML
     if GALLERY_HTML.is_file():
         existing.update(re.findall(r"gallery\.item\.([a-z0-9]+)\.caption", GALLERY_HTML.read_text(encoding="utf-8")))
-    # From app.js keys (covers keys whose HTML was removed)
+    # From caption packs (covers keys whose HTML was removed)
     if GALLERY_I18N_JS.is_file():
         existing.update(re.findall(r"gallery\.item\.([a-z0-9]+)\.caption", GALLERY_I18N_JS.read_text(encoding="utf-8")))
-    # From files
-    for p in GALLERY_DIR.glob("*"):
-        if p.is_file():
-            existing.add(slugify(p.name))
+    # From every media folder — leftover WebP/video covers must still reserve the slug
+    for folder in _media_dirs():
+        if not folder.is_dir():
+            continue
+        for p in folder.iterdir():
+            if p.is_file() and not p.name.startswith("."):
+                existing.add(_stem_slug(p.name))
     slug = base
     n = 2
     while slug in existing or (GALLERY_DIR / f"{slug}.jpeg").exists():
@@ -1563,9 +1580,20 @@ GALLERY_ITEM_RE = re.compile(
 )
 
 
+def _unescape_html(value: str) -> str:
+    """Decode entities until stable so a Save cannot turn & into &amp;amp;."""
+    prev = value or ""
+    for _ in range(4):
+        nxt = html.unescape(prev)
+        if nxt == prev:
+            return nxt
+        prev = nxt
+    return prev
+
+
 def _html_attr(blob: str, name: str) -> str:
     am = re.search(rf'\b{name}="([^"]*)"', blob)
-    return html.unescape(am.group(1)) if am else ""
+    return _unescape_html(am.group(1)) if am else ""
 
 
 def parse_gallery_item(match: re.Match) -> dict:
@@ -1573,7 +1601,7 @@ def parse_gallery_item(match: re.Match) -> dict:
     item_attrs = match.group(1)
     img_attrs = match.group(2)
     i18n_key = match.group(3)
-    caption = html.unescape(match.group(4))
+    caption = _unescape_html(match.group(4))
 
     full = _html_attr(img_attrs, "data-full")
     thumb = _html_attr(img_attrs, "src")
@@ -1996,8 +2024,17 @@ def process_one(
             i18n_n = insert_i18n(slug, cap)
             write_intro_catalog()
         except Exception:
-            # A gallery entry is one logical record — undo partial writes.
-            for path in (thumb_path, medium_path, full_path, video_path):
+            # A gallery entry is one logical record — undo partial writes
+            # including WebP sidecars created after the JPEGs.
+            rollback = [
+                thumb_path,
+                medium_path,
+                full_path,
+                video_path,
+                thumb_path.with_suffix(".webp"),
+                medium_path.with_suffix(".webp"),
+            ]
+            for path in rollback:
                 if path is None:
                     continue
                 try:
@@ -2135,41 +2172,87 @@ def remove_i18n(slug: str) -> int:
     return n
 
 
-def remove_files(slug: str, filename: str | None = None) -> list[str]:
-    """Delete full + medium + thumb (+ video) files. Returns list of paths removed."""
-    fname = filename or f"{slug}.jpeg"
-    removed = []
-    candidates = [
-        GALLERY_DIR / fname,
-        MEDIUM_DIR / fname,
-        THUMBS_DIR / fname,
-    ]
-    if fname != f"{slug}.jpeg":
-        candidates += [
-            GALLERY_DIR / f"{slug}.jpeg",
-            MEDIUM_DIR / f"{slug}.jpeg",
-            THUMBS_DIR / f"{slug}.jpeg",
-        ]
-    # Video files (any supported extension)
-    if VIDEOS_DIR.is_dir():
-        for ext in VIDEO_SUFFIXES:
-            candidates.append(VIDEOS_DIR / f"{slug}{ext}")
-        # Also match any file whose stem is the slug
-        for path in VIDEOS_DIR.glob(f"{slug}.*"):
-            candidates.append(path)
-    for path in candidates:
-        if path.is_file():
-            try:
-                path.unlink()
-                removed.append(str(path.relative_to(ROOT)))
-            except OSError:
-                pass
+def listed_media_stems() -> set[str]:
+    """Stems still referenced by gallery.html (photo + video)."""
+    live: set[str] = set()
+    if not GALLERY_HTML.is_file():
+        return live
+    for item in list_photos():
+        live.add(item["slug"])
+        if item.get("filename"):
+            live.add(_stem_slug(item["filename"]))
+        if item.get("video_filename"):
+            live.add(_stem_slug(item["video_filename"]))
+    return live
+
+
+def media_paths_for_slug(slug: str, filename: str | None = None) -> list[Path]:
+    """Every on-disk asset that belongs to this gallery slug (jpeg, webp, video)."""
+    stems = {slug, _stem_slug(slug)}
+    if filename:
+        stems.add(_stem_slug(filename))
+        stems.add(Path(filename).stem)
+    stems = {s for s in stems if s}
+    found: list[Path] = []
+    seen: set[Path] = set()
+    for folder in _media_dirs():
+        if not folder.is_dir():
+            continue
+        for path in folder.iterdir():
+            if not path.is_file() or path.name.startswith("."):
+                continue
+            if path.stem in stems or _stem_slug(path.name) in stems:
+                key = path.resolve()
+                if key not in seen:
+                    seen.add(key)
+                    found.append(path)
+    return found
+
+
+def _unlink_media(paths: list[Path]) -> list[str]:
+    removed: list[str] = []
+    for path in paths:
+        if not path or not path.is_file():
+            continue
+        try:
+            path.unlink()
+            removed.append(str(path.relative_to(ROOT)))
+        except OSError:
+            pass
     return removed
+
+
+def remove_files(slug: str, filename: str | None = None) -> list[str]:
+    """Delete full + medium + thumb JPEG/WebP + video. Returns paths removed."""
+    return _unlink_media(media_paths_for_slug(slug, filename))
+
+
+def sweep_orphan_media(*, dry_run: bool = False) -> list[str]:
+    """
+    Delete media files that are not referenced by any gallery.html item.
+    Catches leftover WebP sidecars after a video/photo remove.
+    """
+    live = listed_media_stems()
+    orphans: list[Path] = []
+    for folder in _media_dirs():
+        if not folder.is_dir():
+            continue
+        for path in folder.iterdir():
+            if not path.is_file() or path.name.startswith("."):
+                continue
+            stem = path.stem
+            if stem in live or _stem_slug(path.name) in live:
+                continue
+            orphans.append(path)
+    if dry_run:
+        return [str(p.relative_to(ROOT)) for p in orphans]
+    return _unlink_media(orphans)
 
 
 def remove_one(slug: str, filename: str | None = None) -> dict:
     """
-    Fully remove a photo: HTML block, i18n keys (all langs), full image, thumb.
+    Fully remove a photo/video: HTML block, i18n keys, and every media file
+    (full, medium, thumb, WebP sidecars, video).
     """
     slug = re.sub(r"[^a-z0-9]", "", slug.lower())
     if not slug:
@@ -2188,6 +2271,11 @@ def remove_one(slug: str, filename: str | None = None) -> dict:
         html_ok = remove_gallery_html(slug, fname)
         i18n_n = remove_i18n(slug)
         files = remove_files(slug, fname)
+        # Second pass: any leftover files for this slug (e.g. WebP after JPEG gone)
+        extra = sweep_orphan_media()
+        for rel in extra:
+            if rel not in files:
+                files.append(rel)
         try:
             write_intro_catalog()
         except OSError:
@@ -2609,7 +2697,7 @@ UI_HTML = r"""<!DOCTYPE html>
     </div>
     <p class="hint" style="margin-top:0;margin-bottom:12px">
       Edit fields and <strong>Save</strong> to update category / location / date / caption without re-uploading.
-      <strong>Remove</strong> deletes full, medium, thumb, HTML, and all language keys.
+      <strong>Remove</strong> deletes full, medium, thumb, WebP sidecars, video, HTML, and all language keys.
     </p>
     <div class="existing" id="existing"></div>
   </section>
@@ -3020,7 +3108,7 @@ async function saveExisting(card, item) {
 }
 
 async function removePhoto(card, item) {
-  if (!confirm(`Remove “${item.caption || item.slug}” permanently?\n\nDeletes full, medium, thumb, HTML block, and all caption keys.`)) return;
+  if (!confirm(`Remove “${item.caption || item.slug}” permanently?\n\nDeletes full, medium, thumb, WebP, video, HTML block, and all caption keys.`)) return;
   const btn = $('.rm-btn', card);
   btn.disabled = true;
   btn.textContent = 'Removing…';
@@ -3576,6 +3664,11 @@ def main() -> None:
         help="Rewrite src/js/data/intro-gallery.js from current gallery.html",
     )
     parser.add_argument(
+        "--sweep-orphans",
+        action="store_true",
+        help="Delete media files not referenced by gallery.html (leftover WebP/video covers)",
+    )
+    parser.add_argument(
         "--category",
         default="coast",
         choices=CATEGORIES,
@@ -3615,6 +3708,19 @@ def main() -> None:
         ensure_layout()
         n = write_intro_catalog()
         print(f"Wrote {n} still(s) to {INTRO_JS.relative_to(ROOT)}")
+        return
+    if args.sweep_orphans:
+        ensure_layout()
+        orphans = sweep_orphan_media(dry_run=args.dry_run)
+        if not orphans:
+            print("No orphan media files.")
+            return
+        verb = "Would delete" if args.dry_run else "Deleted"
+        print(f"{verb} {len(orphans)} orphan file(s):")
+        for rel in orphans:
+            print(f"  · {rel}")
+        if args.dry_run:
+            print("Dry-run only — re-run without --dry-run to delete.")
         return
     if args.backfill_dates:
         run_backfill_dates(apply=args.apply)
