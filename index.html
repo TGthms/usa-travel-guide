@@ -8,7 +8,7 @@
 <meta name="google-site-verification" content="0rE0QD0vWPSfPxelCpS8qL2_n3JGrd_ZYPJBaGwnLZQ" />
 <meta name="theme-color" content="#07101c">
 <meta name="color-scheme" content="dark light">
-<title>America — A Travel Guide by Tim G</title>
+<title data-i18n="pageTitle.home">America — A Travel Guide by Tim G</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23060b18'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='%23e8a435'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23060b18'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='%23e8a435'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
@@ -24,34 +24,48 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Special+Elite&family=Noto+Serif+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/css/styles.css">
-<!-- First paint: saved theme, else OS light → Daylight / dark → Midnight Atlas.
-     OS dark: Daylight→Twilight Glass, Heritage Paper→Grand Tour (preference kept in Settings). -->
+<!-- FIRST_PAINT_START -->
+<!-- First paint: Appearance × Style. Must match resolveThemeFromAppearanceStyle in runtime.js.
+     Light+Classic=elegant · Light+Modern=minimal · Dark+Classic=default · Dark+Modern=glass.
+     System follows prefers-color-scheme. User motion Full always wins over OS reduce. -->
 <script>
 (function () {
   try {
-    var t = localStorage.getItem('usa-travel-theme');
-    if (!t) {
-      t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
-        ? 'minimal' : 'default';
+    var VALID = ['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'];
+    function isOsLight() {
+      return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
     }
-    if (['default','minimal','elegant','luxury','glass','nature'].indexOf(t) < 0) t = 'default';
-    // Paint the saved/detected theme as chosen — no silent light→dark twin remap.
-    // (OS-dark twin switch happens in app.js only when the OS flips mid-session.)
+    function resolveTheme(appearance, style) {
+      var light = appearance === 'system' ? isOsLight() : appearance === 'light';
+      return light ? (style === 'classic' ? 'elegant' : 'minimal') : (style === 'classic' ? 'default' : 'glass');
+    }
+    var appearance = localStorage.getItem('usa-travel-appearance');
+    var style = localStorage.getItem('usa-travel-style');
+    if (style !== 'classic' && style !== 'modern') style = 'modern';
+    var t = null;
+    if (appearance === 'system' || appearance === 'light' || appearance === 'dark') {
+      t = resolveTheme(appearance, style);
+    } else {
+      t = localStorage.getItem('usa-travel-theme');
+      if (t === 'auto' || !t) t = resolveTheme('system', style);
+    }
+    if (VALID.indexOf(t) < 0) t = 'default';
     document.documentElement.setAttribute('data-theme', t);
     document.documentElement.style.colorScheme = (t === 'minimal' || t === 'elegant') ? 'light' : 'dark';
-    // Early motion preference (avoids flash of full animation before app.js)
+
     var m = localStorage.getItem('usa-travel-motion');
     if (!m && localStorage.getItem('usa-travel-reduce-motion') === 'on') m = 'reduced';
     if (m !== 'full' && m !== 'reduced' && m !== 'off') m = null;
     var osReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (m) document.documentElement.setAttribute('data-motion', m);
-    var eff = m === 'off' ? 'off' : ((m === 'reduced' || osReduce) ? 'reduced' : (m === 'full' ? 'full' : (osReduce ? 'reduced' : null)));
+    var eff = m === 'off' ? 'off' : (m === 'full' ? 'full' : (m === 'reduced' ? 'reduced' : (osReduce ? 'reduced' : null)));
     if (eff) document.documentElement.setAttribute('data-motion-effective', eff);
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'default');
   }
 })();
 </script>
+<!-- FIRST_PAINT_END -->
 </head>
 <body>
 
@@ -936,6 +950,7 @@
 </main>
 
 
+<!-- SETTINGS_START -->
 <div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="settingsTitle">
 <section id="settings" class="settings-panel">
   <div class="settings-header reveal">
@@ -981,7 +996,7 @@
 
     <div class="settings-group reveal reveal-delay-2">
       <div class="settings-group-label" data-i18n="settings.unitsLabel">Units</div>
-      <div class="settings-group-sub" data-i18n="settings.unitsSub">Applied to temperatures and road-trip distances.</div>
+      <div class="settings-group-sub" data-i18n="settings.unitsSub">Auto follows your device’s temperature unit and measurement system.</div>
       <div class="settings-subgroup">
         <div class="settings-subgroup-label" data-i18n="settings.temperature">Temperature</div>
         <div class="units-row" id="unitTempGroup">
@@ -1035,6 +1050,7 @@
   </div>
 </section>
 </div>
+<!-- SETTINGS_END -->
 
 <footer class="site-footer">
   <div class="site-footer-inner">

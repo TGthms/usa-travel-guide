@@ -1580,6 +1580,12 @@ function refreshGalleryLanguageChrome() {
 // Mark gallery UI ready last so language switches can safely refresh chrome.
 galleryUiReady = true;
 
+document.addEventListener('usa-travel:prefs', function (e) {
+  const type = e && e.detail && e.detail.type;
+  if (type !== 'lang') return;
+  refreshGalleryLanguageChrome();
+});
+
 /* Deep link from homepage intro shuffle: gallery.html?photo=filename-or-slug */
 (function openGalleryFromQuery() {
   if (!document.body.classList.contains('page-gallery')) return;

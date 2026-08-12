@@ -483,6 +483,66 @@ test.describe('USA Travel Guide smoke', () => {
     await closeSettings(page);
   });
 
+  test('settings overlay structure matches across pages', async ({ page }) => {
+    const paths = ['/index.html', '/gallery.html', '/tools-weather.html', '/privacy.html'];
+    const signatures = [];
+    for (const path of paths) {
+      await gotoPage(page, path);
+      await waitAppReady(page);
+      const html = await page.content();
+      expect(html, `${path} first-paint marker`).toContain('FIRST_PAINT_START');
+      expect(html, `${path} settings marker`).toContain('SETTINGS_START');
+      const sig = await page.locator('#settingsOverlay').evaluate((el) => {
+        return [...el.querySelectorAll('[id]')].map((n) => n.id).join(',');
+      });
+      signatures.push(sig);
+    }
+    expect(new Set(signatures).size, signatures.join(' | ')).toBe(1);
+    expect(signatures[0]).toContain('appearancePillGroup');
+    expect(signatures[0]).toContain('unitTempGroup');
+  });
+
+  test('first paint resolves Appearance × Style before runtime', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('usa-travel-appearance', 'dark');
+      localStorage.setItem('usa-travel-style', 'modern');
+    });
+    await gotoPage(page, '/index.html');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'glass');
+  });
+
+  test('motion Full wins over OS reduced-motion on first paint', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.addInitScript(() => {
+      localStorage.setItem('usa-travel-motion', 'full');
+    });
+    await gotoPage(page, '/index.html');
+    await expect(page.locator('html')).toHaveAttribute('data-motion-effective', 'full');
+    await waitAppReady(page);
+    await expect(page.locator('html')).toHaveAttribute('data-motion-effective', 'full');
+  });
+
+  test('dest weather chips follow effective temp unit', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await page.evaluate(() => {
+      sessionStorage.setItem('usa-travel-dest-wx-v1', JSON.stringify({
+        at: Date.now(),
+        data: { nyc: { temp: 20, code: 0, hi: 22, lo: 10 } }
+      }));
+      if (window.paintDestWeather) window.paintDestWeather();
+    });
+    const chip = page.locator('.dest-weather[data-dest-wx="nyc"] .dest-weather-temp');
+    await openSettings(page);
+    await page.locator('#unitTempGroup .pill-btn[data-unit-val="c"]').click();
+    await closeSettings(page);
+    await expect(chip).toHaveText('20°');
+    await openSettings(page);
+    await page.locator('#unitTempGroup .pill-btn[data-unit-val="f"]').click();
+    await closeSettings(page);
+    await expect(chip).toHaveText('68°');
+  });
+
   test('tip-tax state selector localizes on language change', async ({ page }) => {
     await gotoPage(page, '/tools-tip-tax.html');
     await page.waitForFunction(() => document.querySelectorAll('#salesTaxState option').length > 10);

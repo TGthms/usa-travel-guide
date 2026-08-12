@@ -37,12 +37,11 @@ usa-travel-guide/
 │       │   ├── nav-return.js # sessionStorage stamp, contextual Back, guide scroll restore
 │       │   └── runtime.js # prefs, i18n engine, settings, nav chrome
 │       ├── features/      # Page behavior (safe no-op if DOM missing)
-│       │   ├── home.js    # immersive hero, intro shuffle, carousels, favorites
+│       │   ├── home.js    # immersive hero, intro shuffle, carousels, favorites, fun facts
 │       │   ├── dest-weather.js # homepage destination live weather chips
 │       │   ├── gallery.js
 │       │   ├── tools.js   # currency, clock, tip/tax, drive, emergency
 │       │   ├── weather/   # Hybrid NWS (US) + Open-Meteo (world / enrich / fallback)
-│       │   ├── weather.js # thin entry for tools-weather
 │       │   └── legal.js
 │       └── app.js         # Boot: applyLanguage / applyUnits / legal first paint
 ├── images/
@@ -50,8 +49,11 @@ usa-travel-guide/
 │   ├── main-modern.webp   # Hero photo (Modern style)
 │   └── gallery/           # full + medium/ + thumbs/ + videos/
 ├── e2e/                   # Playwright smoke
-├── docs/                  # Maintainer docs
-└── tools/                 # Gallery Manager (in git; stripped on public deploy)
+├── docs/
+│   ├── architecture.md
+│   ├── legal/             # Privacy / terms markdown sources
+│   └── partials/          # first-paint + settings HTML (injected into every page)
+└── tools/                 # Gallery Manager + legal/partials builders (stripped on public deploy)
     ├── gallery_manager.py
     └── README.md
 ```
@@ -80,6 +82,10 @@ Core load order on every page: `env.js` → **`nav-return.js`** → `runtime.js`
 | **privacy / terms** | legal-i18n (sync) → i18n → core → legal → app |
 
 `app.js` runs last so feature functions (`initFunFacts`, `renderLegalPage`, gallery chrome, weather hooks) already exist.
+
+Settings dialog and the first-paint theme script are generated from `docs/partials/` (`npm run build:partials`). Do not hand-edit the marked regions in `*.html`.
+
+`applyLanguage` only paints `[data-i18n*]` (including `<title>`), restamps units, and dispatches `usa-travel:prefs` (`{ type: 'lang'|'units'|'theme'|'motion' }`). Features subscribe. Temperature/distance formatting for JS UI goes through `window.USATravel.formatTempFromC` / `formatDistFromMi`.
 
 ### Weather hybrid (summary)
 

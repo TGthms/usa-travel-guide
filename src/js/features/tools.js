@@ -24,6 +24,13 @@ function refreshToolsLive() {
   if (typeof updateDriveCost === 'function') updateDriveCost();
 }
 
+document.addEventListener('usa-travel:prefs', function (e) {
+  const type = e && e.detail && e.detail.type;
+  if (type !== 'lang' && type !== 'units') return;
+  if (type === 'lang' && typeof populateStateSelect === 'function') populateStateSelect();
+  refreshToolsLive();
+});
+
 // Dynamic UI strings for the Tools panel (currency converter, tip estimator,
 // world clock). These are generated at runtime rather than sitting in static
 // HTML, so they need their own small translation table alongside the main

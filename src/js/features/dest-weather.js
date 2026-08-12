@@ -29,17 +29,15 @@
     return (typeof currentLang === 'string' && currentLang) || 'en';
   }
 
-  function useF() {
-    try {
-      if (typeof currentTempUnit === 'string') return currentTempUnit !== 'c';
-    } catch (e) { /* ignore */ }
-    return true;
-  }
-
   function fmtTemp(c) {
+    if (window.USATravel && typeof window.USATravel.formatTempFromC === 'function') {
+      return window.USATravel.formatTempFromC(c);
+    }
     if (c == null || Number.isNaN(Number(c))) return '—';
-    if (useF()) return Math.round(Number(c) * 9 / 5 + 32) + '°';
-    return Math.round(Number(c)) + '°';
+    var unit = (typeof getEffectiveTempUnit === 'function') ? getEffectiveTempUnit() : 'c';
+    var n = Number(c);
+    if (unit === 'f') n = n * 9 / 5 + 32;
+    return Math.round(n) + '°';
   }
 
   /** Compact condition glyph (emoji — no SF symbol dependency on homepage). */
@@ -271,6 +269,11 @@
       startFetch();
     }
   }
+
+  document.addEventListener('usa-travel:prefs', function (e) {
+    var type = e && e.detail && e.detail.type;
+    if (type === 'lang' || type === 'units') paintDestWeather();
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);

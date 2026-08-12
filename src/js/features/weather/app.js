@@ -231,35 +231,16 @@
     return lang() === 'zh' ? 'zh-CN' : lang() === 'ja' ? 'ja-JP' : lang() === 'es' ? 'es-ES' : 'en-US';
   }
   function useF() {
-    // Always live: Auto re-resolves system locale/TZ every call (never stale let)
-    try {
-      if (typeof window.getEffectiveTempUnit === 'function') {
-        return window.getEffectiveTempUnit() === 'f';
-      }
-    } catch (e) { /* fall through */ }
-    try {
-      var attr = document.documentElement.getAttribute('data-temp-unit');
-      if (attr === 'f' || attr === 'c') return attr === 'f';
-    } catch (eAttr) { /* fall through */ }
-    try {
-      if (typeof window.currentTempUnit === 'string') return window.currentTempUnit === 'f';
-    } catch (e2) { /* fall through */ }
-    return typeof currentTempUnit === 'undefined' || currentTempUnit === 'f';
+    if (typeof window.getEffectiveTempUnit === 'function') {
+      return window.getEffectiveTempUnit() === 'f';
+    }
+    return document.documentElement.getAttribute('data-temp-unit') === 'f';
   }
   function useMi() {
-    try {
-      if (typeof window.getEffectiveDistUnit === 'function') {
-        return window.getEffectiveDistUnit() === 'mi';
-      }
-    } catch (e) { /* fall through */ }
-    try {
-      var attr = document.documentElement.getAttribute('data-dist-unit');
-      if (attr === 'mi' || attr === 'km') return attr === 'mi';
-    } catch (eAttr) { /* fall through */ }
-    try {
-      if (typeof window.currentDistUnit === 'string') return window.currentDistUnit === 'mi';
-    } catch (e2) { /* fall through */ }
-    return typeof currentDistUnit === 'undefined' || currentDistUnit === 'mi';
+    if (typeof window.getEffectiveDistUnit === 'function') {
+      return window.getEffectiveDistUnit() === 'mi';
+    }
+    return document.documentElement.getAttribute('data-dist-unit') !== 'km';
   }
   function motionLevel() {
     try {
@@ -618,6 +599,9 @@
   }
 
   function fmtTemp(c) {
+    if (window.USATravel && typeof window.USATravel.formatTempFromC === 'function') {
+      return window.USATravel.formatTempFromC(c, { unit: useF() ? 'f' : 'c' });
+    }
     if (c == null || Number.isNaN(c)) return '—';
     if (useF()) return Math.round(c * 9 / 5 + 32) + '°';
     return Math.round(c) + '°';
@@ -3036,6 +3020,12 @@
     clearTimeout(nameFetchTimer);
     nameFetchTimer = setTimeout(function () { ensureLocalizedMajorNames(); }, 200);
   };
+
+  document.addEventListener('usa-travel:prefs', function (e) {
+    var type = e && e.detail && e.detail.type;
+    if (!type) return;
+    window.refreshWeatherUi({ force: type === 'units' });
+  });
 
   // After list unlock, apply any deferred unit/lang repaint
   (function watchPendingUiRefresh() {

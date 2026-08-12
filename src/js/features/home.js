@@ -814,6 +814,50 @@ document.querySelectorAll('[data-modal]').forEach(el => {
     if (d) { currentModalKey = key; openModal(d.tag, d.title, d.body); }
   });
 });
+let funFactIndex = 0;
+let funFactAnimating = false;
+
+function getFunFactsList() {
+  const list = FUN_FACTS[currentLang] || FUN_FACTS.en;
+  return (list && list.length) ? list : FUN_FACTS.en;
+}
+
+function pickShuffledFunFactIndex() {
+  const n = getFunFactsList().length;
+  if (n <= 1) return 0;
+  let next = Math.floor(Math.random() * n);
+  if (next === funFactIndex) next = (next + 1) % n;
+  return next;
+}
+
+function refreshFunFact(animate) {
+  const textEl = document.getElementById('funFactText');
+  if (!textEl) return;
+  const facts = getFunFactsList();
+  if (funFactIndex < 0 || funFactIndex >= facts.length) funFactIndex = 0;
+  const apply = () => {
+    textEl.textContent = facts[funFactIndex];
+    textEl.classList.remove('is-swapping');
+    textEl.classList.add('is-visible');
+    const wrap = textEl.closest('.fun-fact-text-wrap');
+    if (wrap) wrap.scrollTop = 0;
+    funFactAnimating = false;
+  };
+  if (animate && typeof motionIsOff === 'function' && !motionIsOff()) {
+    funFactAnimating = true;
+    textEl.classList.remove('is-visible');
+    textEl.classList.add('is-swapping');
+    setTimeout(apply, (typeof motionIsReduced === 'function' && motionIsReduced()) ? 140 : 200);
+  } else {
+    apply();
+  }
+}
+
+function shuffleFunFact(animate) {
+  funFactIndex = pickShuffledFunFactIndex();
+  refreshFunFact(!!animate);
+}
+
 function initFunFacts() {
   const textEl = document.getElementById('funFactText');
   if (!textEl) return;
@@ -828,3 +872,14 @@ function initFunFacts() {
     });
   }
 }
+
+document.addEventListener('usa-travel:prefs', function (e) {
+  const type = e && e.detail && e.detail.type;
+  if (type !== 'lang') return;
+  if (currentModalKey && typeof getModalData === 'function' && typeof openModal === 'function') {
+    const d = getModalData(currentModalKey);
+    if (d) openModal(d.tag, d.title, d.body);
+  }
+  if (typeof refreshFunFact === 'function') refreshFunFact();
+  if (typeof window.syncDestFilterUi === 'function') window.syncDestFilterUi();
+});

@@ -1,0 +1,40 @@
+<!-- First paint: Appearance × Style. Must match resolveThemeFromAppearanceStyle in runtime.js.
+     Light+Classic=elegant · Light+Modern=minimal · Dark+Classic=default · Dark+Modern=glass.
+     System follows prefers-color-scheme. User motion Full always wins over OS reduce. -->
+<script>
+(function () {
+  try {
+    var VALID = ['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'];
+    function isOsLight() {
+      return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+    }
+    function resolveTheme(appearance, style) {
+      var light = appearance === 'system' ? isOsLight() : appearance === 'light';
+      return light ? (style === 'classic' ? 'elegant' : 'minimal') : (style === 'classic' ? 'default' : 'glass');
+    }
+    var appearance = localStorage.getItem('usa-travel-appearance');
+    var style = localStorage.getItem('usa-travel-style');
+    if (style !== 'classic' && style !== 'modern') style = 'modern';
+    var t = null;
+    if (appearance === 'system' || appearance === 'light' || appearance === 'dark') {
+      t = resolveTheme(appearance, style);
+    } else {
+      t = localStorage.getItem('usa-travel-theme');
+      if (t === 'auto' || !t) t = resolveTheme('system', style);
+    }
+    if (VALID.indexOf(t) < 0) t = 'default';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.style.colorScheme = (t === 'minimal' || t === 'elegant') ? 'light' : 'dark';
+
+    var m = localStorage.getItem('usa-travel-motion');
+    if (!m && localStorage.getItem('usa-travel-reduce-motion') === 'on') m = 'reduced';
+    if (m !== 'full' && m !== 'reduced' && m !== 'off') m = null;
+    var osReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (m) document.documentElement.setAttribute('data-motion', m);
+    var eff = m === 'off' ? 'off' : (m === 'full' ? 'full' : (m === 'reduced' ? 'reduced' : (osReduce ? 'reduced' : null)));
+    if (eff) document.documentElement.setAttribute('data-motion-effective', eff);
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'default');
+  }
+})();
+</script>

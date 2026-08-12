@@ -132,49 +132,11 @@ if (legalLangSwitch) {
 
 
 
-let funFactIndex = 0;
-let funFactAnimating = false;
-
-function getFunFactsList() {
-  const list = FUN_FACTS[currentLang] || FUN_FACTS.en;
-  return (list && list.length) ? list : FUN_FACTS.en;
-}
-
-/** Pick a random fact index, never the same as the current one when possible. */
-function pickShuffledFunFactIndex() {
-  const n = getFunFactsList().length;
-  if (n <= 1) return 0;
-  let next = Math.floor(Math.random() * n);
-  if (next === funFactIndex) next = (next + 1) % n;
-  return next;
-}
-
-function refreshFunFact(animate) {
-  const textEl = document.getElementById('funFactText');
-  if (!textEl) return;
-  const facts = getFunFactsList();
-  if (funFactIndex < 0 || funFactIndex >= facts.length) funFactIndex = 0;
-  const apply = () => {
-    textEl.textContent = facts[funFactIndex];
-    textEl.classList.remove('is-swapping');
-    textEl.classList.add('is-visible');
-    // Reset scroll so long→short transitions always start at the top of the fixed box
-    const wrap = textEl.closest('.fun-fact-text-wrap');
-    if (wrap) wrap.scrollTop = 0;
-    funFactAnimating = false;
-  };
-  // Full + reduced: short fade; off: instant swap
-  if (animate && !motionIsOff()) {
-    funFactAnimating = true;
-    textEl.classList.remove('is-visible');
-    textEl.classList.add('is-swapping');
-    setTimeout(apply, motionIsReduced() ? 140 : 200);
-  } else {
-    apply();
-  }
-}
-
-function shuffleFunFact(animate) {
-  funFactIndex = pickShuffledFunFactIndex();
-  refreshFunFact(!!animate);
-}
+document.addEventListener('usa-travel:prefs', function (e) {
+  const type = e && e.detail && e.detail.type;
+  if (type !== 'lang') return;
+  if (!document.body.classList.contains('page-legal')) return;
+  const lang = (e.detail && e.detail.lang) || currentLang;
+  if (typeof renderLegalPage === 'function') renderLegalPage(lang, { scrollTop: false });
+  if (typeof updateLegalLangSwitch === 'function') updateLegalLangSwitch(lang);
+});

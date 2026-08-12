@@ -8,7 +8,9 @@ const { build } = require('./build-legal');
 
 const ROOT = path.resolve(__dirname, '..');
 const LEGAL_DIR = path.join(ROOT, 'docs', 'legal');
+const PARTIALS_DIR = path.join(ROOT, 'docs', 'partials');
 const PORT = process.env.PORT || '8000';
+const { build: buildPartials } = require('./build-partials');
 
 function rebuild(reason) {
   try {
@@ -19,7 +21,17 @@ function rebuild(reason) {
   }
 }
 
+function rebuildPartials(reason) {
+  try {
+    buildPartials();
+    if (reason) console.log('[dev-serve] partials rebuilt (' + reason + ')');
+  } catch (e) {
+    console.error('[dev-serve] partials build failed:', e && e.message ? e.message : e);
+  }
+}
+
 rebuild('startup');
+rebuildPartials('startup');
 
 let debounce = null;
 function onLegalChange(fname) {
@@ -41,6 +53,19 @@ try {
     } catch (err) { /* ignore */ }
   }
   console.log('[dev-serve] watching docs/legal language folders');
+}
+
+let partialsDebounce = null;
+function onPartialsChange(fname) {
+  if (fname && !/\.html$/i.test(String(fname))) return;
+  if (partialsDebounce) clearTimeout(partialsDebounce);
+  partialsDebounce = setTimeout(() => rebuildPartials(fname || 'watch'), 120);
+}
+try {
+  fs.watch(PARTIALS_DIR, (_eventType, filename) => onPartialsChange(filename));
+  console.log('[dev-serve] watching docs/partials');
+} catch (e) {
+  console.warn('[dev-serve] could not watch docs/partials');
 }
 
 const child = spawn('python3', ['-m', 'http.server', String(PORT)], {

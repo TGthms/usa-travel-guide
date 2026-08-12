@@ -75,6 +75,13 @@ function getI18nDict(lang) {
 // home.js loads later or is omitted on mini-app pages.
 var currentModalKey = null;
 
+function dispatchPrefs(type, extra) {
+  try {
+    const detail = Object.assign({ type: type }, extra || {});
+    document.dispatchEvent(new CustomEvent('usa-travel:prefs', { detail: detail }));
+  } catch (e) { /* ignore */ }
+}
+
 function applyLanguage(lang) {
   const dict = getI18nDict(lang);
   i18nEls.forEach(el => {
@@ -102,126 +109,8 @@ function applyLanguage(lang) {
   });
   document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : lang === 'es' ? 'es' : 'en');
   document.documentElement.setAttribute('data-lang', lang);
-  // Keep page-specific titles (gallery / tools mini-apps / legal vs main guide).
-  const onGallery = document.body.classList.contains('page-gallery');
-  const onTools = document.body.classList.contains('page-tools');
-  const onLegal = document.body.classList.contains('page-legal');
-  const toolKind = (function () {
-    const el = document.querySelector('[data-tool]');
-    if (el) return el.getAttribute('data-tool') || '';
-    const path = (location.pathname || '') + (location.href || '');
-    if (/tools-weather/i.test(path)) return 'weather';
-    if (/tools-currency/i.test(path)) return 'currency';
-    if (/tools-clock/i.test(path)) return 'clock';
-    if (/tools-tip|tip-tax/i.test(path)) return 'tip';
-    if (/tools-drive/i.test(path)) return 'drive';
-    if (/tools-emergency/i.test(path)) return 'emergency';
-    if (/tools\.html/i.test(path)) return 'hub';
-    return '';
-  })();
-  const legalKind = onLegal
-    ? (location.pathname.indexOf('terms') >= 0 || /terms\.html$/i.test(location.href) ? 'terms' : 'privacy')
-    : null;
-  const toolTitles = {
-    weather: {
-      en: 'Weather — America, A Travel Guide',
-      es: 'Clima — América, Una Guía de Viaje',
-      zh: '天气 — 美国旅行指南',
-      ja: '天気 — アメリカ旅行ガイド'
-    },
-    currency: {
-      en: 'Currency — America, A Travel Guide',
-      es: 'Divisas — América, Una Guía de Viaje',
-      zh: '汇率 — 美国旅行指南',
-      ja: '通貨 — アメリカ旅行ガイド'
-    },
-    clock: {
-      en: 'World Clock — America, A Travel Guide',
-      es: 'Reloj mundial — América, Una Guía de Viaje',
-      zh: '世界时钟 — 美国旅行指南',
-      ja: '世界時計 — アメリカ旅行ガイド'
-    },
-    tip: {
-      en: 'Tip & Sales Tax — America, A Travel Guide',
-      es: 'Propina e impuestos — América, Una Guía de Viaje',
-      zh: '小费与税 — 美国旅行指南',
-      ja: 'チップと税 — アメリカ旅行ガイド'
-    },
-    drive: {
-      en: 'Road Trip Cost — America, A Travel Guide',
-      es: 'Coste de viaje — América, Una Guía de Viaje',
-      zh: '自驾费用 — 美国旅行指南',
-      ja: 'ロードトリップ費用 — アメリカ旅行ガイド'
-    },
-    emergency: {
-      en: 'Useful Numbers — America, A Travel Guide',
-      es: 'Números útiles — América, Una Guía de Viaje',
-      zh: '常用电话 — 美国旅行指南',
-      ja: '緊急連絡先 — アメリカ旅行ガイド'
-    },
-    hub: {
-      en: 'Travel Tools — America, A Travel Guide',
-      es: 'Herramientas — América, Una Guía de Viaje',
-      zh: '旅行工具 — 美国旅行指南',
-      ja: '旅行ツール — アメリカ旅行ガイド'
-    }
-  };
-  const titles = onGallery
-    ? {
-        en: 'Photo Gallery — America, A Travel Guide',
-        es: 'Galería — América, Una Guía de Viaje',
-        zh: '相册 — 美国旅行指南',
-        ja: 'ギャラリー — アメリカ旅行ガイド'
-      }
-    : (onTools && toolTitles[toolKind || 'hub'])
-    ? toolTitles[toolKind || 'hub']
-    : legalKind === 'terms'
-    ? {
-        en: 'Terms of Use — America, A Travel Guide',
-        es: 'Términos de uso — América, Una Guía de Viaje',
-        zh: '使用条款 — 美国旅行指南',
-        ja: '利用規約 — アメリカ旅行ガイド'
-      }
-    : legalKind === 'privacy'
-    ? {
-        en: 'Privacy Policy — America, A Travel Guide',
-        es: 'Política de privacidad — América, Una Guía de Viaje',
-        zh: '隐私政策 — 美国旅行指南',
-        ja: 'プライバシーポリシー — アメリカ旅行ガイド'
-      }
-    : {
-        en: 'America — A Travel Guide',
-        es: 'América — Una Guía de Viaje',
-        zh: '美国 — 旅行指南',
-        ja: 'アメリカ — 旅行ガイド'
-      };
-  document.title = titles[lang] || titles.en;
-  applyUnits(); // re-stamp unit spans that may have been inside translated HTML
-  // Language switch: re-render copy but keep scroll position
-  if (typeof renderLegalPage === 'function') renderLegalPage(lang, { scrollTop: false });
-  if (typeof updateLegalLangSwitch === 'function') updateLegalLangSwitch(lang);
-  if (currentModalKey && typeof getModalData === 'function' && typeof openModal === 'function') {
-    const d = getModalData(currentModalKey);
-    if (d) openModal(d.tag, d.title, d.body);
-  }
-  // Refresh live-generated tools text when language changes (tools page).
-  if (document.body.classList.contains('page-tools') || document.getElementById('currencyAmount')) {
-    // refreshToolsLive is defined later in this file (function-hoisted).
-    if (typeof populateStateSelect === 'function') populateStateSelect();
-    if (typeof refreshToolsLive === 'function') refreshToolsLive();
-  }
-  // Gallery chrome (placeholders / open lightbox) — function is declared later and hoisted.
-  if (typeof refreshGalleryLanguageChrome === 'function') refreshGalleryLanguageChrome();
-  if (typeof refreshFunFact === 'function') refreshFunFact();
-  if (typeof window.refreshWeatherUi === 'function') window.refreshWeatherUi();
-  // Dest filter empty-state key can change at runtime (Saved vs region). Re-sync so
-  // English restore doesn't snap back to the original region empty message.
-  if (typeof window.syncDestFilterUi === 'function') window.syncDestFilterUi();
-  // Contextual Back label/href is rewritten by nav-return; EN snapshot restore
-  // would wipe it unless we re-apply after language paint.
-  if (window.__usaTravelNavReturn && typeof window.__usaTravelNavReturn.apply === 'function') {
-    window.__usaTravelNavReturn.apply();
-  }
+  applyUnits(); // unit spans may sit inside translated HTML
+  dispatchPrefs('lang', { lang: lang });
 }
 
 /* ── UNIT CONVERSION ENGINE ──
@@ -263,10 +152,7 @@ function applyUnits() {
   // Road-trip tool: unit-aware labels + math.
   if (typeof updateDriveUnitLabels === 'function') updateDriveUnitLabels();
   if (typeof updateDriveCost === 'function') updateDriveCost();
-  // Homepage destination weather chips (temp unit + language labels)
-  if (typeof window.paintDestWeather === 'function') {
-    try { window.paintDestWeather(); } catch (e) { /* ignore */ }
-  }
+  dispatchPrefs('units', { temp: tempU, dist: distU });
 }
 
 /* ── SAFE STORAGE ──
@@ -353,18 +239,15 @@ function detectTheme() {
 
 /**
  * Units auto-detect priority (highest → lowest):
- *   1. Explicit region in system locales (en-US, zh-CN) — never invent US from bare "en"
- *   2. System time zone → country (Asia/Shanghai → CN, Europe/London → GB, …)
- *   3. UI language fallback only if system gives nothing
+ *   1. OS Language & Region prefs the engine exposes
+ *      (temperature unit + measurement system — independent, like macOS)
+ *   2. Explicit region in system locales (en-US, zh-CN) — never invent US from bare "en"
+ *   3. System time zone → country
+ *   4. Metric, if nothing else is known
  *
  * BUG FIX: Intl.Locale('en').maximize() becomes en-Latn-US on many engines, which
  * wrongly forced °F for every English speaker. We never maximize bare language tags.
  */
-const IMPERIAL_REGIONS = new Set([
-  'US', 'LR', 'MM',
-  'BS', 'BZ', 'KY', 'PW', 'FM', 'MH', 'GU', 'AS', 'MP', 'VI', 'PR'
-]);
-
 /** Common IANA zones → ISO 3166-1 alpha-2 (enough for units). */
 const TZ_TO_REGION = {
   'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US',
@@ -398,11 +281,8 @@ const TZ_TO_REGION = {
 };
 
 function detectUnitsForLang(lang) {
-  const L = String(lang || 'en').toLowerCase();
-  if (L === 'zh' || L === 'ja') return { temp: 'c', dist: 'km' };
-  // Bare EN/ES without system region: prefer metric for travelers (safer default
-  // than forcing US). US still wins via region/timezone above.
-  if (L === 'es') return { temp: 'c', dist: 'km' };
+  // Language alone never implies US customary — only region / timezone do.
+  void lang;
   return { temp: 'c', dist: 'km' };
 }
 
@@ -439,7 +319,6 @@ function regionFromLocaleTag(raw) {
       if (L.region && String(L.region).length === 2) return String(L.region).toUpperCase();
       // Only maximize when script is present but region missing (e.g. zh-Hans)
       const parts = tag.split('-');
-      const hasLikelyRegion = parts.some(function (p) { return /^[A-Za-z]{2}$/.test(p) && p.length === 2 && p === p.toUpperCase(); });
       if (!L.region && parts.length >= 2 && typeof L.maximize === 'function') {
         // zh-Hans → CN is OK; bare en already returned above without region
         if (parts[0].toLowerCase() !== 'en' && parts[0].toLowerCase() !== 'es') {
@@ -449,7 +328,6 @@ function regionFromLocaleTag(raw) {
           }
         }
       }
-      void hasLikelyRegion;
     }
   } catch (_) { /* fall through */ }
   // Explicit region subtag: en-US, zh-CN, pt-BR (not en-Latn)
@@ -523,60 +401,179 @@ function unitsFromRegion(region) {
   };
 }
 
-/**
- * Optional: engines that expose measurement systems on Intl.Locale
- * (not universal — always fall through if missing).
- */
-function detectUnitsFromMeasurementSystem() {
+function normalizeMeasurementSystem(raw) {
+  const s = String(raw || '').toLowerCase().replace(/[_-\s]/g, '');
+  if (!s) return '';
+  if (s === 'metric' || s === 'si' || s === 'internationalsystem') return 'metric';
+  if (s === 'ussystem' || s === 'us' || s === 'imperial' || s === 'usc') return 'ussystem';
+  if (s === 'uksystem' || s === 'uk' || s === 'imperialuk') return 'uksystem';
+  return '';
+}
+
+function normalizeTempUnit(raw) {
+  const s = String(raw || '').toLowerCase();
+  if (!s) return '';
+  if (s === 'c' || s === 'celsius' || s === 'centigrade' || s === '°c' || s.indexOf('celsius') >= 0) return 'c';
+  if (s === 'f' || s === 'fahrenheit' || s === '°f' || s.indexOf('fahrenheit') >= 0) return 'f';
+  return '';
+}
+
+/** Resolved OS locale first — may include -u-ms-metric when the user overrode the region default. */
+function defaultOsLocaleTag() {
   try {
-    const locales = collectSystemLocales();
-    for (let i = 0; i < locales.length; i++) {
-      const tag = locales[i];
-      if (!tag || typeof Intl === 'undefined' || typeof Intl.Locale !== 'function') continue;
-      const L = new Intl.Locale(tag);
-      // Some engines expose getMeasurementSystems / measurementSystems
-      let systems = null;
-      if (typeof L.getMeasurementSystems === 'function') {
-        systems = L.getMeasurementSystems();
-      } else if (L.measurementSystems) {
-        systems = L.measurementSystems;
-      }
-      if (!systems || !systems.length) continue;
-      const primary = String(systems[0] || '').toLowerCase();
-      if (primary === 'ussystem' || primary === 'us' || primary === 'imperial') {
-        return { temp: 'f', dist: 'mi', source: 'measurement:' + tag };
-      }
-      if (primary === 'metric' || primary === 'si') {
-        return { temp: 'c', dist: 'km', source: 'measurement:' + tag };
-      }
+    const tag = Intl.DateTimeFormat().resolvedOptions().locale;
+    if (tag) return String(tag).replace(/_/g, '-');
+  } catch (_) { /* ignore */ }
+  try {
+    const tag = new Intl.NumberFormat().resolvedOptions().locale;
+    if (tag) return String(tag).replace(/_/g, '-');
+  } catch (_) { /* ignore */ }
+  return '';
+}
+
+function measurementFromLocaleTag(tag) {
+  if (!tag) return '';
+  const m = String(tag).match(/-u-(?:[a-z0-9-]+-)*ms-([a-z0-9]+)/i);
+  return m ? normalizeMeasurementSystem(m[1]) : '';
+}
+
+function measurementFromLocaleObject(L) {
+  if (!L) return '';
+  try {
+    let systems = null;
+    if (typeof L.getMeasurementSystems === 'function') systems = L.getMeasurementSystems();
+    else if (L.measurementSystems) systems = L.measurementSystems;
+    else if (L.measurementSystem) systems = [L.measurementSystem];
+    if (!systems) return '';
+    const first = Array.isArray(systems) ? systems[0] : systems;
+    return normalizeMeasurementSystem(first);
+  } catch (_) {
+    return '';
+  }
+}
+
+function temperatureFromLocaleObject(L) {
+  if (!L) return '';
+  const tryVal = function (v) {
+    if (v == null) return '';
+    if (Array.isArray(v)) return normalizeTempUnit(v[0]);
+    return normalizeTempUnit(v);
+  };
+  try {
+    if (typeof L.getTemperatureUnits === 'function') {
+      const t = tryVal(L.getTemperatureUnits());
+      if (t) return t;
     }
   } catch (_) { /* ignore */ }
-  return null;
+  try {
+    if (typeof L.getTemperatureUnit === 'function') {
+      const t = tryVal(L.getTemperatureUnit());
+      if (t) return t;
+    }
+  } catch (_) { /* ignore */ }
+  try {
+    const t = tryVal(L.temperatureUnits) || tryVal(L.temperatureUnit);
+    if (t) return t;
+  } catch (_) { /* ignore */ }
+  return '';
+}
+
+/**
+ * Read Language & Region–style prefs the engine exposes.
+ * Temperature and measurement system are independent (US + Metric + °C is valid).
+ */
+function detectOsUnitSettings() {
+  const out = { temp: '', dist: '', measurement: '', source: '' };
+  const tags = [];
+  const resolved = defaultOsLocaleTag();
+  if (resolved) tags.push(resolved);
+  const more = collectSystemLocales();
+  for (let i = 0; i < more.length; i++) {
+    if (tags.indexOf(more[i]) < 0) tags.push(more[i]);
+  }
+
+  for (let i = 0; i < tags.length; i++) {
+    const tag = tags[i];
+    if (!out.measurement) {
+      const fromExt = measurementFromLocaleTag(tag);
+      if (fromExt) {
+        out.measurement = fromExt;
+        out.source = 'os-ms:' + tag;
+      }
+    }
+    if (!out.measurement || !out.temp) {
+      if (typeof Intl === 'undefined' || typeof Intl.Locale !== 'function') continue;
+      try {
+        const L = new Intl.Locale(tag);
+        if (!out.measurement) {
+          const ms = measurementFromLocaleObject(L);
+          if (ms) {
+            out.measurement = ms;
+            out.source = out.source || ('os-ms:' + tag);
+          }
+        }
+        if (!out.temp) {
+          const tu = temperatureFromLocaleObject(L);
+          if (tu) {
+            out.temp = tu;
+            out.source = out.source ? out.source + '+temp' : ('os-temp:' + tag);
+          }
+        }
+      } catch (_) { /* next tag */ }
+    }
+    if (out.measurement && out.temp) break;
+  }
+
+  if (out.measurement === 'metric') {
+    if (!out.dist) out.dist = 'km';
+    if (!out.temp) out.temp = 'c';
+  } else if (out.measurement === 'ussystem') {
+    if (!out.dist) out.dist = 'mi';
+    if (!out.temp) out.temp = 'f';
+  } else if (out.measurement === 'uksystem') {
+    if (!out.dist) out.dist = 'mi';
+    if (!out.temp) out.temp = 'c';
+  }
+
+  return out;
 }
 
 function detectUnits() {
-  // 0) Explicit measurement system when the engine reports it
-  const fromMs = detectUnitsFromMeasurementSystem();
-  if (fromMs) return fromMs;
+  const os = detectOsUnitSettings();
+  let temp = os.temp;
+  let dist = os.dist;
+  if (temp && dist) {
+    return { temp: temp, dist: dist, source: os.source || 'os', measurement: os.measurement };
+  }
 
-  // 1) Explicit system locale region (en-US, zh-CN, …)
   const region = detectSystemRegion();
   const fromRegion = unitsFromRegion(region);
-  if (fromRegion) return fromRegion;
+  if (fromRegion) {
+    return {
+      temp: temp || fromRegion.temp,
+      dist: dist || fromRegion.dist,
+      source: (temp || dist) ? (os.source + '+' + fromRegion.source) : fromRegion.source,
+      measurement: os.measurement
+    };
+  }
 
-  // 2) Time zone → country
   const tzRegion = detectRegionFromTimeZone();
   const fromTz = unitsFromRegion(tzRegion);
-  if (fromTz) return fromTz;
+  if (fromTz) {
+    return {
+      temp: temp || fromTz.temp,
+      dist: dist || fromTz.dist,
+      source: (temp || dist) ? (os.source + '+' + fromTz.source) : fromTz.source,
+      measurement: os.measurement
+    };
+  }
 
-  // 3) UI language only as last resort (metric-leaning for bare en)
-  let lang = 'en';
-  try {
-    if (typeof currentLang === 'string' && currentLang) lang = currentLang;
-    else lang = detectLanguage();
-  } catch (_) { /* ignore */ }
-  const byLang = detectUnitsForLang(lang);
-  return { temp: byLang.temp, dist: byLang.dist, source: 'lang:' + lang };
+  return {
+    temp: temp || 'c',
+    dist: dist || 'km',
+    source: os.source || 'default:metric',
+    measurement: os.measurement
+  };
 }
 
 /** Default animation level: OS “reduce motion” → reduced; constrained → off. */
@@ -727,7 +724,9 @@ window.__usaTravelUnits = function () {
     effectiveDist: currentDistUnit,
     detected: d,
     resolved: r,
+    os: detectOsUnitSettings(),
     locales: collectSystemLocales(),
+    resolvedLocale: defaultOsLocaleTag(),
     region: detectSystemRegion(),
     tzRegion: detectRegionFromTimeZone(),
     timeZone: (function () {
@@ -773,17 +772,12 @@ function recomputeAutoPrefs({ paint = true } = {}) {
     if (typeof window.syncHeroBackground === 'function') {
       try { window.syncHeroBackground(); } catch (e) {}
     }
-    if (typeof window.refreshWeatherUi === 'function') {
-      try { window.refreshWeatherUi(); } catch (e) {}
-    }
+    dispatchPrefs('theme', { theme: currentTheme });
   }
   if (unitsChanged || (prefTempUnit === 'auto' || prefDistUnit === 'auto')) {
     syncUnitGlobals();
     updateUnitUI();
     if (typeof applyUnits === 'function') applyUnits();
-    if (unitsChanged && typeof window.refreshWeatherUi === 'function') {
-      try { window.refreshWeatherUi({ force: true }); } catch (e) {}
-    }
   }
   return { themeChanged, unitsChanged };
 }
@@ -830,9 +824,7 @@ function applyMotionModeToDom() {
   document.documentElement.setAttribute('data-motion-effective', effective);
   // Legacy flag: only fully-off matches the old hard cut
   document.documentElement.setAttribute('data-reduce-motion', effective === 'off' ? 'true' : 'false');
-  if (typeof window.refreshWeatherUi === 'function') {
-    try { window.refreshWeatherUi(); } catch (e) {}
-  }
+  dispatchPrefs('motion', { motion: effective });
 }
 
 applyMotionModeToDom();
@@ -895,9 +887,7 @@ function applyAppearanceStyle({ persist = false } = {}) {
   if (typeof window.syncHeroBackground === 'function') {
     try { window.syncHeroBackground(); } catch (e) {}
   }
-  if (typeof window.refreshWeatherUi === 'function') {
-    try { window.refreshWeatherUi(); } catch (e) {}
-  }
+  dispatchPrefs('theme', { theme: currentTheme });
 }
 
 /** @deprecated name kept for any callers; maps to new appearance model */
@@ -985,10 +975,11 @@ function unitsResolvedHintText(resolved) {
   const distLab = r.dist === 'mi'
     ? (currentLang === 'zh' ? '英里' : currentLang === 'ja' ? 'マイル' : currentLang === 'es' ? 'millas' : 'mi')
     : (currentLang === 'zh' ? '公里' : currentLang === 'ja' ? 'km' : currentLang === 'es' ? 'km' : 'km');
-  if (currentLang === 'zh') return '当前：' + tempLab + ' · ' + distLab;
-  if (currentLang === 'ja') return '現在：' + tempLab + ' · ' + distLab;
-  if (currentLang === 'es') return 'Ahora: ' + tempLab + ' · ' + distLab;
-  return 'Using ' + tempLab + ' · ' + distLab;
+  const fromOs = r.source && String(r.source).indexOf('os-') === 0;
+  if (currentLang === 'zh') return (fromOs ? '设备：' : '当前：') + tempLab + ' · ' + distLab;
+  if (currentLang === 'ja') return (fromOs ? 'デバイス：' : '現在：') + tempLab + ' · ' + distLab;
+  if (currentLang === 'es') return (fromOs ? 'Dispositivo: ' : 'Ahora: ') + tempLab + ' · ' + distLab;
+  return (fromOs ? 'Device: ' : 'Using ') + tempLab + ' · ' + distLab;
 }
 
 function ensureUnitsResolvedHintEl() {
@@ -1033,10 +1024,6 @@ function paintUnitsEverywhere() {
   const resolved = syncUnitGlobals();
   updateUnitUI();
   applyUnits();
-  // Weather must repaint even mid-load (force bypasses list lock)
-  if (typeof window.refreshWeatherUi === 'function') {
-    try { window.refreshWeatherUi({ force: true }); } catch (e) {}
-  }
   return resolved;
 }
 
@@ -1088,6 +1075,26 @@ updateUnitUI();
 applyUnits();
 updateUnitsResolvedHint();
 
+function formatTempFromC(celsius, opts) {
+  opts = opts || {};
+  if (celsius == null || Number.isNaN(Number(celsius))) return '—';
+  const getter = (typeof window.getEffectiveTempUnit === 'function') ? window.getEffectiveTempUnit : null;
+  const unit = opts.unit || (getter ? getter() : 'c');
+  let n = Number(celsius);
+  if (unit === 'f') n = n * 9 / 5 + 32;
+  return String(Math.round(n)) + '°';
+}
+
+function formatDistFromMi(miles, opts) {
+  opts = opts || {};
+  if (miles == null || Number.isNaN(Number(miles))) return '—';
+  const getter = (typeof window.getEffectiveDistUnit === 'function') ? window.getEffectiveDistUnit : null;
+  const unit = opts.unit || (getter ? getter() : 'km');
+  const loc = opts.locale || numberLocale();
+  const n = unit === 'km' ? Number(miles) * 1.60934 : Number(miles);
+  return Math.round(n).toLocaleString(loc);
+}
+
 /** Shared public namespace — prefer this over loose globals going forward. */
 window.USATravel = Object.assign(window.USATravel || {}, {
   getTempUnitPreference: window.getTempUnitPreference,
@@ -1096,8 +1103,11 @@ window.USATravel = Object.assign(window.USATravel || {}, {
   setDistUnitPreference: window.setDistUnitPreference,
   getEffectiveTempUnit: window.getEffectiveTempUnit,
   getEffectiveDistUnit: window.getEffectiveDistUnit,
+  formatTempFromC: formatTempFromC,
+  formatDistFromMi: formatDistFromMi,
   detectUnits: detectUnits,
   resolveUnitsFromPrefs: resolveUnitsFromPrefs,
+  dispatchPrefs: dispatchPrefs,
   debugUnits: window.__usaTravelUnits
 });
 

@@ -13,8 +13,6 @@ Classic (non-module) scripts loaded by `tools-weather.html` in this order:
 
 `app.js` creates deps (units, DOM, cache) and calls each factory. Do not load `app.js` alone.
 
-The root `features/weather.js` is a **shim** only (logs if modules were skipped).
-
 ## Editing
 
 - Sky visuals → `sky.js`

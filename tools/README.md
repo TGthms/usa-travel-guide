@@ -26,10 +26,17 @@ Paragraph with **bold**, *italic*, `code`, and [links](https://example.com).
 
 | Command | Behavior |
 |---|---|
-| `npm run serve` | Serve site; rebuild `legal-i18n.js` when legal sources change |
+| `npm run serve` | Serve site; rebuild legal + HTML partials when sources change |
 | `npm run build:legal` | One-shot rebuild → `src/js/data/legal-i18n.js` |
+| `npm run build:partials` | Inject `docs/partials/` into all HTML entrypoints |
 
-Commit both the `.md` sources and generated `legal-i18n.js`. Do not hand-edit `legal-i18n.js`. English is the legal source of meaning; es/zh/ja keep the same structure in natural voice.---
+Commit both the `.md` sources and generated `legal-i18n.js`. Do not hand-edit `legal-i18n.js`. English is the legal source of meaning; es/zh/ja keep the same structure in natural voice.
+
+## Shared HTML partials
+
+Settings dialog and first-paint theme script live in `docs/partials/` and are injected between `FIRST_PAINT_*` / `SETTINGS_*` markers on every page. Edit the partials, then `npm run build:partials` (or save while `npm run serve` is running). Do not hand-edit the generated regions.
+
+---
 
 # Gallery Manager
 

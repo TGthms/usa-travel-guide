@@ -9,7 +9,8 @@
     "serve:python": "python3 -m http.server 8000",
     "serve:node": "npx --yes serve -l 8000 .",
     "build:legal": "node tools/build-legal.js",
-    "pretest": "node tools/build-legal.js",
+    "build:partials": "node tools/build-partials.js",
+    "pretest": "node tools/build-legal.js && node tools/build-partials.js",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed"

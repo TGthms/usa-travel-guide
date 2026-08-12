@@ -605,4 +605,10 @@
     pop: popReturnOnBack,
     clear: clearReturn
   };
+
+  document.addEventListener('usa-travel:prefs', function (e) {
+    const type = e && e.detail && e.detail.type;
+    if (type !== 'lang') return;
+    applyReturnChrome();
+  });
 })();
