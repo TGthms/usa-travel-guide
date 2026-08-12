@@ -333,11 +333,13 @@
 
       async function loadForecasts(pt) {
         const p = pt.properties || {};
-        const forecast = await nwsFetchJson(p.forecast, signal);
-        const hourly = p.forecastHourly
-          ? await nwsFetchJson(p.forecastHourly, signal).catch(function () { return null; })
-          : null;
-        return { forecast: forecast, hourly: hourly, points: pt };
+        const pair = await Promise.all([
+          nwsFetchJson(p.forecast, signal),
+          p.forecastHourly
+            ? nwsFetchJson(p.forecastHourly, signal).catch(function () { return null; })
+            : Promise.resolve(null)
+        ]);
+        return { forecast: pair[0], hourly: pair[1], points: pt };
       }
 
       let result;
@@ -514,6 +516,160 @@
       return pack || { error: true, city: c, fetchedAt: Date.now() };
     }
 
+    var listAbortCtl = null;
+    function abortListLoads() {
+      if (listAbortCtl) {
+        try { listAbortCtl.abort(); } catch (e) {}
+        listAbortCtl = null;
+      }
+    }
+
+    async function loadCityBatchOm(cities, signal) {
+      if (!cities.length) return [];
+      const lats = cities.map(function (c) { return c.lat; }).join(',');
+      const lons = cities.map(function (c) { return c.lon; }).join(',');
+      const wUrl = FORECAST + '?latitude=' + lats + '&longitude=' + lons + '&' + FORECAST_Q;
+      const aUrl = AIR + '?latitude=' + lats + '&longitude=' + lons + '&current=us_aqi,pm2_5,pm10,european_aqi&timezone=auto';
+      const pair = await Promise.all([
+        fetchJson(wUrl, signal),
+        fetchJson(aUrl, signal).catch(function () { return null; })
+      ]);
+      const weatherRaw = pair[0];
+      const airRaw = pair[1];
+      const weatherList = Array.isArray(weatherRaw) ? weatherRaw : [weatherRaw];
+      const airList = airRaw == null ? [] : (Array.isArray(airRaw) ? airRaw : [airRaw]);
+      const now = Date.now();
+      return cities.map(function (c, i) {
+        const weather = weatherList[i];
+        if (!weather || !weather.current) {
+          return { error: true, city: c, fetchedAt: now };
+        }
+        return {
+          weather: weather,
+          air: airList[i] || null,
+          fetchedAt: now,
+          city: c,
+          source: 'open-meteo',
+          needsEnrich: false
+        };
+      });
+    }
+
+    async function loadMany(cities, opts) {
+      opts = opts || {};
+      const quiet = !!opts.quiet;
+      const forceFetch = !!opts.forceFetch;
+      const onProgress = typeof deps.onLoadProgress === 'function' ? deps.onLoadProgress : function () {};
+      function tMsg(key, fallback) {
+        return typeof deps.t === 'function' ? deps.t(key, fallback) : fallback;
+      }
+      abortListLoads();
+      listAbortCtl = typeof AbortController === 'function' ? new AbortController() : null;
+      const myCtl = listAbortCtl;
+      const signal = listAbortCtl ? listAbortCtl.signal : undefined;
+      const total = cities.length;
+      const out = new Array(total);
+      if (!quiet) onProgress(5, tMsg('weather.loadingForecasts', 'Loading forecasts…'));
+
+      const usIdx = [];
+      for (let i = 0; i < cities.length; i++) {
+        if (isLikelyUs(cities[i])) usIdx.push(i);
+      }
+
+      let done = 0;
+      function bump() {
+        done++;
+        if (signal && signal.aborted) return;
+        if (quiet) return;
+        const pct = 5 + Math.round((done / Math.max(1, total)) * 57);
+        onProgress(Math.min(62, pct), tMsg('weather.loadingForecasts', 'Loading forecasts…')
+          + ' (' + Math.min(done, total) + '/' + total + ')');
+      }
+
+      async function nwsWorker(queue) {
+        while (queue.length) {
+          if (signal && signal.aborted) return;
+          const idx = queue.shift();
+          try {
+            out[idx] = await loadCity(cities[idx], signal, { enrich: false, forceFetch: forceFetch });
+          } catch (e) {
+            if (e && e.name === 'AbortError') return;
+            out[idx] = { error: true, city: cities[idx], fetchedAt: Date.now() };
+          }
+          cache.set(cityKey(cities[idx]), out[idx]);
+          bump();
+        }
+      }
+
+      const usQueue = usIdx.slice();
+      await Promise.all([nwsWorker(usQueue), nwsWorker(usQueue), nwsWorker(usQueue)]);
+
+      const needOm = [];
+      for (let i = 0; i < cities.length; i++) {
+        if (!out[i] || out[i].error || !out[i].weather) needOm.push(i);
+      }
+      const omCities = needOm.map(function (i) { return cities[i]; });
+      if (omCities.length && !(signal && signal.aborted)) {
+        const CHUNK = 20;
+        try {
+          for (let start = 0; start < omCities.length; start += CHUNK) {
+            if (signal && signal.aborted) break;
+            const slice = omCities.slice(start, start + CHUNK);
+            const sliceIdx = needOm.slice(start, start + CHUNK);
+            let packs;
+            try {
+              packs = await loadCityBatchOm(slice, signal);
+            } catch (e) {
+              if (e && e.name === 'AbortError') throw e;
+              if (e && e.name === 'RateLimitError') {
+                await new Promise(function (r) { window.setTimeout(r, 900); });
+                packs = await loadCityBatchOm(slice, signal);
+              } else {
+                packs = [];
+                for (let j = 0; j < slice.length; j++) {
+                  packs.push(await loadOpenMeteoCity(slice[j], signal));
+                }
+              }
+            }
+            for (let j = 0; j < packs.length; j++) {
+              const idx = sliceIdx[j];
+              if (out[idx] && out[idx].weather && !out[idx].error) continue;
+              out[idx] = packs[j];
+              cache.set(cityKey(cities[idx]), packs[j]);
+              bump();
+            }
+          }
+        } catch (e) {
+          if (e && e.name === 'AbortError') throw e;
+          for (let k = 0; k < needOm.length; k++) {
+            const idx = needOm[k];
+            if (out[idx] && out[idx].weather) continue;
+            out[idx] = { error: true, city: cities[idx], fetchedAt: Date.now() };
+            cache.set(cityKey(cities[idx]), out[idx]);
+            bump();
+          }
+        }
+      }
+
+      for (let i = 0; i < total; i++) {
+        if (!out[i]) {
+          out[i] = { error: true, city: cities[i], fetchedAt: Date.now() };
+          cache.set(cityKey(cities[i]), out[i]);
+        }
+      }
+
+      if (signal && signal.aborted) {
+        const err = new Error('Aborted');
+        err.name = 'AbortError';
+        throw err;
+      }
+      if (myCtl && listAbortCtl !== myCtl) {
+        const err = new Error('Aborted');
+        err.name = 'AbortError';
+        throw err;
+      }
+      return out;
+    }
 
     return {
       withTimeoutSignal: withTimeoutSignal,
@@ -528,6 +684,9 @@
       loadOpenMeteoCity: loadOpenMeteoCity,
       enrichWithOpenMeteo: enrichWithOpenMeteo,
       loadCity: loadCity,
+      loadCityBatchOm: loadCityBatchOm,
+      loadMany: loadMany,
+      abortListLoads: abortListLoads,
       isLikelyUs: isLikelyUs
     };
   };

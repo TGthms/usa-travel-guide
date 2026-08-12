@@ -83,6 +83,10 @@
   }
   apply();
   window.__usaTravelLoadFonts = apply;
+  document.addEventListener('usa-travel:prefs', function (e) {
+    var type = e && e.detail && e.detail.type;
+    if (type === 'lang' || type === 'style') apply();
+  });
 })();
 </script>
 <noscript>

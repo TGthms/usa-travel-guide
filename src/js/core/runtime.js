@@ -55,8 +55,25 @@ function getI18nDict(lang) {
   } catch (_) {
     pack = null;
   }
-  if (!pack || !lang || lang === 'en') return null;
-  return pack[lang] || null;
+  if (!lang || lang === 'en') return null;
+  var base = pack && pack[lang] ? pack[lang] : null;
+  var extra = null;
+  try {
+    if (typeof window !== 'undefined' && window.GALLERY_I18N) extra = window.GALLERY_I18N[lang] || null;
+  } catch (_) {
+    extra = null;
+  }
+  if (!extra) return base;
+  if (!base) return extra;
+  var merged = {};
+  var k;
+  for (k in base) {
+    if (Object.prototype.hasOwnProperty.call(base, k)) merged[k] = base[k];
+  }
+  for (k in extra) {
+    if (Object.prototype.hasOwnProperty.call(extra, k)) merged[k] = extra[k];
+  }
+  return merged;
 }
 
 function dispatchPrefs(type, extra) {
@@ -95,9 +112,6 @@ function applyLanguage(lang) {
   document.documentElement.setAttribute('data-lang', lang);
   // Restamp unit labels (公里 / km) inside restored HTML without a units event.
   paintUnitSpans();
-  if (typeof window.__usaTravelLoadFonts === 'function') {
-    try { window.__usaTravelLoadFonts(); } catch (e) { /* ignore */ }
-  }
   dispatchPrefs('lang', { lang: lang });
 }
 
@@ -530,12 +544,12 @@ let currentTempUnit = _u0.temp;
 let currentDistUnit = _u0.dist;
 syncUnitGlobals();
 
-/** Live getters — weather and tools should use these so Auto always re-detects */
+/** Live getters — read the last synced values. Sync only from applyUnits / visibility. */
 window.getEffectiveTempUnit = function getEffectiveTempUnit() {
-  return syncUnitGlobals().temp;
+  return currentTempUnit;
 };
 window.getEffectiveDistUnit = function getEffectiveDistUnit() {
-  return syncUnitGlobals().dist;
+  return currentDistUnit;
 };
 
 /** Debug helper — open console: __usaTravelUnits() */
@@ -699,9 +713,6 @@ function applyAppearanceStyle({ persist = false } = {}) {
   document.documentElement.setAttribute('data-theme', currentTheme);
   applyThemeChrome(currentTheme);
   updateAppearanceStyleUI();
-  if (typeof window.__usaTravelLoadFonts === 'function') {
-    try { window.__usaTravelLoadFonts(); } catch (e) { /* ignore */ }
-  }
   dispatchPrefs('theme', { theme: currentTheme });
 }
 
@@ -719,6 +730,7 @@ stylePills.forEach(function (p) {
     if (v !== 'classic' && v !== 'modern') return;
     prefStyle = v;
     applyAppearanceStyle({ persist: true });
+    dispatchPrefs('style', { style: prefStyle });
   });
 });
 applyAppearanceStyle({ persist: false });
@@ -861,8 +873,7 @@ updateUnitsResolvedHint();
 function formatTempFromC(celsius, opts) {
   opts = opts || {};
   if (celsius == null || Number.isNaN(Number(celsius))) return '—';
-  const getter = (typeof window.getEffectiveTempUnit === 'function') ? window.getEffectiveTempUnit : null;
-  const unit = opts.unit || (getter ? getter() : 'c');
+  const unit = opts.unit || currentTempUnit || 'c';
   let n = Number(celsius);
   if (unit === 'f') n = n * 9 / 5 + 32;
   return String(Math.round(n)) + '°';
@@ -871,8 +882,7 @@ function formatTempFromC(celsius, opts) {
 function formatDistFromMi(miles, opts) {
   opts = opts || {};
   if (miles == null || Number.isNaN(Number(miles))) return '—';
-  const getter = (typeof window.getEffectiveDistUnit === 'function') ? window.getEffectiveDistUnit : null;
-  const unit = opts.unit || (getter ? getter() : 'km');
+  const unit = opts.unit || currentDistUnit || 'km';
   const loc = opts.locale || numberLocale();
   const n = unit === 'km' ? Number(miles) * 1.60934 : Number(miles);
   return Math.round(n).toLocaleString(loc);
@@ -962,10 +972,7 @@ galleryQualityPills.forEach(p => p.addEventListener('click', () => {
   galleryQuality = next;
   safeStorage.set('usa-travel-gallery-quality', galleryQuality);
   updateGalleryQualityUI();
-  // If lightbox is open, reload current photo at the new quality.
-  if (typeof showLightboxPhoto === 'function' && lightbox && lightbox.classList.contains('open')) {
-    try { showLightboxPhoto(currentIndex, { fromNav: true, force: true }); } catch (e) { /* ignore */ }
-  }
+  dispatchPrefs('gallery-quality', { quality: galleryQuality });
 }));
 updateGalleryQualityUI();
 
@@ -1430,9 +1437,9 @@ function ensureBodyScrollUnlocked() {
 
 function openSettings(trigger) {
   if (!settingsOverlay || settingsOverlay.classList.contains('open')) return;
-  // Don't open settings over an open lightbox — close it first so scroll lock stays sane.
-  if (typeof closeLightbox === 'function' && document.getElementById('lightbox')?.classList.contains('open')) {
-    closeLightbox();
+  // Don't open settings over an open lightbox — gallery.js closes on this event.
+  if (document.getElementById('lightbox') && document.getElementById('lightbox').classList.contains('open')) {
+    dispatchPrefs('gallery-close');
   }
   lastSettingsTrigger = trigger || document.activeElement;
   closeMobileNav();

@@ -675,7 +675,7 @@ function openModal(tag, title, body) {
     overlay.setAttribute('aria-hidden', 'false');
     lockBodyScroll();
   }
-  applyUnits();
+  if (typeof paintUnitSpans === 'function') paintUnitSpans();
 }
 function closeModal() {
   if (!overlay || !overlay.classList.contains('open')) return;

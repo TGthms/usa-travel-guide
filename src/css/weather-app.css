@@ -3162,29 +3162,6 @@ html[data-motion-effective="off"] body.page-tools:has(.weather-root) .wx-page-li
   margin: 2px 0;
 }
 
-/* Units: Auto takes full row (“major space”) */
-#unitTempGroup.units-row,
-#unitDistGroup.units-row {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  width: 100%;
-}
-#unitTempGroup .pill-btn[data-unit-val="auto"],
-#unitDistGroup .pill-btn[data-unit-val="auto"] {
-  grid-column: 1 / -1;
-  width: 100%;
-  justify-content: center;
-}
-
-/* Appearance / style pill rows */
-#appearancePillGroup,
-#stylePillGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 html[data-theme="glass"] .weather-page-sky {
   background: linear-gradient(165deg,
     var(--wx-page-1, #000) 0%,

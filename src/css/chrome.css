@@ -631,6 +631,25 @@ html[data-motion-effective="off"] .settings-panel {
   width: auto;
   white-space: nowrap;
 }
+#unitTempGroup.units-row,
+#unitDistGroup.units-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+#unitTempGroup .pill-btn[data-unit-val="auto"],
+#unitDistGroup .pill-btn[data-unit-val="auto"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  justify-content: center;
+}
+#appearancePillGroup,
+#stylePillGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
 /* Accessibility group spans the full grid width */
 .settings-group-wide { grid-column: 1 / -1; }

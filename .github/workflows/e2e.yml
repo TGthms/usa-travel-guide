@@ -1,4 +1,4 @@
-# Smoke E2E (Playwright) — does not gate Pages deploy
+# Smoke E2E (Playwright) — gates the GitHub Pages backup deploy (static.yml workflow_run)
 name: E2E smoke
 
 on:

@@ -38,53 +38,20 @@ document.addEventListener('usa-travel:prefs', function (e) {
 // I18N dictionary — this keeps the Tools panel fully localized instead of
 // silently staying in English when another language is selected.
 const TOOLS_TEXT = {
-  en: { sameCurrency: 'Same currency selected.', updating: 'Updating...', fetching: 'Fetching latest available daily rate.', rateUnavailable: 'Rate unavailable', checkConnection: 'Check your connection and try again.', ratesDaily: 'Rates update daily.', updatedAsOf: 'Updated {date}', tax: 'Tax', tip: 'Tip',
-    driveGal: 'gal', driveL: 'L', salesTaxZero: 'No statewide sales tax (local may apply).',
-    driveMpgMi: 'MPG', driveMpgKm: 'L/100 km', driveFuelGal: 'Fuel $/gal', driveFuelL: 'Fuel $/L',
-    driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100 km',
-    cities: {
-      'Honolulu': 'Honolulu', 'Anchorage': 'Anchorage', 'Los Angeles': 'Los Angeles', 'Denver': 'Denver',
-      'Chicago': 'Chicago', 'New York': 'New York', 'Toronto': 'Toronto', 'Mexico City': 'Mexico City',
-      'São Paulo': 'São Paulo', 'London': 'London', 'Paris': 'Paris', 'Berlin': 'Berlin',
-      'Dubai': 'Dubai', 'Mumbai': 'Mumbai', 'Singapore': 'Singapore', 'Hong Kong': 'Hong Kong',
-      'Shanghai': 'Shanghai', 'Seoul': 'Seoul', 'Tokyo': 'Tokyo', 'Sydney': 'Sydney'
-    } },
-  es: { sameCurrency: 'Misma divisa seleccionada.', updating: 'Actualizando…', fetching: 'Obteniendo el último tipo de cambio diario disponible.', rateUnavailable: 'Tipo de cambio no disponible', checkConnection: 'Comprueba tu conexión e inténtalo de nuevo.', ratesDaily: 'Los tipos se actualizan a diario.', updatedAsOf: 'Actualizado el {date}', tax: 'Impuesto', tip: 'Propina',
-    driveGal: 'gal', driveL: 'L', salesTaxZero: 'Sin impuesto estatal de ventas (puede haber impuestos locales).',
-    driveMpgMi: 'MPG', driveMpgKm: 'L/100 km', driveFuelGal: 'Combustible $/gal', driveFuelL: 'Combustible $/L',
-    driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100 km',
-    cities: {
-      'Honolulu': 'Honolulú', 'Anchorage': 'Anchorage', 'Los Angeles': 'Los Ángeles', 'Denver': 'Denver',
-      'Chicago': 'Chicago', 'New York': 'Nueva York', 'Toronto': 'Toronto', 'Mexico City': 'Ciudad de México',
-      'São Paulo': 'São Paulo', 'London': 'Londres', 'Paris': 'París', 'Berlin': 'Berlín',
-      'Dubai': 'Dubái', 'Mumbai': 'Bombay', 'Singapore': 'Singapur', 'Hong Kong': 'Hong Kong',
-      'Shanghai': 'Shanghái', 'Seoul': 'Seúl', 'Tokyo': 'Tokio', 'Sydney': 'Sídney'
-    } },
-  zh: { sameCurrency: '已选择相同货币。', updating: '更新中…', fetching: '正在获取最新每日汇率。', rateUnavailable: '汇率不可用', checkConnection: '请检查网络连接后重试。', ratesDaily: '汇率每日更新。', updatedAsOf: '更新于 {date}', tax: '税费', tip: '小费',
-    driveGal: '加仑', driveL: '升', salesTaxZero: '该州无州销售税（可能仍有地方税）。',
-    driveMpgMi: 'MPG', driveMpgKm: '升/百公里', driveFuelGal: '油价 $/加仑', driveFuelL: '油价 $/升',
-    driveEvMi: '英里/度', driveEvKm: '度/百公里',
-    cities: {
-      'Honolulu': '火奴鲁鲁', 'Anchorage': '安克雷奇', 'Los Angeles': '洛杉矶', 'Denver': '丹佛',
-      'Chicago': '芝加哥', 'New York': '纽约', 'Toronto': '多伦多', 'Mexico City': '墨西哥城',
-      'São Paulo': '圣保罗', 'London': '伦敦', 'Paris': '巴黎', 'Berlin': '柏林',
-      'Dubai': '迪拜', 'Mumbai': '孟买', 'Singapore': '新加坡', 'Hong Kong': '香港',
-      'Shanghai': '上海', 'Seoul': '首尔', 'Tokyo': '东京', 'Sydney': '悉尼'
-    } },
-  ja: { sameCurrency: '同じ通貨が選択されています。', updating: '更新中…', fetching: '最新の為替レートを取得しています。', rateUnavailable: 'レートを取得できません', checkConnection: '接続を確認して再度お試しください。', ratesDaily: 'レートは毎日更新されます。', updatedAsOf: '{date} 更新', tax: '税金', tip: 'チップ',
-    driveGal: 'ガロン', driveL: 'L', salesTaxZero: '州の売上税はありません（地方税がかかる場合あり）。',
-    driveMpgMi: 'MPG', driveMpgKm: 'L/100km', driveFuelGal: '燃料 $/gal', driveFuelL: '燃料 $/L',
-    driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100km',
-    cities: {
-      'Honolulu': 'ホノルル', 'Anchorage': 'アンカレッジ', 'Los Angeles': 'ロサンゼルス', 'Denver': 'デンバー',
-      'Chicago': 'シカゴ', 'New York': 'ニューヨーク', 'Toronto': 'トロント', 'Mexico City': 'メキシコシティ',
-      'São Paulo': 'サンパウロ', 'London': 'ロンドン', 'Paris': 'パリ', 'Berlin': 'ベルリン',
-      'Dubai': 'ドバイ', 'Mumbai': 'ムンバイ', 'Singapore': 'シンガポール', 'Hong Kong': '香港',
-      'Shanghai': '上海', 'Seoul': 'ソウル', 'Tokyo': '東京', 'Sydney': 'シドニー'
-    } },
+  sameCurrency: 'Same currency selected.', updating: 'Updating...', fetching: 'Fetching latest available daily rate.', rateUnavailable: 'Rate unavailable', checkConnection: 'Check your connection and try again.', ratesDaily: 'Rates update daily.', updatedAsOf: 'Updated {date}', tax: 'Tax', tip: 'Tip',
+  driveGal: 'gal', driveL: 'L', salesTaxZero: 'No statewide sales tax (local may apply).',
+  driveMpgMi: 'MPG', driveMpgKm: 'L/100 km', driveFuelGal: 'Fuel $/gal', driveFuelL: 'Fuel $/L',
+  driveEvMi: 'mi/kWh', driveEvKm: 'kWh/100 km',
+  cities: {
+    'Honolulu': 'Honolulu', 'Anchorage': 'Anchorage', 'Los Angeles': 'Los Angeles', 'Denver': 'Denver',
+    'Chicago': 'Chicago', 'New York': 'New York', 'Toronto': 'Toronto', 'Mexico City': 'Mexico City',
+    'São Paulo': 'São Paulo', 'London': 'London', 'Paris': 'Paris', 'Berlin': 'Berlin',
+    'Dubai': 'Dubai', 'Mumbai': 'Mumbai', 'Singapore': 'Singapore', 'Hong Kong': 'Hong Kong',
+    'Shanghai': 'Shanghai', 'Seoul': 'Seoul', 'Tokyo': 'Tokyo', 'Sydney': 'Sydney'
+  }
 };
 function toolsText() {
-  const en = TOOLS_TEXT.en;
+  const en = TOOLS_TEXT;
   const d = (typeof getI18nDict === 'function') ? getI18nDict(currentLang) : null;
   if (!d) return en;
   const t = Object.assign({}, en);
@@ -111,30 +78,13 @@ function toolsText() {
 /* Localized currency display names for the converter selects (codes stay ISO). */
 const CURRENCY_CODES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'HKD', 'CHF', 'MXN'];
 const CURRENCY_NAMES = {
-  en: {
-    USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', CAD: 'Canadian Dollar',
-    AUD: 'Australian Dollar', JPY: 'Japanese Yen', CNY: 'Chinese Yuan',
-    HKD: 'Hong Kong Dollar', CHF: 'Swiss Franc', MXN: 'Mexican Peso'
-  },
-  es: {
-    USD: 'Dólar estadounidense', EUR: 'Euro', GBP: 'Libra esterlina', CAD: 'Dólar canadiense',
-    AUD: 'Dólar australiano', JPY: 'Yen japonés', CNY: 'Yuan chino',
-    HKD: 'Dólar de Hong Kong', CHF: 'Franco suizo', MXN: 'Peso mexicano'
-  },
-  zh: {
-    USD: '美元', EUR: '欧元', GBP: '英镑', CAD: '加拿大元',
-    AUD: '澳大利亚元', JPY: '日元', CNY: '人民币',
-    HKD: '港元', CHF: '瑞士法郎', MXN: '墨西哥比索'
-  },
-  ja: {
-    USD: '米ドル', EUR: 'ユーロ', GBP: '英ポンド', CAD: 'カナダドル',
-    AUD: 'オーストラリアドル', JPY: '日本円', CNY: '中国元',
-    HKD: '香港ドル', CHF: 'スイスフラン', MXN: 'メキシコペソ'
-  }
+  USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', CAD: 'Canadian Dollar',
+  AUD: 'Australian Dollar', JPY: 'Japanese Yen', CNY: 'Chinese Yuan',
+  HKD: 'Hong Kong Dollar', CHF: 'Swiss Franc', MXN: 'Mexican Peso'
 };
 
 function getCurrencyNames() {
-  const en = CURRENCY_NAMES.en;
+  const en = CURRENCY_NAMES;
   const d = (typeof getI18nDict === 'function') ? getI18nDict(currentLang) : null;
   if (!d) return en;
   const out = {};

@@ -1558,8 +1558,19 @@ function refreshGalleryLanguageChrome() {
 
 document.addEventListener('usa-travel:prefs', function (e) {
   const type = e && e.detail && e.detail.type;
-  if (type !== 'lang') return;
-  refreshGalleryLanguageChrome();
+  if (type === 'lang') {
+    refreshGalleryLanguageChrome();
+    return;
+  }
+  if (type === 'gallery-quality') {
+    if (lightbox && lightbox.classList.contains('open')) {
+      try { showLightboxPhoto(currentIndex, { fromNav: true, force: true }); } catch (err) { /* ignore */ }
+    }
+    return;
+  }
+  if (type === 'gallery-close') {
+    if (lightbox && lightbox.classList.contains('open')) closeLightbox();
+  }
 });
 
 /* Deep link from homepage intro shuffle: gallery.html?photo=filename-or-slug */

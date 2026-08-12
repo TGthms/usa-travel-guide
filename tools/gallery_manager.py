@@ -16,7 +16,7 @@ What it does for each photo (add):
   3. Saves a grid thumbnail            → images/gallery/thumbs/
      (long edge ≤ 900px — grid stays fast)
   4. Appends a gallery-item block      → gallery.html
-  5. Adds caption keys (es/zh/ja)      → src/js/data/i18n.js
+  5. Adds caption keys (es/zh/ja)      → src/js/data/gallery-i18n.js
   6. Rewrites the homepage collage     → src/js/data/intro-gallery.js
      (slug / i18n key always come from the original filename or caption —
       never from the server tempfile used during browser upload)
@@ -29,7 +29,7 @@ What it does for each photo (add):
 What it does on remove (clears ALL of the above):
   · Deletes full + medium + thumb
   · Removes the HTML block from gallery.html
-  · Removes caption keys from src/js/data/i18n.js (all languages)
+  · Removes caption keys from src/js/data/gallery-i18n.js (all languages)
 
 Usage — browser UI (recommended after a long trip):
   cd /path/to/usa-travel-guide
@@ -85,8 +85,9 @@ THUMBS_DIR = GALLERY_DIR / "thumbs"
 MEDIUM_DIR = GALLERY_DIR / "medium"
 VIDEOS_DIR = GALLERY_DIR / "videos"
 GALLERY_HTML = ROOT / "gallery.html"
-# Caption keys live in the data pack (es/zh/ja). Path unchanged after core/features split.
+# Chrome strings stay in i18n.js. Gallery captions live in gallery-i18n.js.
 APP_JS = ROOT / "src" / "js" / "data" / "i18n.js"
+GALLERY_I18N_JS = ROOT / "src" / "js" / "data" / "gallery-i18n.js"
 INTRO_JS = ROOT / "src" / "js" / "data" / "intro-gallery.js"
 VIDEO_SUFFIXES = {".mp4", ".mov", ".m4v", ".webm"}
 # Soft warning only — videos are copied as-is (can be large for GH/Pages).
@@ -301,6 +302,8 @@ def ensure_layout() -> None:
         die(f"gallery.html not found at {GALLERY_HTML}")
     if not APP_JS.is_file():
         die(f"i18n data file not found at {APP_JS}")
+    if not GALLERY_I18N_JS.is_file():
+        die(f"gallery-i18n.js not found at {GALLERY_I18N_JS}")
     GALLERY_DIR.mkdir(parents=True, exist_ok=True)
     THUMBS_DIR.mkdir(parents=True, exist_ok=True)
     MEDIUM_DIR.mkdir(parents=True, exist_ok=True)
@@ -388,6 +391,8 @@ def unique_slug(base: str) -> str:
     if GALLERY_HTML.is_file():
         existing.update(re.findall(r"gallery\.item\.([a-z0-9]+)\.caption", GALLERY_HTML.read_text(encoding="utf-8")))
     # From app.js keys (covers keys whose HTML was removed)
+    if GALLERY_I18N_JS.is_file():
+        existing.update(re.findall(r"gallery\.item\.([a-z0-9]+)\.caption", GALLERY_I18N_JS.read_text(encoding="utf-8")))
     if APP_JS.is_file():
         existing.update(re.findall(r"gallery\.item\.([a-z0-9]+)\.caption", APP_JS.read_text(encoding="utf-8")))
     # From files
@@ -1593,6 +1598,100 @@ def html_item_block(
     )
 
 
+# One HTML grammar: html_item_block writes; this regex + parse_gallery_item read.
+# Still: img then caption. Video: optional badge between img and caption.
+GALLERY_ITEM_RE = re.compile(
+    r'[ \t]*<div class="gallery-item"([^>]*)>\s*'
+    r'<img\s+([^>]+)>\s*'
+    r'(?:<span class="gallery-video-badge"[\s\S]*?</span>\s*)?'
+    r'<div class="gallery-caption"[^>]*data-i18n="([^"]*)"[^>]*>([^<]*)</div>\s*'
+    r'</div>',
+    re.S,
+)
+
+
+def _html_attr(blob: str, name: str) -> str:
+    am = re.search(rf'\b{name}="([^"]*)"', blob)
+    return html.unescape(am.group(1)) if am else ""
+
+
+def parse_gallery_item(match: re.Match) -> dict:
+    """Turn one GALLERY_ITEM_RE match into the fields html_item_block needs."""
+    item_attrs = match.group(1)
+    img_attrs = match.group(2)
+    i18n_key = match.group(3)
+    caption = html.unescape(match.group(4))
+
+    full = _html_attr(img_attrs, "data-full")
+    thumb = _html_attr(img_attrs, "src")
+    filename = Path(full).name if full else Path(thumb).name
+    slug = Path(filename).stem
+    key_m = re.match(r"gallery\.item\.([a-z0-9]+)\.caption", i18n_key)
+    if key_m:
+        slug = key_m.group(1)
+
+    video = _html_attr(img_attrs, "data-video")
+    video_filename = Path(video).name if video else None
+    media = _html_attr(item_attrs, "data-media") or "photo"
+    if video:
+        media = "video"
+
+    try:
+        tw = int(_html_attr(img_attrs, "width") or "900")
+        th = int(_html_attr(img_attrs, "height") or "600")
+    except ValueError:
+        tw, th = 900, 600
+
+    medium = _html_attr(img_attrs, "data-medium") or (
+        f"images/gallery/medium/{filename}" if filename else ""
+    )
+    return {
+        "slug": slug,
+        "filename": filename,
+        "i18n_key": i18n_key,
+        "category": _html_attr(item_attrs, "data-category"),
+        "location": _html_attr(item_attrs, "data-location"),
+        "date": _html_attr(item_attrs, "data-date"),
+        "media": media,
+        "thumb": thumb,
+        "medium": medium,
+        "full": full,
+        "alt": _html_attr(img_attrs, "alt"),
+        "caption": caption,
+        "video": video,
+        "video_filename": video_filename,
+        "thumb_webp": bool(_html_attr(img_attrs, "data-thumb-webp")),
+        "medium_webp": bool(_html_attr(img_attrs, "data-medium-webp")),
+        "width": tw,
+        "height": th,
+    }
+
+
+def serialize_gallery_item(item: dict, **overrides) -> str:
+    """Serialize via html_item_block — the only writer for a gallery-item."""
+    merged = dict(item)
+    merged.update(overrides)
+    try:
+        tw = int(merged.get("width") or 900)
+        th = int(merged.get("height") or 600)
+    except (TypeError, ValueError):
+        tw, th = 900, 600
+    return html_item_block(
+        slug=merged["slug"],
+        category=merged.get("category") or "",
+        location=merged.get("location") or "",
+        date=merged.get("date") or "",
+        caption=merged.get("caption") or "",
+        alt=merged.get("alt") or "",
+        tw=tw,
+        th=th,
+        filename=merged["filename"],
+        video_filename=merged.get("video_filename"),
+        thumb_webp=bool(merged.get("thumb_webp")),
+        medium_webp=bool(merged.get("medium_webp")),
+    )
+
+
 def insert_gallery_html(block: str) -> None:
     """Append a gallery-item block inside #galleryGrid (before its closing tag).
 
@@ -1637,78 +1736,56 @@ def insert_gallery_html(block: str) -> None:
     GALLERY_HTML.write_text(text, encoding="utf-8")
 
 
+def read_gallery_i18n() -> dict:
+    """Load window.GALLERY_I18N packs. Empty es/zh/ja dicts if the file is new."""
+    empty = {"es": {}, "zh": {}, "ja": {}}
+    if not GALLERY_I18N_JS.is_file():
+        return empty
+    src = GALLERY_I18N_JS.read_text(encoding="utf-8")
+    m = re.search(r"window\.GALLERY_I18N\s*=\s*(\{[\s\S]*\});\s*\Z", src)
+    if not m:
+        raise RuntimeError("Could not parse gallery-i18n.js (expected window.GALLERY_I18N = {...};)")
+    data = json.loads(m.group(1))
+    out = empty
+    for lang in ("es", "zh", "ja"):
+        pack = data.get(lang) or {}
+        if not isinstance(pack, dict):
+            raise RuntimeError(f"gallery-i18n.js {lang} pack is not an object")
+        out[lang] = pack
+    return out
+
+
+def write_gallery_i18n(packs: dict) -> None:
+    """Rewrite gallery-i18n.js from a {es,zh,ja} map. Same idea as intro catalog."""
+    ordered = {"es": packs.get("es") or {}, "zh": packs.get("zh") or {}, "ja": packs.get("ja") or {}}
+    header = (
+        "'use strict';\n"
+        "/* Gallery captions (es/zh/ja). English lives in gallery.html. */\n"
+        "window.GALLERY_I18N = "
+    )
+    GALLERY_I18N_JS.write_text(
+        header + json.dumps(ordered, indent=2, ensure_ascii=False) + ";\n",
+        encoding="utf-8",
+    )
+
+
 def insert_i18n(slug: str, caption: str) -> int:
     """
     Add gallery.item.{slug}.caption to es/zh/ja (English comes from HTML text).
-    Returns how many language blocks received a new key (0–3).
-    Raises if any of the three I18N language blocks cannot be found/updated.
+    Returns how many language packs received a new key (0–3).
     """
     key = f"gallery.item.{slug}.caption"
-    text = APP_JS.read_text(encoding="utf-8")
-    cap_js = js_escape(caption)
-    line = f'    "{key}": "{cap_js}",\n'
+    packs = read_gallery_i18n()
     inserted = 0
-    missing_langs: list[str] = []
-
-    def inject_lang_block(src: str, lang: str) -> str:
-        nonlocal inserted
-        # Only the top-level I18N object uses "  es: {" (two spaces). Tool strings
-        # further down use a denser inline form — still match first `  lang: {`.
-        m = re.search(rf"(  {re.escape(lang)}: \{{)", src)
-        if not m:
-            missing_langs.append(lang)
-            return src
-        # m.end() is just after `{`; find_object_block wants the `{` index.
-        brace_at = m.end() - 1
-        try:
-            start, end = find_object_block(src, brace_at)
-        except RuntimeError:
-            missing_langs.append(lang)
-            return src
-        block = src[start:end]
-        if f'"{key}"' in block:
-            return src  # already present in this language
-        # Match a single key/value pair (one key per line)
-        matches = list(
-            re.finditer(
-                r'^[ \t]*"gallery\.item\.[^"]+\.caption":\s*"(?:\\.|[^"\\])*",\s*$',
-                block,
-                re.M,
-            )
-        )
-        if matches:
-            last = matches[-1]
-            insert_at = start + last.end()
-            if insert_at < len(src) and src[insert_at] == "\n":
-                insert_at += 1
+    for lang in ("es", "zh", "ja"):
+        if key not in packs[lang]:
+            packs[lang][key] = caption
             inserted += 1
-            return src[:insert_at] + line + src[insert_at:]
-        # No gallery items yet — insert right after the opening brace
-        inserted += 1
-        return src[:start] + "\n" + line + src[start:]
-
-    for lang in ("es", "zh", "ja"):
-        text = inject_lang_block(text, lang)
-
-    if missing_langs:
-        raise RuntimeError(
-            f"Could not locate I18N language block(s) in i18n.js: {', '.join(missing_langs)}. "
-            "Caption keys were not written — gallery HTML may be out of sync."
-        )
-
-    # Verify all three languages now have the key (insert or pre-existing)
-    for lang in ("es", "zh", "ja"):
-        m = re.search(rf"(  {re.escape(lang)}: \{{)", text)
-        if not m:
-            raise RuntimeError(f"I18N verification failed: missing {lang} block")
-        start, end = find_object_block(text, m.end() - 1)
-        if f'"{key}"' not in text[start:end]:
-            raise RuntimeError(
-                f"I18N verification failed: key {key!r} missing from {lang} after insert"
-            )
-
     if inserted:
-        APP_JS.write_text(text, encoding="utf-8")
+        write_gallery_i18n(packs)
+    for lang in ("es", "zh", "ja"):
+        if key not in packs[lang]:
+            raise RuntimeError(f"gallery-i18n.js missing {key!r} in {lang} after insert")
     return inserted
 
 
@@ -1901,7 +1978,7 @@ def process_one(
             video_filename = f"{slug}{vext}"
             video_path = VIDEOS_DIR / video_filename
         gallery_before = GALLERY_HTML.read_text(encoding="utf-8")
-        i18n_before = APP_JS.read_text(encoding="utf-8")
+        i18n_before = GALLERY_I18N_JS.read_text(encoding="utf-8") if GALLERY_I18N_JS.is_file() else None
         intro_before = INTRO_JS.read_text(encoding="utf-8") if INTRO_JS.is_file() else None
 
         try:
@@ -1978,10 +2055,11 @@ def process_one(
                 GALLERY_HTML.write_text(gallery_before, encoding="utf-8")
             except OSError:
                 pass
-            try:
-                APP_JS.write_text(i18n_before, encoding="utf-8")
-            except OSError:
-                pass
+            if i18n_before is not None:
+                try:
+                    GALLERY_I18N_JS.write_text(i18n_before, encoding="utf-8")
+                except OSError:
+                    pass
             if intro_before is not None:
                 try:
                     INTRO_JS.write_text(intro_before, encoding="utf-8")
@@ -2024,63 +2102,12 @@ def process_one(
 def list_photos() -> list[dict]:
     text = GALLERY_HTML.read_text(encoding="utf-8")
     items = []
-    # Flexible: attribute order may include data-city / data-state / data-medium.
-    # Optional video badge sits between <img> and caption.
-    for m in re.finditer(
-        r'<div class="gallery-item"([^>]*)>\s*'
-        r'<img\s+([^>]+)>\s*'
-        r'(?:<span class="gallery-video-badge"[\s\S]*?</span>\s*)?'
-        r'<div class="gallery-caption"[^>]*data-i18n="([^"]*)"[^>]*>([^<]*)</div>',
-        text,
-        re.S,
-    ):
-        item_attrs = m.group(1)
-        img_attrs = m.group(2)
-        i18n_key = m.group(3)
-        caption = m.group(4)
-
-        def attr(blob: str, name: str) -> str:
-            am = re.search(rf'\b{name}="([^"]*)"', blob)
-            return am.group(1) if am else ""
-
-        # HTML is the storage format; the manager API must return the original
-        # values. Returning escaped text here caused a later metadata save to
-        # double-escape captions or locations containing characters such as &.
-        category = html.unescape(attr(item_attrs, "data-category"))
-        location = html.unescape(attr(item_attrs, "data-location"))
-        date = html.unescape(attr(item_attrs, "data-date"))
-        media = attr(item_attrs, "data-media") or "photo"
-        thumb = html.unescape(attr(img_attrs, "src"))
-        full = html.unescape(attr(img_attrs, "data-full"))
-        video = html.unescape(attr(img_attrs, "data-video"))
-        if video:
-            media = "video"
-        medium = attr(img_attrs, "data-medium") or (
-            f"images/gallery/medium/{Path(full).name}" if full else ""
-        )
-        medium = html.unescape(medium)
-        alt = html.unescape(attr(img_attrs, "alt"))
-        filename = Path(full).name if full else Path(thumb).name
-        slug = Path(filename).stem
-        key_m = re.match(r"gallery\.item\.([a-z0-9]+)\.caption", i18n_key)
-        if key_m:
-            slug = key_m.group(1)
-        row = {
-            "slug": slug,
-            "filename": filename,
-            "i18n_key": i18n_key,
-            "category": category,
-            "location": location,
-            "date": date,
-            "media": media,
-            "thumb": thumb,
-            "medium": medium,
-            "full": full,
-            "alt": alt,
-            "caption": html.unescape(caption),
-        }
-        if video:
-            row["video"] = video
+    for m in GALLERY_ITEM_RE.finditer(text):
+        row = parse_gallery_item(m)
+        # Public listing omits empty video path so the UI stays photo-shaped.
+        if not row.get("video"):
+            row.pop("video", None)
+            row.pop("video_filename", None)
         items.append(row)
     return items
 
@@ -2129,58 +2156,29 @@ def remove_gallery_html(slug: str, filename: str | None = None) -> bool:
     """Remove the full gallery-item block for this photo from gallery.html."""
     text = GALLERY_HTML.read_text(encoding="utf-8")
     fname = filename or f"{slug}.jpeg"
-    # Match a complete item (caption is a nested div — must close both).
-    # Optional video badge between img and caption.
-    badge = r'(?:<span class="gallery-video-badge"[\s\S]*?</span>\s*)?'
-    patterns = [
-        # By i18n key (most reliable)
-        rf'[ \t]*<div class="gallery-item"[^>]*>\s*'
-        rf'<img[^>]*>\s*'
-        rf'{badge}'
-        rf'<div class="gallery-caption"[^>]*data-i18n="gallery\.item\.{re.escape(slug)}\.caption"[^>]*>[\s\S]*?</div>\s*'
-        rf'</div>\s*',
-        # By data-full path
-        rf'[ \t]*<div class="gallery-item"[^>]*>\s*'
-        rf'<img[^>]*data-full="images/gallery/{re.escape(fname)}"[^>]*>\s*'
-        rf'{badge}'
-        rf'<div class="gallery-caption"[^>]*>[\s\S]*?</div>\s*'
-        rf'</div>\s*',
-    ]
-    new = text
-    removed = False
-    for pat in patterns:
-        new2, n = re.subn(pat, "", new, count=1, flags=re.S)
-        if n:
-            new = new2
-            removed = True
-            break
-    if removed:
-        GALLERY_HTML.write_text(new, encoding="utf-8")
-    return removed
+    for m in GALLERY_ITEM_RE.finditer(text):
+        parsed = parse_gallery_item(m)
+        if parsed["slug"] != slug and parsed["filename"] != fname:
+            continue
+        start, end = m.start(), m.end()
+        if end < len(text) and text[end] == "\n":
+            end += 1
+        GALLERY_HTML.write_text(text[:start] + text[end:], encoding="utf-8")
+        return True
+    return False
 
 
 def remove_i18n(slug: str) -> int:
-    """Remove gallery.item.{slug}.caption from every language block in i18n.js."""
+    """Remove gallery.item.{slug}.caption from every language pack in gallery-i18n.js."""
     key = f"gallery.item.{slug}.caption"
-    text = APP_JS.read_text(encoding="utf-8")
-    # Allow escaped quotes inside values (same pattern as update/insert).
-    val = r'"(?:\\.|[^"\\])*"'
-    # Whole-line form
-    new, n = re.subn(
-        rf'^[ \t]*"{re.escape(key)}":\s*{val},\s*\n',
-        "",
-        text,
-        flags=re.M,
-    )
-    # Inline form (legacy bug left multiple keys on one line)
-    new2, n2 = re.subn(
-        rf'[ \t]*"{re.escape(key)}":\s*{val},\s*',
-        "",
-        new,
-    )
-    n += n2
+    packs = read_gallery_i18n()
+    n = 0
+    for lang in ("es", "zh", "ja"):
+        if key in packs[lang]:
+            del packs[lang][key]
+            n += 1
     if n:
-        APP_JS.write_text(new2, encoding="utf-8")
+        write_gallery_i18n(packs)
     return n
 
 
@@ -2233,13 +2231,14 @@ def remove_one(slug: str, filename: str | None = None) -> dict:
                 break
     fname = fname or f"{slug}.jpeg"
 
-    html_ok = remove_gallery_html(slug, fname)
-    i18n_n = remove_i18n(slug)
-    files = remove_files(slug, fname)
-    try:
-        write_intro_catalog()
-    except OSError:
-        pass
+    with _WRITE_LOCK:
+        html_ok = remove_gallery_html(slug, fname)
+        i18n_n = remove_i18n(slug)
+        files = remove_files(slug, fname)
+        try:
+            write_intro_catalog()
+        except OSError:
+            pass
 
     if not html_ok and i18n_n == 0 and not files:
         raise FileNotFoundError(f"No gallery entry found for '{slug}'")
@@ -2265,6 +2264,11 @@ def rebuild_media_for_existing(*, patch_html: bool = True) -> dict:
     Safe to re-run. Used after upgrading the tool or for --rebuild-media.
     """
     ensure_layout()
+    with _WRITE_LOCK:
+        return _rebuild_media_for_existing_locked(patch_html=patch_html)
+
+
+def _rebuild_media_for_existing_locked(*, patch_html: bool = True) -> dict:
     photos = list_photos()
     built = []
     missing_full = []
@@ -2310,78 +2314,22 @@ def rebuild_media_for_existing(*, patch_html: bool = True) -> dict:
 
         def patch_item(match: re.Match) -> str:
             nonlocal html_patched
-            block = match.group(0)
-            # Extract data-full filename
-            fm = re.search(r'data-full="images/gallery/([^"]+)"', block)
-            if not fm:
-                return block
-            fname = fm.group(1)
-            # data-location → city/state attrs
-            loc_m = re.search(r'data-location="([^"]*)"', block)
-            loc = loc_m.group(1) if loc_m else ""
-            city, state = parse_location_parts(html.unescape(loc))
-            city_esc = html.escape(city, quote=True)
-            state_esc = html.escape(state, quote=True)
-
-            # Ensure data-city / data-state on the item div
-            if 'data-city="' not in block:
-                block = re.sub(
-                    r'(data-location="[^"]*")',
-                    rf'\1 data-city="{city_esc}" data-state="{state_esc}"',
-                    block,
-                    count=1,
-                )
-            else:
-                block = re.sub(r'data-city="[^"]*"', f'data-city="{city_esc}"', block, count=1)
-                block = re.sub(r'data-state="[^"]*"', f'data-state="{state_esc}"', block, count=1)
-
-            # Ensure data-thumb / data-medium on img
-            if "data-thumb=" not in block:
-                block = re.sub(
-                    r'(src="images/gallery/thumbs/[^"]+")',
-                    rf'\1 data-thumb="images/gallery/thumbs/{html.escape(fname, quote=True)}"',
-                    block,
-                    count=1,
-                )
-            if "data-medium=" not in block:
-                block = re.sub(
-                    r'(data-(?:thumb|full)="[^"]+")',
-                    rf'\1 data-medium="images/gallery/medium/{html.escape(fname, quote=True)}"',
-                    block,
-                    count=1,
-                )
-            # If data-medium was inserted after data-full somehow wrong, force correct path
-            block = re.sub(
-                r'data-medium="[^"]*"',
-                f'data-medium="images/gallery/medium/{html.escape(fname, quote=True)}"',
-                block,
-                count=1,
-            )
-            # Patch width/height from actual thumb display size (post-orientation).
+            item = parse_gallery_item(match)
+            fname = item["filename"]
             size = thumb_sizes.get(fname)
             if size is None:
                 tpath = THUMBS_DIR / fname
                 if tpath.is_file():
                     size = sips_size(tpath)
             if size:
-                tw, th = size
-                if re.search(r'\bwidth="\d+"', block):
-                    block = re.sub(r'\bwidth="\d+"', f'width="{tw}"', block, count=1)
-                else:
-                    block = re.sub(r'(<img\b)', rf'\1 width="{tw}"', block, count=1)
-                if re.search(r'\bheight="\d+"', block):
-                    block = re.sub(r'\bheight="\d+"', f'height="{th}"', block, count=1)
-                else:
-                    block = re.sub(r'(<img\b[^>]*\bwidth="\d+")', rf'\1 height="{th}"', block, count=1)
+                item["width"], item["height"] = size
+            stem = Path(fname).stem
+            item["thumb_webp"] = (THUMBS_DIR / f"{stem}.webp").is_file()
+            item["medium_webp"] = (MEDIUM_DIR / f"{stem}.webp").is_file()
             html_patched += 1
-            return block
+            return serialize_gallery_item(item).rstrip("\n")
 
-        text = re.sub(
-            r'<div class="gallery-item"[^>]*>[\s\S]*?<img[^>]*>[\s\S]*?'
-            r'<div class="gallery-caption"[^>]*>[\s\S]*?</div>\s*</div>',
-            patch_item,
-            text,
-        )
+        text = GALLERY_ITEM_RE.sub(patch_item, text)
         if text != original:
             GALLERY_HTML.write_text(text, encoding="utf-8")
 
@@ -2413,37 +2361,20 @@ def update_i18n_caption(slug: str, caption: str, old_caption: str | None = None)
     Library Save always updates the English HTML caption separately.
     """
     key = f"gallery.item.{slug}.caption"
-    cap_js = js_escape(caption)
     old = (old_caption or "").strip()
-    text = APP_JS.read_text(encoding="utf-8")
+    packs = read_gallery_i18n()
     updated = 0
-
-    def replacer(m: re.Match) -> str:
-        nonlocal updated
-        prefix, value = m.group(1), m.group(2)
-        # Unescape a minimal JS string for comparison
-        current = (
-            value.replace("\\\\", "\0")
-            .replace('\\"', '"')
-            .replace("\0", "\\")
-        )
-        # Only overwrite untranslated clones of the previous English caption
-        # (never wipe a hand-translated string that differs from old English).
-        if (old and current == old) or current == caption:
+    for lang in ("es", "zh", "ja"):
+        current = packs[lang].get(key)
+        if current is None:
+            packs[lang][key] = caption
             updated += 1
-            return f'{prefix}"{cap_js}"'
-        return m.group(0)
-
-    new = re.sub(
-        rf'("{re.escape(key)}":\s*)"((?:\\.|[^"\\])*)"',
-        replacer,
-        text,
-    )
-    if new != text:
-        APP_JS.write_text(new, encoding="utf-8")
-    # Fill any missing language keys (insert_i18n skips existing keys)
-    inserted = insert_i18n(slug, caption)
-    return updated + inserted
+        elif (old and current == old) or current == caption:
+            packs[lang][key] = caption
+            updated += 1
+    if updated:
+        write_gallery_i18n(packs)
+    return updated
 
 
 def update_one(
@@ -2483,46 +2414,31 @@ def update_one(
 
     with _WRITE_LOCK:
         text = GALLERY_HTML.read_text(encoding="utf-8")
-        # Include leading indentation in the match so replacement does not
-        # double-indent (html_item_block already starts with 4 spaces).
-        item_m = re.search(
-            rf'[ \t]*<div class="gallery-item"[^>]*>\s*'
-            rf'<img\s+([^>]+)>\s*'
-            rf'<div class="gallery-caption"[^>]*data-i18n="gallery\.item\.{re.escape(slug)}\.caption"[^>]*>[^<]*</div>\s*'
-            rf'</div>',
-            text,
-            re.S,
-        )
-        if not item_m:
+        found = None
+        for m in GALLERY_ITEM_RE.finditer(text):
+            parsed = parse_gallery_item(m)
+            if parsed["slug"] == slug:
+                found = (m, parsed)
+                break
+        if not found:
             raise RuntimeError(f"Could not locate HTML block for '{slug}'")
-        img_attrs = item_m.group(1)
-        old_block = item_m.group(0)
-
-        def _img_attr(name: str) -> str:
-            am = re.search(rf'\b{name}="([^"]*)"', img_attrs)
-            return am.group(1) if am else ""
-
-        full = _img_attr("data-full")
-        try:
-            tw = int(_img_attr("width") or "900")
-            th = int(_img_attr("height") or "600")
-        except ValueError:
-            tw, th = 900, 600
-
-        filename = Path(full).name
-        new_block = html_item_block(
-            slug=slug,
+        item_m, parsed = found
+        filename = parsed["filename"]
+        stem = Path(filename).stem
+        thumb_webp = parsed.get("thumb_webp") or (THUMBS_DIR / f"{stem}.webp").is_file()
+        medium_webp = parsed.get("medium_webp") or (MEDIUM_DIR / f"{stem}.webp").is_file()
+        new_block = serialize_gallery_item(
+            parsed,
             category=category,
             location=location,
             date=date,
             caption=caption,
             alt=alt,
-            tw=tw,
-            th=th,
-            filename=filename,
+            thumb_webp=thumb_webp,
+            medium_webp=medium_webp,
         ).rstrip("\n")
 
-        text = text.replace(old_block, new_block, 1)
+        text = text[: item_m.start()] + new_block + text[item_m.end() :]
         GALLERY_HTML.write_text(text, encoding="utf-8")
         i18n_n = update_i18n_caption(slug, caption, old_caption=old_caption)
         write_intro_catalog()
@@ -3261,10 +3177,12 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, list_photos())
             return
         if path == "/api/rebuild-media":
-            try:
-                self._json(200, rebuild_media_for_existing())
-            except Exception as e:
-                self._json(500, {"error": str(e)})
+            self.send_response(405)
+            self.send_header("Allow", "POST")
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(b'{"error":"Method Not Allowed; use POST"}')
             return
         if path.startswith("/site/"):
             rel = path[len("/site/") :]
@@ -3348,6 +3266,13 @@ class Handler(BaseHTTPRequestHandler):
                     self._json(200, meta)
                 finally:
                     tmp_path.unlink(missing_ok=True)
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+
+        if path == "/api/rebuild-media":
+            try:
+                self._json(200, rebuild_media_for_existing())
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return

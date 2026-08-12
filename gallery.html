@@ -82,6 +82,10 @@
   }
   apply();
   window.__usaTravelLoadFonts = apply;
+  document.addEventListener('usa-travel:prefs', function (e) {
+    var type = e && e.detail && e.detail.type;
+    if (type === 'lang' || type === 'style') apply();
+  });
 })();
 </script>
 <noscript>
@@ -205,7 +209,7 @@
 
   <!-- Photo grid: prefer local Gallery Manager (tools/gallery_manager.py)
        to add/remove items. It writes full+medium+thumbs, this HTML block,
-       and caption keys in src/js/data/i18n.js (es/zh/ja). -->
+       and caption keys in src/js/data/gallery-i18n.js (es/zh/ja). -->
   <div class="gallery-grid" id="galleryGrid">
     <div class="gallery-item" data-category="landmarks" data-location="San Francisco, CA" data-city="San Francisco" data-state="CA" data-date="May 23, 2026" tabindex="0" role="button">
       <img src="images/gallery/thumbs/SFgolden_gate_bridge.jpeg" data-thumb="images/gallery/thumbs/SFgolden_gate_bridge.jpeg" data-medium="images/gallery/medium/SFgolden_gate_bridge.jpeg" data-medium-webp="images/gallery/medium/SFgolden_gate_bridge.webp" data-thumb-webp="images/gallery/thumbs/SFgolden_gate_bridge.webp" data-full="images/gallery/SFgolden_gate_bridge.jpeg" width="900" height="506" alt="Photograph of Golden Gate Bridge in San Francisco, California — landmark, May 23, 2026" loading="lazy" decoding="async">
@@ -849,6 +853,7 @@
   </div>
 </footer>
 
+<script src="src/js/data/gallery-i18n.js" defer></script>
 <script src="src/js/data/i18n.js" defer></script>
 <script src="src/js/core/env.js" defer></script>
 <script src="src/js/core/nav-return.js" defer></script>

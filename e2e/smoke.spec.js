@@ -37,11 +37,7 @@ async function closeSettings(page) {
 
 async function waitAppReady(page) {
   await page.waitForFunction(() => {
-    return typeof window.applyLanguage === 'function'
-      || typeof window.toggleFavorite === 'function'
-      || document.body.classList.contains('page-tools')
-      || document.body.classList.contains('page-gallery')
-      || document.body.classList.contains('page-legal');
+    return typeof window.applyLanguage === 'function';
   }, null, { timeout: 15_000 });
 }
 
@@ -1162,13 +1158,14 @@ test.describe('USA Travel Guide smoke', () => {
     await page.waitForFunction(() => {
       const list = document.getElementById('weatherList');
       return list && list.querySelectorAll('.weather-row').length > 3;
-    }, null, { timeout: 45_000 }).catch(() => {});
+    }, null, { timeout: 45_000 });
     const before = await page.locator('#weatherList .weather-row').count();
+    expect(before).toBeGreaterThan(0);
     await page.locator('#weatherSearch').fill('Paris');
     await page.waitForTimeout(400);
     // majors list must not be wiped while typing (geocode is blocked)
     const after = await page.locator('#weatherList .weather-row').count();
-    if (before > 0) expect(after).toBe(before);
+    expect(after).toBe(before);
     await expect(page.locator('#weatherSearch')).toHaveValue('Paris');
   });
 

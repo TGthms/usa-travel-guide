@@ -167,7 +167,7 @@
   let autoRefreshTimer = null;
   let searchTimer = 0;
   let openCity = null;
-  let abortCtl = null;
+
   let lastListFetch = 0;
   let myLocationCity = null;
   let refreshGen = 0;       // supersede stale refresh() completions
@@ -237,60 +237,10 @@
   })) || {};
   var applySky = skyApi.applySky;
   var applyAmbientPageSky = skyApi.applyAmbientPageSky;
-  var applyPageSkyFromPacks = skyApi.applyPageSkyFromPacks;
-  var celestialPos = skyApi.celestialPos;
-  var paintSkyMode = skyApi.paintSkyMode;
-  var paintSkyModeClassOnly = skyApi.paintSkyModeClassOnly;
-  var ensureOrnaments = skyApi.ensureOrnaments;
-  var skyModeFromCode = skyApi.skyModeFromCode;
 
   var chartsApi = null;
   var alertsApi = null;
   var dataApi = null;
-
-  function tempToBarColor() { return chartsApi.tempToBarColor.apply(null, arguments); }
-  function dailyBarsHtml() { return chartsApi.dailyBarsHtml.apply(null, arguments); }
-  function hourlyWindow() { return chartsApi.hourlyWindow.apply(null, arguments); }
-  function hourlyLocalDay() { return chartsApi.hourlyLocalDay.apply(null, arguments); }
-  function buildTempChart() { return chartsApi.buildTempChart.apply(null, arguments); }
-  function bindCharts() { return chartsApi.bindCharts.apply(null, arguments); }
-  function uvGauge() { return chartsApi.uvGauge.apply(null, arguments); }
-  function sunArcSvg() { return chartsApi.sunArcSvg.apply(null, arguments); }
-  function buildSunDaySheet() { return chartsApi.buildSunDaySheet.apply(null, arguments); }
-  function windCompass() { return chartsApi.windCompass.apply(null, arguments); }
-  function windCompassMarkup() { return chartsApi.windCompassMarkup.apply(null, arguments); }
-  function localDateKey() { return chartsApi.localDateKey.apply(null, arguments); }
-  function smoothLinePath() { return chartsApi.smoothLinePath.apply(null, arguments); }
-  function sunPathGeometry() { return chartsApi.sunPathGeometry.apply(null, arguments); }
-  function formatDurationMs() { return chartsApi.formatDurationMs.apply(null, arguments); }
-
-  function topAlert() { return alertsApi.topAlert.apply(null, arguments); }
-  function applyAlertsToPack() { return alertsApi.applyAlertsToPack.apply(null, arguments); }
-  function captureOpenAlertTitles() { return alertsApi.captureOpenAlertTitles.apply(null, arguments); }
-  function restoreOpenAlertTitles() { return alertsApi.restoreOpenAlertTitles.apply(null, arguments); }
-  function patchDetailAlerts() { return alertsApi.patchDetailAlerts.apply(null, arguments); }
-  function bindAlertCollapseAnimation() { return alertsApi.bindAlertCollapseAnimation.apply(null, arguments); }
-  function ensureNwsAlerts() { return alertsApi.ensureNwsAlerts.apply(null, arguments); }
-  function prefetchAlertsForCache() { return alertsApi.prefetchAlertsForCache.apply(null, arguments); }
-  function alertsBlockHtml() { return alertsApi.alertsBlockHtml.apply(null, arguments); }
-  function loadNwsAlerts() { return alertsApi.loadNwsAlerts.apply(null, arguments); }
-  function formatAlertDescHtml() { return alertsApi.formatAlertDescHtml.apply(null, arguments); }
-  function normalizeNwsText() { return alertsApi.normalizeNwsText.apply(null, arguments); }
-  function dedupeAlerts() { return alertsApi.dedupeAlerts.apply(null, arguments); }
-  function severityRank() { return alertsApi.severityRank.apply(null, arguments); }
-
-  function loadCity() { return dataApi.loadCity.apply(null, arguments); }
-  function loadOpenMeteoCity() { return dataApi.loadOpenMeteoCity.apply(null, arguments); }
-  function enrichWithOpenMeteo() { return dataApi.enrichWithOpenMeteo.apply(null, arguments); }
-  function loadNwsCity() { return dataApi.loadNwsCity.apply(null, arguments); }
-  function fetchJson() { return dataApi.fetchJson.apply(null, arguments); }
-  function nwsFetchJson() { return dataApi.nwsFetchJson.apply(null, arguments); }
-  function withTimeoutSignal() { return dataApi.withTimeoutSignal.apply(null, arguments); }
-  function normalizeNws() { return dataApi.normalizeNws.apply(null, arguments); }
-  function getCachedNwsPoints() { return dataApi.getCachedNwsPoints.apply(null, arguments); }
-  function setCachedNwsPoints() { return dataApi.setCachedNwsPoints.apply(null, arguments); }
-  function clearCachedNwsPoints() { return dataApi.clearCachedNwsPoints.apply(null, arguments); }
-  function clearAllNwsPointsCache() { return dataApi.clearAllNwsPointsCache.apply(null, arguments); }
 
   function wireRemainingModules() {
     if (!W.factories.charts || !W.factories.alerts || !W.factories.data) {
@@ -310,6 +260,8 @@
       FORECAST: FORECAST, GEOCODE: GEOCODE, AIR: AIR,
       FORECAST_Q: FORECAST_Q,
       REFRESH_MS: REFRESH_MS,
+      t: t,
+      onLoadProgress: setLoadProgress,
       loadNwsAlerts: function () { return alertsApi.loadNwsAlerts.apply(null, arguments); },
       applyAlertsToPack: function () { return alertsApi.applyAlertsToPack.apply(null, arguments); },
       ensureNwsAlerts: function () { return alertsApi.ensureNwsAlerts.apply(null, arguments); }
@@ -444,7 +396,7 @@
     // BigDataCloud client reverse geocode (browser-safe, no API key)
     try {
       const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${langParam}`;
-      const data = await fetchJson(url);
+      const data = await dataApi.fetchJson(url);
       const name = data.city || data.locality || data.principalSubdivision || data.countryName;
       if (name) {
         const admin = [data.principalSubdivision, data.countryName].filter(Boolean).join(', ');
@@ -454,7 +406,7 @@
     // Nominatim fallback
     try {
       const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=${langParam}`;
-      const data = await fetchJson(url);
+      const data = await dataApi.fetchJson(url);
       const a = data.address || {};
       const name = a.city || a.town || a.village || a.hamlet || a.municipality || a.county || data.name;
       if (name) {
@@ -809,154 +761,6 @@
     if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
   }
 
-  /** Open-Meteo multi-location batch (non-US / fallback groups). */
-  async function loadCityBatchOm(cities, signal) {
-    if (!cities.length) return [];
-    const lats = cities.map(function (c) { return c.lat; }).join(',');
-    const lons = cities.map(function (c) { return c.lon; }).join(',');
-    const wUrl = FORECAST + '?latitude=' + lats + '&longitude=' + lons + '&' + FORECAST_Q;
-    const aUrl = AIR + '?latitude=' + lats + '&longitude=' + lons + '&current=us_aqi,pm2_5,pm10,european_aqi&timezone=auto';
-    const weatherRaw = await fetchJson(wUrl, signal);
-    const airRaw = await fetchJson(aUrl, signal).catch(function () { return null; });
-    const weatherList = Array.isArray(weatherRaw) ? weatherRaw : [weatherRaw];
-    const airList = airRaw == null ? [] : (Array.isArray(airRaw) ? airRaw : [airRaw]);
-    const now = Date.now();
-    return cities.map(function (c, i) {
-      const weather = weatherList[i];
-      if (!weather || !weather.current) {
-        return { error: true, city: c, fetchedAt: now };
-      }
-      return {
-        weather: weather,
-        air: airList[i] || null,
-        fetchedAt: now,
-        city: c,
-        source: 'open-meteo',
-        needsEnrich: false
-      };
-    });
-  }
-
-  async function loadMany(cities, opts) {
-    opts = opts || {};
-    const quiet = !!opts.quiet;
-    const forceFetch = !!opts.forceFetch;
-    if (abortCtl) try { abortCtl.abort(); } catch (e) {}
-    abortCtl = typeof AbortController === 'function' ? new AbortController() : null;
-    const myCtl = abortCtl;
-    const signal = abortCtl ? abortCtl.signal : undefined;
-    const total = cities.length;
-    const out = new Array(total);
-    if (!quiet) setLoadProgress(5, t('weather.loadingForecasts', 'Loading forecasts…'));
-
-    const usIdx = [];
-    const omIdx = [];
-    for (let i = 0; i < cities.length; i++) {
-      if (dataApi.isLikelyUs(cities[i])) usIdx.push(i);
-      else omIdx.push(i);
-    }
-
-    let done = 0;
-    function bump() {
-      done++;
-      if (signal && signal.aborted) return;
-      if (quiet) return;
-      // Forecasts: 5% → 62% (alerts continue 62% → 96%; never park at ~85% as the "start")
-      const pct = 5 + Math.round((done / Math.max(1, total)) * 57);
-      setLoadProgress(Math.min(62, pct), t('weather.loadingForecasts', 'Loading forecasts…')
-        + ' (' + Math.min(done, total) + '/' + total + ')');
-    }
-
-    // US: NWS with limited concurrency (no OM enrich on list)
-    async function nwsWorker(queue) {
-      while (queue.length) {
-        if (signal && signal.aborted) return;
-        const idx = queue.shift();
-        try {
-          out[idx] = await loadCity(cities[idx], signal, { enrich: false, forceFetch: forceFetch });
-        } catch (e) {
-          if (e && e.name === 'AbortError') return;
-          out[idx] = { error: true, city: cities[idx], fetchedAt: Date.now() };
-        }
-        cache.set(cityKey(cities[idx]), out[idx]);
-        bump();
-      }
-    }
-
-    const usQueue = usIdx.slice();
-    await Promise.all([nwsWorker(usQueue), nwsWorker(usQueue), nwsWorker(usQueue)]);
-
-    // Non-US (and any holes): Open-Meteo batch
-    const needOm = [];
-    for (let i = 0; i < cities.length; i++) {
-      if (!out[i] || out[i].error || !out[i].weather) needOm.push(i);
-    }
-    // Prefer batch for pure non-US indices first
-    const omCities = needOm.map(function (i) { return cities[i]; });
-    if (omCities.length && !(signal && signal.aborted)) {
-      const CHUNK = 20;
-      try {
-        for (let start = 0; start < omCities.length; start += CHUNK) {
-          if (signal && signal.aborted) break;
-          const slice = omCities.slice(start, start + CHUNK);
-          const sliceIdx = needOm.slice(start, start + CHUNK);
-          let packs;
-          try {
-            packs = await loadCityBatchOm(slice, signal);
-          } catch (e) {
-            if (e && e.name === 'AbortError') throw e;
-            if (e && e.name === 'RateLimitError') {
-              await new Promise(function (r) { window.setTimeout(r, 900); });
-              packs = await loadCityBatchOm(slice, signal);
-            } else {
-              // sequential OM fallback for this chunk
-              packs = [];
-              for (let j = 0; j < slice.length; j++) {
-                packs.push(await loadOpenMeteoCity(slice[j], signal));
-              }
-            }
-          }
-          for (let j = 0; j < packs.length; j++) {
-            const idx = sliceIdx[j];
-            // Don't overwrite a good NWS pack
-            if (out[idx] && out[idx].weather && !out[idx].error) continue;
-            out[idx] = packs[j];
-            cache.set(cityKey(cities[idx]), packs[j]);
-            bump();
-          }
-        }
-      } catch (e) {
-        if (e && e.name === 'AbortError') throw e;
-        for (let k = 0; k < needOm.length; k++) {
-          const idx = needOm[k];
-          if (out[idx] && out[idx].weather) continue;
-          out[idx] = { error: true, city: cities[idx], fetchedAt: Date.now() };
-          cache.set(cityKey(cities[idx]), out[idx]);
-          bump();
-        }
-      }
-    }
-
-    for (let i = 0; i < total; i++) {
-      if (!out[i]) {
-        out[i] = { error: true, city: cities[i], fetchedAt: Date.now() };
-        cache.set(cityKey(cities[i]), out[i]);
-      }
-    }
-
-    if (signal && signal.aborted) {
-      const err = new Error('Aborted');
-      err.name = 'AbortError';
-      throw err;
-    }
-    if (myCtl && abortCtl !== myCtl) {
-      const err = new Error('Aborted');
-      err.name = 'AbortError';
-      throw err;
-    }
-    return out;
-  }
-
   wireRemainingModules();
 
   function clearWeatherSkeleton() {
@@ -1029,7 +833,7 @@
       row.setAttribute('aria-label', (displayCityName(c) || c.name || '') + '. ' + failLines);
       const retry = async () => {
         try {
-          const fresh = await loadCity(c);
+          const fresh = await dataApi.loadCity(c);
           openDetail(fresh);
           refreshListsFromCache();
         } catch (e) { showError(t('weather.error', 'Could not load weather data.')); }
@@ -1069,7 +873,7 @@
       windDeg: cur.wind_direction_10m
     });
 
-    const alert = topAlert(pack);
+    const alert = alertsApi.topAlert(pack);
     const alertSev = alert ? String(alert.severity || '').toLowerCase() : '';
     const alertTone = alertSev === 'extreme' || alertSev === 'severe'
       ? 'weather-row-alert--severe'
@@ -1274,16 +1078,13 @@
       if (!quiet) {
         // Manual / first load: wipe layers so UI can show progress cleanly
         cache.clear();
-        clearAllNwsPointsCache();
+        dataApi.clearAllNwsPointsCache();
       } else {
         // Quiet auto: keep showing last good list; invalidate NWS grid + forceFetch
-        clearAllNwsPointsCache();
+        dataApi.clearAllNwsPointsCache();
       }
       alertsPrefetchGen++; // cancel any in-flight alert prefetch
-      if (abortCtl) {
-        try { abortCtl.abort(); } catch (e) {}
-        abortCtl = null;
-      }
+      if (dataApi && typeof dataApi.abortListLoads === 'function') dataApi.abortListLoads();
     }
 
     showError('');
@@ -1319,7 +1120,7 @@
         }
         if (gen !== refreshGen) return;
 
-        await loadMany(cities, {
+        await dataApi.loadMany(cities, {
           quiet: quiet,
           forceFetch: !!force
         });
@@ -1330,7 +1131,7 @@
         if (!quiet) {
           setLoadProgress(64, t('weather.loadingAlerts', 'Checking weather alerts…'));
         }
-        await prefetchAlertsForCache(function (done, total) {
+        await alertsApi.prefetchAlertsForCache(function (done, total) {
           if (gen !== refreshGen || quiet) return;
           const pct = 64 + Math.round((done / Math.max(1, total)) * 32);
           setLoadProgress(Math.min(96, pct), t('weather.loadingAlerts', 'Checking weather alerts…')
@@ -1358,14 +1159,11 @@
           showError(t('weather.error', 'Could not load weather data. Pull to refresh or try again shortly.'));
         }
 
-        if (isDetailVisible() && openCity && openCity.city) {
+        if (!opts.skipDetailRefresh && isDetailVisible() && openCity && openCity.city) {
           forceCloseSheet();
           const fresh = cache.get(cityKey(openCity.city));
           if (fresh && fresh.weather) openDetail(fresh);
         }
-
-        // Homepage / share deep link: tools-weather.html?city=nyc
-        tryOpenWeatherDeepLink();
       } catch (e) {
         if (e && e.name === 'AbortError') {
           // Superseded by a newer refresh — leave UI to the winner
@@ -1474,7 +1272,7 @@
     const prevCity = openCity && openCity.city;
     const cityChanged = !!(prevCity && pack.city && !sameCity(prevCity, pack.city));
     // Preserve expanded warnings across enrich / unit / language re-renders
-    const keepAlertOpen = !cityChanged && isDetailVisible() ? captureOpenAlertTitles() : [];
+    const keepAlertOpen = !cityChanged && isDetailVisible() ? alertsApi.captureOpenAlertTitles() : [];
     // Preserve alerts already loaded when enrich replaces the pack object
     if (!cityChanged && openCity && Array.isArray(openCity.alerts) && pack.alerts == null) {
       pack.alerts = openCity.alerts;
@@ -1538,12 +1336,12 @@
     syncDetailFav(c);
 
     // NWS severe weather / disaster alerts (Apple Weather–style banner stack)
-    ensureNwsAlerts(pack);
+    alertsApi.ensureNwsAlerts(pack);
 
     const aqi = pack.air && pack.air.current && pack.air.current.us_aqi;
     const mods = [];
     {
-      const alertHtml = alertsBlockHtml(pack.alerts);
+      const alertHtml = alertsApi.alertsBlockHtml(pack.alerts);
       if (alertHtml) mods.push(alertHtml);
     }
     mods.push(modHtml(
@@ -1581,7 +1379,7 @@
         fmtWind(cur.wind_speed_10m),
         dirLab,
         true, false,
-        windCompassMarkup(deg, 'mini')
+        chartsApi.windCompassMarkup(deg, 'mini')
       ));
     }
     {
@@ -1659,7 +1457,7 @@
     hourlyHtml += '</div>';
     mods.push(`<button type="button" class="weather-mod weather-mod-wide is-tappable" data-sheet="conditions"><div class="weather-mod-label">${modLabelIcon('conditions')}<span>${escapeHtml(t('weather.hourly', 'Hourly Forecast'))}</span></div>${hourlyHtml}</button>`);
 
-    mods.push(`<div class="weather-mod weather-mod-wide"><div class="weather-mod-label">${escapeHtml(t('weather.daily', '10-Day Forecast'))}</div>${dailyBarsHtml(daily, {
+    mods.push(`<div class="weather-mod weather-mod-wide"><div class="weather-mod-label">${escapeHtml(t('weather.daily', '10-Day Forecast'))}</div>${chartsApi.dailyBarsHtml(daily, {
       currentTemp: cur && cur.temperature_2m != null ? cur.temperature_2m : null,
       timeZone: (pack.weather && pack.weather.timezone) || (c && c.tz) || undefined,
       hourly: hourly
@@ -1668,7 +1466,7 @@
     const sr = daily.sunrise && daily.sunrise[0];
     const ss = daily.sunset && daily.sunset[0];
     const sunTz = (pack.weather && pack.weather.timezone) || (c && c.tz) || undefined;
-    const sunViz = sunArcSvg(sr, ss, true, sunTz);
+    const sunViz = chartsApi.sunArcSvg(sr, ss, true, sunTz);
     const sunTitle = (function () {
       // Use city-local wall clock for day/night (same as sheet path)
       try {
@@ -1693,8 +1491,8 @@
 
     detailMods.innerHTML = mods.join('');
     // Restore any expanded alerts the user had open before this re-render
-    if (keepAlertOpen && keepAlertOpen.length) restoreOpenAlertTitles(keepAlertOpen);
-    bindAlertCollapseAnimation(detailMods);
+    if (keepAlertOpen && keepAlertOpen.length) alertsApi.restoreOpenAlertTitles(keepAlertOpen);
+    alertsApi.bindAlertCollapseAnimation(detailMods);
     // Clicks use delegated handler on detailMods (bound once) — survives re-renders
 
     const isClosing = detailEl.classList.contains('is-closing');
@@ -1772,7 +1570,7 @@
     if (!pack.needsEnrich && pack.weather && pack.weather.hourly && pack.city
         && (pack.source === 'nws' || pack.source === 'nws+om')) {
       try {
-        const win = hourlyLocalDay(pack.weather.hourly, pack.weather.timezone || pack.city.tz);
+        const win = chartsApi.hourlyLocalDay(pack.weather.hourly, pack.weather.timezone || pack.city.tz);
         if ((win.end - win.start) < 12) pack.needsEnrich = true;
       } catch (eSparse) { /* ignore */ }
     }
@@ -1780,8 +1578,8 @@
       pack._enriching = true;
       const enrichKey = cityKey(pack.city);
       // Snapshot expanded alerts so enrich re-render can restore them
-      const openTitlesBeforeEnrich = captureOpenAlertTitles();
-      loadCity(pack.city, null, { enrich: true }).then(function (fresh) {
+      const openTitlesBeforeEnrich = alertsApi.captureOpenAlertTitles();
+      dataApi.loadCity(pack.city, null, { enrich: true }).then(function (fresh) {
         if (!fresh || !fresh.weather) return;
         fresh._enriching = false;
         // Keep alerts from pre-enrich pack (enrich path does not re-fetch them)
@@ -1796,7 +1594,7 @@
           }
           openDetail(fresh);
           if (fresh._restoreAlertOpen) {
-            restoreOpenAlertTitles(fresh._restoreAlertOpen);
+            alertsApi.restoreOpenAlertTitles(fresh._restoreAlertOpen);
             delete fresh._restoreAlertOpen;
           }
         }
@@ -2013,26 +1811,26 @@
     if (kind === 'conditions') {
       // Chart owns the big readout (scrub updates it). Secondary context line above.
       body += `<p class="wx-sheet-context">${escapeHtml(condLabel(cur.weather_code))}</p>`;
-      body += buildTempChart(hourly, 'temperature_2m', (v) => fmtTemp(v), chartTz);
+      body += chartsApi.buildTempChart(hourly, 'temperature_2m', (v) => fmtTemp(v), chartTz);
       body += `<p class="weather-mod-label" style="margin-top:16px">${escapeHtml(t('weather.feelsLike', 'Feels Like'))}</p>`;
-      body += buildTempChart(hourly, 'apparent_temperature', (v) => fmtTemp(v), chartTz);
+      body += chartsApi.buildTempChart(hourly, 'apparent_temperature', (v) => fmtTemp(v), chartTz);
     } else if (kind === 'feels') {
       body += `<p class="wx-sheet-context">${escapeHtml(condLabel(cur.weather_code))}</p>`;
-      body += buildTempChart(hourly, 'apparent_temperature', (v) => fmtTemp(v), chartTz);
+      body += chartsApi.buildTempChart(hourly, 'apparent_temperature', (v) => fmtTemp(v), chartTz);
     } else if (kind === 'humidity') {
-      body += buildTempChart(hourly, 'relative_humidity_2m', (v) => Math.round(v) + '%', chartTz);
+      body += chartsApi.buildTempChart(hourly, 'relative_humidity_2m', (v) => Math.round(v) + '%', chartTz);
     } else if (kind === 'wind') {
       // Direction as context; speed is the scrub readout
       body += `<p class="wx-sheet-context">${escapeHtml(degToCompass(cur.wind_direction_10m))}${cur.wind_direction_10m != null ? ' · ' + Math.round(cur.wind_direction_10m) + '°' : ''}</p>`;
-      body += buildTempChart(hourly, 'wind_speed_10m', (v) => fmtWind(v), chartTz);
-      body += `<div class="wx-sheet-compass-row">${windCompass(cur.wind_direction_10m)}</div>`;
+      body += chartsApi.buildTempChart(hourly, 'wind_speed_10m', (v) => fmtWind(v), chartTz);
+      body += `<div class="wx-sheet-compass-row">${chartsApi.windCompass(cur.wind_direction_10m)}</div>`;
       body += `<p class="weather-mod-label">${escapeHtml(t('weather.units', 'Units'))}</p><div class="weather-units-row" id="wxWindUnits">`;
       [['mph', 'mph'], ['kmh', 'km/h'], ['ms', 'm/s'], ['bft', 'bft'], ['kn', 'kn']].forEach(([u, lab]) => {
         body += `<button type="button" data-u="${u}" class="${windUnit() === u ? 'active' : ''}">${lab}</button>`;
       });
       body += '</div>';
     } else if (kind === 'pressure') {
-      body += buildTempChart(hourly, 'surface_pressure', (v) => fmtPress(v), chartTz);
+      body += chartsApi.buildTempChart(hourly, 'surface_pressure', (v) => fmtPress(v), chartTz);
       body += `<div class="weather-units-row" id="wxPressUnits">`;
       ['hPa', 'mbar', 'inHg', 'mmHg', 'kPa'].forEach((u) => {
         body += `<button type="button" data-u="${u}" class="${pressUnit() === u ? 'active' : ''}">${u}</button>`;
@@ -2041,11 +1839,11 @@
     } else if (kind === 'uv') {
       const uv = daily.uv_index_max ? daily.uv_index_max[0] : null;
       if (hourly.uv_index) {
-        body += buildTempChart(hourly, 'uv_index', (v) => String(Math.round(v * 10) / 10), chartTz);
+        body += chartsApi.buildTempChart(hourly, 'uv_index', (v) => String(Math.round(v * 10) / 10), chartTz);
       } else {
         body += `<div class="wx-sheet-hero"><div class="weather-chart-readout">${uv != null ? Math.round(uv * 10) / 10 : '—'}</div></div>`;
       }
-      body += uvGauge(uv);
+      body += chartsApi.uvGauge(uv);
     } else if (kind === 'aqi') {
       const aqi = pack.air && pack.air.current && pack.air.current.us_aqi;
       body += `<div class="wx-sheet-hero">
@@ -2062,7 +1860,7 @@
         </div>`;
       }
     } else if (kind === 'precip') {
-      if (hourly.precipitation) body += buildTempChart(hourly, 'precipitation', (v) => fmtPrecip(v), chartTz);
+      if (hourly.precipitation) body += chartsApi.buildTempChart(hourly, 'precipitation', (v) => fmtPrecip(v), chartTz);
       else {
         body += `<div class="wx-sheet-hero"><div class="weather-chart-readout">${escapeHtml(fmtPrecip(cur.precipitation))}</div></div>`;
       }
@@ -2074,7 +1872,7 @@
     } else if (kind === 'sun') {
       const sr = daily.sunrise && daily.sunrise[0];
       const ss = daily.sunset && daily.sunset[0];
-      body += buildSunDaySheet(sr, ss, chartTz);
+      body += chartsApi.buildSunDaySheet(sr, ss, chartTz);
     } else if (kind === 'vis') {
       body += `<div class="wx-sheet-hero">
         <div class="weather-chart-readout">${escapeHtml(fmtVis(cur.visibility))}</div>
@@ -2092,7 +1890,7 @@
 
     sheetBody.innerHTML = body;
     setSheetTitle(sheetTitleHtml);
-    bindCharts(sheetBody);
+    chartsApi.bindCharts(sheetBody);
 
     const bind = (id, setter) => {
       const row = document.getElementById(id);
@@ -2598,7 +2396,7 @@
     const gen = ++searchGen;
     try {
       const langParam = lang() === 'zh' ? 'zh' : lang() === 'ja' ? 'ja' : lang() === 'es' ? 'es' : 'en';
-      const data = await fetchJson(`${GEOCODE}?name=${encodeURIComponent(q)}&count=8&language=${langParam}&format=json`);
+      const data = await dataApi.fetchJson(`${GEOCODE}?name=${encodeURIComponent(q)}&count=8&language=${langParam}&format=json`);
       if (gen !== searchGen) return;
       const results = data.results || [];
       suggestEl.innerHTML = '';
@@ -2634,7 +2432,7 @@
             searchClear.classList.add('show');
           }
           try {
-            const pack = await loadCity(city);
+            const pack = await dataApi.loadCity(city);
             openDetail(pack);
           } catch (e) {
             showError(t('weather.error', 'Could not load weather data.'));
@@ -2845,7 +2643,7 @@
           };
           // Always refresh locatedAt — user asked for a new fix
           saveMyLocation(city, { refreshLocatedAt: true });
-          await loadCity(city);
+          await dataApi.loadCity(city);
           refreshListsFromCache();
           // Card only — do not open detail
           if (myLocBlock) {
@@ -2953,22 +2751,31 @@
     if (isDetailVisible() && openCity && openCity.weather) {
       const fresh = (openCity.city && cache.get(cityKey(openCity.city))) || openCity;
       // Preserve open alerts across unit repaint
-      const keepAlerts = captureOpenAlertTitles();
+      const keepAlerts = alertsApi.captureOpenAlertTitles();
       openDetail(fresh);
-      if (keepAlerts && keepAlerts.length) restoreOpenAlertTitles(keepAlerts);
+      if (keepAlerts && keepAlerts.length) alertsApi.restoreOpenAlertTitles(keepAlerts);
     }
   };
 
+  var lastWxTemp = null;
+  var lastWxDist = null;
   document.addEventListener('usa-travel:prefs', function (e) {
     var type = e && e.detail && e.detail.type;
-    if (type !== 'lang' && type !== 'units') return;
-    window.refreshWeatherUi({ force: type === 'units' });
+    if (type === 'lang') {
+      window.refreshWeatherUi({ force: false });
+      return;
+    }
+    if (type !== 'units') return;
+    var temp = e.detail && e.detail.temp;
+    var dist = e.detail && e.detail.dist;
+    var changed = temp !== lastWxTemp || dist !== lastWxDist;
+    lastWxTemp = temp;
+    lastWxDist = dist;
+    window.refreshWeatherUi({ force: changed });
   });
 
   /** Deep link from homepage cards / shared URLs: ?city=nyc | ?lat=&lon= */
-  var weatherDeepLink = null;
-  var weatherDeepLinkDone = false;
-  function parseWeatherDeepLink() {
+  function cityFromQuery() {
     try {
       var p = new URLSearchParams(location.search || '');
       var slug = (p.get('city') || p.get('dest') || '').toLowerCase().trim();
@@ -2976,81 +2783,41 @@
       var lon = parseFloat(p.get('lon'));
       if (Number.isFinite(lat) && Number.isFinite(lon)) {
         return {
+          name: p.get('name') || 'Location',
+          admin1: p.get('admin1') || '',
           lat: lat,
           lon: lon,
-          name: p.get('name') || '',
-          admin1: p.get('admin1') || '',
           tz: p.get('tz') || undefined
         };
       }
       if (slug && typeof DEST_WEATHER_CITIES !== 'undefined' && DEST_WEATHER_CITIES[slug]) {
-        var c = DEST_WEATHER_CITIES[slug];
-        return { lat: c.lat, lon: c.lon, name: c.name, admin1: c.admin1 || '', tz: c.tz };
+        return DEST_WEATHER_CITIES[slug];
       }
-      // Fallback: match major city by name fragment
       if (slug) {
         var hit = MAJOR.find(function (m) {
-          return String(m.name).toLowerCase().replace(/\s+/g, '') === slug.replace(/\s+/g, '')
-            || String(m.name).toLowerCase().indexOf(slug) === 0;
+          var n = String(m.name).toLowerCase().replace(/\s+/g, '');
+          var s = slug.replace(/\s+/g, '');
+          return n === s || n.indexOf(s) === 0;
         });
-        if (hit) return { lat: hit.lat, lon: hit.lon, name: hit.name, admin1: hit.admin1 || '', tz: hit.tz };
+        if (hit) return hit;
       }
     } catch (e) { /* ignore */ }
     return null;
   }
-  function cityFromDeepLinkTarget(target) {
-    if (!target) return null;
-    var lat = Number(target.lat);
-    var lon = Number(target.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-    return {
-      name: target.name || 'Location',
-      admin1: target.admin1 || '',
-      lat: lat,
-      lon: lon,
-      tz: target.tz
-    };
-  }
 
-  /** Fetch only the deep-linked city and open detail — do not wait for majors. */
-  async function openDeepLinkFirst() {
-    if (!weatherDeepLink || weatherDeepLinkDone) return false;
-    var city = cityFromDeepLinkTarget(weatherDeepLink);
+  /** Fetch only the query city and open detail — do not wait for majors. */
+  async function openDeepLinkFirst(city) {
     if (!city) return false;
     try {
-      var pack = await loadCity(city, null, { enrich: true, forceFetch: true });
+      var pack = await dataApi.loadCity(city, null, { enrich: true, forceFetch: true });
       if (!pack || !pack.weather) return false;
       cache.set(cityKey(city), pack);
-      weatherDeepLinkDone = true;
       listPaintLocked = false;
       try { clearWeatherSkeleton(); } catch (e) { /* ignore */ }
       openDetail(pack);
       return true;
     } catch (e) {
-      if (e && e.name === 'AbortError') return false;
       return false;
-    }
-  }
-
-  function tryOpenWeatherDeepLink() {
-    if (weatherDeepLinkDone) return;
-    if (!weatherDeepLink) weatherDeepLink = parseWeatherDeepLink();
-    if (!weatherDeepLink) {
-      weatherDeepLinkDone = true;
-      return;
-    }
-    var target = weatherDeepLink;
-    var pack = null;
-    cache.forEach(function (p) {
-      if (!p || !p.city || !p.weather) return;
-      if (Math.abs(Number(p.city.lat) - Number(target.lat)) < 0.08
-          && Math.abs(Number(p.city.lon) - Number(target.lon)) < 0.08) {
-        pack = p;
-      }
-    });
-    if (pack) {
-      weatherDeepLinkDone = true;
-      try { openDetail(pack); } catch (e) { /* ignore */ }
     }
   }
 
@@ -3065,10 +2832,15 @@
   }
   applyAmbientPageSky();
   seedStaticCityNames();
-  weatherDeepLink = parseWeatherDeepLink();
-  if (weatherDeepLink) {
-    openDeepLinkFirst().then(function (opened) {
-      refresh(true, { quiet: !!opened, reason: opened ? 'boot-after-deeplink' : 'boot' });
+  var bootCity = cityFromQuery();
+  if (bootCity) {
+    openDeepLinkFirst(bootCity).then(function (opened) {
+      // List fills in behind detail. Do not force-refetch the city we just opened.
+      refresh(opened ? false : true, {
+        quiet: !!opened,
+        reason: opened ? 'boot-after-deeplink' : 'boot',
+        skipDetailRefresh: !!opened
+      });
     });
   } else {
     refresh(true, { quiet: false, reason: 'boot' });

@@ -16,10 +16,9 @@
     return (typeof currentLang === 'string' && currentLang) || 'en';
   }
   function tx(key, fallback) {
-    if (window.USATravel && typeof window.USATravel.t === 'function') {
-      return window.USATravel.t(key, fallback);
-    }
-    return fallback;
+    return window.USATravel && typeof window.USATravel.t === 'function'
+      ? window.USATravel.t(key, fallback)
+      : fallback;
   }
   function openLabel() { return tx('dest.wxOpen', 'Open weather →'); }
   function hlLabel() {
