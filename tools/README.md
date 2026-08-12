@@ -4,12 +4,6 @@ Local-only utilities. **Strip `tools/` from public deploys** (Cloudflare / GitHu
 
 ---
 
-## Liquid Glass vendor
-
-Optional WebGL material uses a pinned copy of `@ybouane/liquidglass` under `vendor/liquidglass/` (MIT). Loaded only when the user enables **Liquid Glass** in Settings. Re-vendor notes: see `vendor/liquidglass/README.md`.
-
----
-
 ## Legal markdown builder
 
 Privacy Policy and Terms of Use sources:

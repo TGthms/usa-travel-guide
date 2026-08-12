@@ -1637,22 +1637,8 @@ function openSettings(trigger) {
   lockBodyScroll();
   settingsOverlay.classList.add('open');
   settingsOverlay.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('settings-open');
-  const panel = document.getElementById('settings');
-  if (panel) {
-    panel.setAttribute('aria-hidden', 'false');
-    panel.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
-  }
   settingsOverlay.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
   if (settingsCloseBtn) setTimeout(() => settingsCloseBtn.focus(), 100);
-  // Liquid Glass: build WebGL settings stage (mirror + glass panel + switch pills)
-  try {
-    if (window.__usaTravelLiquidGlass && typeof window.__usaTravelLiquidGlass.refresh === 'function') {
-      Promise.resolve(window.__usaTravelLiquidGlass.refresh()).catch(function () { /* ignore */ });
-    } else if (window.__usaTravelLiquidGlass && typeof window.__usaTravelLiquidGlass.markChanged === 'function') {
-      window.__usaTravelLiquidGlass.markChanged(panel || settingsOverlay);
-    }
-  } catch (e) { /* ignore */ }
 }
 
 function closeSettings() {
@@ -1660,9 +1646,6 @@ function closeSettings() {
   const restoreY = lockedScrollY;
   settingsOverlay.classList.remove('open');
   settingsOverlay.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('settings-open');
-  const panel = document.getElementById('settings');
-  if (panel) panel.setAttribute('aria-hidden', 'true');
   unlockBodyScroll();
   ensureBodyScrollUnlocked();
   if (lastSettingsTrigger && typeof lastSettingsTrigger.focus === 'function') {

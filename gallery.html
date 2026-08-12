@@ -658,8 +658,7 @@
   <button type="button" class="lightbox-next" id="lightboxNext" aria-label="Next photo"><svg class="sf-icon sf-icon--nav" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></button>
 </div>
 
-<div class="settings-overlay" id="settingsOverlay" data-lg-settings-restructured="1" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="settingsTitle">
-</div>
+<div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="settingsTitle">
 <section id="settings" class="settings-panel">
   <div class="settings-header reveal">
     <span class="section-eyebrow" data-i18n="settings.eyebrow">Preferences</span>
@@ -755,25 +754,9 @@
       </div>
     </div>
 
-    <div class="settings-group settings-group-wide reveal reveal-delay-5" id="liquidGlassSettingsGroup">
-      <div class="settings-group-label" data-i18n="settings.liquidGlassLabel">Liquid Glass</div>
-      <div class="settings-group-sub" data-i18n="settings.liquidGlassSub">Liquid glass material for panels and cards. Uses extra GPU when available; off keeps the default look.</div>
-      <div class="units-row" id="liquidGlassPillGroup" role="group" aria-label="Liquid Glass">
-        <button type="button" class="pill-btn active" data-liquid-glass-val="off"><span data-i18n="settings.liquidGlassOff">Off</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
-        <button type="button" class="pill-btn" data-liquid-glass-val="on"><span data-i18n="settings.liquidGlassOn">On</span><span class="pill-check" aria-hidden="true"><svg class="sf-icon sf-icon--check" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></button>
-      </div>
-      <div class="settings-liquid-glass-tint" id="liquidGlassTintWrap">
-        <div class="settings-liquid-glass-tint-labels">
-          <span data-i18n="settings.liquidGlassClear">Clear</span>
-          <span data-i18n="settings.liquidGlassTinted">Tinted</span>
-        </div>
-        <input type="range" id="liquidGlassTint" min="0" max="100" value="35" step="1" aria-valuemin="0" aria-valuemax="100" aria-label="Liquid Glass tint">
-      </div>
-    </div>
-
-
   </div>
 </section>
+</div>
 <footer class="gallery-app-footer">
   <div class="gallery-app-footer-row">
     <a href="index.html" class="gallery-app-footer-home">
@@ -798,7 +781,6 @@
 <script src="src/js/core/nav-return.js" defer></script>
 <script src="src/js/core/runtime.js" defer></script>
 <script src="src/js/features/gallery.js" defer></script>
-<script src="src/js/features/liquid-glass.js" defer></script>
 <script src="src/js/app.js" defer></script>
 </body>
 </html>

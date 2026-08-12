@@ -1,8 +1,0 @@
-{
-  "name": "@ybouane/liquidglass-vendored",
-  "version": "1.0.3",
-  "private": true,
-  "type": "module",
-  "description": "Vendored ESM build of @ybouane/liquidglass for USA Travel Guide",
-  "license": "MIT"
-}
