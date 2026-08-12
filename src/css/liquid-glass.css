@@ -1,0 +1,725 @@
+/* USA Travel Guide — Liquid Glass (optional)
+   All visual overrides gated by html[data-liquid-glass="on"|"fallback"].
+   Off / attribute absent → zero visual change.
+   Primary look is CSS glass (blur + translucency + specular). WebGL is an
+   optional refraction layer on chrome hosts when available. */
+
+/* ── Tint control UI ── */
+.settings-liquid-glass-tint {
+  display: none;
+  margin-top: 16px;
+  max-width: 420px;
+}
+.settings-liquid-glass-tint.is-visible { display: block; }
+.settings-liquid-glass-tint-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin-bottom: 8px;
+}
+#liquidGlassSettingsGroup[hidden] { display: none !important; }
+#liquidGlassTint {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, #fff 40%, transparent) 0%,
+    color-mix(in srgb, var(--accent-1) 55%, rgba(255, 255, 255, 0.4)) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+#liquidGlassTint::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+  cursor: grab;
+}
+#liquidGlassTint::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+  cursor: grab;
+}
+
+/* ── Material tokens (Clear → Tinted) ── */
+html[data-liquid-glass="on"],
+html[data-liquid-glass="fallback"] {
+  --lg-tint: 0.35;
+  --lg-blur: calc(28px + (var(--lg-tint) * 24px));
+  --lg-sat: calc(1.55 + var(--lg-tint) * 0.35);
+  /* Dark: clear glass, not solid paint */
+  --lg-fill: rgba(16, 20, 28, calc(0.18 + var(--lg-tint) * 0.32));
+  --lg-fill-soft: rgba(22, 26, 34, calc(0.22 + var(--lg-tint) * 0.28));
+  --lg-fill-strong: rgba(12, 14, 20, calc(0.28 + var(--lg-tint) * 0.34));
+  --lg-border: rgba(255, 255, 255, calc(0.22 + (1 - var(--lg-tint)) * 0.2));
+  --lg-border-soft: rgba(255, 255, 255, calc(0.12 + (1 - var(--lg-tint)) * 0.1));
+  --lg-highlight: inset 0 1px 0 rgba(255, 255, 255, calc(0.34 + (1 - var(--lg-tint)) * 0.22));
+  --lg-highlight-soft: inset 0 1px 0 rgba(255, 255, 255, calc(0.2 + (1 - var(--lg-tint)) * 0.12));
+  --lg-shadow: 0 20px 56px rgba(0, 0, 0, calc(0.2 + var(--lg-tint) * 0.18)),
+    0 2px 0 rgba(255, 255, 255, 0.04);
+  --lg-shine: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, calc(0.18 - var(--lg-tint) * 0.08)) 0%,
+    rgba(255, 255, 255, 0.03) 38%,
+    transparent 62%
+  );
+}
+
+/* Light themes: milky glass */
+html[data-theme="minimal"][data-liquid-glass="on"],
+html[data-theme="minimal"][data-liquid-glass="fallback"],
+html[data-theme="elegant"][data-liquid-glass="on"],
+html[data-theme="elegant"][data-liquid-glass="fallback"] {
+  --lg-fill: rgba(255, 255, 255, calc(0.42 + var(--lg-tint) * 0.28));
+  --lg-fill-soft: rgba(255, 255, 255, calc(0.48 + var(--lg-tint) * 0.24));
+  --lg-fill-strong: rgba(255, 255, 255, calc(0.55 + var(--lg-tint) * 0.22));
+  --lg-border: rgba(255, 255, 255, calc(0.55 + var(--lg-tint) * 0.15));
+  --lg-border-soft: rgba(255, 255, 255, 0.45);
+  --lg-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --lg-highlight-soft: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  --lg-shadow: 0 18px 48px rgba(20, 24, 40, calc(0.1 + var(--lg-tint) * 0.08)),
+    0 1px 0 rgba(255, 255, 255, 0.6);
+  --lg-shine: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(255, 255, 255, 0.2) 36%,
+    transparent 64%
+  );
+}
+
+/* Shared glass surface recipe — beats glass-theme opaque cards via higher specificity + !important */
+html[data-liquid-glass="on"] .lg-surface,
+html[data-liquid-glass="fallback"] .lg-surface,
+html[data-theme="glass"][data-liquid-glass="on"] .lg-surface,
+html[data-theme="glass"][data-liquid-glass="fallback"] .lg-surface,
+html[data-liquid-glass="on"] .settings-panel,
+html[data-liquid-glass="fallback"] .settings-panel,
+html[data-theme="glass"][data-liquid-glass="on"] .settings-panel,
+html[data-theme="glass"][data-liquid-glass="fallback"] .settings-panel,
+html[data-liquid-glass="on"] .settings-group,
+html[data-liquid-glass="fallback"] .settings-group,
+html[data-theme="glass"][data-liquid-glass="on"] .settings-group,
+html[data-theme="glass"][data-liquid-glass="fallback"] .settings-group,
+html[data-liquid-glass="on"] .tool-card,
+html[data-liquid-glass="fallback"] .tool-card,
+html[data-theme="glass"][data-liquid-glass="on"] .tool-card,
+html[data-theme="glass"][data-liquid-glass="fallback"] .tool-card,
+html[data-liquid-glass="on"] .modal-box,
+html[data-liquid-glass="fallback"] .modal-box,
+html[data-theme="glass"][data-liquid-glass="on"] .modal-box,
+html[data-theme="glass"][data-liquid-glass="fallback"] .modal-box,
+html[data-liquid-glass="on"] .fact-card,
+html[data-liquid-glass="fallback"] .fact-card,
+html[data-liquid-glass="on"] .season-card,
+html[data-liquid-glass="fallback"] .season-card,
+html[data-liquid-glass="on"] .route-card,
+html[data-liquid-glass="fallback"] .route-card,
+html[data-liquid-glass="on"] .fun-fact-card,
+html[data-liquid-glass="fallback"] .fun-fact-card,
+html[data-liquid-glass="on"] .tools-panel,
+html[data-liquid-glass="fallback"] .tools-panel,
+html[data-liquid-glass="on"] .tools-hub-card,
+html[data-liquid-glass="fallback"] .tools-hub-card,
+html[data-theme="glass"][data-liquid-glass="on"] .tools-hub-card,
+html[data-theme="glass"][data-liquid-glass="fallback"] .tools-hub-card {
+  /* Do not set position here — .settings-panel must stay position:fixed */
+  isolation: isolate;
+  background: var(--lg-fill) !important;
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  border-color: var(--lg-border) !important;
+  box-shadow: var(--lg-shadow), var(--lg-highlight) !important;
+}
+
+/* In-flow cards only — safe to establish containing block for sheen */
+html[data-liquid-glass="on"] .settings-group,
+html[data-liquid-glass="fallback"] .settings-group,
+html[data-liquid-glass="on"] .tool-card,
+html[data-liquid-glass="fallback"] .tool-card,
+html[data-liquid-glass="on"] .modal-box,
+html[data-liquid-glass="fallback"] .modal-box,
+html[data-liquid-glass="on"] .fact-card,
+html[data-liquid-glass="fallback"] .fact-card,
+html[data-liquid-glass="on"] .season-card,
+html[data-liquid-glass="fallback"] .season-card,
+html[data-liquid-glass="on"] .route-card,
+html[data-liquid-glass="fallback"] .route-card,
+html[data-liquid-glass="on"] .fun-fact-card,
+html[data-liquid-glass="fallback"] .fun-fact-card,
+html[data-liquid-glass="on"] .tools-hub-card,
+html[data-liquid-glass="fallback"] .tools-hub-card {
+  position: relative;
+}
+
+/* Clip sheen to card bounds; keep .settings-panel scrollable (overflow:auto) */
+html[data-liquid-glass="on"] .settings-group,
+html[data-liquid-glass="fallback"] .settings-group,
+html[data-liquid-glass="on"] .tool-card,
+html[data-liquid-glass="fallback"] .tool-card,
+html[data-liquid-glass="on"] .modal-box,
+html[data-liquid-glass="fallback"] .modal-box,
+html[data-liquid-glass="on"] .fact-card,
+html[data-liquid-glass="fallback"] .fact-card,
+html[data-liquid-glass="on"] .season-card,
+html[data-liquid-glass="fallback"] .season-card,
+html[data-liquid-glass="on"] .route-card,
+html[data-liquid-glass="fallback"] .route-card,
+html[data-liquid-glass="on"] .fun-fact-card,
+html[data-liquid-glass="fallback"] .fun-fact-card,
+html[data-liquid-glass="on"] .tools-hub-card,
+html[data-liquid-glass="fallback"] .tools-hub-card {
+  overflow: hidden;
+}
+
+/* Specular sheen — only on surfaces that do not already use ::before */
+html[data-liquid-glass="on"] .settings-panel::before,
+html[data-liquid-glass="fallback"] .settings-panel::before,
+html[data-liquid-glass="on"] .settings-group::before,
+html[data-liquid-glass="fallback"] .settings-group::before,
+html[data-liquid-glass="on"] .tool-card::before,
+html[data-liquid-glass="fallback"] .tool-card::before,
+html[data-liquid-glass="on"] .modal-box::before,
+html[data-liquid-glass="fallback"] .modal-box::before,
+html[data-liquid-glass="on"] .route-card::before,
+html[data-liquid-glass="fallback"] .route-card::before,
+html[data-liquid-glass="on"] .fun-fact-card::before,
+html[data-liquid-glass="fallback"] .fun-fact-card::before,
+html[data-liquid-glass="on"] .tools-hub-card::before,
+html[data-liquid-glass="fallback"] .tools-hub-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--lg-shine);
+  opacity: 1;
+}
+
+html[data-liquid-glass="on"] .settings-panel > *,
+html[data-liquid-glass="fallback"] .settings-panel > *,
+html[data-liquid-glass="on"] .settings-group > *,
+html[data-liquid-glass="fallback"] .settings-group > *,
+html[data-liquid-glass="on"] .tool-card > *,
+html[data-liquid-glass="fallback"] .tool-card > *,
+html[data-liquid-glass="on"] .modal-box > *,
+html[data-liquid-glass="fallback"] .modal-box > *,
+html[data-liquid-glass="on"] .route-card > *,
+html[data-liquid-glass="fallback"] .route-card > *,
+html[data-liquid-glass="on"] .fun-fact-card > *,
+html[data-liquid-glass="fallback"] .fun-fact-card > *,
+html[data-liquid-glass="on"] .tools-hub-card > *,
+html[data-liquid-glass="fallback"] .tools-hub-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* fact/season cards already use ::before for hover wash — glass via fill + edge only */
+html[data-liquid-glass="on"] .fact-card::before,
+html[data-liquid-glass="fallback"] .fact-card::before {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, calc(0.16 - var(--lg-tint) * 0.06)) 0%,
+    transparent 55%
+  );
+  opacity: 0.55;
+}
+html[data-liquid-glass="on"] .fact-card:hover::before,
+html[data-liquid-glass="fallback"] .fact-card:hover::before {
+  opacity: 0.9;
+}
+html[data-liquid-glass="on"] .season-card::before,
+html[data-liquid-glass="fallback"] .season-card::before {
+  background: var(--lg-shine);
+  opacity: 0.45;
+}
+html[data-liquid-glass="on"] .season-card:hover::before,
+html[data-liquid-glass="fallback"] .season-card:hover::before {
+  opacity: 0.75;
+}
+
+/* Outer sheet slightly clearer than nested cards */
+html[data-liquid-glass="on"] .settings-panel,
+html[data-liquid-glass="fallback"] .settings-panel,
+html[data-theme="glass"][data-liquid-glass="on"] .settings-panel,
+html[data-theme="glass"][data-liquid-glass="fallback"] .settings-panel {
+  background: rgba(14, 18, 26, calc(0.14 + var(--lg-tint) * 0.26)) !important;
+  border: 1px solid var(--lg-border) !important;
+}
+
+html[data-theme="minimal"][data-liquid-glass="on"] .settings-panel,
+html[data-theme="minimal"][data-liquid-glass="fallback"] .settings-panel,
+html[data-theme="elegant"][data-liquid-glass="on"] .settings-panel,
+html[data-theme="elegant"][data-liquid-glass="fallback"] .settings-panel {
+  background: rgba(255, 255, 255, calc(0.38 + var(--lg-tint) * 0.22)) !important;
+}
+
+/* Nested settings cards / tool cards — same liquid material, slightly denser */
+html[data-liquid-glass="on"] .settings-group,
+html[data-liquid-glass="fallback"] .settings-group,
+html[data-liquid-glass="on"] .tool-card,
+html[data-liquid-glass="fallback"] .tool-card,
+html[data-theme="glass"][data-liquid-glass="on"] .settings-group,
+html[data-theme="glass"][data-liquid-glass="fallback"] .settings-group,
+html[data-theme="glass"][data-liquid-glass="on"] .tool-card,
+html[data-theme="glass"][data-liquid-glass="fallback"] .tool-card {
+  background: var(--lg-fill-soft) !important;
+  border-radius: 16px;
+}
+
+/* Tip rows + culture mosaic cells */
+html[data-liquid-glass="on"] .tip-row,
+html[data-liquid-glass="fallback"] .tip-row {
+  background: var(--lg-fill-soft) !important;
+  backdrop-filter: blur(calc(var(--lg-blur) * 0.75)) saturate(var(--lg-sat)) !important;
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur) * 0.75)) saturate(var(--lg-sat)) !important;
+  border-color: var(--lg-border-soft) !important;
+  box-shadow: var(--lg-highlight-soft);
+}
+
+html[data-liquid-glass="on"] .culture-tile,
+html[data-liquid-glass="fallback"] .culture-tile {
+  background: var(--lg-fill-soft) !important;
+  backdrop-filter: blur(18px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.4) !important;
+}
+
+/* Hover lift keeps glass */
+html[data-liquid-glass="on"] .fact-card:hover,
+html[data-liquid-glass="fallback"] .fact-card:hover,
+html[data-liquid-glass="on"] .season-card:hover,
+html[data-liquid-glass="fallback"] .season-card:hover,
+html[data-liquid-glass="on"] .route-card:hover,
+html[data-liquid-glass="fallback"] .route-card:hover,
+html[data-liquid-glass="on"] .tool-card:hover,
+html[data-liquid-glass="fallback"] .tool-card:hover {
+  background: var(--lg-fill-strong) !important;
+  border-color: rgba(255, 255, 255, calc(0.32 + (1 - var(--lg-tint)) * 0.18)) !important;
+  box-shadow: 0 24px 56px rgba(0, 0, 0, calc(0.22 + var(--lg-tint) * 0.12)), var(--lg-highlight) !important;
+}
+
+html[data-theme="minimal"][data-liquid-glass="on"] .fact-card:hover,
+html[data-theme="minimal"][data-liquid-glass="fallback"] .fact-card:hover,
+html[data-theme="elegant"][data-liquid-glass="on"] .fact-card:hover,
+html[data-theme="elegant"][data-liquid-glass="fallback"] .fact-card:hover,
+html[data-theme="minimal"][data-liquid-glass="on"] .season-card:hover,
+html[data-theme="minimal"][data-liquid-glass="fallback"] .season-card:hover,
+html[data-theme="elegant"][data-liquid-glass="on"] .season-card:hover,
+html[data-theme="elegant"][data-liquid-glass="fallback"] .season-card:hover,
+html[data-theme="minimal"][data-liquid-glass="on"] .route-card:hover,
+html[data-theme="minimal"][data-liquid-glass="fallback"] .route-card:hover,
+html[data-theme="elegant"][data-liquid-glass="on"] .route-card:hover,
+html[data-theme="elegant"][data-liquid-glass="fallback"] .route-card:hover,
+html[data-theme="minimal"][data-liquid-glass="on"] .tool-card:hover,
+html[data-theme="minimal"][data-liquid-glass="fallback"] .tool-card:hover,
+html[data-theme="elegant"][data-liquid-glass="on"] .tool-card:hover,
+html[data-theme="elegant"][data-liquid-glass="fallback"] .tool-card:hover {
+  background: rgba(255, 255, 255, calc(0.62 + var(--lg-tint) * 0.2)) !important;
+}
+
+/* Scrim: keep page readable through glass sheet */
+html[data-liquid-glass="on"] .settings-overlay.open,
+html[data-liquid-glass="fallback"] .settings-overlay.open {
+  background: rgba(0, 0, 0, calc(0.22 + var(--lg-tint) * 0.18)) !important;
+  backdrop-filter: blur(calc(14px + var(--lg-tint) * 12px)) saturate(1.25) !important;
+  -webkit-backdrop-filter: blur(calc(14px + var(--lg-tint) * 12px)) saturate(1.25) !important;
+}
+
+/* Nav / app bars */
+html[data-liquid-glass="on"] #navbar.scrolled,
+html[data-liquid-glass="fallback"] #navbar.scrolled,
+html[data-liquid-glass="on"] .gallery-app-bar,
+html[data-liquid-glass="fallback"] .gallery-app-bar,
+html[data-liquid-glass="on"] .legal-topbar,
+html[data-liquid-glass="fallback"] .legal-topbar {
+  background: var(--lg-fill) !important;
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  border-bottom-color: var(--lg-border) !important;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, calc(0.12 + var(--lg-tint) * 0.1)), var(--lg-highlight);
+}
+
+html[data-liquid-glass="on"] #navbar:not(.scrolled),
+html[data-liquid-glass="fallback"] #navbar:not(.scrolled) {
+  background: rgba(10, 12, 18, calc(0.08 + var(--lg-tint) * 0.12)) !important;
+  backdrop-filter: blur(calc(12px + var(--lg-tint) * 10px)) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(calc(12px + var(--lg-tint) * 10px)) saturate(1.3) !important;
+}
+
+/* Pill capsules / segmented controls */
+html[data-liquid-glass="on"] .settings-panel .pill-group,
+html[data-liquid-glass="fallback"] .settings-panel .pill-group,
+html[data-liquid-glass="on"] .settings-panel .units-row,
+html[data-liquid-glass="fallback"] .settings-panel .units-row,
+html[data-liquid-glass="on"] .tool-seg,
+html[data-liquid-glass="fallback"] .tool-seg {
+  background: rgba(255, 255, 255, calc(0.07 + var(--lg-tint) * 0.1)) !important;
+  backdrop-filter: blur(calc(14px + var(--lg-tint) * 10px)) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(calc(14px + var(--lg-tint) * 10px)) saturate(1.35) !important;
+  border: 1px solid rgba(255, 255, 255, calc(0.14 + (1 - var(--lg-tint)) * 0.12));
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+html[data-theme="minimal"][data-liquid-glass="on"] .settings-panel .pill-group,
+html[data-theme="minimal"][data-liquid-glass="fallback"] .settings-panel .pill-group,
+html[data-theme="minimal"][data-liquid-glass="on"] .settings-panel .units-row,
+html[data-theme="minimal"][data-liquid-glass="fallback"] .settings-panel .units-row,
+html[data-theme="elegant"][data-liquid-glass="on"] .settings-panel .pill-group,
+html[data-theme="elegant"][data-liquid-glass="fallback"] .settings-panel .pill-group,
+html[data-theme="elegant"][data-liquid-glass="on"] .settings-panel .units-row,
+html[data-theme="elegant"][data-liquid-glass="fallback"] .settings-panel .units-row {
+  background: rgba(255, 255, 255, calc(0.4 + var(--lg-tint) * 0.22)) !important;
+  border-color: rgba(255, 255, 255, 0.62);
+}
+
+/* Active pills / close / chrome buttons */
+html[data-liquid-glass="on"] .settings-panel .pill-btn.active,
+html[data-liquid-glass="fallback"] .settings-panel .pill-btn.active {
+  background: rgba(255, 255, 255, calc(0.12 + var(--lg-tint) * 0.1)) !important;
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+html[data-liquid-glass="on"] .settings-close,
+html[data-liquid-glass="fallback"] .settings-close,
+html[data-liquid-glass="on"] .btn-primary,
+html[data-liquid-glass="fallback"] .btn-primary,
+html[data-liquid-glass="on"] .gallery-enter-btn,
+html[data-liquid-glass="fallback"] .gallery-enter-btn,
+html[data-liquid-glass="on"] .gallery-app-back,
+html[data-liquid-glass="fallback"] .gallery-app-back,
+html[data-liquid-glass="on"] .nav-settings-btn,
+html[data-liquid-glass="fallback"] .nav-settings-btn,
+html[data-liquid-glass="on"] .nav-tool-btn,
+html[data-liquid-glass="fallback"] .nav-tool-btn,
+html[data-liquid-glass="on"] .fun-fact-btn,
+html[data-liquid-glass="fallback"] .fun-fact-btn {
+  backdrop-filter: blur(calc(16px + var(--lg-tint) * 12px)) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(calc(16px + var(--lg-tint) * 12px)) saturate(1.4) !important;
+  border-color: rgba(255, 255, 255, calc(0.24 + (1 - var(--lg-tint)) * 0.18)) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+html[data-liquid-glass="on"] .gallery-enter-btn,
+html[data-liquid-glass="fallback"] .gallery-enter-btn,
+html[data-liquid-glass="on"] .settings-close,
+html[data-liquid-glass="fallback"] .settings-close {
+  background: rgba(255, 255, 255, calc(0.1 + var(--lg-tint) * 0.12)) !important;
+}
+
+html[data-liquid-glass="on"] .tool-field input,
+html[data-liquid-glass="fallback"] .tool-field input,
+html[data-liquid-glass="on"] .tool-field select,
+html[data-liquid-glass="fallback"] .tool-field select {
+  background: rgba(8, 10, 14, calc(0.28 + var(--lg-tint) * 0.2)) !important;
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border-color: var(--lg-border-soft) !important;
+}
+
+html[data-theme="minimal"][data-liquid-glass="on"] .tool-field input,
+html[data-theme="minimal"][data-liquid-glass="fallback"] .tool-field input,
+html[data-theme="minimal"][data-liquid-glass="on"] .tool-field select,
+html[data-theme="minimal"][data-liquid-glass="fallback"] .tool-field select,
+html[data-theme="elegant"][data-liquid-glass="on"] .tool-field input,
+html[data-theme="elegant"][data-liquid-glass="fallback"] .tool-field input,
+html[data-theme="elegant"][data-liquid-glass="on"] .tool-field select,
+html[data-theme="elegant"][data-liquid-glass="fallback"] .tool-field select {
+  background: rgba(255, 255, 255, calc(0.55 + var(--lg-tint) * 0.2)) !important;
+}
+
+/* Footer strip when liquid glass is on */
+html[data-liquid-glass="on"] .site-footer,
+html[data-liquid-glass="fallback"] .site-footer {
+  background: var(--lg-fill) !important;
+  backdrop-filter: blur(calc(20px + var(--lg-tint) * 16px)) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(calc(20px + var(--lg-tint) * 16px)) saturate(1.35) !important;
+  border-top: 1px solid var(--lg-border-soft);
+}
+
+/* Filter chips / hub chrome */
+html[data-liquid-glass="on"] .dest-filter-btn,
+html[data-liquid-glass="fallback"] .dest-filter-btn,
+html[data-liquid-glass="on"] .gallery-filter,
+html[data-liquid-glass="fallback"] .gallery-filter,
+html[data-liquid-glass="on"] .tools-hub-back,
+html[data-liquid-glass="fallback"] .tools-hub-back {
+  background: rgba(255, 255, 255, calc(0.06 + var(--lg-tint) * 0.1)) !important;
+  backdrop-filter: blur(calc(14px + var(--lg-tint) * 10px)) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(calc(14px + var(--lg-tint) * 10px)) saturate(1.35) !important;
+  border-color: var(--lg-border-soft) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+html[data-liquid-glass="on"] .dest-filter-btn.active,
+html[data-liquid-glass="fallback"] .dest-filter-btn.active,
+html[data-liquid-glass="on"] .gallery-filter.active,
+html[data-liquid-glass="fallback"] .gallery-filter.active {
+  background: rgba(255, 255, 255, calc(0.14 + var(--lg-tint) * 0.12)) !important;
+  border-color: var(--lg-border) !important;
+}
+
+/* Nested tool-card density matches settings groups */
+html[data-liquid-glass="on"] .tools-hub-card,
+html[data-liquid-glass="fallback"] .tools-hub-card {
+  background: var(--lg-fill-soft) !important;
+}
+
+/* Photo cards: glass frame, keep photo intact */
+html[data-liquid-glass="on"] .dest-card,
+html[data-liquid-glass="fallback"] .dest-card,
+html[data-liquid-glass="on"] .region-card,
+html[data-liquid-glass="fallback"] .region-card {
+  border-color: var(--lg-border) !important;
+  box-shadow: var(--lg-shadow), var(--lg-highlight) !important;
+}
+
+html[data-liquid-glass="on"] .dest-card .dest-info,
+html[data-liquid-glass="fallback"] .dest-card .dest-info,
+html[data-liquid-glass="on"] .region-card .region-info,
+html[data-liquid-glass="fallback"] .region-card .region-info {
+  backdrop-filter: blur(calc(16px + var(--lg-tint) * 10px)) saturate(1.3);
+  -webkit-backdrop-filter: blur(calc(16px + var(--lg-tint) * 10px)) saturate(1.3);
+}
+
+/* ═══ In-panel FX root (demo architecture: mirror + indicators under grid) ═══ */
+html[data-liquid-glass="on"] .lg-settings-fx,
+html[data-liquid-glass="fallback"] .lg-settings-fx {
+  position: relative;
+  display: block;
+  isolation: isolate;
+  /* Keep panel scrollable — this root is NOT a glass host */
+  overflow: visible;
+}
+
+html[data-liquid-glass="on"] .lg-settings-fx-mirror,
+html[data-liquid-glass="fallback"] .lg-settings-fx-mirror {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 16px;
+  /* Always present so WebGL has a photographic scene to refract */
+  opacity: 1;
+}
+
+/* Grid paints above indicators; transparent tracks reveal glass underneath */
+html[data-liquid-glass="on"] .lg-settings-fx > .settings-grid,
+html[data-liquid-glass="fallback"] .lg-settings-fx > .settings-grid {
+  position: relative;
+  z-index: 2;
+}
+
+/* Sliding glass pill — under labels, over the photographic mirror */
+html[data-liquid-glass="on"] .lg-settings-fx > .lg-switch-indicator,
+html[data-liquid-glass="fallback"] .lg-settings-fx > .lg-switch-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 12px;
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    width 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    height 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.2s ease;
+  will-change: transform, width, height;
+  /* CSS fallback if WebGL not yet ready */
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px) saturate(1.7);
+  -webkit-backdrop-filter: blur(16px) saturate(1.7);
+}
+html[data-liquid-glass="on"] .lg-settings-fx > .lg-switch-indicator.lg-glass-host {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* Panel shell: CSS glass only — never WebGL host (preserves overflow:auto) */
+html[data-liquid-glass="on"] .settings-panel,
+html[data-liquid-glass="fallback"] .settings-panel {
+  overflow: auto !important;
+}
+
+/* Groups: very translucent so photographic mirror + glass pill read through */
+html[data-liquid-glass="on"] .settings-panel .settings-group,
+html[data-liquid-glass="fallback"] .settings-panel .settings-group,
+html[data-theme="glass"][data-liquid-glass="on"] .settings-panel .settings-group,
+html[data-theme="glass"][data-liquid-glass="fallback"] .settings-panel .settings-group {
+  background: rgba(12, 16, 24, calc(0.12 + var(--lg-tint) * 0.14)) !important;
+  backdrop-filter: blur(calc(12px + var(--lg-tint) * 8px)) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(calc(12px + var(--lg-tint) * 8px)) saturate(1.35) !important;
+}
+/* Kill group sheen overlay that would mute the glass */
+html[data-liquid-glass="on"] .settings-panel .settings-group::before,
+html[data-liquid-glass="fallback"] .settings-panel .settings-group::before {
+  opacity: 0.25;
+}
+
+/* Switch tracks: dim glass bar like demo .hero-tabs — no solid paint */
+html[data-liquid-glass="on"] .settings-panel .pill-group,
+html[data-liquid-glass="fallback"] .settings-panel .pill-group,
+html[data-liquid-glass="on"] .settings-panel .units-row,
+html[data-liquid-glass="fallback"] .settings-panel .units-row {
+  position: relative;
+  background: rgba(0, 0, 0, 0.18) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 14px;
+  padding: 4px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  gap: 4px;
+}
+
+/* Labels sit above the glass pill (pill is a stage sibling under the grid) */
+html[data-liquid-glass="on"] .settings-panel .pill-btn,
+html[data-liquid-glass="fallback"] .settings-panel .pill-btn {
+  position: relative;
+  z-index: 2;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-liquid-glass="on"] .settings-panel .pill-btn.active,
+html[data-liquid-glass="fallback"] .settings-panel .pill-btn.active {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--text-main) !important;
+  box-shadow: none !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* ═══ Page-level switch roots (filters, tool-seg) ═══ */
+html[data-liquid-glass="on"] .lg-switch-root,
+html[data-liquid-glass="fallback"] .lg-switch-root {
+  position: relative;
+  display: block;
+  isolation: isolate;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: visible;
+}
+html[data-liquid-glass="on"] .lg-switch-env,
+html[data-liquid-glass="fallback"] .lg-switch-env {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  object-fit: cover;
+}
+html[data-liquid-glass="on"] .lg-switch-root > .lg-switch-group,
+html[data-liquid-glass="fallback"] .lg-switch-root > .lg-switch-group {
+  position: relative;
+  z-index: 2;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px;
+  gap: 4px;
+}
+html[data-liquid-glass="on"] .lg-switch-root > .lg-switch-indicator,
+html[data-liquid-glass="fallback"] .lg-switch-root > .lg-switch-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 12px;
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    width 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    height 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform, width, height;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 6px 18px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(14px) saturate(1.6);
+  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+}
+html[data-liquid-glass="on"] .lg-switch-root > .lg-switch-indicator.lg-glass-host {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+html[data-liquid-glass="on"] .lg-switch-group .pill-btn,
+html[data-liquid-glass="fallback"] .lg-switch-group .pill-btn,
+html[data-liquid-glass="on"] .lg-switch-group .dest-filter-btn,
+html[data-liquid-glass="fallback"] .lg-switch-group .dest-filter-btn,
+html[data-liquid-glass="on"] .lg-switch-group .gallery-filter,
+html[data-liquid-glass="fallback"] .lg-switch-group .gallery-filter,
+html[data-liquid-glass="on"] .lg-switch-group .tool-seg-btn,
+html[data-liquid-glass="fallback"] .lg-switch-group .tool-seg-btn {
+  position: relative;
+  z-index: 2;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-liquid-glass="on"] .lg-switch-group .pill-btn.active,
+html[data-liquid-glass="fallback"] .lg-switch-group .pill-btn.active,
+html[data-liquid-glass="on"] .lg-switch-group .dest-filter-btn.active,
+html[data-liquid-glass="fallback"] .lg-switch-group .dest-filter-btn.active,
+html[data-liquid-glass="on"] .lg-switch-group .gallery-filter.active,
+html[data-liquid-glass="fallback"] .lg-switch-group .gallery-filter.active,
+html[data-liquid-glass="on"] .lg-switch-group .tool-seg-btn.active,
+html[data-liquid-glass="fallback"] .lg-switch-group .tool-seg-btn.active {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* WebGL host canvas never steals clicks */
+html[data-liquid-glass="on"] .lg-glass-host > canvas,
+html[data-liquid-glass="on"] .lg-glass-host canvas {
+  pointer-events: none !important;
+}
+
+/* Prefer reduced-transparency system setting: denser fill, less blur */
+@media (prefers-reduced-transparency: reduce) {
+  html[data-liquid-glass="on"],
+  html[data-liquid-glass="fallback"] {
+    --lg-blur: 8px;
+    --lg-fill: rgba(18, 22, 30, 0.88);
+    --lg-fill-soft: rgba(22, 26, 34, 0.9);
+    --lg-fill-strong: rgba(16, 18, 24, 0.94);
+  }
+  html[data-theme="minimal"][data-liquid-glass="on"],
+  html[data-theme="minimal"][data-liquid-glass="fallback"],
+  html[data-theme="elegant"][data-liquid-glass="on"],
+  html[data-theme="elegant"][data-liquid-glass="fallback"] {
+    --lg-fill: rgba(255, 255, 255, 0.92);
+    --lg-fill-soft: rgba(255, 255, 255, 0.94);
+    --lg-fill-strong: rgba(255, 255, 255, 0.97);
+  }
+}

@@ -447,8 +447,9 @@ body.page-tools .clock-time { font-size: 18px; font-family: var(--ff-display); }
   }
 }
 .settings-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; }
+/* Panel is a body-level sibling of the scrim (Liquid Glass root needs direct children). */
 .settings-panel {
-  width: min(1120px, 100%);
+  width: min(1120px, calc(100% - 24px));
   max-height: min(86dvh, 900px);
   overflow: auto;
   -webkit-overflow-scrolling: touch;
@@ -458,10 +459,17 @@ body.page-tools .clock-time { font-size: 18px; font-family: var(--ff-display); }
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   box-shadow: 0 28px 64px rgba(0, 0, 0, 0.38);
-  position: relative;
+  position: fixed;
+  z-index: 1003;
+  left: 50%;
+  top: 50%;
   color: var(--text-main);
-  transform: translateY(12px);
-  transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, calc(-50% + 12px));
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), opacity .28s ease, visibility .28s ease;
+  box-sizing: border-box;
 }
 .settings-panel,
 .settings-panel input,
@@ -469,11 +477,22 @@ body.page-tools .clock-time { font-size: 18px; font-family: var(--ff-display); }
 .settings-panel button {
   font-family: var(--ff-body);
 }
-.settings-overlay.open .settings-panel { transform: translateY(0); }
+.settings-overlay.open ~ .settings-panel,
+body.settings-open .settings-panel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+}
 html[data-motion-effective="reduced"] .settings-panel,
 html[data-motion-effective="off"] .settings-panel {
-  transition: opacity .2s ease;
-  transform: none;
+  transition: opacity .2s ease, visibility .2s ease;
+}
+html[data-motion-effective="reduced"] .settings-overlay.open ~ .settings-panel,
+html[data-motion-effective="off"] .settings-overlay.open ~ .settings-panel,
+html[data-motion-effective="reduced"] body.settings-open .settings-panel,
+html[data-motion-effective="off"] body.settings-open .settings-panel {
+  transform: translate(-50%, -50%);
 }
 .settings-header { max-width: var(--content-max); margin: 0 auto 28px; }
 .settings-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }

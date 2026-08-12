@@ -464,6 +464,53 @@ test.describe('USA Travel Guide smoke', () => {
     await expect(page.locator('html')).toHaveAttribute('data-motion', 'off');
   });
 
+  test('Liquid Glass stays off by default and does not load vendor', async ({ page }) => {
+    const vendorHits = [];
+    page.on('request', (req) => {
+      if (/liquidglass/i.test(req.url())) vendorHits.push(req.url());
+    });
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await page.waitForTimeout(400);
+    expect(vendorHits).toEqual([]);
+    await expect(page.locator('html')).not.toHaveAttribute('data-liquid-glass', /on|fallback/);
+    await openSettings(page);
+    await expect(page.locator('#liquidGlassSettingsGroup')).toBeVisible();
+    await expect(page.locator('#liquidGlassPillGroup .pill-btn[data-liquid-glass-val="off"]')).toHaveClass(/active/);
+    await expect(page.locator('#liquidGlassTintWrap')).not.toHaveClass(/is-visible/);
+    await closeSettings(page);
+  });
+
+  test('Liquid Glass On shows tint slider and sets data attribute', async ({ page }) => {
+    test.setTimeout(60_000);
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await openSettings(page);
+    await page.evaluate(async () => {
+      if (window.__usaTravelLiquidGlass) {
+        await window.__usaTravelLiquidGlass.setEnabled(true);
+      }
+    });
+    await expect(page.locator('#liquidGlassTintWrap')).toHaveClass(/is-visible/);
+    await page.waitForFunction(() => {
+      const v = document.documentElement.getAttribute('data-liquid-glass');
+      return v === 'on' || v === 'fallback';
+    }, null, { timeout: 20_000 });
+    await page.locator('#liquidGlassTint').evaluate((el) => {
+      el.value = '70';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await page.evaluate(async () => {
+      if (window.__usaTravelLiquidGlass) {
+        await window.__usaTravelLiquidGlass.setEnabled(false);
+      }
+    });
+    await page.waitForTimeout(200);
+    await expect(page.locator('html')).not.toHaveAttribute('data-liquid-glass', /on|fallback/);
+    await closeSettings(page);
+  });
+
   test('tip-tax state selector localizes on language change', async ({ page }) => {
     await gotoPage(page, '/tools-tip-tax.html');
     await page.waitForFunction(() => document.querySelectorAll('#salesTaxState option').length > 10);
