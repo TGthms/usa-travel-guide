@@ -132,16 +132,18 @@ if (legalLangSwitch) {
 
 
 
+var legalReady = false;
 document.addEventListener('usa-travel:prefs', function (e) {
   if (!document.getElementById('legalDoc')) return;
   const type = e && e.detail && e.detail.type;
   const lang = (e.detail && e.detail.lang) || currentLang;
   if (type === 'ready') {
+    legalReady = true;
     renderLegalPage(lang, { scrollTop: true });
     updateLegalLangSwitch(lang);
     return;
   }
-  if (type !== 'lang') return;
+  if (type !== 'lang' || !legalReady) return;
   renderLegalPage(lang, { scrollTop: false });
   updateLegalLangSwitch(lang);
 });

@@ -1158,12 +1158,6 @@
         else if (!quiet) {
           showError(t('weather.error', 'Could not load weather data. Pull to refresh or try again shortly.'));
         }
-
-        if (!opts.skipDetailRefresh && isDetailVisible() && openCity && openCity.city) {
-          forceCloseSheet();
-          const fresh = cache.get(cityKey(openCity.city));
-          if (fresh && fresh.weather) openDetail(fresh);
-        }
       } catch (e) {
         if (e && e.name === 'AbortError') {
           // Superseded by a newer refresh — leave UI to the winner
@@ -2757,8 +2751,8 @@
     }
   };
 
-  var lastWxTemp = null;
-  var lastWxDist = null;
+  var lastWxTemp = (typeof currentTempUnit === 'string') ? currentTempUnit : null;
+  var lastWxDist = (typeof currentDistUnit === 'string') ? currentDistUnit : null;
   document.addEventListener('usa-travel:prefs', function (e) {
     var type = e && e.detail && e.detail.type;
     if (type === 'lang') {
@@ -2838,8 +2832,7 @@
       // List fills in behind detail. Do not force-refetch the city we just opened.
       refresh(opened ? false : true, {
         quiet: !!opened,
-        reason: opened ? 'boot-after-deeplink' : 'boot',
-        skipDetailRefresh: !!opened
+        reason: opened ? 'boot-after-deeplink' : 'boot'
       });
     });
   } else {

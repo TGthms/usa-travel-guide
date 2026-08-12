@@ -1437,10 +1437,7 @@ function ensureBodyScrollUnlocked() {
 
 function openSettings(trigger) {
   if (!settingsOverlay || settingsOverlay.classList.contains('open')) return;
-  // Don't open settings over an open lightbox — gallery.js closes on this event.
-  if (document.getElementById('lightbox') && document.getElementById('lightbox').classList.contains('open')) {
-    dispatchPrefs('gallery-close');
-  }
+  dispatchPrefs('gallery-close');
   lastSettingsTrigger = trigger || document.activeElement;
   closeMobileNav();
   lockBodyScroll();

@@ -393,8 +393,6 @@ def unique_slug(base: str) -> str:
     # From app.js keys (covers keys whose HTML was removed)
     if GALLERY_I18N_JS.is_file():
         existing.update(re.findall(r"gallery\.item\.([a-z0-9]+)\.caption", GALLERY_I18N_JS.read_text(encoding="utf-8")))
-    if APP_JS.is_file():
-        existing.update(re.findall(r"gallery\.item\.([a-z0-9]+)\.caption", APP_JS.read_text(encoding="utf-8")))
     # From files
     for p in GALLERY_DIR.glob("*"):
         if p.is_file():
@@ -405,51 +403,6 @@ def unique_slug(base: str) -> str:
         slug = f"{base}{n}"
         n += 1
     return slug
-
-
-def js_escape(s: str) -> str:
-    """Escape a string for a double-quoted JS object value."""
-    return (
-        (s or "")
-        .replace("\\", "\\\\")
-        .replace('"', '\\"')
-        .replace("\n", " ")
-        .replace("\r", " ")
-    )
-
-
-def find_object_block(src: str, open_brace_index: int) -> tuple[int, int]:
-    """
-    Given index of `{`, return (content_start, closing_brace_index).
-    Brace depth ignores braces inside double-quoted strings.
-    """
-    if open_brace_index < 0 or open_brace_index >= len(src) or src[open_brace_index] != "{":
-        raise ValueError("find_object_block: expected '{'")
-    depth = 0
-    i = open_brace_index
-    in_str = False
-    esc = False
-    content_start = open_brace_index + 1
-    while i < len(src):
-        c = src[i]
-        if in_str:
-            if esc:
-                esc = False
-            elif c == "\\":
-                esc = True
-            elif c == '"':
-                in_str = False
-        else:
-            if c == '"':
-                in_str = True
-            elif c == "{":
-                depth += 1
-            elif c == "}":
-                depth -= 1
-                if depth == 0:
-                    return content_start, i
-        i += 1
-    raise RuntimeError("Unbalanced braces while scanning i18n.js language block")
 
 
 def describe_alt(
