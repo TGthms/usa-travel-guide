@@ -4,7 +4,7 @@
 <script>
 (function () {
   try {
-    var VALID = ['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'];
+    var VALID = ['default', 'minimal', 'elegant', 'glass'];
     function isOsLight() {
       return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
     }
@@ -20,7 +20,8 @@
       t = resolveTheme(appearance, style);
     } else {
       t = localStorage.getItem('usa-travel-theme');
-      if (t === 'auto' || !t) t = resolveTheme('system', style);
+      if (t === 'luxury' || t === 'nature') t = 'default';
+      else if (t === 'auto' || !t) t = resolveTheme('system', style);
     }
     if (VALID.indexOf(t) < 0) t = 'default';
     document.documentElement.setAttribute('data-theme', t);

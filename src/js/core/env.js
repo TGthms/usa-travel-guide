@@ -89,8 +89,9 @@ function observeWhenVisible(elements, onVisible, options) {
   }
 }
 
-// Prevent a single unhandled rejection from blanking constrained webviews.
+// Constrained webviews can blank on an unhandled rejection. Desktop: leave it visible.
 window.addEventListener('unhandledrejection', (e) => {
+  if (!ENV.constrained) return;
   try { if (e && typeof e.preventDefault === 'function') e.preventDefault(); } catch (err) { /* ignore */ }
 });
 

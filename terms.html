@@ -18,9 +18,75 @@
 <meta property="og:image:height" content="1260">
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23060b18'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='%23e8a435'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<!-- FONTS_START -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Special+Elite&family=Noto+Serif+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>
+(function () {
+  var loaded = {};
+  function hrefFor(parts) {
+    return 'https://fonts.googleapis.com/css2?' + parts.join('&') + '&display=swap';
+  }
+  function add(id, href) {
+    if (loaded[id] || document.getElementById(id)) {
+      loaded[id] = true;
+      return;
+    }
+    var l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = href;
+    document.head.appendChild(l);
+    loaded[id] = true;
+  }
+  function detectLang() {
+    try {
+      var s = localStorage.getItem('usa-travel-lang');
+      if (s === 'zh' || s === 'ja' || s === 'es' || s === 'en') return s;
+    } catch (e) { /* ignore */ }
+    try {
+      var n = String(navigator.language || '').toLowerCase();
+      if (n.indexOf('zh') === 0) return 'zh';
+      if (n.indexOf('ja') === 0) return 'ja';
+    } catch (e2) { /* ignore */ }
+    return 'en';
+  }
+  function detectStyle() {
+    try {
+      var st = localStorage.getItem('usa-travel-style');
+      if (st === 'classic' || st === 'modern') return st;
+    } catch (e) { /* ignore */ }
+    return 'modern';
+  }
+  function apply() {
+    add('usa-font-sans', hrefFor(['family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400']));
+    var classic = detectStyle() === 'classic';
+    var lang = detectLang();
+    if (classic) {
+      add('usa-font-classic', hrefFor([
+        'family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700',
+        'family=Special+Elite'
+      ]));
+    }
+    if (lang === 'zh') {
+      add('usa-font-zh', hrefFor(classic
+        ? ['family=Noto+Sans+SC:wght@300;400;500;600;700', 'family=Noto+Serif+SC:wght@400;500;700;900']
+        : ['family=Noto+Sans+SC:wght@300;400;500;600;700']));
+    }
+    if (lang === 'ja') {
+      add('usa-font-ja', hrefFor(classic
+        ? ['family=Noto+Sans+JP:wght@300;400;500;600;700', 'family=Noto+Serif+JP:wght@400;500;700;900']
+        : ['family=Noto+Sans+JP:wght@300;400;500;600;700']));
+    }
+  }
+  apply();
+  window.__usaTravelLoadFonts = apply;
+})();
+</script>
+<noscript>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+</noscript>
+<!-- FONTS_END -->
 <link rel="stylesheet" href="src/css/styles.css">
 <!-- FIRST_PAINT_START -->
 <!-- First paint: Appearance × Style. Must match resolveThemeFromAppearanceStyle in runtime.js.
@@ -29,7 +95,7 @@
 <script>
 (function () {
   try {
-    var VALID = ['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'];
+    var VALID = ['default', 'minimal', 'elegant', 'glass'];
     function isOsLight() {
       return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
     }
@@ -45,7 +111,8 @@
       t = resolveTheme(appearance, style);
     } else {
       t = localStorage.getItem('usa-travel-theme');
-      if (t === 'auto' || !t) t = resolveTheme('system', style);
+      if (t === 'luxury' || t === 'nature') t = 'default';
+      else if (t === 'auto' || !t) t = resolveTheme('system', style);
     }
     if (VALID.indexOf(t) < 0) t = 'default';
     document.documentElement.setAttribute('data-theme', t);
@@ -67,7 +134,7 @@
 </head>
 <body class="page-legal" data-legal-page="terms">
 
-<a class="skip-link" href="#main">Skip to main content</a>
+<a class="skip-link" href="#main" data-i18n="aria.skipToMain">Skip to main content</a>
 <div id="progress-bar"></div>
 
 <header class="legal-topbar" role="banner">
@@ -90,7 +157,7 @@
   </div>
 </header>
 
-<main id="main" class="legal-main">
+<main id="main" class="legal-main" tabindex="-1">
   <article class="legal-doc" id="legalDoc">
     <p class="legal-lead">Loading…</p>
   </article>
@@ -142,7 +209,7 @@
 
     <div class="settings-group reveal reveal-delay-2">
       <div class="settings-group-label" data-i18n="settings.unitsLabel">Units</div>
-      <div class="settings-group-sub" data-i18n="settings.unitsSub">Auto follows your device’s temperature unit and measurement system.</div>
+      <div class="settings-group-sub" data-i18n="settings.unitsSub">Auto follows your region and time zone. Pick °C or km to override.</div>
       <div class="settings-subgroup">
         <div class="settings-subgroup-label" data-i18n="settings.temperature">Temperature</div>
         <div class="units-row" id="unitTempGroup">
@@ -210,7 +277,7 @@
   </div>
 </footer>
 
-<script src="src/js/data/legal-i18n.js"></script>
+<script src="src/js/data/legal-i18n.js" defer></script>
 <script src="src/js/data/i18n.js" defer></script>
 <script src="src/js/core/env.js" defer></script>
 <script src="src/js/core/nav-return.js" defer></script>

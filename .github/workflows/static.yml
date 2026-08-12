@@ -1,9 +1,13 @@
-# Deploy static content to GitHub Pages
+# Deploy static content to GitHub Pages (backup mirror).
+# Runs only after E2E smoke succeeds on main, or via manual dispatch.
+# Do not change the strip step or Pages artifact path without a reason.
 name: Deploy static content to Pages
 
 on:
-  push:
-    branches: ["main"]
+  workflow_run:
+    workflows: ["E2E smoke"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +21,10 @@ concurrency:
 
 jobs:
   deploy:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -24,6 +32,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          # workflow_run default SHA is latest default branch — use the commit that passed E2E
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Strip internal / non-public files
         # Gallery Manager lives in the repo for maintainers, but must never ship
         # on the public static site (GitHub Pages mirror). Cloudflare deploy

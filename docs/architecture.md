@@ -63,8 +63,10 @@ usa-travel-guide/
 | | |
 |---|---|
 | **Primary** | `https://travelusa.pages.dev/` — canonical URLs, OG, sitemap, robots |
-| **Backup** | `https://tgthms.github.io/usa-travel-guide/` — GitHub Actions `static.yml` |
+| **Backup** | `https://tgthms.github.io/usa-travel-guide/` — GitHub Actions `static.yml` (deploys only after **E2E smoke** succeeds on `main`) |
 | **Strip on deploy** | `tools/` and `Add Photos.command` removed before Pages publish |
+
+Cloudflare Pages (primary) is not gated from this repo. In the Cloudflare dashboard, wait for the GitHub check **E2E smoke** before deploying when that option exists. Do not publish `travelusa.pages.dev` from a red E2E run.
 
 ## Script load order
 
@@ -74,18 +76,18 @@ Core load order on every page: `env.js` → **`nav-return.js`** → `runtime.js`
 
 | Page | Scripts |
 |------|---------|
-| **index** | data (i18n, fun-facts, intro-gallery, modal, dest-links, dest-weather-cities) → core (env, nav-return, runtime) → features (tools, home, dest-weather, legal, gallery) → app |
+| **index** | data (i18n, fun-facts, intro-gallery, modal, dest-links, dest-weather-cities) → core (env, nav-return, runtime) → features (home, dest-weather) → app |
 | **gallery** | i18n → core → gallery → app |
 | **tools.html** (hub) | i18n → core → tools → app |
 | **tools-currency / clock / tip-tax / drive / emergency** | i18n → core → tools → app |
 | **tools-weather** | i18n → dest-weather-cities (optional deep-link helpers) → core → **weather/** modules → app |
-| **privacy / terms** | legal-i18n (sync) → i18n → core → legal → app |
+| **privacy / terms** | legal-i18n (`defer`) → i18n → core → legal → app |
 
 `app.js` runs last so feature functions (`initFunFacts`, `renderLegalPage`, gallery chrome, weather hooks) already exist.
 
-Settings dialog and the first-paint theme script are generated from `docs/partials/` (`npm run build:partials`). Do not hand-edit the marked regions in `*.html`.
+Settings dialog, first-paint theme script, and the Google Fonts links are generated from `docs/partials/` (`npm run build:partials`). Do not hand-edit the marked regions in `*.html`.
 
-`applyLanguage` only paints `[data-i18n*]` (including `<title>`), restamps units, and dispatches `usa-travel:prefs` (`{ type: 'lang'|'units'|'theme'|'motion' }`). Features subscribe. Temperature/distance formatting for JS UI goes through `window.USATravel.formatTempFromC` / `formatDistFromMi`.
+`applyLanguage` paints `[data-i18n*]` (including `<title>`), restamps unit spans, and dispatches `usa-travel:prefs` (`{ type: 'lang'|'units'|'theme'|'motion' }`). Features subscribe. Temperature/distance formatting for JS UI goes through `window.USATravel.formatTempFromC` / `formatDistFromMi`. Auto units follow the browser locale region, then time zone — not OS Language & Region radios.
 
 ### Weather hybrid (summary)
 
@@ -146,6 +148,7 @@ Local tool at `tools/gallery_manager.py` (**tracked in git**, stripped from publ
 - `gallery.html` (items + `<!-- GALLERY_MANAGER_INSERT -->` inside `#galleryGrid`)
 - `images/gallery/**` (full, medium, thumbs, WebP sidecars; videos → `images/gallery/videos/`)
 - `src/js/data/i18n.js` (es/zh/ja caption keys)
+- `src/js/data/intro-gallery.js` (homepage About collage — rewritten on add / remove / save / `--rebuild-intro`)
 
 **Orientation:** EXIF Orientation ≠ 1 is baked into pixels (Pillow) so thumbs/medium/width×height always match the visual image. Upright JPEGs still copy byte-for-byte (HDR-safe).
 

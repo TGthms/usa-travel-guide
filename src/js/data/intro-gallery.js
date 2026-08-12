@@ -835,7 +835,7 @@ window.INTRO_GALLERY_PHOTOS = [
     "state": "NV",
     "thumbWebp": "images/gallery/thumbs/larcdetriomphe.webp",
     "mediumWebp": "images/gallery/medium/larcdetriomphe.webp",
-    "caption": "L&#x27;Arc de Triomphe"
+    "caption": "L'Arc de Triomphe"
   },
   {
     "slug": "lasvegasblvd",
@@ -1319,7 +1319,7 @@ window.INTRO_GALLERY_PHOTOS = [
     "state": "NV",
     "thumbWebp": "images/gallery/thumbs/newyorknewyorkhotelcasino.webp",
     "mediumWebp": "images/gallery/medium/newyorknewyorkhotelcasino.webp",
-    "caption": "New York-New York Hotel &amp; Casino"
+    "caption": "New York-New York Hotel & Casino"
   },
   {
     "slug": "goldengatebridge",

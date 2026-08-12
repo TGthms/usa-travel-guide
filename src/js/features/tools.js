@@ -28,6 +28,7 @@ document.addEventListener('usa-travel:prefs', function (e) {
   const type = e && e.detail && e.detail.type;
   if (type !== 'lang' && type !== 'units') return;
   if (type === 'lang' && typeof populateStateSelect === 'function') populateStateSelect();
+  if (type === 'units' && typeof syncDriveFieldsToDistUnit === 'function') syncDriveFieldsToDistUnit();
   refreshToolsLive();
 });
 
@@ -82,7 +83,27 @@ const TOOLS_TEXT = {
       'Shanghai': '上海', 'Seoul': 'ソウル', 'Tokyo': '東京', 'Sydney': 'シドニー'
     } },
 };
-function toolsText() { return TOOLS_TEXT[currentLang] || TOOLS_TEXT.en; }
+function toolsText() {
+  const en = TOOLS_TEXT.en;
+  const d = (typeof getI18nDict === 'function') ? getI18nDict(currentLang) : null;
+  if (!d) return en;
+  const t = Object.assign({}, en);
+  const keys = [
+    'sameCurrency', 'updating', 'fetching', 'rateUnavailable', 'checkConnection',
+    'ratesDaily', 'updatedAsOf', 'tax', 'tip', 'driveGal', 'driveL', 'salesTaxZero',
+    'driveMpgMi', 'driveMpgKm', 'driveFuelGal', 'driveFuelL', 'driveEvMi', 'driveEvKm'
+  ];
+  keys.forEach(function (k) {
+    if (d['tools.' + k]) t[k] = d['tools.' + k];
+  });
+  const cities = Object.assign({}, en.cities);
+  Object.keys(cities).forEach(function (name) {
+    const ck = 'tools.city.' + String(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+    if (d[ck]) cities[name] = d[ck];
+  });
+  t.cities = cities;
+  return t;
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // CURRENCY — Frankfurter daily rates + clear “last updated” stamp
@@ -113,7 +134,14 @@ const CURRENCY_NAMES = {
 };
 
 function getCurrencyNames() {
-  return CURRENCY_NAMES[currentLang] || CURRENCY_NAMES.en;
+  const en = CURRENCY_NAMES.en;
+  const d = (typeof getI18nDict === 'function') ? getI18nDict(currentLang) : null;
+  if (!d) return en;
+  const out = {};
+  CURRENCY_CODES.forEach(function (code) {
+    out[code] = d['tools.currency.' + code] || en[code];
+  });
+  return out;
 }
 
 function currencyOptionLabel(code) {
@@ -464,6 +492,12 @@ const driveMeta = document.getElementById('driveMeta');
 let driveMode = 'gas'; // 'gas' | 'ev'
 // HTML field defaults are imperial (mi / MPG / mi/kWh / $/gal). Track last unit so toggles convert.
 let driveFieldsUnit = 'mi';
+
+function syncDriveFieldsToDistUnit() {
+  if (!driveDist) return;
+  const next = (typeof currentDistUnit === 'string' && currentDistUnit === 'km') ? 'km' : 'mi';
+  if (driveFieldsUnit !== next) convertDriveInputsForUnitChange(driveFieldsUnit, next);
+}
 
 function convertDriveInputsForUnitChange(fromUnit, toUnit) {
   if (!driveDist || fromUnit === toUnit) return;

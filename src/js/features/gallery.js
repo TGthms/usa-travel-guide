@@ -8,10 +8,6 @@
 // GALLERY — filtering, scroll-in animation, image loading state, lightbox
 // ═══════════════════════════════════════════════════════════════════════
 
-// Declared early (false) so mid-script applyLanguage can safely gate gallery chrome.
-// Flipped true after gallery event handlers and lightbox bindings are ready.
-var galleryUiReady = false;
-
 const galleryGrid = document.getElementById('galleryGrid');
 const filterBtns = document.querySelectorAll('.gallery-filter');
 const galleryEmptyState = document.getElementById('galleryEmptyState');
@@ -24,18 +20,15 @@ let filterFadeTimers = new WeakMap();
 let galleryActiveCategory = 'all';
 let gallerySearchQuery = '';
 let gallerySortMode = (gallerySortSelect && gallerySortSelect.value) || 'date-desc';
-// Legacy timer id (repack-on-load removed; kept so old call sites stay harmless).
-let galleryPackTimer = 0;
-
 // Mirrors the EMPTY_STATE_SAVED_TEXT pattern used by the destinations filter:
 // the "photo not added yet" placeholder is generated dynamically in JS, so it
 // can't pick up a data-i18n attribute — it's translated by hand instead.
-const GALLERY_PLACEHOLDER_TEXT = {
-  en: 'Photo not added yet',
-  es: 'Foto aún no añadida',
-  zh: '照片尚未上传',
-  ja: '写真はまだ追加されていません'
-};
+function galleryPlaceholderText() {
+  if (window.USATravel && typeof window.USATravel.t === 'function') {
+    return window.USATravel.t('gallery.placeholder', 'Photo not added yet');
+  }
+  return 'Photo not added yet';
+}
 
 // --- Reveal captions when tiles approach the viewport (safe without IO).
 
@@ -116,7 +109,7 @@ function showLoadError(item) {
   if (!item.querySelector('.gallery-item-placeholder')) {
     const ph = document.createElement('div');
     ph.className = 'gallery-item-placeholder';
-    const text = GALLERY_PLACEHOLDER_TEXT[currentLang] || GALLERY_PLACEHOLDER_TEXT.en;
+    const text = galleryPlaceholderText();
     ph.innerHTML = `<span class="ph-icon" aria-hidden="true"><svg class="sf-icon" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="14" height="12" rx="1.5"/><path d="M8 18h11a1.5 1.5 0 0 0 1.5-1.5V9"/><circle cx="9.2" cy="10.5" r="1.1"/><path d="m4.5 15.5 3.2-3 2.6 2.4 2.2-2 3.5 3.2"/></svg></span><span class="ph-text">${text}</span>`;
     item.appendChild(ph);
   }
@@ -400,12 +393,6 @@ function packGalleryMasonry(orderedItems) {
   });
 
   galleryGrid.style.overflowAnchor = prevAnchor;
-}
-
-function scheduleGalleryMasonryPack() {
-  // Kept as a named no-op hook for any legacy call sites. Layout is stable
-  // from attributes; only sort/filter/resize should repack (via sortGalleryItems).
-  if (!galleryGrid) return;
 }
 
 function compareGalleryItems(a, b) {
@@ -772,34 +759,18 @@ const lightboxProgressFill = document.getElementById('lightboxProgressFill');
 const lightboxProgressPct = document.getElementById('lightboxProgressPct');
 const lightboxProgressMsg = document.getElementById('lightboxProgressMsg');
 
-const LIGHTBOX_PROGRESS_TEXT = {
-  en: {
-    loading: 'Downloading…',
-    preparing: 'Rendering full photo…',
-    almost: 'Ready',
-    failed: 'Couldn’t load full photo'
-  },
-  es: {
-    loading: 'Descargando…',
-    preparing: 'Procesando la foto…',
-    almost: 'Listo',
-    failed: 'No se pudo cargar la foto'
-  },
-  zh: {
-    loading: '下载中…',
-    preparing: '正在渲染高清照片…',
-    almost: '完成',
-    failed: '高清照片加载失败'
-  },
-  ja: {
-    loading: 'ダウンロード中…',
-    preparing: 'フルサイズを描画中…',
-    almost: '完了',
-    failed: '読み込みに失敗しました'
-  }
-};
 function lightboxProgressText() {
-  return LIGHTBOX_PROGRESS_TEXT[currentLang] || LIGHTBOX_PROGRESS_TEXT.en;
+  const t = (key, fallback) => (
+    window.USATravel && typeof window.USATravel.t === 'function'
+      ? window.USATravel.t(key, fallback)
+      : fallback
+  );
+  return {
+    loading: t('gallery.lbLoading', 'Downloading…'),
+    preparing: t('gallery.lbPreparing', 'Rendering full photo…'),
+    almost: t('gallery.lbAlmost', 'Ready'),
+    failed: t('gallery.lbFailed', 'Couldn’t load full photo')
+  };
 }
 
 /*
@@ -882,7 +853,15 @@ function lbProgEnsureTicking() {
   if (!lbProgRaf) lbProgRaf = raf(lbProgTick);
 }
 
+// Bar only for Settings “full” originals. The curve is intentionally fake:
+// real XHR loaded/total on these JPEGs sticks at 98% or finishes at 50%.
+let lbNeedProgress = false;
+
 function lbProgStart() {
+  if (!lbNeedProgress) {
+    lbProgHide();
+    return;
+  }
   lbProgVisible = true;
   lbProgCompleting = false;
   lbProgDisplay = 0;
@@ -1204,6 +1183,9 @@ function loadFullViaImageFallback(assetUrl, token, thumbFallback, tier) {
 function loadFullWithProgress(assetUrl, token, thumbFallback, tier) {
   if (!assetUrl) return;
   const loadedTier = tier || 'medium';
+  // Thumb/medium: no bar. Full: same decode-ease engine as before (not XHR %).
+  lbNeedProgress = loadedTier === 'full';
+  if (!lbNeedProgress) lbProgHide();
 
   let absoluteUrl = assetUrl;
   try {
@@ -1553,13 +1535,10 @@ if (lightbox) {
 
 /** Refresh gallery placeholders, tile aria, and open lightbox after language change. */
 function refreshGalleryLanguageChrome() {
-  if (!document.body.classList.contains('page-gallery')) return;
-  // applyLanguage() also runs mid-script (before the gallery section initializes).
-  // Accessing const/let gallery bindings in that window throws TDZ — bail quietly.
-  if (typeof galleryUiReady === 'undefined' || !galleryUiReady) return;
+  if (!galleryGrid) return;
   try {
     document.querySelectorAll('.gallery-item-placeholder .ph-text').forEach(el => {
-      el.textContent = GALLERY_PLACEHOLDER_TEXT[currentLang] || GALLERY_PLACEHOLDER_TEXT.en;
+      el.textContent = galleryPlaceholderText();
     });
     document.querySelectorAll('.gallery-item').forEach(item => {
       const cap = item.querySelector('.gallery-caption');
@@ -1576,9 +1555,6 @@ function refreshGalleryLanguageChrome() {
     }
   } catch (_) { /* gallery bindings not ready */ }
 }
-
-// Mark gallery UI ready last so language switches can safely refresh chrome.
-galleryUiReady = true;
 
 document.addEventListener('usa-travel:prefs', function (e) {
   const type = e && e.detail && e.detail.type;

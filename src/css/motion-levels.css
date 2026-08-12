@@ -154,6 +154,3 @@ html[data-motion-effective="off"] .reveal-right {
 }
 html[data-motion-effective="off"] .marquee-track { animation: none !important; }
 
-/* Legacy attribute still written when effective === off */
-html[data-reduce-motion="true"] #cursorCanvas { display: none !important; }
-

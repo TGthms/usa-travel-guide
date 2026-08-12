@@ -17,6 +17,7 @@ What it does for each photo (add):
      (long edge ≤ 900px — grid stays fast)
   4. Appends a gallery-item block      → gallery.html
   5. Adds caption keys (es/zh/ja)      → src/js/data/i18n.js
+  6. Rewrites the homepage collage     → src/js/data/intro-gallery.js
      (slug / i18n key always come from the original filename or caption —
       never from the server tempfile used during browser upload)
 
@@ -86,6 +87,7 @@ VIDEOS_DIR = GALLERY_DIR / "videos"
 GALLERY_HTML = ROOT / "gallery.html"
 # Caption keys live in the data pack (es/zh/ja). Path unchanged after core/features split.
 APP_JS = ROOT / "src" / "js" / "data" / "i18n.js"
+INTRO_JS = ROOT / "src" / "js" / "data" / "intro-gallery.js"
 VIDEO_SUFFIXES = {".mp4", ".mov", ".m4v", ".webm"}
 # Soft warning only — videos are copied as-is (can be large for GH/Pages).
 VIDEO_WARN_MB = 40.0
@@ -1900,6 +1902,7 @@ def process_one(
             video_path = VIDEOS_DIR / video_filename
         gallery_before = GALLERY_HTML.read_text(encoding="utf-8")
         i18n_before = APP_JS.read_text(encoding="utf-8")
+        intro_before = INTRO_JS.read_text(encoding="utf-8") if INTRO_JS.is_file() else None
 
         try:
             if is_video:
@@ -1961,6 +1964,7 @@ def process_one(
             )
             insert_gallery_html(block)
             i18n_n = insert_i18n(slug, cap)
+            write_intro_catalog()
         except Exception:
             # A gallery entry is one logical record — undo partial writes.
             for path in (thumb_path, medium_path, full_path, video_path):
@@ -1978,6 +1982,11 @@ def process_one(
                 APP_JS.write_text(i18n_before, encoding="utf-8")
             except OSError:
                 pass
+            if intro_before is not None:
+                try:
+                    INTRO_JS.write_text(intro_before, encoding="utf-8")
+                except OSError:
+                    pass
             raise
 
     result = {
@@ -2074,6 +2083,46 @@ def list_photos() -> list[dict]:
             row["video"] = video
         items.append(row)
     return items
+
+
+def write_intro_catalog() -> int:
+    """Rewrite intro-gallery.js from current gallery.html (stills + video covers)."""
+    photos = list_photos()
+    rows = []
+    for p in photos:
+        thumb = p.get("thumb") or ""
+        thumb_path = (ROOT / thumb) if thumb else None
+        if thumb_path is None or not thumb_path.is_file():
+            continue
+        filename = p.get("filename") or Path(thumb).name
+        stem = Path(filename).stem
+        thumb_webp = THUMBS_DIR / f"{stem}.webp"
+        medium_webp = MEDIUM_DIR / f"{stem}.webp"
+        tw = f"images/gallery/thumbs/{stem}.webp" if thumb_webp.is_file() else thumb
+        mw = (
+            f"images/gallery/medium/{stem}.webp"
+            if medium_webp.is_file()
+            else (p.get("medium") or f"images/gallery/medium/{filename}")
+        )
+        city, state = parse_location_parts(p.get("location") or "")
+        rows.append({
+            "slug": p["slug"],
+            "file": filename,
+            "category": p.get("category") or "",
+            "location": p.get("location") or "",
+            "city": city,
+            "state": state,
+            "thumbWebp": tw,
+            "mediumWebp": mw,
+            "caption": p.get("caption") or "",
+        })
+    header = (
+        "'use strict';\n"
+        "/* Catalog for homepage intro photo shuffle (thumb WebP paths). */\n"
+        "window.INTRO_GALLERY_PHOTOS = "
+    )
+    INTRO_JS.write_text(header + json.dumps(rows, indent=2, ensure_ascii=False) + ";\n", encoding="utf-8")
+    return len(rows)
 
 
 def remove_gallery_html(slug: str, filename: str | None = None) -> bool:
@@ -2187,6 +2236,10 @@ def remove_one(slug: str, filename: str | None = None) -> dict:
     html_ok = remove_gallery_html(slug, fname)
     i18n_n = remove_i18n(slug)
     files = remove_files(slug, fname)
+    try:
+        write_intro_catalog()
+    except OSError:
+        pass
 
     if not html_ok and i18n_n == 0 and not files:
         raise FileNotFoundError(f"No gallery entry found for '{slug}'")
@@ -2332,11 +2385,18 @@ def rebuild_media_for_existing(*, patch_html: bool = True) -> dict:
         if text != original:
             GALLERY_HTML.write_text(text, encoding="utf-8")
 
+    intro_n = 0
+    try:
+        intro_n = write_intro_catalog()
+    except OSError:
+        intro_n = 0
+
     return {
         "built": built,
         "missing_full": missing_full,
         "oriented": oriented,
         "html_items_patched": html_patched,
+        "intro_catalog": intro_n,
         "status": "ok",
     }
 
@@ -2465,6 +2525,7 @@ def update_one(
         text = text.replace(old_block, new_block, 1)
         GALLERY_HTML.write_text(text, encoding="utf-8")
         i18n_n = update_i18n_caption(slug, caption, old_caption=old_caption)
+        write_intro_catalog()
 
     return {
         "slug": slug,
@@ -3632,6 +3693,11 @@ def main() -> None:
         help="Rebuild medium assets for all existing gallery photos and patch HTML",
     )
     parser.add_argument(
+        "--rebuild-intro",
+        action="store_true",
+        help="Rewrite src/js/data/intro-gallery.js from current gallery.html",
+    )
+    parser.add_argument(
         "--category",
         default="coast",
         choices=CATEGORIES,
@@ -3666,6 +3732,11 @@ def main() -> None:
         ensure_layout()
         for p in list_photos():
             print(f"{p['slug']:24}  {p['category']:12}  {p['date']:18}  {p['location']:32}  {p['caption']}")
+        return
+    if args.rebuild_intro:
+        ensure_layout()
+        n = write_intro_catalog()
+        print(f"Wrote {n} still(s) to {INTRO_JS.relative_to(ROOT)}")
         return
     if args.backfill_dates:
         run_backfill_dates(apply=args.apply)

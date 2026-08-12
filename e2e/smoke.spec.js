@@ -46,10 +46,9 @@ async function waitAppReady(page) {
 }
 
 async function waitLoaderGone(page) {
-  await page.waitForFunction(() => {
-    const loader = document.getElementById('loader');
-    return !loader || loader.classList.contains('gone') || getComputedStyle(loader).opacity === '0';
-  }, null, { timeout: 20_000 }).catch(() => {});
+  const loader = page.locator('#loader');
+  if (await loader.count() === 0) return;
+  await expect(loader).toHaveClass(/gone/, { timeout: 20_000 });
 }
 
 /** Ignore benign noise; surface real page script failures. */
@@ -246,8 +245,6 @@ test.describe('USA Travel Guide smoke', () => {
         sessionStorage.setItem('__e2e_inited', '1');
       } catch (_) { /* ignore */ }
     });
-    await gotoPage(page, '/index.html');
-    await waitAppReady(page);
   });
 
   test('loads main + tool pages without console page errors', async ({ page }) => {
@@ -279,6 +276,8 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('cycles appearance × style theme matrix', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
     await openSettings(page);
     // System default
     await page.locator('#appearancePillGroup .pill-btn[data-appearance-val="system"]').click();
@@ -297,6 +296,8 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('cycles all four languages', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
     await openSettings(page);
     for (const lang of LANGS) {
       await page.locator(`#langPillGroup .pill-btn[data-lang-val="${lang}"]`).click();
@@ -310,6 +311,8 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('toggles destination favorites and persists', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
     const fav = page.locator('.dest-card[data-dest="nyc"] .dest-fav-btn');
     await fav.scrollIntoViewIfNeeded();
     await expect(fav).not.toHaveClass(/active/);
@@ -330,6 +333,8 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('saved filter empty state survives language round-trip to English', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
     await page.locator('#destFilterBar [data-filter="saved"]').click();
     await expect(page.locator('#destEmptyState')).toHaveClass(/show/);
     await expect(page.locator('#destEmptyState')).toContainText(/haven't saved|saved any cities/i);
@@ -457,6 +462,8 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('motion Off sets data-motion-effective', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
     await openSettings(page);
     await page.locator('#motionPillGroup .pill-btn[data-motion-val="off"]').click();
     await closeSettings(page);
@@ -509,6 +516,48 @@ test.describe('USA Travel Guide smoke', () => {
     });
     await gotoPage(page, '/index.html');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'glass');
+  });
+
+  test('legacy luxury theme first-paints as default', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.removeItem('usa-travel-appearance');
+      localStorage.removeItem('usa-travel-style');
+      localStorage.setItem('usa-travel-theme', 'luxury');
+    });
+    await gotoPage(page, '/index.html');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'default');
+    await waitAppReady(page);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'default');
+  });
+
+  test('homepage does not load unused feature scripts', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    const srcs = await page.locator('script[src]').evaluateAll((els) => els.map((e) => e.getAttribute('src') || ''));
+    expect(srcs.some((s) => s.includes('features/gallery.js'))).toBeFalsy();
+    expect(srcs.some((s) => s.includes('features/legal.js'))).toBeFalsy();
+    expect(srcs.some((s) => s.includes('features/tools.js'))).toBeFalsy();
+    expect(srcs.some((s) => s.includes('features/home.js'))).toBeTruthy();
+  });
+
+  test('Auto units copy does not claim OS temperature radios', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await openSettings(page);
+    const sub = await page.locator('[data-i18n="settings.unitsSub"]').textContent();
+    expect(sub.toLowerCase()).not.toMatch(/temperature unit and measurement system/);
+    expect(sub.toLowerCase()).toMatch(/region|time zone|zona horaria|地区|タイムゾーン/);
+    const hint = await page.locator('#unitsResolvedHint').textContent();
+    expect(hint).not.toMatch(/Device:/);
+    expect(hint).toMatch(/Using|当前|現在|Ahora/);
+  });
+
+  test('i18n includes weather.untilSunset in es/zh/ja', async () => {
+    const fs = require('fs');
+    const path = require('path');
+    const src = fs.readFileSync(path.join(__dirname, '../src/js/data/i18n.js'), 'utf8');
+    expect(src).toMatch(/"weather\.untilSunset": "Hasta el atardecer"/);
+    expect(src).toMatch(/"weather\.untilSunset": "直到日落"/);
+    expect(src).toMatch(/"weather\.untilSunset": "日没まで"/);
   });
 
   test('motion Full wins over OS reduced-motion on first paint', async ({ page }) => {
@@ -1063,6 +1112,8 @@ test.describe('USA Travel Guide smoke', () => {
   });
 
   test('modal opens for a destination and closes with Escape', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
     const card = page.locator('.dest-card[data-dest="nyc"]').first();
     await card.scrollIntoViewIfNeeded();
     await card.click();
@@ -1127,6 +1178,61 @@ test.describe('USA Travel Guide smoke', () => {
     const xml = await page.content();
     expect(xml).toContain('tools-weather.html');
     expect(xml).toContain('tools-currency.html');
+  });
+
+  test('homepage section nav clears the fixed bar', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await waitLoaderGone(page);
+    await page.locator('.nav-links a[href="#destinations"]').click();
+    await expect.poll(async () => page.evaluate(() => {
+      const dest = document.getElementById('destinations');
+      const nav = document.getElementById('navbar');
+      if (!dest || !nav) return 9999;
+      return dest.getBoundingClientRect().top - nav.getBoundingClientRect().height;
+    }), { timeout: 10_000 }).toBeLessThan(80);
+    const gap = await page.evaluate(() => {
+      const dest = document.getElementById('destinations');
+      const nav = document.getElementById('navbar');
+      return dest.getBoundingClientRect().top - nav.getBoundingClientRect().height;
+    });
+    expect(gap).toBeGreaterThan(-24);
+  });
+
+  test('gallery manager insert marker and intro catalog slugs', async ({ page }) => {
+    const fs = require('fs');
+    const path = require('path');
+    const html = fs.readFileSync(path.join(__dirname, '../gallery.html'), 'utf8');
+    expect(html).toContain('<!-- GALLERY_MANAGER_INSERT -->');
+    const intro = fs.readFileSync(path.join(__dirname, '../src/js/data/intro-gallery.js'), 'utf8');
+    const htmlSlugs = new Set([...html.matchAll(/gallery\.item\.([a-z0-9]+)\.caption/g)].map((m) => m[1]));
+    const introSlugs = [...intro.matchAll(/"slug": "([^"]+)"/g)].map((m) => m[1]);
+    introSlugs.forEach((s) => expect(htmlSlugs.has(s), s).toBeTruthy());
+  });
+
+  test('modern English first visit does not request Fraunces or Noto', async ({ page }) => {
+    const fontUrls = [];
+    page.on('request', (req) => {
+      const u = req.url();
+      if (u.includes('fonts.googleapis.com') || u.includes('fonts.gstatic.com')) fontUrls.push(u);
+    });
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await page.waitForTimeout(400);
+    const joined = fontUrls.join('\n');
+    expect(joined).not.toMatch(/Fraunces/i);
+    expect(joined).not.toMatch(/Noto/i);
+    expect(joined).toMatch(/Public\+Sans|Public Sans/i);
+  });
+
+  test('weather deep link ?city=nyc opens New York', async ({ page }) => {
+    test.setTimeout(90_000);
+    await fixtureWeatherApis(page);
+    await gotoPage(page, '/tools-weather.html?city=nyc');
+    await waitLoaderGone(page);
+    // Must open this city first — not after the full majors list finishes
+    await expect(page.locator('#weatherDetail')).toHaveClass(/open/, { timeout: 15_000 });
+    await expect(page.locator('body')).toContainText(/New York|Nueva York|纽约|ニューヨーク/);
   });
 
   test('progress bar and nav scroll chrome update on scroll', async ({ page }) => {

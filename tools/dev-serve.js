@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 'use strict';
 // Dev server: rebuild legal-i18n.js from docs/legal, watch for saves, serve :8000
-const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { build } = require('./build-legal');
+const { start } = require('./static-server');
 
 const ROOT = path.resolve(__dirname, '..');
 const LEGAL_DIR = path.join(ROOT, 'docs', 'legal');
@@ -68,15 +68,10 @@ try {
   console.warn('[dev-serve] could not watch docs/partials');
 }
 
-const child = spawn('python3', ['-m', 'http.server', String(PORT)], {
-  cwd: ROOT,
-  stdio: 'inherit',
-});
+const server = start(PORT, '127.0.0.1');
+console.log('[dev-serve] watching legal + partials · http://127.0.0.1:' + PORT + '/');
 
-console.log('[dev-serve] http://127.0.0.1:' + PORT + '/');
-
-child.on('exit', (code) => process.exit(code == null ? 0 : code));
 process.on('SIGINT', () => {
-  try { child.kill('SIGINT'); } catch (e) { /* ignore */ }
+  try { server.close(); } catch (e) { /* ignore */ }
   process.exit(0);
 });

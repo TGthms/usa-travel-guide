@@ -12,21 +12,18 @@
   var CACHE_TTL_MS = 20 * 60 * 1000;
   var OM = 'https://api.open-meteo.com/v1/forecast';
 
-  var OPEN_LABEL = {
-    en: 'Open weather →',
-    es: 'Ver el tiempo →',
-    zh: '查看天气 →',
-    ja: '天気を見る →'
-  };
-  var HL_LABEL = {
-    en: { h: 'H', l: 'L' },
-    es: { h: 'Máx', l: 'Mín' },
-    zh: { h: '高', l: '低' },
-    ja: { h: '最高', l: '最低' }
-  };
-
   function lang() {
     return (typeof currentLang === 'string' && currentLang) || 'en';
+  }
+  function tx(key, fallback) {
+    if (window.USATravel && typeof window.USATravel.t === 'function') {
+      return window.USATravel.t(key, fallback);
+    }
+    return fallback;
+  }
+  function openLabel() { return tx('dest.wxOpen', 'Open weather →'); }
+  function hlLabel() {
+    return { h: tx('dest.wxH', 'H'), l: tx('dest.wxL', 'L') };
   }
 
   function fmtTemp(c) {
@@ -57,13 +54,13 @@
 
   function condAria(code) {
     var c = Number(code);
-    if (c === 0) return { en: 'Clear', es: 'Despejado', zh: '晴', ja: '晴れ' };
-    if (c <= 3) return { en: 'Partly cloudy', es: 'Parcialmente nublado', zh: '多云', ja: '晴れ時々曇り' };
-    if (c <= 48) return { en: 'Fog', es: 'Niebla', zh: '雾', ja: '霧' };
-    if (c <= 67) return { en: 'Rain', es: 'Lluvia', zh: '雨', ja: '雨' };
-    if (c <= 77) return { en: 'Snow', es: 'Nieve', zh: '雪', ja: '雪' };
-    if (c >= 95) return { en: 'Storm', es: 'Tormenta', zh: '雷暴', ja: '嵐' };
-    return { en: 'Weather', es: 'Tiempo', zh: '天气', ja: '天気' };
+    if (c === 0) return tx('dest.wx.clear', 'Clear');
+    if (c <= 3) return tx('dest.wx.cloud', 'Partly cloudy');
+    if (c <= 48) return tx('dest.wx.fog', 'Fog');
+    if (c <= 67) return tx('dest.wx.rain', 'Rain');
+    if (c <= 77) return tx('dest.wx.snow', 'Snow');
+    if (c >= 95) return tx('dest.wx.storm', 'Storm');
+    return tx('dest.wx.generic', 'Weather');
   }
 
   function readCache() {
@@ -94,14 +91,14 @@
       a.className = 'dest-weather is-loading';
       a.href = 'tools-weather.html?city=' + encodeURIComponent(slug);
       a.setAttribute('data-dest-wx', slug);
-      a.setAttribute('aria-label', OPEN_LABEL[lang()] || OPEN_LABEL.en);
+      a.setAttribute('aria-label', openLabel());
       a.innerHTML =
         '<span class="dest-weather-icon" aria-hidden="true">·</span>' +
         '<span class="dest-weather-main">' +
           '<span class="dest-weather-temp">…</span>' +
           '<span class="dest-weather-hl"></span>' +
         '</span>' +
-        '<span class="dest-weather-fallback">' + (OPEN_LABEL[lang()] || OPEN_LABEL.en) + '</span>';
+        '<span class="dest-weather-fallback">' + openLabel() + '</span>';
       // Don't open the destination modal; ensure guide return stamp is set
       a.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -116,9 +113,8 @@
   }
 
   function paintOne(el, pack) {
-    var L = lang();
-    var openLab = OPEN_LABEL[L] || OPEN_LABEL.en;
-    var hl = HL_LABEL[L] || HL_LABEL.en;
+    var openLab = openLabel();
+    var hl = hlLabel();
     var fallback = el.querySelector('.dest-weather-fallback');
     var icon = el.querySelector('.dest-weather-icon');
     var temp = el.querySelector('.dest-weather-temp');
@@ -139,8 +135,7 @@
     el.classList.remove('is-fallback');
     el.classList.add('is-live');
     var glyph = condGlyph(pack.code);
-    var cond = condAria(pack.code);
-    var condLab = (cond && (cond[L] || cond.en)) || '';
+    var condLab = condAria(pack.code) || '';
     if (icon) icon.textContent = glyph;
     if (temp) temp.textContent = fmtTemp(pack.temp);
     if (hlEl) {
@@ -220,7 +215,7 @@
         el.classList.add('is-fallback');
         el.classList.remove('is-live', 'is-loading');
         var fb = el.querySelector('.dest-weather-fallback');
-        if (fb) fb.textContent = OPEN_LABEL[lang()] || OPEN_LABEL.en;
+        if (fb) fb.textContent = openLabel();
       });
     }
     bindClicks();

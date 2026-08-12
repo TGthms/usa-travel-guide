@@ -573,11 +573,6 @@
     requestAnimationFrame(function () {
       requestAnimationFrame(apply);
     });
-    // Late layout (fonts, images, deferred UI) — re-apply a few times
-    setTimeout(apply, 0);
-    setTimeout(apply, 120);
-    setTimeout(apply, 400);
-    setTimeout(apply, 900);
     window.addEventListener('load', apply, { once: true });
     window.addEventListener('pageshow', function (ev) {
       if (ev && ev.persisted) apply();

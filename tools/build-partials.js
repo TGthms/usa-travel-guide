@@ -4,6 +4,7 @@
  * Inject docs/partials/{first-paint,settings}.html into every page entrypoint.
  *
  * Markers (required on each page):
+ *   <!-- FONTS_START --> … <!-- FONTS_END -->
  *   <!-- FIRST_PAINT_START --> … <!-- FIRST_PAINT_END -->
  *   <!-- SETTINGS_START --> … <!-- SETTINGS_END -->
  *
@@ -30,6 +31,7 @@ const PAGES = [
   'terms.html',
 ];
 const BLOCKS = [
+  { name: 'fonts', file: 'fonts.html', start: '<!-- FONTS_START -->', end: '<!-- FONTS_END -->' },
   { name: 'first-paint', file: 'first-paint.html', start: '<!-- FIRST_PAINT_START -->', end: '<!-- FIRST_PAINT_END -->' },
   { name: 'settings', file: 'settings.html', start: '<!-- SETTINGS_START -->', end: '<!-- SETTINGS_END -->' },
 ];
@@ -67,7 +69,7 @@ function build() {
     });
     fs.writeFileSync(file, src);
   });
-  console.log('[build-partials] wrote first-paint + settings into ' + PAGES.length + ' pages');
+  console.log('[build-partials] wrote fonts + first-paint + settings into ' + PAGES.length + ' pages');
 }
 
 if (require.main === module) {

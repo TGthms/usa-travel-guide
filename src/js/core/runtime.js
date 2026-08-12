@@ -4,19 +4,8 @@
    Canonical load order: see header of src/js/app.js
 */
 
-/* Data files (plain scripts, not ES modules — preserves global onclick handlers) */
 /* I18N dictionary: src/js/data/i18n.js → window.I18N */
 const I18N = window.I18N || {};
-/* Fun facts: src/js/data/fun-facts.js → window.FUN_FACTS (homepage only) */
-const FUN_FACTS = window.FUN_FACTS || { en: [] };
-/* Modal + dest link data: src/js/data/modal-content.js, dest-links.js (homepage) */
-const MODAL_DATA = window.MODAL_DATA || {};
-const MODAL_DATA_I18N = window.MODAL_DATA_I18N || {};
-const DEST_TRAVEL_LINKS = window.DEST_TRAVEL_LINKS || {};
-const DEST_LINKS_HEADING = window.DEST_LINKS_HEADING || {
-  en: 'Helpful links', es: 'Enlaces útiles', zh: '实用链接', ja: '役立つリンク'
-};
-
 
 /* ── I18N ENGINE ──
    English lives directly in the HTML (already written for every section),
@@ -70,11 +59,6 @@ function getI18nDict(lang) {
   return pack[lang] || null;
 }
 
-// Shared with features/home.js (modal open state). Declared here so
-// applyLanguage can re-render an open modal on language change even when
-// home.js loads later or is omitted on mini-app pages.
-var currentModalKey = null;
-
 function dispatchPrefs(type, extra) {
   try {
     const detail = Object.assign({ type: type }, extra || {});
@@ -109,7 +93,11 @@ function applyLanguage(lang) {
   });
   document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : lang === 'es' ? 'es' : 'en');
   document.documentElement.setAttribute('data-lang', lang);
-  applyUnits(); // unit spans may sit inside translated HTML
+  // Restamp unit labels (公里 / km) inside restored HTML without a units event.
+  paintUnitSpans();
+  if (typeof window.__usaTravelLoadFonts === 'function') {
+    try { window.__usaTravelLoadFonts(); } catch (e) { /* ignore */ }
+  }
   dispatchPrefs('lang', { lang: lang });
 }
 
@@ -122,9 +110,7 @@ function numberLocale() {
   return currentLang === 'zh' ? 'zh-CN' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : 'en-US';
 }
 
-function applyUnits() {
-  // Always re-sync from Auto / prefs before painting (fixes stale unit bug)
-  syncUnitGlobals();
+function paintUnitSpans() {
   const loc = numberLocale();
   const tempU = currentTempUnit;
   const distU = currentDistUnit;
@@ -149,10 +135,12 @@ function applyUnits() {
       el.textContent = miFmt + unit + suffix;
     }
   });
-  // Road-trip tool: unit-aware labels + math.
-  if (typeof updateDriveUnitLabels === 'function') updateDriveUnitLabels();
-  if (typeof updateDriveCost === 'function') updateDriveCost();
-  dispatchPrefs('units', { temp: tempU, dist: distU });
+}
+
+function applyUnits() {
+  syncUnitGlobals();
+  paintUnitSpans();
+  dispatchPrefs('units', { temp: currentTempUnit, dist: currentDistUnit });
 }
 
 /* ── SAFE STORAGE ──
@@ -239,14 +227,15 @@ function detectTheme() {
 
 /**
  * Units auto-detect priority (highest → lowest):
- *   1. OS Language & Region prefs the engine exposes
- *      (temperature unit + measurement system — independent, like macOS)
- *   2. Explicit region in system locales (en-US, zh-CN) — never invent US from bare "en"
- *   3. System time zone → country
- *   4. Metric, if nothing else is known
+ *   1. Explicit region in system locales (en-US, zh-CN) — never invent US from bare "en"
+ *   2. System time zone → country
+ *   3. Metric, if nothing else is known
  *
- * BUG FIX: Intl.Locale('en').maximize() becomes en-Latn-US on many engines, which
- * wrongly forced °F for every English speaker. We never maximize bare language tags.
+ * Browsers do not expose OS Language & Region radios (e.g. macOS Celsius while
+ * Region is United States). Auto is region + time zone only.
+ *
+ * Intl.Locale('en').maximize() becomes en-Latn-US on many engines, which
+ * wrongly forced °F for every English speaker. Never maximize bare language tags.
  */
 /** Common IANA zones → ISO 3166-1 alpha-2 (enough for units). */
 const TZ_TO_REGION = {
@@ -276,15 +265,8 @@ const TZ_TO_REGION = {
   'Asia/Riyadh': 'SA', 'Asia/Jerusalem': 'IL', 'Asia/Ho_Chi_Minh': 'VN',
   'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU', 'Australia/Perth': 'AU',
   'Australia/Brisbane': 'AU', 'Australia/Adelaide': 'AU', 'Pacific/Auckland': 'NZ',
-  'Africa/Johannesburg': 'ZA', 'Africa/Cairo': 'EG', 'Africa/Lagos': 'NG',
-  'Pacific/Auckland': 'NZ'
+  'Africa/Johannesburg': 'ZA', 'Africa/Cairo': 'EG', 'Africa/Lagos': 'NG'
 };
-
-function detectUnitsForLang(lang) {
-  // Language alone never implies US customary — only region / timezone do.
-  void lang;
-  return { temp: 'c', dist: 'km' };
-}
 
 function collectSystemLocales() {
   const locales = [];
@@ -401,179 +383,22 @@ function unitsFromRegion(region) {
   };
 }
 
-function normalizeMeasurementSystem(raw) {
-  const s = String(raw || '').toLowerCase().replace(/[_-\s]/g, '');
-  if (!s) return '';
-  if (s === 'metric' || s === 'si' || s === 'internationalsystem') return 'metric';
-  if (s === 'ussystem' || s === 'us' || s === 'imperial' || s === 'usc') return 'ussystem';
-  if (s === 'uksystem' || s === 'uk' || s === 'imperialuk') return 'uksystem';
-  return '';
-}
-
-function normalizeTempUnit(raw) {
-  const s = String(raw || '').toLowerCase();
-  if (!s) return '';
-  if (s === 'c' || s === 'celsius' || s === 'centigrade' || s === '°c' || s.indexOf('celsius') >= 0) return 'c';
-  if (s === 'f' || s === 'fahrenheit' || s === '°f' || s.indexOf('fahrenheit') >= 0) return 'f';
-  return '';
-}
-
-/** Resolved OS locale first — may include -u-ms-metric when the user overrode the region default. */
-function defaultOsLocaleTag() {
-  try {
-    const tag = Intl.DateTimeFormat().resolvedOptions().locale;
-    if (tag) return String(tag).replace(/_/g, '-');
-  } catch (_) { /* ignore */ }
-  try {
-    const tag = new Intl.NumberFormat().resolvedOptions().locale;
-    if (tag) return String(tag).replace(/_/g, '-');
-  } catch (_) { /* ignore */ }
-  return '';
-}
-
-function measurementFromLocaleTag(tag) {
-  if (!tag) return '';
-  const m = String(tag).match(/-u-(?:[a-z0-9-]+-)*ms-([a-z0-9]+)/i);
-  return m ? normalizeMeasurementSystem(m[1]) : '';
-}
-
-function measurementFromLocaleObject(L) {
-  if (!L) return '';
-  try {
-    let systems = null;
-    if (typeof L.getMeasurementSystems === 'function') systems = L.getMeasurementSystems();
-    else if (L.measurementSystems) systems = L.measurementSystems;
-    else if (L.measurementSystem) systems = [L.measurementSystem];
-    if (!systems) return '';
-    const first = Array.isArray(systems) ? systems[0] : systems;
-    return normalizeMeasurementSystem(first);
-  } catch (_) {
-    return '';
-  }
-}
-
-function temperatureFromLocaleObject(L) {
-  if (!L) return '';
-  const tryVal = function (v) {
-    if (v == null) return '';
-    if (Array.isArray(v)) return normalizeTempUnit(v[0]);
-    return normalizeTempUnit(v);
-  };
-  try {
-    if (typeof L.getTemperatureUnits === 'function') {
-      const t = tryVal(L.getTemperatureUnits());
-      if (t) return t;
-    }
-  } catch (_) { /* ignore */ }
-  try {
-    if (typeof L.getTemperatureUnit === 'function') {
-      const t = tryVal(L.getTemperatureUnit());
-      if (t) return t;
-    }
-  } catch (_) { /* ignore */ }
-  try {
-    const t = tryVal(L.temperatureUnits) || tryVal(L.temperatureUnit);
-    if (t) return t;
-  } catch (_) { /* ignore */ }
-  return '';
-}
-
-/**
- * Read Language & Region–style prefs the engine exposes.
- * Temperature and measurement system are independent (US + Metric + °C is valid).
- */
-function detectOsUnitSettings() {
-  const out = { temp: '', dist: '', measurement: '', source: '' };
-  const tags = [];
-  const resolved = defaultOsLocaleTag();
-  if (resolved) tags.push(resolved);
-  const more = collectSystemLocales();
-  for (let i = 0; i < more.length; i++) {
-    if (tags.indexOf(more[i]) < 0) tags.push(more[i]);
-  }
-
-  for (let i = 0; i < tags.length; i++) {
-    const tag = tags[i];
-    if (!out.measurement) {
-      const fromExt = measurementFromLocaleTag(tag);
-      if (fromExt) {
-        out.measurement = fromExt;
-        out.source = 'os-ms:' + tag;
-      }
-    }
-    if (!out.measurement || !out.temp) {
-      if (typeof Intl === 'undefined' || typeof Intl.Locale !== 'function') continue;
-      try {
-        const L = new Intl.Locale(tag);
-        if (!out.measurement) {
-          const ms = measurementFromLocaleObject(L);
-          if (ms) {
-            out.measurement = ms;
-            out.source = out.source || ('os-ms:' + tag);
-          }
-        }
-        if (!out.temp) {
-          const tu = temperatureFromLocaleObject(L);
-          if (tu) {
-            out.temp = tu;
-            out.source = out.source ? out.source + '+temp' : ('os-temp:' + tag);
-          }
-        }
-      } catch (_) { /* next tag */ }
-    }
-    if (out.measurement && out.temp) break;
-  }
-
-  if (out.measurement === 'metric') {
-    if (!out.dist) out.dist = 'km';
-    if (!out.temp) out.temp = 'c';
-  } else if (out.measurement === 'ussystem') {
-    if (!out.dist) out.dist = 'mi';
-    if (!out.temp) out.temp = 'f';
-  } else if (out.measurement === 'uksystem') {
-    if (!out.dist) out.dist = 'mi';
-    if (!out.temp) out.temp = 'c';
-  }
-
-  return out;
-}
-
 function detectUnits() {
-  const os = detectOsUnitSettings();
-  let temp = os.temp;
-  let dist = os.dist;
-  if (temp && dist) {
-    return { temp: temp, dist: dist, source: os.source || 'os', measurement: os.measurement };
-  }
-
   const region = detectSystemRegion();
   const fromRegion = unitsFromRegion(region);
-  if (fromRegion) {
-    return {
-      temp: temp || fromRegion.temp,
-      dist: dist || fromRegion.dist,
-      source: (temp || dist) ? (os.source + '+' + fromRegion.source) : fromRegion.source,
-      measurement: os.measurement
-    };
-  }
+  if (fromRegion) return fromRegion;
 
   const tzRegion = detectRegionFromTimeZone();
   const fromTz = unitsFromRegion(tzRegion);
   if (fromTz) {
     return {
-      temp: temp || fromTz.temp,
-      dist: dist || fromTz.dist,
-      source: (temp || dist) ? (os.source + '+' + fromTz.source) : fromTz.source,
-      measurement: os.measurement
+      temp: fromTz.temp,
+      dist: fromTz.dist,
+      source: 'timezone:' + tzRegion
     };
   }
 
-  return {
-    temp: temp || 'c',
-    dist: dist || 'km',
-    source: os.source || 'default:metric',
-    measurement: os.measurement
-  };
+  return { temp: 'c', dist: 'km', source: 'default:metric' };
 }
 
 /** Default animation level: OS “reduce motion” → reduced; constrained → off. */
@@ -650,9 +475,9 @@ let currentTheme = resolveThemeFromAppearanceStyle(prefAppearance, prefStyle);
 // Legacy alias used by some UI code
 let prefTheme = prefAppearance === 'system' ? 'auto' : currentTheme;
 
-/** Unit prefs: auto | f/c | mi/km
- *  v5: re-force Auto so sticky °F/mi from older maximize() bug is cleared once more.
- *  (Users who explicitly picked °F/°C after v5 keep their choice.) */
+/** Unit prefs: auto | f/c | mi/km.
+ *  v5 already shipped. Keep the one-time migrate for browsers that never ran it.
+ *  Do not add v6 — if Auto looks wrong, fix detectUnits. */
 if (!safeStorage.has('usa-travel-units-v5')) {
   try {
     safeStorage.set('usa-travel-temp-unit', 'auto');
@@ -682,7 +507,7 @@ function resolveUnitsFromPrefs() {
   };
 }
 
-/** Sync window globals used by weather.js / tools (must not go stale). */
+/** Sync window globals used by weather / tools (must not go stale). */
 function syncUnitGlobals() {
   const r = resolveUnitsFromPrefs();
   currentTempUnit = r.temp;
@@ -724,9 +549,7 @@ window.__usaTravelUnits = function () {
     effectiveDist: currentDistUnit,
     detected: d,
     resolved: r,
-    os: detectOsUnitSettings(),
     locales: collectSystemLocales(),
-    resolvedLocale: defaultOsLocaleTag(),
     region: detectSystemRegion(),
     tzRegion: detectRegionFromTimeZone(),
     timeZone: (function () {
@@ -744,9 +567,15 @@ let cursorEffectEnabled = safeStorage.has('usa-travel-cursor-fx')
 let galleryQuality = safeStorage.get('usa-travel-gallery-quality', 'medium');
 
 // Guard against corrupt effective values
-if (!['default', 'minimal', 'elegant', 'luxury', 'glass', 'nature'].includes(currentTheme)) currentTheme = 'default';
-if (currentTempUnit !== 'f' && currentTempUnit !== 'c') currentTempUnit = 'f';
-if (currentDistUnit !== 'mi' && currentDistUnit !== 'km') currentDistUnit = 'mi';
+if (!['default', 'minimal', 'elegant', 'glass'].includes(currentTheme)) currentTheme = 'default';
+if (currentTempUnit !== 'f' && currentTempUnit !== 'c') {
+  const fixed = resolveUnitsFromPrefs();
+  currentTempUnit = (fixed.temp === 'f' || fixed.temp === 'c') ? fixed.temp : 'c';
+}
+if (currentDistUnit !== 'mi' && currentDistUnit !== 'km') {
+  const fixed = resolveUnitsFromPrefs();
+  currentDistUnit = (fixed.dist === 'mi' || fixed.dist === 'km') ? fixed.dist : 'km';
+}
 if (!['thumb', 'medium', 'full'].includes(galleryQuality)) galleryQuality = 'medium';
 if (!['full', 'reduced', 'off'].includes(motionMode)) motionMode = 'full';
 
@@ -769,9 +598,6 @@ function recomputeAutoPrefs({ paint = true } = {}) {
     document.documentElement.setAttribute('data-theme', currentTheme);
     applyThemeChrome(currentTheme);
     if (typeof updateAppearanceStyleUI === 'function') updateAppearanceStyleUI();
-    if (typeof window.syncHeroBackground === 'function') {
-      try { window.syncHeroBackground(); } catch (e) {}
-    }
     dispatchPrefs('theme', { theme: currentTheme });
   }
   if (unitsChanged || (prefTempUnit === 'auto' || prefDistUnit === 'auto')) {
@@ -822,8 +648,6 @@ function applyMotionModeToDom() {
   document.documentElement.setAttribute('data-motion', motionMode);
   // What CSS should actually paint
   document.documentElement.setAttribute('data-motion-effective', effective);
-  // Legacy flag: only fully-off matches the old hard cut
-  document.documentElement.setAttribute('data-reduce-motion', effective === 'off' ? 'true' : 'false');
   dispatchPrefs('motion', { motion: effective });
 }
 
@@ -836,14 +660,9 @@ function scrollBehaviorPref() {
   return 'smooth';
 }
 
-/* ── THEME SWATCHES ──
-   currentTheme is always what paints AND what Settings highlights.
-   OS dark does not repaint a light pick as its twin; user choice is sacred
-   after an explicit swatch click. */
+/* ── APPEARANCE × STYLE ── */
 const appearancePills = document.querySelectorAll('#appearancePillGroup .pill-btn');
 const stylePills = document.querySelectorAll('#stylePillGroup .pill-btn');
-// Legacy nodes (if any leftover pages)
-const themeSwatches = document.querySelectorAll('.theme-swatch');
 
 function updateAppearanceStyleUI() {
   appearancePills.forEach(function (p) {
@@ -861,9 +680,7 @@ const THEME_META_COLORS = {
   default: '#07101c',
   minimal: '#f5f5f7',
   elegant: '#f6f1e8',
-  luxury: '#0c0c0c',
-  glass: '#000000',
-  nature: '#141c18'
+  glass: '#000000'
 };
 function applyThemeChrome(theme) {
   const light = LIGHT_THEMES.includes(theme);
@@ -878,34 +695,14 @@ function applyAppearanceStyle({ persist = false } = {}) {
   if (persist) {
     safeStorage.set('usa-travel-appearance', prefAppearance);
     safeStorage.set('usa-travel-style', prefStyle);
-    // Keep legacy key in sync for any old readers
-    safeStorage.set('usa-travel-theme', prefAppearance === 'system' ? 'auto' : currentTheme);
   }
   document.documentElement.setAttribute('data-theme', currentTheme);
   applyThemeChrome(currentTheme);
   updateAppearanceStyleUI();
-  if (typeof window.syncHeroBackground === 'function') {
-    try { window.syncHeroBackground(); } catch (e) {}
+  if (typeof window.__usaTravelLoadFonts === 'function') {
+    try { window.__usaTravelLoadFonts(); } catch (e) { /* ignore */ }
   }
   dispatchPrefs('theme', { theme: currentTheme });
-}
-
-/** @deprecated name kept for any callers; maps to new appearance model */
-function applyThemePreference(preferred, { persist = false } = {}) {
-  if (preferred === 'auto' || preferred === 'system') {
-    prefAppearance = 'system';
-  } else if (preferred === 'minimal') {
-    prefAppearance = 'light'; prefStyle = 'modern';
-  } else if (preferred === 'elegant') {
-    prefAppearance = 'light'; prefStyle = 'classic';
-  } else if (preferred === 'default') {
-    prefAppearance = 'dark'; prefStyle = 'classic';
-  } else if (preferred === 'glass') {
-    prefAppearance = 'dark'; prefStyle = 'modern';
-  } else if (preferred === 'light' || preferred === 'dark') {
-    prefAppearance = preferred;
-  }
-  applyAppearanceStyle({ persist: persist });
 }
 
 appearancePills.forEach(function (p) {
@@ -922,12 +719,6 @@ stylePills.forEach(function (p) {
     if (v !== 'classic' && v !== 'modern') return;
     prefStyle = v;
     applyAppearanceStyle({ persist: true });
-  });
-});
-// Legacy swatches if present
-themeSwatches.forEach(function (sw) {
-  sw.addEventListener('click', function () {
-    applyThemePreference(sw.dataset.themeVal, { persist: true });
   });
 });
 applyAppearanceStyle({ persist: false });
@@ -975,11 +766,10 @@ function unitsResolvedHintText(resolved) {
   const distLab = r.dist === 'mi'
     ? (currentLang === 'zh' ? '英里' : currentLang === 'ja' ? 'マイル' : currentLang === 'es' ? 'millas' : 'mi')
     : (currentLang === 'zh' ? '公里' : currentLang === 'ja' ? 'km' : currentLang === 'es' ? 'km' : 'km');
-  const fromOs = r.source && String(r.source).indexOf('os-') === 0;
-  if (currentLang === 'zh') return (fromOs ? '设备：' : '当前：') + tempLab + ' · ' + distLab;
-  if (currentLang === 'ja') return (fromOs ? 'デバイス：' : '現在：') + tempLab + ' · ' + distLab;
-  if (currentLang === 'es') return (fromOs ? 'Dispositivo: ' : 'Ahora: ') + tempLab + ' · ' + distLab;
-  return (fromOs ? 'Device: ' : 'Using ') + tempLab + ' · ' + distLab;
+  if (currentLang === 'zh') return '当前：' + tempLab + ' · ' + distLab;
+  if (currentLang === 'ja') return '現在：' + tempLab + ' · ' + distLab;
+  if (currentLang === 'es') return 'Ahora: ' + tempLab + ' · ' + distLab;
+  return 'Using ' + tempLab + ' · ' + distLab;
 }
 
 function ensureUnitsResolvedHintEl() {
@@ -1050,14 +840,9 @@ window.setTempUnitPreference = function setTempUnitPreference(next) {
 };
 window.setDistUnitPreference = function setDistUnitPreference(next) {
   if (next !== 'auto' && next !== 'mi' && next !== 'km') return null;
-  const prevDist = currentDistUnit;
   prefDistUnit = next;
   safeStorage.set('usa-travel-dist-unit', prefDistUnit);
-  const resolved = resolveUnitsFromPrefs();
-  if (resolved.dist !== prevDist && typeof convertDriveInputsForUnitChange === 'function') {
-    convertDriveInputsForUnitChange(prevDist, resolved.dist);
-  }
-  return applyResolvedUnits(resolved);
+  return applyResolvedUnits(resolveUnitsFromPrefs());
 };
 
 tempPills.forEach(function (p) {
@@ -1071,8 +856,6 @@ distPills.forEach(function (p) {
   });
 });
 updateUnitUI();
-// Ensure guide unit spans match Auto detection on first paint
-applyUnits();
 updateUnitsResolvedHint();
 
 function formatTempFromC(celsius, opts) {
@@ -1095,6 +878,12 @@ function formatDistFromMi(miles, opts) {
   return Math.round(n).toLocaleString(loc);
 }
 
+function tKey(key, fallback) {
+  const dict = getI18nDict(currentLang);
+  if (dict && key && dict[key]) return dict[key];
+  return fallback != null ? fallback : key;
+}
+
 /** Shared public namespace — prefer this over loose globals going forward. */
 window.USATravel = Object.assign(window.USATravel || {}, {
   getTempUnitPreference: window.getTempUnitPreference,
@@ -1105,6 +894,9 @@ window.USATravel = Object.assign(window.USATravel || {}, {
   getEffectiveDistUnit: window.getEffectiveDistUnit,
   formatTempFromC: formatTempFromC,
   formatDistFromMi: formatDistFromMi,
+  numberLocale: numberLocale,
+  paintUnitSpans: paintUnitSpans,
+  t: tKey,
   detectUnits: detectUnits,
   resolveUnitsFromPrefs: resolveUnitsFromPrefs,
   dispatchPrefs: dispatchPrefs,

@@ -3185,13 +3185,6 @@ html[data-motion-effective="off"] body.page-tools:has(.weather-root) .wx-page-li
   gap: 8px;
 }
 
-/* Theme-tuned page sky soft overlays */
-html[data-theme="luxury"] .weather-page-sky::before {
-  background-image: radial-gradient(ellipse at 70% 20%, rgba(196,164,98,.18), transparent 50%) !important;
-}
-html[data-theme="nature"] .weather-page-sky::before {
-  background-image: radial-gradient(ellipse at 40% 30%, rgba(143,168,132,.2), transparent 55%) !important;
-}
 html[data-theme="glass"] .weather-page-sky {
   background: linear-gradient(165deg,
     var(--wx-page-1, #000) 0%,

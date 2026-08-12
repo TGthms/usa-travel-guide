@@ -7,7 +7,7 @@
 .season-card, .culture-intro > *, .section-header > *, .dest-header-wrapper > *,
 .site-footer-inner, .routes-grid > *, .tips-grid > *,
 .culture-tiles > *, .practical-grid > *, .regions-track > *,
-.settings-grid > *, .tools-grid > *, .theme-swatch-grid > *, .theme-swatch, .pill-group > * {
+.settings-grid > *, .tools-grid > *, .pill-group > * {
   min-width: 0;
 }
 h1, h2, h3, .hero-desc, .intro-body, .intro-pull, p { overflow-wrap: break-word; }
@@ -179,7 +179,6 @@ section[id], footer[id] { scroll-margin-top: 64px; }
   .settings-grid { grid-template-columns: 1fr; }
   /* tools-grid already collapses at 900px; keep panel usable on phones */
   .tools-panel { max-height: calc(100dvh - 24px); width: min(100%, 1180px); }
-  .theme-swatch-grid { grid-template-columns: repeat(3, 1fr); }
   .hero-stats { display: none; }
   .site-footer { text-align: center; }
   .section-header { grid-template-columns: 1fr; }
@@ -223,7 +222,6 @@ section[id], footer[id] { scroll-margin-top: 64px; }
 }
 /* Mid phones / small tablets in portrait — avoid cramped 3-col swatches */
 @media (max-width: 720px) {
-  .theme-swatch-grid { grid-template-columns: repeat(2, 1fr); }
   .intro-facts { gap: 10px; }
   .fact-card { padding: 18px 14px; }
   /* Keep From | ⇄ | To — never stack swap as a full-width bar */
@@ -276,7 +274,6 @@ section[id], footer[id] { scroll-margin-top: 64px; }
   .hero-desc { font-size: 0.98rem; }
   .section-header h2, #practical h2, .tips-header h2 { font-size: clamp(1.7rem, 8vw, 2.2rem) !important; }
   .loader-bar { width: min(240px, 70vw); }
-  .theme-swatch-grid { grid-template-columns: 1fr 1fr; }
   .regions-track { padding: 4px 14px 28px; margin: 0 -14px; }
   .dest-track { padding: 10px 14px 30px; margin: 0 -14px; }
 }
@@ -299,7 +296,6 @@ section[id], footer[id] { scroll-margin-top: 64px; }
   .hero-desc { font-size: 13px; }
   .gallery-caption { font-size: 10px; }
   .settings-panel { padding: 16px 12px; }
-  .theme-swatch-grid { grid-template-columns: 1fr; }
   .culture-tiles { grid-template-columns: 1fr; }
 }
 /* Foldables / split-screen: very short + moderately wide */
@@ -554,16 +550,6 @@ html[data-theme="glass"] .modal-box {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
-}
-html[data-theme="luxury"] .section-eyebrow,
-html[data-theme="luxury"] .nav-logo {
-  letter-spacing: .14em;
-}
-html[data-theme="luxury"] .btn-primary {
-  letter-spacing: .16em;
-}
-html[data-theme="nature"] .section-eyebrow::after {
-  opacity: .55;
 }
 /* Light themes: softer card shadows, stronger borders for definition */
 html[data-theme="minimal"] .fact-card,

@@ -34,7 +34,9 @@ Commit both the `.md` sources and generated `legal-i18n.js`. Do not hand-edit `l
 
 ## Shared HTML partials
 
-Settings dialog and first-paint theme script live in `docs/partials/` and are injected between `FIRST_PAINT_*` / `SETTINGS_*` markers on every page. Edit the partials, then `npm run build:partials` (or save while `npm run serve` is running). Do not hand-edit the generated regions.
+Google Fonts links, settings dialog, and the first-paint theme script live in `docs/partials/` and are injected between `FONTS_*` / `FIRST_PAINT_*` / `SETTINGS_*` markers on every page. Edit the partials, then `npm run build:partials` (or save while `npm run serve` is running). Do not hand-edit the generated regions.
+
+`npm run serve` uses the same Node static server as Playwright (`tools/static-server.js`) and watches legal + partials.
 
 ---
 
@@ -69,7 +71,7 @@ Your browser opens **http://127.0.0.1:8791**. Then:
 5. **Per photo**, set caption and category independently; adjust date/location if needed.
 6. **Apply checked defaults to queue** only overwrites the fields you selected.
 7. **Re-detect metadata** re-runs EXIF/GPS for the whole queue.
-8. **Add all to gallery** writes full + medium + thumb + HTML + i18n keys (requires a category on every item).
+8. **Add all to gallery** writes full + medium + thumb + HTML + i18n keys + the homepage intro catalog (requires a category on every item).
 9. In **Library**, search/filter, **Save** metadata edits, or **Remove** entirely.  
    **Save** updates the English caption in HTML; hand-translated es/zh/ja captions are preserved.
 
@@ -161,6 +163,7 @@ python3 tools/gallery_manager.py --remove richmondbay sfgoldengate
 | `--remove SLUG…` | Fully delete photo(s) by slug/filename |
 | `--list` | Show current gallery entries |
 | `--rebuild-media` | Bake orientation if needed; rebuild medium/thumb/WebP; patch HTML attrs |
+| `--rebuild-intro` | Rewrite `src/js/data/intro-gallery.js` from current `gallery.html` |
 | `--backfill-dates` | Upgrade dates from EXIF (dry-run unless `--apply`) |
 | `--apply` | With `--backfill-dates`: write `gallery.html` |
 | `--category` | `cityscapes` · `landmarks` · `nature` · `coast` · `food-culture` · `roads` |

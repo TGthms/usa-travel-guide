@@ -126,6 +126,7 @@ function scrollToGuideSection(id, behavior) {
     window.scrollTo(0, y);
   }
 }
+window.scrollToGuideSection = scrollToGuideSection;
 
 /**
  * iMessage-style celebration: small colorful paper strips fall from near the
@@ -203,8 +204,6 @@ document.querySelectorAll('.nav-links a[href^="#"], .nav-mobile-link[href^="#"]'
     if (!document.getElementById(id)) return;
     // Gallery immersive stage: use native (scroll-margin: 0)
     if (id === 'gallery' || id === 'hero') return;
-    e.preventDefault();
-    scrollToGuideSection(id);
     try {
       if (history && history.replaceState) history.replaceState(null, '', href);
     } catch (err) { /* ignore */ }
@@ -567,8 +566,9 @@ function applyDestFilter(filter) {
       destEmptyState.setAttribute('data-i18n', 'dest.emptyStateSaved');
       const dict = getI18nDict(currentLang);
       destEmptyState.textContent = (dict && dict['dest.emptyStateSaved'])
-        || EMPTY_STATE_SAVED_TEXT[currentLang]
-        || EMPTY_STATE_SAVED_TEXT.en;
+        || (window.USATravel && window.USATravel.t
+          ? window.USATravel.t('dest.emptyStateSaved', EMPTY_STATE_SAVED_TEXT.en)
+          : EMPTY_STATE_SAVED_TEXT[currentLang] || EMPTY_STATE_SAVED_TEXT.en);
     } else if (destEmptyStateDefaultKey) {
       destEmptyState.setAttribute('data-i18n', destEmptyStateDefaultKey);
       const dict = getI18nDict(currentLang);
@@ -639,17 +639,20 @@ if (tb) {
   }, { threshold: 0.3 });
 }
 
-/* ── SMOOTH ANCHORS ── */
+/* ── SMOOTH ANCHORS ── one helper: guide sections clear the fixed nav. */
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     const hash = a.getAttribute('href');
     if (!hash || hash === '#') return;
     if (a.classList.contains('nav-logo')) return;
-    const target = document.querySelector(hash);
-    if (!target) return; // let the browser handle anything we don't recognize
+    const id = hash.slice(1);
+    const target = document.getElementById(id);
+    if (!target) return;
+    if (id === 'gallery' || id === 'hero') return;
     e.preventDefault();
-    closeMobileNav();
-    target.scrollIntoView({ behavior: scrollBehaviorPref(), block: 'start' });
+    if (typeof closeMobileNav === 'function') closeMobileNav();
+    if (typeof window.scrollToGuideSection === 'function') window.scrollToGuideSection(id);
+    else target.scrollIntoView({ behavior: (typeof scrollBehaviorPref === 'function' ? scrollBehaviorPref() : 'smooth'), block: 'start' });
   });
 });
 /* ── MODAL SYSTEM ── */
@@ -659,7 +662,7 @@ const modalTitle= document.getElementById('modal-title');
 const modalBody = document.getElementById('modal-body');
 
 
-// currentModalKey is declared in core/runtime.js (shared with applyLanguage).
+var currentModalKey = null;
 
 function openModal(tag, title, body) {
   if (!overlay) return;
@@ -731,13 +734,9 @@ function buildDestLinksHtml(destId) {
   let html = buildLinksListHtml(links);
   // Deep-link into the weather mini-app for this city
   if (typeof DEST_WEATHER_CITIES !== 'undefined' && DEST_WEATHER_CITIES[destId]) {
-    const wxLabels = {
-      en: 'Live weather for this city →',
-      es: 'Tiempo en vivo de esta ciudad →',
-      zh: '查看该城市实时天气 →',
-      ja: 'この都市の天気を見る →'
-    };
-    const wxLab = wxLabels[currentLang] || wxLabels.en;
+    const wxLab = (window.USATravel && window.USATravel.t)
+      ? window.USATravel.t('dest.liveWeatherCta', 'Live weather for this city →')
+      : 'Live weather for this city →';
     const wxBlock =
       `<p class="modal-tool-cta"><a class="guide-tool-link" href="tools-weather.html?city=${encodeURIComponent(destId)}">${wxLab}</a></p>`;
     html = wxBlock + html;
@@ -875,6 +874,10 @@ function initFunFacts() {
 
 document.addEventListener('usa-travel:prefs', function (e) {
   const type = e && e.detail && e.detail.type;
+  if (type === 'theme') {
+    if (typeof syncHeroBackground === 'function') syncHeroBackground();
+    return;
+  }
   if (type !== 'lang') return;
   if (currentModalKey && typeof getModalData === 'function' && typeof openModal === 'function') {
     const d = getModalData(currentModalKey);

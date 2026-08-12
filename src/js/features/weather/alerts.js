@@ -21,10 +21,6 @@
     function getDetailMods() { return typeof deps.getDetailMods === 'function' ? deps.getDetailMods() : null; }
     function isDetailVisible() { return typeof deps.isDetailVisible === 'function' ? deps.isDetailVisible() : false; }
     function getOpenCity() { return typeof deps.getOpenCity === 'function' ? deps.getOpenCity() : null; }
-    // Local paint coordination (was outer IIFE state)
-    var listPaintLocked = false;
-    var listPaintTimer = 0;
-    var listPaintQueued = false;
     function scheduleListPaintFromAlerts() {
       if (typeof deps.scheduleListPaintFromAlerts === 'function') {
         deps.scheduleListPaintFromAlerts();
@@ -141,33 +137,6 @@
           cached._alertsLoading = false;
         }
       }
-    }
-
-    /**
-     * While true, city lists must not re-render. Initial load shows only the
-     * progress bar, then one reveal after forecasts + alerts finish.
-     */
-    var listPaintLocked = false;
-    var listPaintTimer = 0;
-    var listPaintQueued = false;
-    function cancelPendingListPaints() {
-      listPaintQueued = false;
-      if (listPaintTimer) {
-        window.clearTimeout(listPaintTimer);
-        listPaintTimer = 0;
-      }
-    }
-    /** Only used after unlock for incidental single-city alert updates. */
-    function scheduleListPaintFromAlerts() {
-      if (listPaintLocked) return;
-      listPaintQueued = true;
-      if (listPaintTimer) return;
-      listPaintTimer = window.setTimeout(function () {
-        listPaintTimer = 0;
-        if (!listPaintQueued || listPaintLocked) return;
-        listPaintQueued = false;
-        refreshListsFromCache({ skipAmbient: true });
-      }, 500);
     }
 
     function captureOpenAlertTitles() {
@@ -518,12 +487,6 @@
       );
     }
 
-    const FORECAST_Q =
-      'current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,precipitation'
-      + '&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,precipitation,wind_speed_10m,wind_direction_10m,relative_humidity_2m,surface_pressure,uv_index'
-      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max'
-      + '&temperature_unit=celsius&wind_speed_unit=ms&timezone=auto&forecast_days=10&past_days=1';
-
     return {
       severityRank: severityRank,
       normalizeNwsText: normalizeNwsText,
@@ -539,7 +502,6 @@
       prefetchAlertsForCache: prefetchAlertsForCache,
       formatAlertDescHtml: formatAlertDescHtml,
       alertsBlockHtml: alertsBlockHtml,
-      cancelPendingListPaints: cancelPendingListPaints,
       scheduleListPaintFromAlerts: scheduleListPaintFromAlerts
     };
   };

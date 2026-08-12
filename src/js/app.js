@@ -19,16 +19,16 @@
    1. core/env.js
    2. core/nav-return.js   guide ↔ tools back-stack
    3. core/runtime.js      prefs · i18n · chrome · settings
-   4. features/tools.js    (tools hub + currency/clock/tip/drive/emergency)
-   5. features/weather/*   (tools-weather only — ns/sky/charts/alerts/data/app)
-   6. features/home.js     (index)
-   7. features/legal.js    (privacy / terms)
-   8. features/gallery.js  (gallery page)
-   9. app.js               this file — apply saved prefs + final init
+   4. features/home.js     (index only)
+   5. features/dest-weather.js (index)
+   6. features/tools.js    (tools hub + mini-apps — not index)
+   7. features/weather/*   (tools-weather only — ns/sky/charts/alerts/data/app)
+   8. features/legal.js    (privacy / terms)
+   9. features/gallery.js  (gallery page)
+  10. app.js               this file — apply saved prefs + final init
 
-   Not every page loads every feature script; each feature no-ops when its
-   root DOM is missing. Kept as non-module scripts so window.* hooks remain
-   available (e.g. toggleFavorite, closeWeatherDetail, refreshWeatherUi).
+   Load only the feature scripts a page needs. Kept as non-module scripts so
+   window.* hooks remain available (e.g. toggleFavorite, refreshWeatherUi).
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Apply saved preferences once all feature scripts have registered. */

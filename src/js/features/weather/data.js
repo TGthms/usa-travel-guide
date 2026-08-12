@@ -527,7 +527,8 @@
       loadNwsCity: loadNwsCity,
       loadOpenMeteoCity: loadOpenMeteoCity,
       enrichWithOpenMeteo: enrichWithOpenMeteo,
-      loadCity: loadCity
+      loadCity: loadCity,
+      isLikelyUs: isLikelyUs
     };
   };
 })(window);

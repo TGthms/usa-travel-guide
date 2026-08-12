@@ -138,39 +138,6 @@
   --rc-ne: #e4e8f0; --rc-so: #f3e4de; --rc-mw: #e4eee6; --rc-we: #ebe4f0; --rc-sw: #efe6df;
 }
 
-/* Theme: Luxury Travel — charcoal, antique gold, ivory (high contrast, no neon gold glow) */
-[data-theme="luxury"] {
-  --bg-base:     #0c0c0c;
-  --bg-surface:  #151515;
-  --bg-surface-2:#1c1c1c;
-  --bg-card:     rgba(245, 240, 230, 0.04);
-  --bg-card-hov: rgba(196, 164, 98, 0.1);
-
-  --accent-1:    #c4a462;
-  --accent-1-lt: #dfc98a;
-  --accent-1-dk: #94763f;
-  --accent-2:    #a8a29a;
-
-  --text-main:   #f5f0e6;
-  --text-dim:    rgba(245, 240, 230, 0.72);
-  --text-mute:   rgba(245, 240, 230, 0.45);
-  --text-inv:    #0c0c0c;
-
-  --border-light: rgba(196, 164, 98, 0.18);
-  --border-med:   rgba(196, 164, 98, 0.42);
-
-  --nav-bg:      rgba(12, 12, 12, 0.9);
-  --modal-bg:    rgba(8, 8, 8, 0.96);
-
-  --ff-display:  'Fraunces', 'Noto Serif SC', 'Noto Serif JP', Georgia, serif;
-  --ff-serif:    'Special Elite', 'Noto Serif SC', 'Noto Serif JP', Georgia, serif;
-  --ff-body:     'Public Sans', 'Noto Sans SC', 'Noto Sans JP', Helvetica, Arial, sans-serif;
-  --body-weight: 400;
-  --shadow-card: 0 20px 48px rgba(0, 0, 0, 0.45);
-
-  --rc-ne: #141820; --rc-so: #1a1410; --rc-mw: #121816; --rc-we: #16141c; --rc-sw: #1a1210;
-}
-
 /* Theme: Twilight Glass — dark twin of Gallery Daylight
    Apple product-night palette (MacBook Pro–style): pure black stage,
    graphite elevated surfaces, soft white type, system blue accents.
@@ -211,39 +178,6 @@
 
   /* Soft dark region tints (cool graphite, not muddy) */
   --rc-ne: #141a22; --rc-so: #1a1614; --rc-mw: #141a16; --rc-we: #16141c; --rc-sw: #1a1412;
-}
-
-/* Theme: Nature Field Notes — forest ink, sage (readable, not neon green) */
-[data-theme="nature"] {
-  --bg-base:     #141c18;
-  --bg-surface:  #1b2620;
-  --bg-surface-2:#24322a;
-  --bg-card:     rgba(232, 236, 228, 0.04);
-  --bg-card-hov: rgba(143, 168, 132, 0.1);
-
-  --accent-1:    #8fa884;
-  --accent-1-lt: #b0c4a6;
-  --accent-1-dk: #6a8262;
-  --accent-2:    #c9a66b;
-
-  --text-main:   #e8ece4;
-  --text-dim:    rgba(232, 236, 228, 0.74);
-  --text-mute:   rgba(232, 236, 228, 0.48);
-  --text-inv:    #141c18;
-
-  --border-light: rgba(143, 168, 132, 0.16);
-  --border-med:   rgba(143, 168, 132, 0.4);
-
-  --nav-bg:      rgba(20, 28, 24, 0.92);
-  --modal-bg:    rgba(14, 20, 17, 0.96);
-
-  --ff-display:  'Fraunces', 'Noto Serif SC', 'Noto Serif JP', Georgia, serif;
-  --ff-serif:    'Special Elite', 'Noto Serif SC', 'Noto Serif JP', Georgia, serif;
-  --ff-body:     'Public Sans', 'Noto Sans SC', 'Noto Sans JP', Helvetica, Arial, sans-serif;
-  --body-weight: 400;
-  --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.3);
-
-  --rc-ne: #1a2824; --rc-so: #24241c; --rc-mw: #1a2a1e; --rc-we: #182624; --rc-sw: #262018;
 }
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
