@@ -11,6 +11,7 @@ rm -rf \
   docs \
   .github \
   .grok \
+  trailer \
   "Add Photos.command"
 
 rm -f \

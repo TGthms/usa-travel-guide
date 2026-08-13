@@ -202,6 +202,7 @@ section[id], footer[id] { scroll-margin-top: 64px; }
     justify-self: start;
   }
   .culture-intro { grid-template-columns: 1fr; gap: 32px; }
+  .tip-row-photo { flex-basis: 88px; width: 88px; }
   .dest-track { padding: 10px 24px 30px; margin: 0 -24px;}
   .dest-card { flex: 0 0 min(280px, 82vw); height: min(380px, 62vh);}
   .modal-facts { grid-template-columns: 1fr 1fr; }

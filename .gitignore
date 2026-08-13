@@ -40,3 +40,12 @@ images/gallery/thumbs/tmp*
 .dev.vars
 .env
 .env.*
+
+# Trailer pipeline outputs (scripts + cards.html stay tracked)
+trailer/music/
+trailer/stills/
+trailer/clips/
+trailer/raw/
+trailer/cards/*.png
+trailer/plates/
+trailer/*.mp4

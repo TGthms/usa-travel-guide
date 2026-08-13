@@ -64,7 +64,7 @@ usa-travel-guide/
 |---|---|
 | **Primary** | `https://travelusa.pages.dev/` — canonical URLs, OG, sitemap, robots |
 | **Backup** | `https://tgthms.github.io/usa-travel-guide/` — GitHub Actions `static.yml` (deploys only after **E2E smoke** succeeds on `main`) |
-| **Strip on deploy** | `tools/`, `e2e/`, `docs/`, npm/Playwright metadata, and `Add Photos.command` (`tools/strip-public.sh`). Cloudflare also 404s those paths via `_redirects`. |
+| **Strip on deploy** | `tools/`, `e2e/`, `docs/`, `trailer/`, npm/Playwright metadata, and `Add Photos.command` (`tools/strip-public.sh`). Cloudflare also 404s those paths via `_redirects`. |
 
 Cloudflare Pages (primary) is not gated from this repo. In the Cloudflare dashboard, wait for the GitHub check **E2E smoke** before deploying when that option exists. Do not publish `travelusa.pages.dev` from a red E2E run.
 

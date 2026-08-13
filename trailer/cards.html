@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Trailer title cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body {
+    margin: 0;
+    width: 1920px;
+    height: 1080px;
+    background: #000;
+    overflow: hidden;
+    color: #f5f5f7;
+    font-family: "Public Sans", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  html.clear, html.clear body { background: transparent; }
+  .stage {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+  }
+  .bg {
+    position: absolute;
+    inset: 0;
+    background: #000 center / cover no-repeat;
+  }
+  .veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .veil.soft {
+    background: linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.08) 36%, rgba(0,0,0,.62) 100%);
+  }
+  .veil.heavy {
+    background: linear-gradient(180deg, rgba(0,0,0,.28) 0%, rgba(0,0,0,.55) 100%);
+  }
+  .copy {
+    position: absolute;
+    left: 96px;
+    right: 96px;
+    bottom: 112px;
+    z-index: 2;
+  }
+  .copy.center {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .line {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+    font-size: 132px;
+  }
+  .line.sm { font-size: 92px; }
+  .line.super {
+    font-size: 76px;
+    text-shadow: 0 10px 48px rgba(0,0,0,.62);
+  }
+  .mark {
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    font-size: 28px;
+    opacity: 0.72;
+    margin-bottom: 22px;
+  }
+  .url {
+    margin-top: 28px;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
+    color: rgba(245,245,247,0.62);
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var card = q.get('card') || 'america-black';
+  var bg = q.get('bg') || '';
+  var stage = document.getElementById('stage');
+  if (q.get('clear') === '1') document.documentElement.classList.add('clear');
+
+  var cards = {
+    'america-black': { center: true, lines: ['America'] },
+    'guide-black': { center: true, lineClass: 'sm', lines: ['A travel guide.'] },
+    'road-black': { center: true, lineClass: 'sm', lines: ['The road, still.'] },
+    'states-black': { center: true, lines: ['50 states.'] },
+    'sky-black': { center: true, lineClass: 'sm', lines: ['Then the sky.'] },
+    'yours-black': { center: true, lineClass: 'sm', lines: ['Make it yours.'] },
+    'sky-over': { bg: true, veil: 'soft', lineClass: 'sm', lines: ['Then the sky.'] },
+    'end': { center: true, mark: '✦', lines: ['America'], url: 'travelusa.pages.dev' },
+    'america-super': { lineClass: 'super', lines: ['America'] },
+    'guide-super': { lineClass: 'super', lines: ['A travel guide.'] },
+    'states-super': { lineClass: 'super', lines: ['50 states.'] },
+    'sky-super': { lineClass: 'super', lines: ['Then the sky.'] },
+    'yours-super': { lineClass: 'super', lines: ['Make it yours.'] }
+  };
+
+  var spec = cards[card] || cards['america-black'];
+  var html = '';
+  if (spec.bg && bg) {
+    html += '<div class="bg" style="background-image:url(\'' + bg.replace(/'/g, '') + '\')"></div>';
+    html += '<div class="veil ' + (spec.veil || 'soft') + '"></div>';
+  }
+  html += '<div class="copy' + (spec.center ? ' center' : '') + '">';
+  if (spec.mark) html += '<div class="mark">' + spec.mark + '</div>';
+  spec.lines.forEach(function (line) {
+    html += '<p class="line' + (spec.lineClass ? ' ' + spec.lineClass : '') + '">' + line + '</p>';
+  });
+  if (spec.url) html += '<div class="url">' + spec.url + '</div>';
+  html += '</div>';
+  stage.innerHTML = html;
+})();
+</script>
+</body>
+</html>

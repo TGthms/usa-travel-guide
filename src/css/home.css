@@ -841,30 +841,35 @@ html[data-motion-effective="off"] .hero-explore-btn::before {
 .regions-track { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
 .region-card { position: relative; overflow: hidden; border-radius: var(--radius-lg); cursor: pointer; height: 480px; transition: transform .4s cubic-bezier(.22,1,.36,1), box-shadow .4s; border: 1px solid transparent; }
 .region-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-card); border-color: var(--border-med); z-index: 10; }
-.region-card-bg { position: absolute; inset: 0; transition: transform .8s cubic-bezier(.22,1,.36,1); }
-.region-card:hover .region-card-bg { transform: scale(1.1); }
-.rc-northeast { background: linear-gradient(170deg, var(--rc-ne), var(--bg-surface-2), var(--bg-base)); }
-.rc-south     { background: linear-gradient(170deg, var(--rc-so), var(--bg-surface-2), var(--bg-base)); }
-.rc-midwest   { background: linear-gradient(170deg, var(--rc-mw), var(--bg-surface-2), var(--bg-base)); }
-.rc-west      { background: linear-gradient(170deg, var(--rc-we), var(--bg-surface-2), var(--bg-base)); }
-.rc-southwest { background: linear-gradient(170deg, var(--rc-sw), var(--bg-surface-2), var(--bg-base)); }
+.region-card-bg {
+  position: absolute; inset: 0;
+  background-color: #0c1220;
+  background-size: cover;
+  background-position: center 40%;
+  background-repeat: no-repeat;
+  transition: transform .8s cubic-bezier(.22,1,.36,1);
+}
+.region-card:hover .region-card-bg { transform: scale(1.04); }
+.rc-northeast { background-image: url('../../ai-images/region-northeast.webp'); }
+.rc-south     { background-image: url('../../ai-images/region-south.webp'); }
+.rc-midwest   { background-image: url('../../ai-images/region-midwest.webp'); }
+.rc-west      { background-image: url('../../ai-images/region-west.webp'); }
+.rc-southwest { background-image: url('../../ai-images/region-southwest.webp'); }
 
-.region-deco { position: absolute; inset: 0; opacity: 0.55; transition: opacity .5s; }
-.region-card:hover .region-deco { opacity: 1; }
-.deco-northeast { background: radial-gradient(circle at 50% 15%, rgba(255,255,255,0.1) 0%, transparent 50%), linear-gradient(180deg, transparent 25%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.8) 100%); }
-.deco-south { background: radial-gradient(ellipse 70% 45% at 50% 35%, rgba(255,255,255,0.1) 0%, transparent 70%), linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.8) 100%); }
-.deco-midwest { background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 40%, rgba(0,0,0,0.8) 100%); }
-.deco-west { background: radial-gradient(ellipse 100% 30% at 50% 65%, rgba(255,255,255,0.1) 0%, transparent 70%), linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.8) 100%); }
-.deco-southwest { background: radial-gradient(ellipse 80% 50% at 50% 55%, rgba(255,255,255,0.1) 0%, transparent 70%), linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.8) 100%); }
-
-.region-svg { position: absolute; bottom: 0; left: 0; right: 0; width: 100%; height: 55%; opacity: 0.4; transition: opacity .5s, transform .5s; filter: grayscale(50%) brightness(1.2); }
-.region-card:hover .region-svg { opacity: 0.8; transform: translateY(-5px); filter: grayscale(0%); }
+.region-deco,
+.region-svg { display: none; }
 
 /* Always-legible type over region art (works on light pastel themes too). */
 .region-card::after {
   content: '';
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background: linear-gradient(to top, rgba(8, 10, 14, 0.88) 0%, rgba(8, 10, 14, 0.35) 42%, rgba(8, 10, 14, 0.12) 100%);
+  background:
+    linear-gradient(to top, rgba(6, 8, 12, 0.90) 0%, rgba(6, 8, 12, 0.42) 46%, rgba(6, 8, 12, 0.18) 100%);
+  transition: background .45s ease;
+}
+.region-card:hover::after {
+  background:
+    linear-gradient(to top, rgba(6, 8, 12, 0.94) 0%, rgba(6, 8, 12, 0.62) 52%, rgba(6, 8, 12, 0.34) 100%);
 }
 .region-content { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 28px 22px; }
 .region-tag { font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--accent-1-lt); margin-bottom: 10px; text-shadow: 0 1px 8px rgba(0,0,0,.35); }
@@ -886,11 +891,11 @@ html[data-theme="minimal"] .region-card {
   border-color: rgba(0, 0, 0, 0.06);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
 }
-html[data-theme="minimal"] .rc-northeast { background: linear-gradient(165deg, #eef3fb 0%, #d5e2f4 45%, #b8c9e0 100%); }
-html[data-theme="minimal"] .rc-south     { background: linear-gradient(165deg, #f7f0ea 0%, #e8d8cc 45%, #d4bfb0 100%); }
-html[data-theme="minimal"] .rc-midwest   { background: linear-gradient(165deg, #eaf4ee 0%, #d0e4d8 45%, #b4cfc0 100%); }
-html[data-theme="minimal"] .rc-west      { background: linear-gradient(165deg, #f0eef8 0%, #d8d4ec 45%, #beb8d8 100%); }
-html[data-theme="minimal"] .rc-southwest { background: linear-gradient(165deg, #f6efe8 0%, #e6d4c4 45%, #d0b8a0 100%); }
+html[data-theme="minimal"] .rc-northeast { background-image: url('../../ai-images/region-northeast.webp'); }
+html[data-theme="minimal"] .rc-south     { background-image: url('../../ai-images/region-south.webp'); }
+html[data-theme="minimal"] .rc-midwest   { background-image: url('../../ai-images/region-midwest.webp'); }
+html[data-theme="minimal"] .rc-west      { background-image: url('../../ai-images/region-west.webp'); }
+html[data-theme="minimal"] .rc-southwest { background-image: url('../../ai-images/region-southwest.webp'); }
 html[data-theme="minimal"] .region-card::after {
   background: linear-gradient(
     to top,
@@ -939,11 +944,11 @@ html[data-theme="elegant"] .region-card {
   border-color: rgba(122, 46, 46, 0.12);
   box-shadow: 0 12px 32px rgba(36, 31, 27, 0.08);
 }
-html[data-theme="elegant"] .rc-northeast { background: linear-gradient(165deg, #eef2f8 0%, #e2d8cc 48%, #d4c4b0 100%); }
-html[data-theme="elegant"] .rc-south     { background: linear-gradient(165deg, #f7ebe4 0%, #ebd4c8 48%, #d9b8a8 100%); }
-html[data-theme="elegant"] .rc-midwest   { background: linear-gradient(165deg, #e8f0ea 0%, #d8e4d6 48%, #c4d0bc 100%); }
-html[data-theme="elegant"] .rc-west      { background: linear-gradient(165deg, #ece8f4 0%, #ddd4e8 48%, #c8bcd8 100%); }
-html[data-theme="elegant"] .rc-southwest { background: linear-gradient(165deg, #f4ebe4 0%, #e8d4c4 48%, #d4b8a0 100%); }
+html[data-theme="elegant"] .rc-northeast { background-image: url('../../ai-images/region-northeast.webp'); }
+html[data-theme="elegant"] .rc-south     { background-image: url('../../ai-images/region-south.webp'); }
+html[data-theme="elegant"] .rc-midwest   { background-image: url('../../ai-images/region-midwest.webp'); }
+html[data-theme="elegant"] .rc-west      { background-image: url('../../ai-images/region-west.webp'); }
+html[data-theme="elegant"] .rc-southwest { background-image: url('../../ai-images/region-southwest.webp'); }
 html[data-theme="elegant"] .region-card::after {
   /* Soft burgundy dusk — keeps type readable without black mud on paper */
   background: linear-gradient(
@@ -1032,20 +1037,17 @@ html[data-theme="elegant"] .region-svg {
 .dest-nav-btn:hover { background: var(--accent-1); color: var(--text-inv); border-color: var(--accent-1); transform: scale(1.1); }
 .dest-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; background: transparent; color: var(--text-dim); }
 
-/* Destination cards — designed to look rich even without photography */
 .dest-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  transition: transform .8s cubic-bezier(.22,1,.36,1);
   background-color: #0c1220;
-  --sky: rgba(255,255,255,0.14);
-  --glow: rgba(255,255,255,0.12);
-  --accent-line: rgba(255,255,255,0.35);
+  background-size: cover;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+  transition: transform .8s cubic-bezier(.22,1,.36,1);
 }
-.dest-card:hover .dest-bg { transform: scale(1.05); }
-
-/* Soft vignette + light bloom (shared) */
+.dest-card:hover .dest-bg { transform: scale(1.035); }
 .dest-bg::after {
   content: '';
   position: absolute;
@@ -1053,156 +1055,27 @@ html[data-theme="elegant"] .region-svg {
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 28%),
-    radial-gradient(ellipse 90% 70% at 12% 8%, rgba(255,255,255,0.16) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 50% at 92% 78%, rgba(0,0,0,0.3) 0%, transparent 50%),
-    linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 48%);
+    linear-gradient(to bottom, rgba(0,0,0,0.22) 0%, transparent 32%),
+    linear-gradient(to top, rgba(0,0,0,0.38) 0%, transparent 48%);
+  transition: background .4s ease;
 }
-
-/* Large monogram watermark (city initials) — pure CSS via data-dest */
-.dest-bg::before {
-  content: '';
-  position: absolute;
-  right: -4%;
-  top: 6%;
-  z-index: 0;
-  font-family: var(--ff-display);
-  font-size: clamp(4.6rem, 12vw, 6.4rem);
-  font-weight: 800;
-  letter-spacing: -0.06em;
-  line-height: 0.85;
-  color: rgba(255,255,255,0.13);
-  text-transform: uppercase;
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
-  transform: rotate(-10deg);
-  text-shadow: 0 12px 48px rgba(0,0,0,0.25);
-  transition: color .35s ease, transform .8s cubic-bezier(.22,1,.36,1);
+.dest-card:hover .dest-bg::after {
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.32) 0%, transparent 30%),
+    linear-gradient(to top, rgba(0,0,0,0.52) 0%, transparent 56%);
 }
-.dest-card:hover .dest-bg::before {
-  color: rgba(255,255,255,0.18);
-  transform: rotate(-8deg) scale(1.04);
-}
-.dest-card[data-dest="nyc"] .dest-bg::before { content: 'NYC'; }
-.dest-card[data-dest="la"] .dest-bg::before { content: 'LA'; }
-.dest-card[data-dest="chicago"] .dest-bg::before { content: 'CHI'; }
-.dest-card[data-dest="miami"] .dest-bg::before { content: 'MIA'; }
-.dest-card[data-dest="nola"] .dest-bg::before { content: 'NOLA'; }
-.dest-card[data-dest="vegas"] .dest-bg::before { content: 'LV'; }
-.dest-card[data-dest="sf"] .dest-bg::before { content: 'SF'; }
-.dest-card[data-dest="seattle"] .dest-bg::before { content: 'SEA'; }
-.dest-card[data-dest="austin"] .dest-bg::before { content: 'ATX'; }
-.dest-card[data-dest="dc"] .dest-bg::before { content: 'DC'; }
-.dest-card[data-dest="honolulu"] .dest-bg::before { content: 'HNL'; }
-.dest-card[data-dest="boston"] .dest-bg::before { content: 'BOS'; }
-
-/*
- * Layered CSS art (no photo required):
- * 1–8 skyline bars, 9 glow orb, 10 diagonal sheen, 11 accent hairline, 12 city gradient
- */
-.dest-card .dest-bg {
-  background-image:
-    linear-gradient(var(--sky), var(--sky)),
-    linear-gradient(var(--sky), var(--sky)),
-    linear-gradient(var(--sky), var(--sky)),
-    linear-gradient(var(--sky), var(--sky)),
-    linear-gradient(var(--sky), var(--sky)),
-    linear-gradient(var(--sky), var(--sky)),
-    linear-gradient(var(--sky), var(--sky)),
-    linear-gradient(var(--sky), var(--sky)),
-    radial-gradient(ellipse 55% 42% at 78% 18%, var(--glow) 0%, transparent 70%),
-    linear-gradient(125deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%),
-    linear-gradient(var(--accent-line), var(--accent-line)),
-    var(--dest-grad, linear-gradient(160deg, #1a2438 0%, #0a101c 100%));
-  background-size:
-    9% 26%, 6% 36%, 11% 20%, 7% 42%, 10% 30%, 5% 24%, 8% 38%, 13% 22%,
-    100% 100%,
-    100% 100%,
-    100% 2px,
-    100% 100%;
-  background-position:
-    5% 100%, 16% 100%, 26% 100%, 38% 100%, 50% 100%, 62% 100%, 74% 100%, 86% 100%,
-    0 0,
-    0 0,
-    0 0,
-    0 0;
-  background-repeat: no-repeat;
-}
-
-/* Per-city color stories — vivid even without photos */
-.db-nyc {
-  --dest-grad: linear-gradient(145deg, #2a4a78 0%, #152038 40%, #1a1030 100%);
-  --sky: rgba(212,175,100,0.28);
-  --glow: rgba(201,162,89,0.32);
-  --accent-line: rgba(201,162,89,0.55);
-}
-.db-la {
-  --dest-grad: linear-gradient(155deg, #9a4a6e 0%, #4a1e38 42%, #1a0c18 100%);
-  --sky: rgba(255,190,130,0.26);
-  --glow: rgba(255,140,100,0.28);
-  --accent-line: rgba(255,170,120,0.5);
-}
-.db-chi {
-  --dest-grad: linear-gradient(150deg, #1e5a7a 0%, #0c2c40 48%, #061018 100%);
-  --sky: rgba(150,200,230,0.28);
-  --glow: rgba(100,180,220,0.28);
-  --accent-line: rgba(140,200,230,0.5);
-}
-.db-mia {
-  --dest-grad: linear-gradient(150deg, #1290a0 0%, #0a4550 45%, #051820 100%);
-  --sky: rgba(100,240,220,0.24);
-  --glow: rgba(80,220,200,0.3);
-  --accent-line: rgba(80,230,210,0.5);
-}
-.db-nola {
-  --dest-grad: linear-gradient(150deg, #6e3488 0%, #321450 48%, #0e0618 100%);
-  --sky: rgba(230,170,255,0.24);
-  --glow: rgba(200,120,255,0.28);
-  --accent-line: rgba(210,150,255,0.5);
-}
-.db-veg {
-  --dest-grad: linear-gradient(140deg, #a83828 0%, #541810 38%, #1a0806 100%);
-  --sky: rgba(255,140,90,0.26);
-  --glow: rgba(255,90,60,0.3);
-  --accent-line: rgba(255,120,80,0.55);
-}
-.db-sf {
-  --dest-grad: linear-gradient(155deg, #4a7a9c 0%, #2a4a5c 35%, #8a4a38 72%, #1a0e12 100%);
-  --sky: rgba(210,225,255,0.26);
-  --glow: rgba(160,200,255,0.28);
-  --accent-line: rgba(180,210,255,0.5);
-}
-.db-sea {
-  --dest-grad: linear-gradient(150deg, #1e7058 0%, #0e3830 48%, #061610 100%);
-  --sky: rgba(120,230,190,0.24);
-  --glow: rgba(80,200,160,0.28);
-  --accent-line: rgba(100,220,180,0.5);
-}
-.db-aus {
-  --dest-grad: linear-gradient(150deg, #a06a30 0%, #543818 45%, #1c1208 100%);
-  --sky: rgba(255,210,110,0.26);
-  --glow: rgba(255,180,80,0.28);
-  --accent-line: rgba(255,190,100,0.5);
-}
-.db-dc {
-  --dest-grad: linear-gradient(150deg, #364a72 0%, #182038 48%, #080c14 100%);
-  --sky: rgba(190,210,245,0.26);
-  --glow: rgba(140,170,230,0.28);
-  --accent-line: rgba(180,200,240,0.5);
-}
-.db-hon {
-  --dest-grad: linear-gradient(150deg, #1ea088 0%, #0e5848 42%, #062018 100%);
-  --sky: rgba(90,250,210,0.22);
-  --glow: rgba(60,220,180,0.3);
-  --accent-line: rgba(80,240,200,0.5);
-}
-.db-bos {
-  --dest-grad: linear-gradient(150deg, #7a3430 0%, #401818 48%, #140808 100%);
-  --sky: rgba(255,170,150,0.24);
-  --glow: rgba(230,120,100,0.28);
-  --accent-line: rgba(255,150,130,0.5);
-}
+.db-nyc { background-image: url('../../ai-images/dest-nyc.webp'); background-position: center 30%; }
+.db-la  { background-image: url('../../ai-images/dest-la.webp'); background-position: center 28%; }
+.db-chi { background-image: url('../../ai-images/dest-chicago.webp'); background-position: center 32%; }
+.db-mia { background-image: url('../../ai-images/dest-miami.webp'); background-position: center 28%; }
+.db-nola { background-image: url('../../ai-images/dest-nola.webp'); background-position: center 30%; }
+.db-veg { background-image: url('../../ai-images/dest-vegas.webp'); background-position: center 28%; }
+.db-sf  { background-image: url('../../ai-images/dest-sf.webp'); background-position: center 22%; }
+.db-sea { background-image: url('../../ai-images/dest-seattle.webp'); background-position: center 22%; }
+.db-aus { background-image: url('../../ai-images/dest-austin.webp'); background-position: center 28%; }
+.db-dc  { background-image: url('../../ai-images/dest-dc.webp'); background-position: center 18%; }
+.db-hon { background-image: url('../../ai-images/dest-honolulu.webp'); background-position: center 30%; }
+.db-bos { background-image: url('../../ai-images/dest-boston.webp'); background-position: center 22%; }
 
 .dest-content {
   position: absolute;
@@ -1214,19 +1087,32 @@ html[data-theme="elegant"] .region-svg {
   padding: 24px;
   background: linear-gradient(
     to top,
-    rgba(0,0,0,0.9) 0%,
-    rgba(0,0,0,0.5) 40%,
-    rgba(0,0,0,0.1) 68%,
-    transparent 100%
+    rgba(0,0,0,0.92) 0%,
+    rgba(0,0,0,0.62) 38%,
+    rgba(0,0,0,0.22) 64%,
+    rgba(0,0,0,0.06) 100%
+  );
+  transition: background .4s ease;
+}
+.dest-card:hover .dest-content {
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.96) 0%,
+    rgba(0,0,0,0.74) 42%,
+    rgba(0,0,0,0.36) 70%,
+    rgba(0,0,0,0.12) 100%
   );
 }
-.dest-tag { font-family: var(--ff-serif); font-size: 10px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-1); margin-bottom: 8px; }
+.dest-tag { font-family: var(--ff-serif); font-size: 10px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-1); margin-bottom: 8px; text-shadow: 0 1px 10px rgba(0,0,0,.45); }
 .dest-name {
   font-family: var(--ff-display);
   font-size: clamp(1.35rem, 1.15rem + 0.8vw, 1.85rem);
   font-weight: 700; line-height: 1.15; margin-bottom: 12px; color: #fff;
+  text-shadow: 0 2px 18px rgba(0,0,0,.45);
+  overflow-wrap: break-word;
+  padding-right: 8px;
 }
-.dest-desc { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.dest-desc { font-size: 13px; color: rgba(255,255,255,0.82); line-height: 1.6; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 10px rgba(0,0,0,.4); }
 
 /* Helpful links inside destination modals */
 .modal-links {
@@ -1289,8 +1175,8 @@ html[data-theme="elegant"] .region-svg {
 }
 .dest-meta { display: flex; gap: 16px; flex-wrap: wrap; }
 .dest-meta-item { display: flex; flex-direction: column; gap: 4px; }
-.dest-meta-label { font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
-.dest-meta-val { font-size: 11px; font-weight: 600; color: #fff; }
+.dest-meta-label { font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,0.62); text-shadow: 0 1px 8px rgba(0,0,0,.4); }
+.dest-meta-val { font-size: 11px; font-weight: 600; color: #fff; text-shadow: 0 1px 8px rgba(0,0,0,.4); }
 
 /* Live weather chip on destination cards (homepage) */
 .dest-weather {
@@ -1403,10 +1289,36 @@ html[data-theme="elegant"] .region-svg {
 /* ═══ PRACTICAL CARDS ═══ */
 #practical { padding: var(--section-y) var(--section-x); }
 .practical-grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border-light); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
-.prac-card { padding: 48px 32px 56px; background: var(--bg-surface); transition: background .4s; position: relative; cursor: pointer; outline: none; overflow: hidden; }
-.prac-card:hover, .prac-card:focus-visible { background: var(--bg-surface-2); }
-.prac-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--accent-1); transform: scaleX(0); transform-origin: left; transition: transform .5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.prac-card { padding: 48px 32px 56px; background: #0c1220; transition: transform .35s ease, box-shadow .35s ease; position: relative; cursor: pointer; outline: none; overflow: hidden; }
+.prac-card:hover, .prac-card:focus-visible { background: #0c1220; }
+.prac-card-photo {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  transition: transform .8s cubic-bezier(.22,1,.36,1);
+}
+.prac-card:hover .prac-card-photo { transform: scale(1.03); }
+.prac-card[data-prac="transport"] .prac-card-photo { background-image: url('../../ai-images/prac-transport.webp'); }
+.prac-card[data-prac="driving"] .prac-card-photo { background-image: url('../../ai-images/prac-driving.webp'); }
+.prac-card[data-prac="money"] .prac-card-photo { background-image: url('../../ai-images/prac-money.webp'); }
+.prac-card[data-prac="health"] .prac-card-photo { background-image: url('../../ai-images/prac-health.webp'); }
+.prac-card::after {
+  content:''; position:absolute; inset:0; z-index: 0; pointer-events:none;
+  background: linear-gradient(to top, rgba(6,8,12,0.92) 0%, rgba(6,8,12,0.68) 48%, rgba(6,8,12,0.40) 100%);
+  transition: background .4s ease;
+}
+.prac-card:hover::after, .prac-card:focus-visible::after {
+  background: linear-gradient(to top, rgba(6,8,12,0.95) 0%, rgba(6,8,12,0.78) 52%, rgba(6,8,12,0.52) 100%);
+}
+.prac-card > *:not(.prac-card-photo):not(.prac-num) { position: relative; z-index: 1; }
+.prac-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; z-index: 2; background: var(--accent-1); transform: scaleX(0); transform-origin: left; transition: transform .5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .prac-card:hover::before, .prac-card:focus-visible::before { transform: scaleX(1); }
+.prac-card .prac-title { color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.4); }
+.prac-card .prac-body { color: rgba(255,255,255,0.84); text-shadow: 0 1px 8px rgba(0,0,0,.35); }
+.prac-card .prac-body strong { color: #fff; }
+.prac-card .prac-icon { color: #fff; filter: drop-shadow(0 1px 8px rgba(0,0,0,.4)); }
+.prac-card .prac-num { color: rgba(255,255,255,0.16); }
+.prac-card:hover .prac-num { color: rgba(255,255,255,0.26); }
+.prac-card .prac-more { color: #fff; background: rgba(0,0,0,0.28); }
 /* Quiet CTAs into tools mini-apps (journey UX) */
 .guide-tool-link {
   display: inline-flex;
@@ -1594,14 +1506,47 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
 .temp-val { font-size: 11px; color: var(--text-mute); width: 40px; text-align: right; font-weight: 600; }
 
 .seasons-right { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.season-card { padding: 32px 28px; border: 1px solid var(--border-light); border-radius: var(--radius-lg); position: relative; overflow: hidden; transition: border-color .35s ease, box-shadow .35s ease, background .35s ease, transform .35s ease; cursor: pointer; background: var(--bg-card); backdrop-filter: blur(8px); }
-.season-card:hover { transform: translateY(-3px); border-color: var(--border-med); box-shadow: var(--shadow-card); background: var(--bg-card-hov); }
-.season-card::before { content:''; position:absolute; inset:0; opacity:.06; transition:opacity .4s; pointer-events:none; }
-.season-card:hover::before { opacity:.18; }
-.sc-spring::before { background: radial-gradient(circle at 80% 15%, #80e060 0%, transparent 65%); }
-.sc-summer::before { background: radial-gradient(circle at 80% 15%, #ffb020 0%, transparent 65%); }
-.sc-fall::before   { background: radial-gradient(circle at 80% 15%, #e06020 0%, transparent 65%); }
-.sc-winter::before { background: radial-gradient(circle at 80% 15%, #60b0e0 0%, transparent 65%); }
+.season-card { padding: 32px 28px; border: 1px solid var(--border-light); border-radius: var(--radius-lg); position: relative; overflow: hidden; transition: border-color .35s ease, box-shadow .35s ease, transform .35s ease; cursor: pointer; background: #0c1220; min-height: 280px; }
+.season-card:hover { transform: translateY(-3px); border-color: var(--border-med); box-shadow: var(--shadow-card); }
+.season-card-photo {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  transition: transform .8s cubic-bezier(.22,1,.36,1);
+}
+.season-card:hover .season-card-photo { transform: scale(1.03); }
+.sc-spring .season-card-photo { background-image: url('../../ai-images/season-spring.webp'); }
+.sc-summer .season-card-photo { background-image: url('../../ai-images/season-summer.webp'); }
+.sc-fall .season-card-photo   { background-image: url('../../ai-images/season-fall.webp'); }
+.sc-winter .season-card-photo { background-image: url('../../ai-images/season-winter.webp'); }
+.season-card::before {
+  content:''; position:absolute; inset:0; z-index: 0; pointer-events:none;
+  background: linear-gradient(to top, rgba(6,8,12,0.92) 0%, rgba(6,8,12,0.62) 48%, rgba(6,8,12,0.40) 100%);
+  transition: background .4s ease;
+}
+.season-card:hover::before {
+  background: linear-gradient(to top, rgba(6,8,12,0.95) 0%, rgba(6,8,12,0.74) 52%, rgba(6,8,12,0.52) 100%);
+}
+.season-card > *:not(.season-card-photo):not(.season-badge) { position: relative; z-index: 1; }
+.season-card .season-name { color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,.45); }
+.season-card .season-desc { color: rgba(255,255,255,0.88); text-shadow: 0 1px 10px rgba(0,0,0,.4); }
+.season-card .season-go { color: rgba(255,255,255,0.94); text-shadow: 0 1px 8px rgba(0,0,0,.35); }
+.season-card .season-icon { color: #fff; filter: drop-shadow(0 1px 8px rgba(0,0,0,.45)); }
+.season-card .season-months { color: #d7e4ff; text-shadow: 0 1px 8px rgba(0,0,0,.4); }
+.season-card > .season-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  left: auto;
+  width: max-content;
+  z-index: 2;
+  background: rgba(6,8,12,0.55);
+  color: #fff;
+  border-color: rgba(255,255,255,0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 1;
+  transform: none;
+}
 .season-icon {
   display: inline-flex;
   align-items: center;
@@ -1634,10 +1579,41 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
 .culture-intro p { font-size: 14px; color: var(--text-dim); line-height: 1.8; }
 /* Culture: denser “field notes” mosaic — less floaty card stack */
 .culture-tiles { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--border-light); border: 1px solid var(--border-light); border-radius: var(--radius-lg); overflow: hidden; }
-.culture-tile { padding: 28px 18px 24px; border: none; border-radius: 0; transition: background .3s ease; text-align: left; cursor: pointer; position: relative; overflow: hidden; background: var(--bg-surface); }
-.culture-tile::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background: var(--accent-1); transform: scaleY(0); transform-origin: top; transition: transform .35s ease; opacity: .9; }
-.culture-tile:hover { border-color: transparent; transform: none; box-shadow: none; background: var(--bg-surface-2); z-index:2; }
+.culture-tile { padding: 28px 18px 24px; border: none; border-radius: 0; transition: background .3s ease; text-align: left; cursor: pointer; position: relative; overflow: hidden; background: #0c1220; min-height: 168px; }
+.culture-tile-photo {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  transition: transform .7s cubic-bezier(.22,1,.36,1);
+}
+.culture-tile:hover .culture-tile-photo { transform: scale(1.04); }
+.culture-tile[data-culture="rock"] .culture-tile-photo { background-image: url('../../ai-images/culture-rock.webp'); }
+.culture-tile[data-culture="jazz"] .culture-tile-photo { background-image: url('../../ai-images/culture-jazz.webp'); }
+.culture-tile[data-culture="texmex"] .culture-tile-photo { background-image: url('../../ai-images/culture-texmex.webp'); }
+.culture-tile[data-culture="seafood"] .culture-tile-photo { background-image: url('../../ai-images/culture-seafood.webp'); }
+.culture-tile[data-culture="broadway"] .culture-tile-photo { background-image: url('../../ai-images/culture-broadway.webp'); }
+.culture-tile[data-culture="bbq"] .culture-tile-photo { background-image: url('../../ai-images/culture-bbq.webp'); }
+.culture-tile[data-culture="streetart"] .culture-tile-photo { background-image: url('../../ai-images/culture-streetart.webp'); }
+.culture-tile[data-culture="sports"] .culture-tile-photo { background-image: url('../../ai-images/culture-sports.webp'); }
+.culture-tile[data-culture="hollywood"] .culture-tile-photo { background-image: url('../../ai-images/culture-hollywood.webp'); }
+.culture-tile[data-culture="pizza"] .culture-tile-photo { background-image: url('../../ai-images/culture-pizza.webp'); }
+.culture-tile[data-culture="smithsonian"] .culture-tile-photo { background-image: url('../../ai-images/culture-smithsonian.webp'); }
+.culture-tile[data-culture="farmtable"] .culture-tile-photo { background-image: url('../../ai-images/culture-farmtable.webp'); }
+.culture-tile::after {
+  content:''; position:absolute; inset:0; z-index: 0; pointer-events:none;
+  background: linear-gradient(to top, rgba(6,8,12,0.90) 0%, rgba(6,8,12,0.62) 55%, rgba(6,8,12,0.38) 100%);
+  transition: background .35s ease;
+}
+.culture-tile:hover::after {
+  background: linear-gradient(to top, rgba(6,8,12,0.94) 0%, rgba(6,8,12,0.74) 58%, rgba(6,8,12,0.50) 100%);
+}
+.culture-tile > *:not(.culture-tile-photo) { position: relative; z-index: 1; }
+.culture-tile::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; z-index: 2; background: var(--accent-1); transform: scaleY(0); transform-origin: top; transition: transform .35s ease; opacity: .9; }
+.culture-tile:hover { border-color: transparent; transform: none; box-shadow: none; background: #0c1220; z-index:2; }
 .culture-tile:hover::before { transform: scaleY(1); opacity: 1; }
+.culture-tile .culture-tile-name { color: #fff; text-shadow: 0 1px 10px rgba(0,0,0,.4); }
+.culture-tile .culture-tile-desc { color: rgba(255,255,255,0.84); text-shadow: 0 1px 8px rgba(0,0,0,.35); }
+.culture-tile .culture-tile-icon { color: #fff; filter: drop-shadow(0 1px 8px rgba(0,0,0,.4)); }
+.culture-tile .culture-tile-link { color: #d7e4ff; }
 .culture-tile-icon {
   display: inline-flex;
   align-items: center;
@@ -1681,6 +1657,18 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
 .routes-grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .route-card { border: 1px solid var(--border-light); border-radius: var(--radius-lg); overflow: hidden; transition: border-color .35s ease, box-shadow .35s ease, background .35s ease, transform .35s ease; cursor: pointer; background: var(--bg-card); backdrop-filter: blur(10px); }
 .route-card:hover { border-color: var(--border-med); transform: translateY(-3px); box-shadow: var(--shadow-card); background: var(--bg-card-hov); }
+.route-card-photo-wrap { height: 176px; overflow: hidden; background: #0c1220; }
+.route-card-photo {
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform .8s cubic-bezier(.22,1,.36,1);
+}
+.route-card:hover .route-card-photo { transform: scale(1.06); }
+.route-card[data-route="route66"] .route-card-photo { background-image: url('../../ai-images/route-route66.webp'); }
+.route-card[data-route="pch"] .route-card-photo { background-image: url('../../ai-images/route-pch.webp'); }
+.route-card[data-route="parksloop"] .route-card-photo { background-image: url('../../ai-images/route-parksloop.webp'); }
 .route-header { padding: 32px 28px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; position: relative; }
 .route-header::after { content:''; position:absolute; bottom:-1px; left:0; height: 2px; background: var(--accent-1); width: 0; transition: width .6s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .route-card:hover .route-header::after { width: 100%; }
@@ -1718,10 +1706,31 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
 .tips-header p { font-size: 14px; color: var(--text-dim); max-width: 580px; line-height: 1.8; }
 .tips-grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 24px; border-top: 1px solid var(--border-light); }
 /* Tips: dossier-style rows — horizontal emphasis instead of bouncing cards */
-.tip-row { padding: 26px 28px; border: 1px solid var(--border-light); border-radius: 0; display: flex; gap: 16px; align-items: flex-start; transition: background .3s ease, border-color .3s ease; cursor: pointer; position: relative; overflow: hidden; background: transparent; }
-.tip-row::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background: var(--accent-1); transform: scaleY(0); transform-origin: top; transition: transform .35s ease; }
-.tip-row:hover { border-color: var(--border-med); background: var(--bg-card); transform: none; box-shadow: none; }
+.tip-row { padding: 0; border: 1px solid var(--border-light); border-radius: 0; display: flex; gap: 0; align-items: stretch; transition: background .3s ease, border-color .3s ease; cursor: pointer; position: relative; overflow: hidden; background: var(--bg-card); }
+.tip-row-photo {
+  flex: 0 0 120px;
+  width: 120px;
+  min-height: 100%;
+  background-color: #0c1220;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform .7s cubic-bezier(.22,1,.36,1);
+}
+.tip-row:hover .tip-row-photo { transform: scale(1.04); }
+.tip-row[data-tip="parks"] .tip-row-photo { background-image: url('../../ai-images/tip-parks.webp'); }
+.tip-row[data-tip="tax"] .tip-row-photo { background-image: url('../../ai-images/tip-tax.webp'); }
+.tip-row[data-tip="sim"] .tip-row-photo { background-image: url('../../ai-images/tip-sim.webp'); }
+.tip-row[data-tip="distance"] .tip-row-photo { background-image: url('../../ai-images/tip-distance.webp'); }
+.tip-row[data-tip="tipping"] .tip-row-photo { background-image: url('../../ai-images/tip-tipping.webp'); }
+.tip-row[data-tip="pass"] .tip-row-photo { background-image: url('../../ai-images/tip-pass.webp'); }
+.tip-row[data-tip="food"] .tip-row-photo { background-image: url('../../ai-images/tip-food.webp'); }
+.tip-row[data-tip="driving"] .tip-row-photo { background-image: url('../../ai-images/tip-driving.webp'); }
+.tip-row::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; z-index: 2; background: var(--accent-1); transform: scaleY(0); transform-origin: top; transition: transform .35s ease; }
+.tip-row:hover { border-color: var(--border-med); background: var(--bg-card-hov); transform: none; box-shadow: none; }
 .tip-row:hover::before { transform: scaleY(1); }
+.tip-row .tip-icon { margin: 26px 12px 26px 16px; }
+.tip-row .tip-content { padding: 26px 28px 26px 4px; min-width: 0; }
 .tip-icon {
   display: inline-flex;
   align-items: center;

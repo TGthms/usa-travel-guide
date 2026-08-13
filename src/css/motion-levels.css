@@ -72,7 +72,12 @@ html[data-motion-effective="reduced"] .culture-tile:hover {
   transform: none;
 }
 html[data-motion-effective="reduced"] .dest-card:hover .dest-bg,
-html[data-motion-effective="reduced"] .region-card:hover .region-card-bg {
+html[data-motion-effective="reduced"] .region-card:hover .region-card-bg,
+html[data-motion-effective="reduced"] .season-card:hover .season-card-photo,
+html[data-motion-effective="reduced"] .route-card:hover .route-card-photo,
+html[data-motion-effective="reduced"] .prac-card:hover .prac-card-photo,
+html[data-motion-effective="reduced"] .culture-tile:hover .culture-tile-photo,
+html[data-motion-effective="reduced"] .tip-row:hover .tip-row-photo {
   transform: none;
 }
 html[data-motion-effective="reduced"] .marquee-track {
