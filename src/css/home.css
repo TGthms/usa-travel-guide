@@ -1103,7 +1103,24 @@ html[data-theme="elegant"] .region-svg {
     rgba(0,0,0,0.12) 100%
   );
 }
-.dest-tag { font-family: var(--ff-serif); font-size: 10px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-1); margin-bottom: 8px; text-shadow: 0 1px 10px rgba(0,0,0,.45); }
+.dest-tag {
+  font-family: var(--ff-serif);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 8px;
+  width: fit-content;
+  max-width: calc(100% - 8px);
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(6, 8, 12, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
 .dest-name {
   font-family: var(--ff-display);
   font-size: clamp(1.35rem, 1.15rem + 0.8vw, 1.85rem);
@@ -1284,7 +1301,7 @@ html[data-theme="elegant"] .region-svg {
 @keyframes favPulse { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 100% { transform: scale(1); } }
 .dest-rating { display: flex; gap: 4px; margin-bottom: 10px; }
 /* Star glyphs live in icons.css as SVG (.dest-star / .sf-icon--star) */
-.dest-star { color: var(--accent-1); }
+.dest-star { color: #fff; filter: drop-shadow(0 1px 6px rgba(0,0,0,.45)); }
 
 /* ═══ PRACTICAL CARDS ═══ */
 #practical { padding: var(--section-y) var(--section-x); }
@@ -1307,7 +1324,7 @@ html[data-theme="elegant"] .region-svg {
   transition: background .4s ease;
 }
 .prac-card:hover::after, .prac-card:focus-visible::after {
-  background: linear-gradient(to top, rgba(6,8,12,0.95) 0%, rgba(6,8,12,0.78) 52%, rgba(6,8,12,0.52) 100%);
+  background: linear-gradient(to top, rgba(6,8,12,0.96) 0%, rgba(6,8,12,0.82) 55%, rgba(6,8,12,0.58) 100%);
 }
 .prac-card > *:not(.prac-card-photo):not(.prac-num) { position: relative; z-index: 1; }
 .prac-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; z-index: 2; background: var(--accent-1); transform: scaleX(0); transform-origin: left; transition: transform .5s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -1318,7 +1335,11 @@ html[data-theme="elegant"] .region-svg {
 .prac-card .prac-icon { color: #fff; filter: drop-shadow(0 1px 8px rgba(0,0,0,.4)); }
 .prac-card .prac-num { color: rgba(255,255,255,0.16); }
 .prac-card:hover .prac-num { color: rgba(255,255,255,0.26); }
-.prac-card .prac-more { color: #fff; background: rgba(0,0,0,0.28); }
+.prac-card .prac-more {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.28);
+}
 /* Quiet CTAs into tools mini-apps (journey UX) */
 .guide-tool-link {
   display: inline-flex;
@@ -1481,9 +1502,15 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
 .prac-body { font-size: 14px; color: var(--text-dim); line-height: 1.8; }
 .prac-body strong { color: var(--text-main); font-weight: 500; }
 .prac-more { margin-top: 20px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-1); display: inline-flex; align-items: center; gap: 8px; opacity: 0; transform: translateY(10px); transition: all .4s cubic-bezier(0.2, 0.8, 0.2, 1); padding: 6px 12px; border-radius: 20px; border: 1px solid transparent; }
-.prac-card:hover .prac-more { opacity: 1; transform: translateY(0); border-color: var(--border-med); background: var(--bg-card-hov); }
+.prac-card:hover .prac-more {
+  opacity: 1;
+  transform: translateY(0);
+  color: #fff;
+  border-color: rgba(255,255,255,0.38);
+  background: rgba(255,255,255,0.16);
+}
 .prac-num { position: absolute; bottom: 16px; right: 24px; font-family: var(--ff-display); font-size: 4rem; font-weight: 900; color: var(--border-light); line-height: 1; transition: color .4s, transform .4s; }
-.prac-card:hover .prac-num { color: var(--border-med); transform: scale(1.05) translate(-4px, -4px); }
+.prac-card:hover .prac-num { color: rgba(255,255,255,0.28); transform: scale(1.05) translate(-4px, -4px); }
 
 /* ═══ SEASONS ═══ */
 #seasons { padding: var(--section-y) var(--section-x); background: var(--bg-surface); position: relative; }
@@ -1704,20 +1731,35 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
 .tips-header p { max-width: var(--prose-max); font-size: var(--fs-small); line-height: 1.7; }
 .tips-header h2 em { font-style: italic; color: var(--accent-1); font-weight: 400; }
 .tips-header p { font-size: 14px; color: var(--text-dim); max-width: 580px; line-height: 1.8; }
-.tips-grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 24px; border-top: 1px solid var(--border-light); }
+.tips-grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 24px; border-top: 1px solid var(--border-light); min-width: 0; }
 /* Tips: dossier-style rows — horizontal emphasis instead of bouncing cards */
-.tip-row { padding: 0; border: 1px solid var(--border-light); border-radius: 0; display: flex; gap: 0; align-items: stretch; transition: background .3s ease, border-color .3s ease; cursor: pointer; position: relative; overflow: hidden; background: var(--bg-card); }
+.tip-row {
+  padding: 22px 24px;
+  border: 1px solid var(--border-light);
+  border-radius: 0;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  transition: background .3s ease, border-color .3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-card);
+  min-width: 0;
+}
 .tip-row-photo {
-  flex: 0 0 120px;
-  width: 120px;
-  min-height: 100%;
+  flex: 0 0 80px;
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  max-width: 80px;
+  border-radius: 12px;
   background-color: #0c1220;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transition: transform .7s cubic-bezier(.22,1,.36,1);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
 }
-.tip-row:hover .tip-row-photo { transform: scale(1.04); }
 .tip-row[data-tip="parks"] .tip-row-photo { background-image: url('../../ai-images/tip-parks.webp'); }
 .tip-row[data-tip="tax"] .tip-row-photo { background-image: url('../../ai-images/tip-tax.webp'); }
 .tip-row[data-tip="sim"] .tip-row-photo { background-image: url('../../ai-images/tip-sim.webp'); }
@@ -1729,8 +1771,8 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
 .tip-row::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; z-index: 2; background: var(--accent-1); transform: scaleY(0); transform-origin: top; transition: transform .35s ease; }
 .tip-row:hover { border-color: var(--border-med); background: var(--bg-card-hov); transform: none; box-shadow: none; }
 .tip-row:hover::before { transform: scaleY(1); }
-.tip-row .tip-icon { margin: 26px 12px 26px 16px; }
-.tip-row .tip-content { padding: 26px 28px 26px 4px; min-width: 0; }
+.tip-row .tip-icon { margin: 4px 0 0; }
+.tip-row .tip-content { padding: 0; min-width: 0; flex: 1 1 auto; }
 .tip-icon {
   display: inline-flex;
   align-items: center;
