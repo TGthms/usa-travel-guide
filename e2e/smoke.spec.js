@@ -1232,6 +1232,29 @@ test.describe('USA Travel Guide smoke', () => {
     await expect(page.locator('body')).toContainText(/New York|Nueva York|纽约|ニューヨーク/);
   });
 
+  test('below-fold card photos wait until the section is near view', async ({ page }) => {
+    await gotoPage(page, '/index.html');
+    await waitAppReady(page);
+    await waitLoaderGone(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(80);
+    await expect(page.locator('#culture')).not.toHaveClass(/is-photos-ready/);
+    await expect(page.locator('#tips')).not.toHaveClass(/is-photos-ready/);
+    await page.locator('#culture').scrollIntoViewIfNeeded();
+    await expect(page.locator('#culture')).toHaveClass(/is-photos-ready/, { timeout: 8_000 });
+    await page.locator('#tips').scrollIntoViewIfNeeded();
+    await expect(page.locator('#tips')).toHaveClass(/is-photos-ready/, { timeout: 8_000 });
+    await expect(page.locator('.site-footer-credits a[href="privacy.html#generated-images"]')).toBeVisible();
+  });
+
+  test('privacy policy discloses generated card images', async ({ page }) => {
+    await gotoPage(page, '/privacy.html#generated-images');
+    await waitAppReady(page);
+    await expect(page.locator('#generated-images')).toBeVisible({ timeout: 10_000 });
+    const body = await page.locator('#generated-images').innerText();
+    expect(body.toLowerCase()).toMatch(/ai-generated|generadas por ia|ai 生成|ai生成/);
+  });
+
   test('progress bar and nav scroll chrome update on scroll', async ({ page }) => {
     await gotoPage(page, '/index.html');
     await waitAppReady(page);

@@ -2,7 +2,7 @@
 title: Privacy Policy
 eyebrow: Legal
 updatedLabel: Updated
-updatedDate: "August 6, 2026"
+updatedDate: "August 12, 2026"
 onThisPage: On this page
 lead: "This Privacy Policy describes how **America — A Travel Guide** (the “Site,” “we,” “us”) handles information when you visit or use this website, including the guide, photo gallery, and tools. We designed the Site to work well with as little personal data as possible."
 footerNote: "© {year} USA Travel Guide · Tim G (TGthms)"
@@ -45,7 +45,14 @@ The Site may load or contact third-party services necessary for features you use
 - **Exchange rates (Tools).** The currency converter may request rates from a public API (for example Frankfurter). Only the currency codes needed for the conversion are sent for that request.
 - **Weather, alerts & air quality (Tools).** The Weather tool may request U.S. forecast data and active severe-weather alerts (watches, warnings, and advisories) from the National Weather Service (api.weather.gov), and world forecasts, gap-fill fields, geocoding, and air quality from Open-Meteo (or a compatible provider). Requests typically include the coordinates or place name you selected. If you use “Use my location,” coordinates are rounded on your device to about **1 km** before the forecast or alerts request and before any local storage of that place. Optional browser geolocation is sent only if you allow it. Weather and alert data are for general travel guidance only—not for emergencies or life-safety decisions. Always follow official emergency authorities when severe weather threatens.
 - **Gallery media.** Photos and videos in the Gallery are static files hosted with the Site. Playing a video loads that file in your browser; no separate analytics SDK is required for playback.
+- **Generated card images.** Some decorative homepage card backgrounds are AI-generated illustrations stored as static files on the Site (`ai-images/`). Loading those files does not upload your photos or account data. See [Generated images](#generated-images).
 - **External / outbound links.** For convenience, the Site includes links to third-party websites—including official city tourism bureaus, public-transit agencies, National Park Service pages, museums, GitHub, About Me, and similar resources (for example “Helpful links” on destination cards). Clicking such a link leaves the Site and takes you to a service we do not operate. Those operators may collect information under their own privacy policies; this policy does not cover them. We do not receive your activity on those external sites by virtue of the link alone, and a link does not mean we endorse or control that third party.
+
+## Generated images {#generated-images}
+
+Some decorative card backgrounds on the homepage — regions, destination cities, seasons, culture tiles, road-trip cards, travel essentials, and tips — are **AI-generated illustrations**, not photographs from the Gallery and not pictures of identifiable private individuals. They are served as ordinary static files with the rest of the Site.
+
+The Gallery remains the author’s own travel photography. Generating or displaying the card illustrations from this Site does not send your gallery photos, location, or account data to an image-generation service.
 
 ## Cookies & similar technologies {#cookies}
 

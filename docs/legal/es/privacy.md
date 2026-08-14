@@ -2,7 +2,7 @@
 title: Política de privacidad
 eyebrow: Legal
 updatedLabel: Actualizado
-updatedDate: "August 6, 2026"
+updatedDate: "August 12, 2026"
 onThisPage: En esta página
 lead: "Esta política explica cómo **América — Una Guía de Viaje** (el “Sitio”) trata la información cuando usas la guía, la galería o las herramientas. El Sitio está pensado para funcionar bien con la menor cantidad posible de datos personales."
 footerNote: "© {year} USA Travel Guide · Tim G (TGthms)"
@@ -45,7 +45,14 @@ Algunas funciones pueden contactar servicios externos:
 - **Tipos de cambio (Herramientas).** El conversor puede pedir cotizaciones a una API pública (por ejemplo Frankfurter). Solo se envían los códigos de moneda necesarios.
 - **Tiempo, avisos y calidad del aire (Herramientas).** El pronóstico y los avisos severos de EE. UU. pueden venir del National Weather Service (api.weather.gov); el pronóstico mundial, campos complementarios, geocodificación y calidad del aire, de Open-Meteo (o un proveedor compatible). Las peticiones suelen incluir las coordenadas o el lugar que elegiste. Con “Usar mi ubicación”, las coordenadas se redondean a ~1 km en el dispositivo antes de enviarse. El tiempo y los avisos son orientativos para viajar; no sustituyen la información oficial de emergencia. Ante tiempo severo, sigue a las autoridades.
 - **Galería.** Fotos y vídeos se cargan como archivos estáticos del Sitio; no hace falta un SDK de analítica para reproducirlos.
+- **Imágenes generadas en las tarjetas.** Algunos fondos decorativos de la página de inicio son ilustraciones generadas por IA y se sirven como archivos estáticos (`ai-images/`). Cargarlos no sube tus fotos ni datos de cuenta. Ver [Imágenes generadas](#generated-images).
 - **Enlaces externos.** Hay enlaces a oficinas de turismo, transporte, parques nacionales, museos, GitHub, etc. Al hacer clic sales del Sitio y entras en un servicio que no operamos. Allí rigen sus políticas. Un enlace no implica respaldo.
+
+## Imágenes generadas {#generated-images}
+
+Algunos fondos decorativos de las tarjetas en la página de inicio —regiones, ciudades, estaciones, cultura, rutas, esenciales y consejos— son **ilustraciones generadas por IA**, no fotografías de la Galería ni retratos de personas particulares identificables. Se sirven como archivos estáticos junto con el resto del Sitio.
+
+La Galería sigue siendo la fotografía de viaje del autor. Mostrar esas ilustraciones desde este Sitio no envía tus fotos de la galería, tu ubicación ni datos de cuenta a un servicio de generación de imágenes.
 
 ## Cookies y almacenamiento local {#cookies}
 

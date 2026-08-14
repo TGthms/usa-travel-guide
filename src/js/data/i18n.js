@@ -522,6 +522,7 @@ window.I18N = {
     "footer.whenToVisit": "Cuándo viajar",
     "footer.visa": "Visado y entrada",
     "footer.copyright": "© {year} Guía de viaje de EE. UU. &nbsp;·&nbsp; Hecho con pasión por la carretera abierta | Creado por Tim G · En colaboración con IA",
+    "footer.generatedArt": "Algunos fondos de las tarjetas son ilustraciones generadas por IA.",
     "footer.motto": "Tierra de libres, hogar de valientes",
 
     "funFacts.eyebrow": "¿Sabías que…?",
@@ -1045,6 +1046,7 @@ window.I18N = {
     "footer.whenToVisit": "最佳季节",
     "footer.visa": "签证与入境",
     "footer.copyright": "© {year} 美国旅行指南 &nbsp;·&nbsp; 本网页由 Tim G （GitHub @TGthms）制作",
+    "footer.generatedArt": "部分卡片背景为 AI 生成的装饰性插图。",
     "footer.motto": "自由的土地，勇者的家园",
 
     "funFacts.eyebrow": "你知道吗？",
@@ -1568,6 +1570,7 @@ window.I18N = {
     "footer.whenToVisit": "ベストシーズン",
     "footer.visa": "ビザと入国",
     "footer.copyright": "© {year} アメリカ旅行ガイド &nbsp;·&nbsp; 情熱を胸に、自由な道を駆け巡ります | Tim G が制作・ AI と協力して完成",
+    "footer.generatedArt": "一部のカード背景は AI 生成の装飾イラストです。",
     "footer.motto": "自由の地、勇者の故郷",
 
     "funFacts.eyebrow": "知っていますか？",

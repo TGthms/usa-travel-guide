@@ -13,7 +13,7 @@ window.LEGAL_I18N = {
       "title": "Privacy Policy",
       "eyebrow": "Legal",
       "updatedLabel": "Updated",
-      "updatedDate": "August 6, 2026",
+      "updatedDate": "August 12, 2026",
       "onThisPage": "On this page",
       "lead": "This Privacy Policy describes how <strong>America — A Travel Guide</strong> (the “Site,” “we,” “us”) handles information when you visit or use this website, including the guide, photo gallery, and tools. We designed the Site to work well with as little personal data as possible.",
       "toc": [
@@ -36,6 +36,10 @@ window.LEGAL_I18N = {
         {
           "id": "third-parties",
           "label": "Third-party services"
+        },
+        {
+          "id": "generated-images",
+          "label": "Generated images"
         },
         {
           "id": "cookies",
@@ -82,7 +86,12 @@ window.LEGAL_I18N = {
         {
           "id": "third-parties",
           "title": "Third-party services",
-          "html": "<p>The Site may load or contact third-party services necessary for features you use:</p>\n<ul>\n<li><strong>Fonts.</strong> Web fonts may be loaded from Google Fonts so text displays correctly across languages. That request may include technical data such as your IP address, subject to Google’s policies.</li>\n<li><strong>Exchange rates (Tools).</strong> The currency converter may request rates from a public API (for example Frankfurter). Only the currency codes needed for the conversion are sent for that request.</li>\n<li><strong>Weather, alerts & air quality (Tools).</strong> The Weather tool may request U.S. forecast data and active severe-weather alerts (watches, warnings, and advisories) from the National Weather Service (api.weather.gov), and world forecasts, gap-fill fields, geocoding, and air quality from Open-Meteo (or a compatible provider). Requests typically include the coordinates or place name you selected. If you use “Use my location,” coordinates are rounded on your device to about <strong>1 km</strong> before the forecast or alerts request and before any local storage of that place. Optional browser geolocation is sent only if you allow it. Weather and alert data are for general travel guidance only—not for emergencies or life-safety decisions. Always follow official emergency authorities when severe weather threatens.</li>\n<li><strong>Gallery media.</strong> Photos and videos in the Gallery are static files hosted with the Site. Playing a video loads that file in your browser; no separate analytics SDK is required for playback.</li>\n<li><strong>External / outbound links.</strong> For convenience, the Site includes links to third-party websites—including official city tourism bureaus, public-transit agencies, National Park Service pages, museums, GitHub, About Me, and similar resources (for example “Helpful links” on destination cards). Clicking such a link leaves the Site and takes you to a service we do not operate. Those operators may collect information under their own privacy policies; this policy does not cover them. We do not receive your activity on those external sites by virtue of the link alone, and a link does not mean we endorse or control that third party.</li>\n</ul>"
+          "html": "<p>The Site may load or contact third-party services necessary for features you use:</p>\n<ul>\n<li><strong>Fonts.</strong> Web fonts may be loaded from Google Fonts so text displays correctly across languages. That request may include technical data such as your IP address, subject to Google’s policies.</li>\n<li><strong>Exchange rates (Tools).</strong> The currency converter may request rates from a public API (for example Frankfurter). Only the currency codes needed for the conversion are sent for that request.</li>\n<li><strong>Weather, alerts & air quality (Tools).</strong> The Weather tool may request U.S. forecast data and active severe-weather alerts (watches, warnings, and advisories) from the National Weather Service (api.weather.gov), and world forecasts, gap-fill fields, geocoding, and air quality from Open-Meteo (or a compatible provider). Requests typically include the coordinates or place name you selected. If you use “Use my location,” coordinates are rounded on your device to about <strong>1 km</strong> before the forecast or alerts request and before any local storage of that place. Optional browser geolocation is sent only if you allow it. Weather and alert data are for general travel guidance only—not for emergencies or life-safety decisions. Always follow official emergency authorities when severe weather threatens.</li>\n<li><strong>Gallery media.</strong> Photos and videos in the Gallery are static files hosted with the Site. Playing a video loads that file in your browser; no separate analytics SDK is required for playback.</li>\n<li><strong>Generated card images.</strong> Some decorative homepage card backgrounds are AI-generated illustrations stored as static files on the Site (<code>ai-images/</code>). Loading those files does not upload your photos or account data. See <a href=\"#generated-images\">Generated images</a>.</li>\n<li><strong>External / outbound links.</strong> For convenience, the Site includes links to third-party websites—including official city tourism bureaus, public-transit agencies, National Park Service pages, museums, GitHub, About Me, and similar resources (for example “Helpful links” on destination cards). Clicking such a link leaves the Site and takes you to a service we do not operate. Those operators may collect information under their own privacy policies; this policy does not cover them. We do not receive your activity on those external sites by virtue of the link alone, and a link does not mean we endorse or control that third party.</li>\n</ul>"
+        },
+        {
+          "id": "generated-images",
+          "title": "Generated images",
+          "html": "<p>Some decorative card backgrounds on the homepage — regions, destination cities, seasons, culture tiles, road-trip cards, travel essentials, and tips — are <strong>AI-generated illustrations</strong>, not photographs from the Gallery and not pictures of identifiable private individuals. They are served as ordinary static files with the rest of the Site.</p>\n<p>The Gallery remains the author’s own travel photography. Generating or displaying the card illustrations from this Site does not send your gallery photos, location, or account data to an image-generation service.</p>"
         },
         {
           "id": "cookies",
@@ -116,7 +125,7 @@ window.LEGAL_I18N = {
       "title": "Política de privacidad",
       "eyebrow": "Legal",
       "updatedLabel": "Actualizado",
-      "updatedDate": "August 6, 2026",
+      "updatedDate": "August 12, 2026",
       "onThisPage": "En esta página",
       "lead": "Esta política explica cómo <strong>América — Una Guía de Viaje</strong> (el “Sitio”) trata la información cuando usas la guía, la galería o las herramientas. El Sitio está pensado para funcionar bien con la menor cantidad posible de datos personales.",
       "toc": [
@@ -139,6 +148,10 @@ window.LEGAL_I18N = {
         {
           "id": "third-parties",
           "label": "Servicios de terceros"
+        },
+        {
+          "id": "generated-images",
+          "label": "Imágenes generadas"
         },
         {
           "id": "cookies",
@@ -185,7 +198,12 @@ window.LEGAL_I18N = {
         {
           "id": "third-parties",
           "title": "Servicios de terceros",
-          "html": "<p>Algunas funciones pueden contactar servicios externos:</p>\n<ul>\n<li><strong>Fuentes.</strong> Pueden cargarse fuentes web de Google Fonts para mostrar bien el texto en varios idiomas. Esa petición puede incluir datos técnicos como la IP, según las políticas de Google.</li>\n<li><strong>Tipos de cambio (Herramientas).</strong> El conversor puede pedir cotizaciones a una API pública (por ejemplo Frankfurter). Solo se envían los códigos de moneda necesarios.</li>\n<li><strong>Tiempo, avisos y calidad del aire (Herramientas).</strong> El pronóstico y los avisos severos de EE. UU. pueden venir del National Weather Service (api.weather.gov); el pronóstico mundial, campos complementarios, geocodificación y calidad del aire, de Open-Meteo (o un proveedor compatible). Las peticiones suelen incluir las coordenadas o el lugar que elegiste. Con “Usar mi ubicación”, las coordenadas se redondean a ~1 km en el dispositivo antes de enviarse. El tiempo y los avisos son orientativos para viajar; no sustituyen la información oficial de emergencia. Ante tiempo severo, sigue a las autoridades.</li>\n<li><strong>Galería.</strong> Fotos y vídeos se cargan como archivos estáticos del Sitio; no hace falta un SDK de analítica para reproducirlos.</li>\n<li><strong>Enlaces externos.</strong> Hay enlaces a oficinas de turismo, transporte, parques nacionales, museos, GitHub, etc. Al hacer clic sales del Sitio y entras en un servicio que no operamos. Allí rigen sus políticas. Un enlace no implica respaldo.</li>\n</ul>"
+          "html": "<p>Algunas funciones pueden contactar servicios externos:</p>\n<ul>\n<li><strong>Fuentes.</strong> Pueden cargarse fuentes web de Google Fonts para mostrar bien el texto en varios idiomas. Esa petición puede incluir datos técnicos como la IP, según las políticas de Google.</li>\n<li><strong>Tipos de cambio (Herramientas).</strong> El conversor puede pedir cotizaciones a una API pública (por ejemplo Frankfurter). Solo se envían los códigos de moneda necesarios.</li>\n<li><strong>Tiempo, avisos y calidad del aire (Herramientas).</strong> El pronóstico y los avisos severos de EE. UU. pueden venir del National Weather Service (api.weather.gov); el pronóstico mundial, campos complementarios, geocodificación y calidad del aire, de Open-Meteo (o un proveedor compatible). Las peticiones suelen incluir las coordenadas o el lugar que elegiste. Con “Usar mi ubicación”, las coordenadas se redondean a ~1 km en el dispositivo antes de enviarse. El tiempo y los avisos son orientativos para viajar; no sustituyen la información oficial de emergencia. Ante tiempo severo, sigue a las autoridades.</li>\n<li><strong>Galería.</strong> Fotos y vídeos se cargan como archivos estáticos del Sitio; no hace falta un SDK de analítica para reproducirlos.</li>\n<li><strong>Imágenes generadas en las tarjetas.</strong> Algunos fondos decorativos de la página de inicio son ilustraciones generadas por IA y se sirven como archivos estáticos (<code>ai-images/</code>). Cargarlos no sube tus fotos ni datos de cuenta. Ver <a href=\"#generated-images\">Imágenes generadas</a>.</li>\n<li><strong>Enlaces externos.</strong> Hay enlaces a oficinas de turismo, transporte, parques nacionales, museos, GitHub, etc. Al hacer clic sales del Sitio y entras en un servicio que no operamos. Allí rigen sus políticas. Un enlace no implica respaldo.</li>\n</ul>"
+        },
+        {
+          "id": "generated-images",
+          "title": "Imágenes generadas",
+          "html": "<p>Algunos fondos decorativos de las tarjetas en la página de inicio —regiones, ciudades, estaciones, cultura, rutas, esenciales y consejos— son <strong>ilustraciones generadas por IA</strong>, no fotografías de la Galería ni retratos de personas particulares identificables. Se sirven como archivos estáticos junto con el resto del Sitio.</p>\n<p>La Galería sigue siendo la fotografía de viaje del autor. Mostrar esas ilustraciones desde este Sitio no envía tus fotos de la galería, tu ubicación ni datos de cuenta a un servicio de generación de imágenes.</p>"
         },
         {
           "id": "cookies",
@@ -219,7 +237,7 @@ window.LEGAL_I18N = {
       "title": "隐私政策",
       "eyebrow": "法律信息",
       "updatedLabel": "更新日期",
-      "updatedDate": "August 10, 2026",
+      "updatedDate": "August 12, 2026",
       "onThisPage": "本页目录",
       "lead": "本隐私政策说明你在使用 <strong>美国 — 旅行指南</strong>（下称「本网站」）时，信息会如何被处理。本网站包含旅行指南、相册与实用工具。我们尽量少收集个人信息，让你安心浏览。",
       "toc": [
@@ -242,6 +260,10 @@ window.LEGAL_I18N = {
         {
           "id": "third-parties",
           "label": "第三方服务"
+        },
+        {
+          "id": "generated-images",
+          "label": "生成图像"
         },
         {
           "id": "cookies",
@@ -288,7 +310,12 @@ window.LEGAL_I18N = {
         {
           "id": "third-parties",
           "title": "第三方服务",
-          "html": "<p>使用某些功能时，本站可能请求以下第三方服务：</p>\n<ul>\n<li><strong>字体。</strong>可能从 Google Fonts 加载网络字体，以便多语言正确显示。请求可能带有 IP 等技术信息，并受 Google 政策约束。</li>\n<li><strong>汇率（工具）。</strong>货币换算可能向公开汇率接口（如 Frankfurter）请求数据，只发送换算所需的货币代码。</li>\n<li><strong>天气、预警与空气质量。</strong>美国预报与现行恶劣天气预警可能来自美国国家气象局（api.weather.gov）；全球预报、补充字段、地理编码与空气质量可能来自 Open-Meteo（或同类服务）。请求通常包含你选的城市坐标或地名。使用「我的位置」时，坐标会先在本机粗略估算到约 1 公里再发送。天气与预警仅供出行参考，不能替代官方应急信息；遇到恶劣天气请听从当地官方指引。</li>\n<li><strong>相册媒体。</strong>照片与视频作为本站静态文件加载，不需要额外统计 SDK。</li>\n<li><strong>站外链接。</strong>目的地卡片等处可能链到官方旅游局、公交、国家公园、博物馆、GitHub 等。点击后你将离开本站，进入我们无法控制的网站，适用对方的隐私政策。链接不等于背书。</li>\n</ul>"
+          "html": "<p>使用某些功能时，本站可能请求以下第三方服务：</p>\n<ul>\n<li><strong>字体。</strong>可能从 Google Fonts 加载网络字体，以便多语言正确显示。请求可能带有 IP 等技术信息，并受 Google 政策约束。</li>\n<li><strong>汇率（工具）。</strong>货币换算可能向公开汇率接口（如 Frankfurter）请求数据，只发送换算所需的货币代码。</li>\n<li><strong>天气、预警与空气质量。</strong>美国预报与现行恶劣天气预警可能来自美国国家气象局（api.weather.gov）；全球预报、补充字段、地理编码与空气质量可能来自 Open-Meteo（或同类服务）。请求通常包含你选的城市坐标或地名。使用「我的位置」时，坐标会先在本机粗略估算到约 1 公里再发送。天气与预警仅供出行参考，不能替代官方应急信息；遇到恶劣天气请听从当地官方指引。</li>\n<li><strong>相册媒体。</strong>照片与视频作为本站静态文件加载，不需要额外统计 SDK。</li>\n<li><strong>卡片配图。</strong>首页部分卡片背景为 AI 生成的装饰性插图，作为本站静态文件（<code>ai-images/</code>）加载，不会上传你的照片或账户数据。详见<a href=\"#generated-images\">生成图像</a>。</li>\n<li><strong>站外链接。</strong>目的地卡片等处可能链到官方旅游局、公交、国家公园、博物馆、GitHub 等。点击后你将离开本站，进入我们无法控制的网站，适用对方的隐私政策。链接不等于背书。</li>\n</ul>"
+        },
+        {
+          "id": "generated-images",
+          "title": "生成图像",
+          "html": "<p>首页部分卡片背景——地区、城市、季节、文化、路线、出行必备与贴士——是 <strong>AI 生成的装饰性插图</strong>，不是相册中的实拍，也不是可识别私人的肖像。它们与网站其他文件一样作为静态资源提供。</p>\n<p>相册仍是作者本人的旅行摄影。通过本站展示这些插图，不会把你的相册照片、位置或账户数据发送给图像生成服务。</p>"
         },
         {
           "id": "cookies",
@@ -322,7 +349,7 @@ window.LEGAL_I18N = {
       "title": "プライバシーポリシー",
       "eyebrow": "リーガル",
       "updatedLabel": "更新日",
-      "updatedDate": "August 6, 2026",
+      "updatedDate": "August 12, 2026",
       "onThisPage": "このページの内容",
       "lead": "このプライバシーポリシーは、<strong>アメリカ — 旅行ガイド</strong>（以下「本サイト」）をご利用いただく際に、情報がどのように扱われるかをご説明するものです。本サイトにはガイド、フォトギャラリー、各種ツールが含まれます。できるだけ個人情報を少なく扱いながら、快適に使えるよう設計しています。",
       "toc": [
@@ -345,6 +372,10 @@ window.LEGAL_I18N = {
         {
           "id": "third-parties",
           "label": "第三者サービス"
+        },
+        {
+          "id": "generated-images",
+          "label": "生成画像"
         },
         {
           "id": "cookies",
@@ -391,7 +422,12 @@ window.LEGAL_I18N = {
         {
           "id": "third-parties",
           "title": "第三者サービス",
-          "html": "<p>機能の提供にあたり、次のような第三者サービスを利用することがあります。</p>\n<ul>\n<li><strong>フォント。</strong>多言語表示のため Google Fonts からウェブフォントを読み込むことがあります。IP などの技術情報が含まれる場合があり、Google の方針が適用されます。</li>\n<li><strong>為替（ツール）。</strong>通貨換算は公開 API（例：Frankfurter）へレートを問い合わせることがあります。必要な通貨コードのみ送信します。</li>\n<li><strong>天気・警報・大気質（ツール）。</strong>米国の予報と有効な悪天候警報は National Weather Service（api.weather.gov）から、世界の予報・補完データ・地名検索・大気質は Open-Meteo（または同等のサービス）から取得する場合があります。選んだ地点の座標や地名が含まれます。「現在地」利用時は、約 1 km に丸めたうえで送信します。天気・警報は旅行の参考情報であり、緊急時の公式情報の代わりにはなりません。悪天候時は当局の指示に従ってください。</li>\n<li><strong>ギャラリー。</strong>写真・動画は本サイトの静的ファイルとして読み込まれます。別途の解析 SDK は不要です。</li>\n<li><strong>外部リンク。</strong>公式観光局、交通機関、国立公園、博物館、GitHub などへのリンクがあります。クリックすると本サイトを離れ、当方が管理しないサイトへ移ります。相手方のプライバシーポリシーが適用され、リンクは推奨を意味しません。</li>\n</ul>"
+          "html": "<p>機能の提供にあたり、次のような第三者サービスを利用することがあります。</p>\n<ul>\n<li><strong>フォント。</strong>多言語表示のため Google Fonts からウェブフォントを読み込むことがあります。IP などの技術情報が含まれる場合があり、Google の方針が適用されます。</li>\n<li><strong>為替（ツール）。</strong>通貨換算は公開 API（例：Frankfurter）へレートを問い合わせることがあります。必要な通貨コードのみ送信します。</li>\n<li><strong>天気・警報・大気質（ツール）。</strong>米国の予報と有効な悪天候警報は National Weather Service（api.weather.gov）から、世界の予報・補完データ・地名検索・大気質は Open-Meteo（または同等のサービス）から取得する場合があります。選んだ地点の座標や地名が含まれます。「現在地」利用時は、約 1 km に丸めたうえで送信します。天気・警報は旅行の参考情報であり、緊急時の公式情報の代わりにはなりません。悪天候時は当局の指示に従ってください。</li>\n<li><strong>ギャラリー。</strong>写真・動画は本サイトの静的ファイルとして読み込まれます。別途の解析 SDK は不要です。</li>\n<li><strong>生成カード画像。</strong>ホームページの一部カード背景は AI 生成の装飾イラストで、静的ファイル（<code>ai-images/</code>）として配信されます。読み込みによってあなたの写真やアカウント情報がアップロードされることはありません。<a href=\"#generated-images\">生成画像</a> もご覧ください。</li>\n<li><strong>外部リンク。</strong>公式観光局、交通機関、国立公園、博物館、GitHub などへのリンクがあります。クリックすると本サイトを離れ、当方が管理しないサイトへ移ります。相手方のプライバシーポリシーが適用され、リンクは推奨を意味しません。</li>\n</ul>"
+        },
+        {
+          "id": "generated-images",
+          "title": "生成画像",
+          "html": "<p>ホームページの一部カード背景（地域、都市、季節、文化、ルート、必需品、ヒント）は、ギャラリーの実写ではなく、特定の私人を写した写真でもない <strong>AI 生成の装飾イラスト</strong>です。サイトの他のファイルと同様、静的ファイルとして配信されます。</p>\n<p>ギャラリーは引き続き作者本人の旅行写真です。本サイトからこれらのイラストを表示しても、ギャラリー写真・位置情報・アカウントデータが画像生成サービスへ送られることはありません。</p>"
         },
         {
           "id": "cookies",

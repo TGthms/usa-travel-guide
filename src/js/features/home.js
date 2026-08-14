@@ -218,6 +218,28 @@ document.querySelectorAll('.nav-links a[href^="#"], .nav-mobile-link[href^="#"]'
   });
 });
 
+/* ── CARD PHOTOS: apply background URLs only when a section is near view.
+   Regions stay eager (above the fold). Destinations / essentials / seasons /
+   culture / routes / tips wait so first paint does not fetch all 48 files. ── */
+(function initLazyCardPhotos() {
+  const ids = ['destinations', 'practical', 'seasons', 'culture', 'routes', 'tips'];
+  const sections = ids.map(function (id) { return document.getElementById(id); }).filter(Boolean);
+  if (!sections.length) return;
+  const mark = function (el) { el.classList.add('is-photos-ready'); };
+  if (!('IntersectionObserver' in window)) {
+    sections.forEach(mark);
+    return;
+  }
+  const io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      mark(entry.target);
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: '320px 0px', threshold: 0.01 });
+  sections.forEach(function (el) { io.observe(el); });
+})();
+
 /* ── INTRO FACT CARDS: staggered entrance on first reveal ── */
 (function initIntroFactEntrance() {
   const facts = document.querySelector('.intro-facts');

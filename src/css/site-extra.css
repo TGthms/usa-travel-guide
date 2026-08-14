@@ -252,6 +252,20 @@ footer.site-footer {
   color: var(--text-mute);
   font-weight: 400;
 }
+.site-footer-credits {
+  margin: 0;
+  max-width: 40rem;
+  font-size: var(--fs-micro, 0.75rem);
+  line-height: 1.55;
+}
+.site-footer-credits a {
+  color: var(--text-mute);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+.site-footer-credits a:hover {
+  color: var(--accent-1);
+}
 .site-footer-motto {
   margin: 0;
   font-size: var(--fs-micro, 0.75rem);

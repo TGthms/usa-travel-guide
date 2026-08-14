@@ -1064,18 +1064,30 @@ html[data-theme="elegant"] .region-svg {
     linear-gradient(to bottom, rgba(0,0,0,0.32) 0%, transparent 30%),
     linear-gradient(to top, rgba(0,0,0,0.52) 0%, transparent 56%);
 }
-.db-nyc { background-image: url('../../ai-images/dest-nyc.webp'); background-position: center 30%; }
-.db-la  { background-image: url('../../ai-images/dest-la.webp'); background-position: center 28%; }
-.db-chi { background-image: url('../../ai-images/dest-chicago.webp'); background-position: center 32%; }
-.db-mia { background-image: url('../../ai-images/dest-miami.webp'); background-position: center 28%; }
-.db-nola { background-image: url('../../ai-images/dest-nola.webp'); background-position: center 30%; }
-.db-veg { background-image: url('../../ai-images/dest-vegas.webp'); background-position: center 28%; }
-.db-sf  { background-image: url('../../ai-images/dest-sf.webp'); background-position: center 22%; }
-.db-sea { background-image: url('../../ai-images/dest-seattle.webp'); background-position: center 22%; }
-.db-aus { background-image: url('../../ai-images/dest-austin.webp'); background-position: center 28%; }
-.db-dc  { background-image: url('../../ai-images/dest-dc.webp'); background-position: center 18%; }
-.db-hon { background-image: url('../../ai-images/dest-honolulu.webp'); background-position: center 30%; }
-.db-bos { background-image: url('../../ai-images/dest-boston.webp'); background-position: center 22%; }
+.db-nyc { background-position: center 30%; }
+.db-la  { background-position: center 28%; }
+.db-chi { background-position: center 32%; }
+.db-mia { background-position: center 28%; }
+.db-nola { background-position: center 30%; }
+.db-veg { background-position: center 28%; }
+.db-sf  { background-position: center 22%; }
+.db-sea { background-position: center 22%; }
+.db-aus { background-position: center 28%; }
+.db-dc  { background-position: center 18%; }
+.db-hon { background-position: center 30%; }
+.db-bos { background-position: center 22%; }
+#destinations.is-photos-ready .db-nyc { background-image: url('../../ai-images/dest-nyc.webp'); }
+#destinations.is-photos-ready .db-la  { background-image: url('../../ai-images/dest-la.webp'); }
+#destinations.is-photos-ready .db-chi { background-image: url('../../ai-images/dest-chicago.webp'); }
+#destinations.is-photos-ready .db-mia { background-image: url('../../ai-images/dest-miami.webp'); }
+#destinations.is-photos-ready .db-nola { background-image: url('../../ai-images/dest-nola.webp'); }
+#destinations.is-photos-ready .db-veg { background-image: url('../../ai-images/dest-vegas.webp'); }
+#destinations.is-photos-ready .db-sf  { background-image: url('../../ai-images/dest-sf.webp'); }
+#destinations.is-photos-ready .db-sea { background-image: url('../../ai-images/dest-seattle.webp'); }
+#destinations.is-photos-ready .db-aus { background-image: url('../../ai-images/dest-austin.webp'); }
+#destinations.is-photos-ready .db-dc  { background-image: url('../../ai-images/dest-dc.webp'); }
+#destinations.is-photos-ready .db-hon { background-image: url('../../ai-images/dest-honolulu.webp'); }
+#destinations.is-photos-ready .db-bos { background-image: url('../../ai-images/dest-boston.webp'); }
 
 .dest-content {
   position: absolute;
@@ -1314,10 +1326,10 @@ html[data-theme="elegant"] .region-svg {
   transition: transform .8s cubic-bezier(.22,1,.36,1);
 }
 .prac-card:hover .prac-card-photo { transform: scale(1.03); }
-.prac-card[data-prac="transport"] .prac-card-photo { background-image: url('../../ai-images/prac-transport.webp'); }
-.prac-card[data-prac="driving"] .prac-card-photo { background-image: url('../../ai-images/prac-driving.webp'); }
-.prac-card[data-prac="money"] .prac-card-photo { background-image: url('../../ai-images/prac-money.webp'); }
-.prac-card[data-prac="health"] .prac-card-photo { background-image: url('../../ai-images/prac-health.webp'); }
+#practical.is-photos-ready .prac-card[data-prac="transport"] .prac-card-photo { background-image: url('../../ai-images/prac-transport.webp'); }
+#practical.is-photos-ready .prac-card[data-prac="driving"] .prac-card-photo { background-image: url('../../ai-images/prac-driving.webp'); }
+#practical.is-photos-ready .prac-card[data-prac="money"] .prac-card-photo { background-image: url('../../ai-images/prac-money.webp'); }
+#practical.is-photos-ready .prac-card[data-prac="health"] .prac-card-photo { background-image: url('../../ai-images/prac-health.webp'); }
 .prac-card::after {
   content:''; position:absolute; inset:0; z-index: 0; pointer-events:none;
   background: linear-gradient(to top, rgba(6,8,12,0.92) 0%, rgba(6,8,12,0.68) 48%, rgba(6,8,12,0.40) 100%);
@@ -1541,10 +1553,10 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
   transition: transform .8s cubic-bezier(.22,1,.36,1);
 }
 .season-card:hover .season-card-photo { transform: scale(1.03); }
-.sc-spring .season-card-photo { background-image: url('../../ai-images/season-spring.webp'); }
-.sc-summer .season-card-photo { background-image: url('../../ai-images/season-summer.webp'); }
-.sc-fall .season-card-photo   { background-image: url('../../ai-images/season-fall.webp'); }
-.sc-winter .season-card-photo { background-image: url('../../ai-images/season-winter.webp'); }
+#seasons.is-photos-ready .sc-spring .season-card-photo { background-image: url('../../ai-images/season-spring.webp'); }
+#seasons.is-photos-ready .sc-summer .season-card-photo { background-image: url('../../ai-images/season-summer.webp'); }
+#seasons.is-photos-ready .sc-fall .season-card-photo   { background-image: url('../../ai-images/season-fall.webp'); }
+#seasons.is-photos-ready .sc-winter .season-card-photo { background-image: url('../../ai-images/season-winter.webp'); }
 .season-card::before {
   content:''; position:absolute; inset:0; z-index: 0; pointer-events:none;
   background: linear-gradient(to top, rgba(6,8,12,0.92) 0%, rgba(6,8,12,0.62) 48%, rgba(6,8,12,0.40) 100%);
@@ -1613,18 +1625,18 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
   transition: transform .7s cubic-bezier(.22,1,.36,1);
 }
 .culture-tile:hover .culture-tile-photo { transform: scale(1.04); }
-.culture-tile[data-culture="rock"] .culture-tile-photo { background-image: url('../../ai-images/culture-rock.webp'); }
-.culture-tile[data-culture="jazz"] .culture-tile-photo { background-image: url('../../ai-images/culture-jazz.webp'); }
-.culture-tile[data-culture="texmex"] .culture-tile-photo { background-image: url('../../ai-images/culture-texmex.webp'); }
-.culture-tile[data-culture="seafood"] .culture-tile-photo { background-image: url('../../ai-images/culture-seafood.webp'); }
-.culture-tile[data-culture="broadway"] .culture-tile-photo { background-image: url('../../ai-images/culture-broadway.webp'); }
-.culture-tile[data-culture="bbq"] .culture-tile-photo { background-image: url('../../ai-images/culture-bbq.webp'); }
-.culture-tile[data-culture="streetart"] .culture-tile-photo { background-image: url('../../ai-images/culture-streetart.webp'); }
-.culture-tile[data-culture="sports"] .culture-tile-photo { background-image: url('../../ai-images/culture-sports.webp'); }
-.culture-tile[data-culture="hollywood"] .culture-tile-photo { background-image: url('../../ai-images/culture-hollywood.webp'); }
-.culture-tile[data-culture="pizza"] .culture-tile-photo { background-image: url('../../ai-images/culture-pizza.webp'); }
-.culture-tile[data-culture="smithsonian"] .culture-tile-photo { background-image: url('../../ai-images/culture-smithsonian.webp'); }
-.culture-tile[data-culture="farmtable"] .culture-tile-photo { background-image: url('../../ai-images/culture-farmtable.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="rock"] .culture-tile-photo { background-image: url('../../ai-images/culture-rock.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="jazz"] .culture-tile-photo { background-image: url('../../ai-images/culture-jazz.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="texmex"] .culture-tile-photo { background-image: url('../../ai-images/culture-texmex.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="seafood"] .culture-tile-photo { background-image: url('../../ai-images/culture-seafood.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="broadway"] .culture-tile-photo { background-image: url('../../ai-images/culture-broadway.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="bbq"] .culture-tile-photo { background-image: url('../../ai-images/culture-bbq.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="streetart"] .culture-tile-photo { background-image: url('../../ai-images/culture-streetart.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="sports"] .culture-tile-photo { background-image: url('../../ai-images/culture-sports.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="hollywood"] .culture-tile-photo { background-image: url('../../ai-images/culture-hollywood.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="pizza"] .culture-tile-photo { background-image: url('../../ai-images/culture-pizza.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="smithsonian"] .culture-tile-photo { background-image: url('../../ai-images/culture-smithsonian.webp'); }
+#culture.is-photos-ready .culture-tile[data-culture="farmtable"] .culture-tile-photo { background-image: url('../../ai-images/culture-farmtable.webp'); }
 .culture-tile::after {
   content:''; position:absolute; inset:0; z-index: 0; pointer-events:none;
   background: linear-gradient(to top, rgba(6,8,12,0.90) 0%, rgba(6,8,12,0.62) 55%, rgba(6,8,12,0.38) 100%);
@@ -1693,9 +1705,9 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
   transition: transform .8s cubic-bezier(.22,1,.36,1);
 }
 .route-card:hover .route-card-photo { transform: scale(1.06); }
-.route-card[data-route="route66"] .route-card-photo { background-image: url('../../ai-images/route-route66.webp'); }
-.route-card[data-route="pch"] .route-card-photo { background-image: url('../../ai-images/route-pch.webp'); }
-.route-card[data-route="parksloop"] .route-card-photo { background-image: url('../../ai-images/route-parksloop.webp'); }
+#routes.is-photos-ready .route-card[data-route="route66"] .route-card-photo { background-image: url('../../ai-images/route-route66.webp'); }
+#routes.is-photos-ready .route-card[data-route="pch"] .route-card-photo { background-image: url('../../ai-images/route-pch.webp'); }
+#routes.is-photos-ready .route-card[data-route="parksloop"] .route-card-photo { background-image: url('../../ai-images/route-parksloop.webp'); }
 .route-header { padding: 32px 28px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; position: relative; }
 .route-header::after { content:''; position:absolute; bottom:-1px; left:0; height: 2px; background: var(--accent-1); width: 0; transition: width .6s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .route-card:hover .route-header::after { width: 100%; }
@@ -1760,14 +1772,14 @@ html[data-motion-effective="off"] .seasons-weather-cta:hover {
   background-repeat: no-repeat;
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
 }
-.tip-row[data-tip="parks"] .tip-row-photo { background-image: url('../../ai-images/tip-parks.webp'); }
-.tip-row[data-tip="tax"] .tip-row-photo { background-image: url('../../ai-images/tip-tax.webp'); }
-.tip-row[data-tip="sim"] .tip-row-photo { background-image: url('../../ai-images/tip-sim.webp'); }
-.tip-row[data-tip="distance"] .tip-row-photo { background-image: url('../../ai-images/tip-distance.webp'); }
-.tip-row[data-tip="tipping"] .tip-row-photo { background-image: url('../../ai-images/tip-tipping.webp'); }
-.tip-row[data-tip="pass"] .tip-row-photo { background-image: url('../../ai-images/tip-pass.webp'); }
-.tip-row[data-tip="food"] .tip-row-photo { background-image: url('../../ai-images/tip-food.webp'); }
-.tip-row[data-tip="driving"] .tip-row-photo { background-image: url('../../ai-images/tip-driving.webp'); }
+#tips.is-photos-ready .tip-row[data-tip="parks"] .tip-row-photo { background-image: url('../../ai-images/tip-parks.webp'); }
+#tips.is-photos-ready .tip-row[data-tip="tax"] .tip-row-photo { background-image: url('../../ai-images/tip-tax.webp'); }
+#tips.is-photos-ready .tip-row[data-tip="sim"] .tip-row-photo { background-image: url('../../ai-images/tip-sim.webp'); }
+#tips.is-photos-ready .tip-row[data-tip="distance"] .tip-row-photo { background-image: url('../../ai-images/tip-distance.webp'); }
+#tips.is-photos-ready .tip-row[data-tip="tipping"] .tip-row-photo { background-image: url('../../ai-images/tip-tipping.webp'); }
+#tips.is-photos-ready .tip-row[data-tip="pass"] .tip-row-photo { background-image: url('../../ai-images/tip-pass.webp'); }
+#tips.is-photos-ready .tip-row[data-tip="food"] .tip-row-photo { background-image: url('../../ai-images/tip-food.webp'); }
+#tips.is-photos-ready .tip-row[data-tip="driving"] .tip-row-photo { background-image: url('../../ai-images/tip-driving.webp'); }
 .tip-row::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; z-index: 2; background: var(--accent-1); transform: scaleY(0); transform-origin: top; transition: transform .35s ease; }
 .tip-row:hover { border-color: var(--border-med); background: var(--bg-card-hov); transform: none; box-shadow: none; }
 .tip-row:hover::before { transform: scaleY(1); }
