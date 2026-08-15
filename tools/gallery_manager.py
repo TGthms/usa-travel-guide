@@ -71,6 +71,7 @@ import json
 import mimetypes
 import os
 import re
+import secrets
 import shutil
 import struct
 import subprocess
@@ -122,6 +123,11 @@ FULL_ORIENT_QUALITY = 95  # re-encode quality when baking EXIF orientation
 MEDIUM_QUALITY = 82
 THUMB_QUALITY = 72
 PORT = 1221
+# Set at server start (see run_server). Every request must present this
+# token (as a cookie, set once via a ?token=... link) or it's rejected.
+# Keeps the server safe to bind to your LAN, not just localhost.
+AUTH_TOKEN: str | None = None
+AUTH_COOKIE = "gm_token"
 # Serialize gallery.html + i18n.js writes (server is multi-threaded)
 _WRITE_LOCK = threading.Lock()
 JPEG_SUFFIXES = {".jpg", ".jpeg", ".jpe", ".jfif"}
@@ -3208,9 +3214,55 @@ class Handler(BaseHTTPRequestHandler):
         raw = json.dumps(obj, ensure_ascii=False, indent=2).encode("utf-8")
         self._send(code, raw, "application/json; charset=utf-8")
 
+    def _cookies(self) -> dict[str, str]:
+        raw = self.headers.get("Cookie", "")
+        out: dict[str, str] = {}
+        for part in raw.split(";"):
+            if "=" in part:
+                k, v = part.strip().split("=", 1)
+                out[k] = v
+        return out
+
+    def _authorized(self) -> bool:
+        # No token configured (e.g. explicit --no-auth on localhost-only use)
+        if not AUTH_TOKEN:
+            return True
+        return secrets.compare_digest(self._cookies().get(AUTH_COOKIE, ""), AUTH_TOKEN)
+
+    def _reject(self) -> None:
+        self._send(
+            401,
+            b"<h1>401 Unauthorized</h1><p>Missing or invalid access token. "
+            b"Use the link printed in the terminal that started this server.</p>",
+        )
+
     def do_GET(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
+        qs = urllib.parse.parse_qs(parsed.query)
+
+        # First-time auth handshake: visiting "/?token=..." with a valid
+        # token sets a cookie and redirects to the clean URL. This is the
+        # only route reachable without an existing valid cookie.
+        if path in ("/", "/index.html") and AUTH_TOKEN:
+            supplied = (qs.get("token") or [""])[0]
+            if supplied and secrets.compare_digest(supplied, AUTH_TOKEN):
+                self.send_response(302)
+                self.send_header("Location", "/")
+                self.send_header(
+                    "Set-Cookie",
+                    f"{AUTH_COOKIE}={AUTH_TOKEN}; Path=/; HttpOnly; SameSite=Strict",
+                )
+                self.end_headers()
+                return
+            if not self._authorized():
+                self._reject()
+                return
+
+        if not self._authorized():
+            self._reject()
+            return
+
         if path in ("/", "/index.html"):
             self._send(200, UI_HTML.encode("utf-8"))
             return
@@ -3245,6 +3297,9 @@ class Handler(BaseHTTPRequestHandler):
         self._send(404, b"Not found")
 
     def do_POST(self) -> None:
+        if not self._authorized():
+            self._reject()
+            return
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         length = int(self.headers.get("Content-Length", "0"))
@@ -3421,18 +3476,59 @@ def parse_multipart(content_type: str, body: bytes) -> tuple[dict, dict]:
     return fields, files
 
 
-def run_server(port: int = PORT, open_browser: bool = True) -> None:
+def _lan_ip() -> str | None:
+    """Best-effort guess at this machine's LAN IP (for the printed link)."""
+    import socket
+
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("192.168.1.1", 80))  # no packet actually sent
+            return s.getsockname()[0]
+        finally:
+            s.close()
+    except OSError:
+        return None
+
+
+def run_server(
+    port: int = PORT,
+    open_browser: bool = True,
+    host: str = "127.0.0.1",
+    token: str | None = None,
+    no_auth: bool = False,
+) -> None:
+    global AUTH_TOKEN
     ensure_layout()
-    server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    url = f"http://127.0.0.1:{port}/"
+
+    if host != "127.0.0.1" and no_auth:
+        die("--no-auth cannot be combined with --host (refusing to run an open server on your LAN)")
+
+    if not no_auth:
+        AUTH_TOKEN = token or secrets.token_urlsafe(24)
+
+    server = ThreadingHTTPServer((host, port), Handler)
+    local_url = f"http://127.0.0.1:{port}/"
     print("=" * 56)
     print("  Gallery Manager is running")
-    print(f"  Open:  {url}")
+    if AUTH_TOKEN:
+        print(f"  Open (this machine):  {local_url}?token={AUTH_TOKEN}")
+        if host != "127.0.0.1":
+            lan_ip = _lan_ip() or "<your-lan-ip>"
+            print(f"  Open (other devices): http://{lan_ip}:{port}/?token={AUTH_TOKEN}")
+        print("  The token is required once per browser (sets a cookie).")
+        print("  Keep this link private — anyone with it can edit your gallery.")
+    else:
+        print(f"  Open:  {local_url}")
+    if host != "127.0.0.1":
+        print("  ⚠  Bound to your LAN. Only do this on trusted home wifi —")
+        print("     never on public/unsecured wifi or a network you don't control.")
     print("  Press Ctrl+C to stop")
     print("=" * 56)
     print(f"  Project: {ROOT}")
     if open_browser:
-        threading.Timer(0.6, lambda: webbrowser.open(url)).start()
+        open_url = f"{local_url}?token={AUTH_TOKEN}" if AUTH_TOKEN else local_url
+        threading.Timer(0.6, lambda: webbrowser.open(open_url)).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -3697,6 +3793,25 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="CLI: parse only, write nothing")
     parser.add_argument("--port", type=int, default=PORT, help=f"UI port (default {PORT})")
     parser.add_argument("--no-browser", action="store_true", help="Don't auto-open browser")
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help=(
+            "Address to bind. Default 127.0.0.1 (this machine only). "
+            "Use 0.0.0.0 to allow other devices on your home wifi — do NOT do "
+            "this on public/unsecured networks. A token is required either way."
+        ),
+    )
+    parser.add_argument(
+        "--token",
+        default=None,
+        help="Fixed access token instead of a random one (e.g. to bookmark the URL).",
+    )
+    parser.add_argument(
+        "--no-auth",
+        action="store_true",
+        help="Disable the access token. Only valid with the default --host 127.0.0.1.",
+    )
     args = parser.parse_args()
 
     if args.list:
@@ -3749,7 +3864,13 @@ def main() -> None:
     elif args.cli:
         run_cli(args)
     else:
-        run_server(port=args.port, open_browser=not args.no_browser)
+        run_server(
+            port=args.port,
+            open_browser=not args.no_browser,
+            host=args.host,
+            token=args.token,
+            no_auth=args.no_auth,
+        )
 
 
 if __name__ == "__main__":
