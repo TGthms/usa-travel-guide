@@ -36,7 +36,7 @@ What it does on remove (clears ALL of the above):
 Usage — browser UI (recommended after a long trip):
   cd /path/to/usa-travel-guide
   python3 tools/gallery_manager.py
-  # opens http://127.0.0.1:8791
+  # opens http://127.0.0.1:1221
 
 Usage — CLI batch from a folder:
   python3 tools/gallery_manager.py --cli ~/Pictures/california-trip \\
@@ -121,7 +121,7 @@ FULL_QUALITY = 100  # only used when format conversion is required (HEIC/PNG/…
 FULL_ORIENT_QUALITY = 95  # re-encode quality when baking EXIF orientation
 MEDIUM_QUALITY = 82
 THUMB_QUALITY = 72
-PORT = 8791
+PORT = 1221
 # Serialize gallery.html + i18n.js writes (server is multi-threaded)
 _WRITE_LOCK = threading.Lock()
 JPEG_SUFFIXES = {".jpg", ".jpeg", ".jpe", ".jfif"}
