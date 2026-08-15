@@ -128,6 +128,8 @@ PORT = 1221
 # Keeps the server safe to bind to your LAN, not just localhost.
 AUTH_TOKEN: str | None = None
 AUTH_COOKIE = "gm_token"
+TOKEN_FILE = ROOT / "tools" / ".gallery_token"       # gitignored, persists across restarts
+TRUSTED_SSID_FILE = ROOT / "tools" / ".trusted_wifi"  # gitignored, one SSID per line
 # Serialize gallery.html + i18n.js writes (server is multi-threaded)
 _WRITE_LOCK = threading.Lock()
 JPEG_SUFFIXES = {".jpg", ".jpeg", ".jpe", ".jfif"}
@@ -3491,6 +3493,75 @@ def _lan_ip() -> str | None:
         return None
 
 
+def _load_or_create_token(fixed: str | None) -> str:
+    """Persist the token to a gitignored local file so bookmarks/home-screen
+    links on other devices keep working across restarts, instead of a fresh
+    random token invalidating them every time."""
+    if fixed:
+        return fixed
+    try:
+        if TOKEN_FILE.is_file():
+            existing = TOKEN_FILE.read_text().strip()
+            if existing:
+                return existing
+    except OSError:
+        pass
+    new_token = secrets.token_urlsafe(24)
+    try:
+        TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+        TOKEN_FILE.write_text(new_token)
+        os.chmod(TOKEN_FILE, 0o600)
+    except OSError:
+        pass  # fine, just won't persist across restarts
+    return new_token
+
+
+def _current_ssid() -> str | None:
+    """Best-effort current wifi network name (macOS)."""
+    try:
+        out = subprocess.run(
+            ["/usr/sbin/networksetup", "-getairportnetwork", "en0"],
+            capture_output=True, text=True, timeout=2,
+        )
+        # "Current Wi-Fi Network: MyHomeWifi"
+        if ":" in out.stdout:
+            return out.stdout.split(":", 1)[1].strip() or None
+    except Exception:
+        pass
+    return None
+
+
+def _trusted_ssids() -> set[str]:
+    try:
+        lines = TRUSTED_SSID_FILE.read_text().splitlines()
+        return {ln.strip() for ln in lines if ln.strip() and not ln.strip().startswith("#")}
+    except OSError:
+        return set()
+
+
+def _check_lan_bind_is_safe() -> None:
+    """Called only when --host is not 127.0.0.1. Refuses to bind on a
+    network that isn't in the trusted-wifi allowlist, so a forgotten
+    `--host 0.0.0.0` doesn't open the tool up on public/unsecured wifi."""
+    trusted = _trusted_ssids()
+    if not trusted:
+        print("  ⚠  No trusted-wifi list set up yet — allowing this bind, but")
+        print(f"     consider adding your home network name to {TRUSTED_SSID_FILE.relative_to(ROOT)}")
+        print("     (one SSID per line) so future runs can double-check for you.")
+        return
+    ssid = _current_ssid()
+    if ssid is None:
+        print("  ⚠  Could not detect the current wifi name — proceeding anyway.")
+        return
+    if ssid not in trusted:
+        die(
+            f"refusing to bind to the LAN: current wifi ({ssid!r}) is not in your "
+            f"trusted list ({TRUSTED_SSID_FILE.relative_to(ROOT)}). Run on your home "
+            "wifi, or add this network's name to that file if it's actually trusted."
+        )
+    print(f"  ✓ Wifi network {ssid!r} is on your trusted list.")
+
+
 def run_server(
     port: int = PORT,
     open_browser: bool = True,
@@ -3503,9 +3574,11 @@ def run_server(
 
     if host != "127.0.0.1" and no_auth:
         die("--no-auth cannot be combined with --host (refusing to run an open server on your LAN)")
+    if host != "127.0.0.1":
+        _check_lan_bind_is_safe()
 
     if not no_auth:
-        AUTH_TOKEN = token or secrets.token_urlsafe(24)
+        AUTH_TOKEN = _load_or_create_token(token)
 
     server = ThreadingHTTPServer((host, port), Handler)
     local_url = f"http://127.0.0.1:{port}/"

@@ -60,7 +60,7 @@ cd /Users/timgong/Desktop/usa-travel-guide
 python3 tools/gallery_manager.py
 ```
 
-Your browser opens **http://127.0.0.1:8791**. Then:
+Your browser opens **http://127.0.0.1:1221**. Then:
 
 1. **Defaults are optional** — leave category empty for mixed trips (e.g. LA).  
    Tick only the fields you want to apply (category / date fallback / location fallback).

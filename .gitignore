@@ -49,3 +49,5 @@ trailer/raw/
 trailer/cards/*.png
 trailer/plates/
 trailer/*.mp4
+tools/.trusted_wifi
+tools/.gallery_token
