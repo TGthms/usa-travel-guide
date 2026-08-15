@@ -1,6 +1,6 @@
 # Maintainer tools
 
-Local-only utilities. **Strip `tools/` from public deploys** (Cloudflare / GitHub Pages).
+Admin utilities. **Strip `tools/` from public deploys** (Cloudflare / GitHub Pages).
 
 ---
 
