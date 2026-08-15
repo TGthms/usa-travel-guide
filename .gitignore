@@ -50,4 +50,7 @@ trailer/cards/*.png
 trailer/plates/
 trailer/*.mp4
 tools/.trusted_wifi
+
+# Internal Tools
 tools/.gallery_token
+Add Photos*.command
