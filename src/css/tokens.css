@@ -26,7 +26,7 @@
   --border-med:   rgba(201, 162, 89, 0.38);
 
   --nav-bg:      rgba(7, 16, 28, 0.88);
-  --modal-bg:    rgba(5, 10, 18, 0.96);
+  --modal-bg:    rgba(5, 10, 18, 0.55);
 
   /* Licensed web fonts only (Google Fonts + generic fallbacks) */
   --ff-display:  'Fraunces', 'Noto Serif SC', 'Noto Serif JP', Georgia, 'Times New Roman', serif;
@@ -92,7 +92,7 @@
   --border-med:   rgba(0, 0, 0, 0.18);
 
   --nav-bg:      rgba(255, 255, 255, 0.78);
-  --modal-bg:    rgba(255, 255, 255, 0.97);
+  --modal-bg:    rgba(255, 255, 255, 0.6);
 
   /* Public Sans only — licensed Google Font; not system product fonts */
   --ff-display:  'Public Sans', 'Noto Sans SC', 'Noto Sans JP', Helvetica, Arial, sans-serif;
@@ -127,7 +127,7 @@
   --border-med:   rgba(122, 46, 46, 0.36);
 
   --nav-bg:      rgba(246, 241, 232, 0.94);
-  --modal-bg:    rgba(239, 232, 219, 0.97);
+  --modal-bg:    rgba(239, 232, 219, 0.6);
 
   --ff-display:  'Fraunces', 'Noto Serif SC', 'Noto Serif JP', Georgia, serif;
   --ff-serif:    'Special Elite', 'Noto Serif SC', 'Noto Serif JP', Georgia, serif;
@@ -167,7 +167,7 @@
 
   /* Frosted dark nav (blur + translucent graphite) */
   --nav-bg:      rgba(22, 22, 23, 0.72);
-  --modal-bg:    rgba(29, 29, 31, 0.96);
+  --modal-bg:    rgba(29, 29, 31, 0.55);
 
   /* Match Gallery Daylight type — product-page sans only */
   --ff-display:  'Public Sans', 'Noto Sans SC', 'Noto Sans JP', Helvetica, Arial, sans-serif;
