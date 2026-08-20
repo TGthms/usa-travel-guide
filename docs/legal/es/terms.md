@@ -24,16 +24,18 @@ Salvo lo que permitan estos Términos o una licencia abierta concreta, no copies
 
 Las fotos y obras visuales de la galería y del resto del Sitio (incluido `images/`), salvo que se indique otro crédito, son **© {year} Tim G (GitHub @TGthms)**.
 
-Se ofrecen bajo [Creative Commons Atribución 4.0 Internacional (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/). En la práctica, puedes compartir y adaptar las fotos (también con fines comerciales) si:
+Se ofrecen bajo [Creative Commons Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/). En la práctica, puedes compartir y adaptar las fotos **solo con fines no comerciales**, si:
 
 - das crédito a **Tim G / @TGthms**;
-- enlazas a CC BY 4.0 cuando sea razonable;
+- enlazas a CC BY-NC 4.0 cuando sea razonable;
 - indicas si hiciste cambios; y
 - no insinúas que el autor respalda tu uso.
 
-Crédito sugerido: *«Foto © Tim G (@TGthms), con licencia CC BY 4.0.»*
+El uso comercial (por ejemplo, vender copias, usarlas en publicidad o en un sitio monetizado) **no está permitido** sin permiso previo por escrito.
 
-No quites marcas de agua, no atribuyas de forma falsa ni uses las fotos de forma ilegal. Si necesitas derechos más amplios que CC BY 4.0, contáctanos.
+Crédito sugerido: *«Foto © Tim G (@TGthms), con licencia CC BY-NC 4.0.»*
+
+No quites marcas de agua, no atribuyas de forma falsa ni uses las fotos de forma ilegal. Si necesitas derechos más amplios que CC BY-NC 4.0, contáctanos.
 
 ## Software y código {#software}
 

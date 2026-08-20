@@ -24,16 +24,18 @@ footerNote: "© {year} USA Travel Guide · Tim G (TGthms)。オープンライ�
 
 ギャラリー等の写真・関連ビジュアル（`images/` 配下を含む）は、別クレジットがない限り **© {year} Tim G（GitHub @TGthms）** です。
 
-[クリエイティブ・コモンズ 表示 4.0 国際（CC BY 4.0）](https://creativecommons.org/licenses/by/4.0/) で提供しています。要するに、次を守れば共有や改変（商用含む）が可能です。
+[クリエイティブ・コモンズ 表示-非営利 4.0 国際（CC BY-NC 4.0）](https://creativecommons.org/licenses/by-nc/4.0/) で提供しています。要するに、次を守れば**非営利目的に限り**共有や改変が可能です。
 
 - **Tim G / @TGthms** に適切なクレジットを付ける
-- 可能なら CC BY 4.0 へのリンクを示す
+- 可能なら CC BY-NC 4.0 へのリンクを示す
 - 改変した場合はその旨を示す
 - 著者が利用を推奨していると誤解させない
 
-推奨クレジット例：*「Photo © Tim G (@TGthms), licensed under CC BY 4.0.」*
+商用利用（例：写真の販売、広告への使用、収益化されたサイトでの利用など）は、事前の書面による許可なく**行うことはできません**。
 
-透かしの削除、偽の帰属、違法な利用は禁止です。CC BY 4.0 を超える権利が必要な場合はご連絡ください。
+推奨クレジット例：*「Photo © Tim G (@TGthms), licensed under CC BY-NC 4.0.」*
+
+透かしの削除、偽の帰属、違法な利用は禁止です。CC BY-NC 4.0 を超える権利が必要な場合はご連絡ください。
 
 ## ソフトウェアとコード {#software}
 
