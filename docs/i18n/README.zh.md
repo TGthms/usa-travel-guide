@@ -53,7 +53,7 @@
 ## 📄 版权声明
 
 - **代码：** MIT — 见 [LICENSE](../../LICENSE)。
-- **`/images` 照片：** © 2026 Tim G (TGthms)，**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — 注明作者后可使用。
+- **照片** 在 `/images`：© 2026 Tim G (TGthms)，依据 **[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)** 许可 — 可免费非商业使用并注明出处。
 - **网页字体：** 来自 Google Fonts — Fraunces、Public Sans、Special Elite、Noto Sans/Serif（中文/日语）。开放许可（SIL OFL / Apache 等）。
 - **站点政策：** [隐私政策](https://travelusa.pages.dev/privacy.html) · [使用条款](https://travelusa.pages.dev/terms.html)  
   镜像：[隐私](https://tgthms.github.io/usa-travel-guide/privacy.html) · [条款](https://tgthms.github.io/usa-travel-guide/terms.html)
