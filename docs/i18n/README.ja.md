@@ -67,7 +67,7 @@ npm run serve
 ## 📄 ライセンス
 
 - **コード:** MIT — [LICENSE](../../LICENSE) を参照。
-- **`/images` の写真:** © 2026 Tim G (TGthms)、**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — クレジット表記のうえ利用可。
+- **写真** は `/images` 内：© 2026 Tim G (TGthms)、**[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)** の下でライセンス — クレジット付きで非商用利用自由。
 - **Web フォント:** Google Fonts — Fraunces、Public Sans、Special Elite、Noto Sans/Serif（SC/JP）。オープンライセンス（SIL OFL / Apache など）。
 - **サイト方針:** [プライバシー](https://travelusa.pages.dev/privacy.html) · [利用規約](https://travelusa.pages.dev/terms.html)  
   ミラー: [プライバシー](https://tgthms.github.io/usa-travel-guide/privacy.html) · [利用規約](https://tgthms.github.io/usa-travel-guide/terms.html)
