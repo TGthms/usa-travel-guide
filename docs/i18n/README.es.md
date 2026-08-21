@@ -67,7 +67,8 @@ Este sitio es un proyecto personal — ¡feedback y sugerencias son bienvenidos!
 ## 📄 Licencia y aspectos legales
 
 - **Código:** MIT — ver [LICENSE](../../LICENSE).
-- **Fotos** en `/images`: © 2026 Tim G (TGthms), **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — uso libre con crédito.
+**Spanish**
+- **Fotos** en `/images`: © 2026 Tim G (TGthms). Bajo licencia **[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)** — uso no comercial gratuito con atribución.
 - **Fuentes web:** Google Fonts — Fraunces, Public Sans, Special Elite, Noto Sans/Serif (SC/JP). Licencias abiertas (SIL OFL / Apache según el caso).
 - **Políticas del sitio:** [Privacidad](https://travelusa.pages.dev/privacy.html) · [Términos](https://travelusa.pages.dev/terms.html)  
   Espejo: [Privacidad](https://tgthms.github.io/usa-travel-guide/privacy.html) · [Términos](https://tgthms.github.io/usa-travel-guide/terms.html)
